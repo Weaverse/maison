@@ -1,5 +1,5 @@
 {
-  "name": "@weaverse/pilot",
+  "name": "@weaverse/maison",
   "version": "6.0.3",
   "description": "A production-ready Shopify storefront built with Hydrogen and Weaverse",
   "keywords": [
@@ -17,13 +17,13 @@
   "license": "MIT",
   "author": "Weaverse",
   "type": "module",
-  "homepage": "https://pilot.weaverse.dev",
+  "homepage": "https://maison.weaverse.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/weaverse/pilot.git"
+    "url": "git+https://github.com/weaverse/maison.git"
   },
   "bugs": {
-    "url": "https://github.com/weaverse/pilot/issues"
+    "url": "https://github.com/weaverse/maison/issues"
   },
   "scripts": {
     "build": "shopify hydrogen build --codegen",

@@ -6,7 +6,7 @@ export const themeSchema: HydrogenThemeSchema = {
   info: {
     version,
     author: "Weaverse",
-    name: "Pilot",
+    name: "Maison",
     authorProfilePhoto:
       "https://cdn.shopify.com/s/files/1/0838/0052/3057/files/Weaverse_logo_-_3000x_e2fa8c13-dac2-4dcb-a2c2-f7aaf7a58169.png?v=1698245759",
     documentationUrl: "https://weaverse.io/docs",

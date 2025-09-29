@@ -38,7 +38,7 @@ jobs:
 
           # Direct prompt for automated review
           direct_prompt: |
-            You are reviewing a PR for Pilot, a Shopify Hydrogen theme powered by Weaverse. This project uses:
+            You are reviewing a PR for Maison, a Shopify Hydrogen theme powered by Weaverse. This project uses:
             - React Router 7, TypeScript, and Tailwind CSS v4
             - Weaverse for visual page building
             - Biome for linting/formatting (not ESLint/Prettier)
@@ -95,4 +95,3 @@ jobs:
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
-

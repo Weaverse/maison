@@ -1,4 +1,4 @@
-# @weaverse/pilot
+# @weaverse/maison
 
 ## 6.0.3
 

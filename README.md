@@ -1,17 +1,17 @@
-<h1 align="center">Pilot - Production-ready Shopify Hydrogen Theme</h1>
+<h1 align="center">Maison - Production-ready Shopify Hydrogen Theme</h1>
 
 <div align="center">
 
-📚 [Read the docs](https://weaverse.io/docs) | 🗣 [Join our community on Slack](https://join.slack.com/t/weaversecommunity/shared_invite/zt-235bv7d80-velzJU8CpZIHWdrzFwAdXg) | 🐞 [Report a bug](https://github.com/weaverse/pilot/issues)
+📚 [Read the docs](https://weaverse.io/docs) | 🗣 [Join our community on Slack](https://join.slack.com/t/weaversecommunity/shared_invite/zt-235bv7d80-velzJU8CpZIHWdrzFwAdXg) | 🐞 [Report a bug](https://github.com/weaverse/maison/issues)
 
 </div>
 
 ![Weaverse + Hydrogen + Shopify](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/weaverse-x-hydrogen-x-shopify.png?v=1755245801)
 
-_Pilot is an innovative Shopify theme, powered by Hydrogen, React Router 7, and Weaverse, designed to create lightning-fast storefronts with exceptional performance. This theme combines a collection of powerful tools and features to streamline your Shopify development experience._
+_maison is an innovative Shopify theme, powered by Hydrogen, React Router 7, and Weaverse, designed to create lightning-fast storefronts with exceptional performance. This theme combines a collection of powerful tools and features to streamline your Shopify development experience._
 
-## Who is using Weaverse/Pilot on production?
-These **Shopify (Plus)** brands built on top of Weaverse/Pilot:
+## Who is using Weaverse/Maison on production?
+These **Shopify (Plus)** brands built on top of Weaverse/Maison:
 - [Entropy Home](https://www.entropyhome.com/) - curated home goods brand operated by Entropy Bright LLC.
 - [Karma and Luck](https://www.karmaandluck.com) - modern lifestyle brand rooted in timeless traditions and spiritual intention.
 - [Baltzar](https://baltzar.com/) - curated selection of menswear brands from world renowned specialists such as Frank Clegg, Albert Thurston and Astorflex.
@@ -22,9 +22,9 @@ These **Shopify (Plus)** brands built on top of Weaverse/Pilot:
 
 ## Links
 
-- Live store: https://pilot.weaverse.dev
-- Customizing Pilot on Weaverse Studio: https://studio.weaverse.io/demo?theme=pilot
-  ![pilot.weaverse.dev](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/pilot.weavverse.dev_0b0b2f77-b79e-4524-8cf5-bc22d6ec4ba9.png?v=1744963684)
+- Live store: https://maison.weaverse.dev
+- Customizing Maison on Weaverse Studio: https://studio.weaverse.io/demo?theme=maison
+  ![maison.weaverse.dev](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/maison.weavverse.dev_0b0b2f77-b79e-4524-8cf5-bc22d6ec4ba9.png?v=1744963684)
 
 ## What's included
 
@@ -50,7 +50,7 @@ These **Shopify (Plus)** brands built on top of Weaverse/Pilot:
 ## Deployment
 
 - [Deploy to Shopify Oxygen](https://weaverse.io/docs/deployment/oxygen)
-- [Deploy to Vercel](https://wvse.cc/deploy-pilot-to-vercel)
+- [Deploy to Vercel](https://wvse.cc/deploy-maison-to-vercel)
 
 ## Getting started
 
@@ -59,7 +59,7 @@ These **Shopify (Plus)** brands built on top of Weaverse/Pilot:
 - Node.js version 20.0.0 or higher
 - `npm` or `pnpm` package manager
 
-**Follow these steps to get started with Pilot and begin crafting your Hydrogen-driven storefront:**
+**Follow these steps to get started with Maison and begin crafting your Hydrogen-driven storefront:**
 
 1. Install [Weaverse Hydrogen Customizer](https://apps.shopify.com/weaverse) from Shopify App Store.
 2. Create new Hydrogen storefront inside Weaverse.
@@ -91,7 +91,7 @@ npm run e2e
 
 ### Fetching page data with parallel loading
 
-Pilot uses parallel data loading for optimal performance. Every route loads Weaverse data alongside GraphQL queries using `Promise.all()`:
+Maison uses parallel data loading for optimal performance. Every route loads Weaverse data alongside GraphQL queries using `Promise.all()`:
 
 ```ts:routes/($locale)._index.tsx
 import { data } from '@shopify/remix-oxygen';
@@ -332,7 +332,7 @@ export const components: HydrogenComponent[] = [
 
 Weaverse provides a convenient way to customize your theme inside the **Weaverse Studio**. You can add new sections, customize existing ones, and change the theme settings.
 
-![Pilot in Weaverse Studio](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/pilot-in-weaverse-studio.png?v=1755247352)
+![Maison in Weaverse Studio](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/maison-in-weaverse-studio.png?v=1755247352)
 
 ### Project Structure
 
@@ -374,4 +374,4 @@ This project is provided under the [MIT License](LICENSE).
 
 ---
 
-Let **Weaverse** & **Pilot** empower your Shopify store with top-notch performance and unmatched customization possibilities! 🚀
+Let **Weaverse** & **Maison** empower your Shopify store with top-notch performance and unmatched customization possibilities! 🚀
