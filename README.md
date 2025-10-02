@@ -8,7 +8,7 @@
 
 ![Weaverse + Hydrogen + Shopify](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/weaverse-x-hydrogen-x-shopify.png?v=1755245801)
 
-_maison is an innovative Shopify theme, powered by Hydrogen, React Router 7, and Weaverse, designed to create lightning-fast storefronts with exceptional performance. This theme combines a collection of powerful tools and features to streamline your Shopify development experience._
+_Maison is an innovative Shopify theme, powered by Hydrogen, React Router 7, and Weaverse, designed to create lightning-fast storefronts with exceptional performance. This theme combines a collection of powerful tools and features to streamline your Shopify development experience._
 
 ## Who is using Weaverse/Maison on production?
 These **Shopify (Plus)** brands built on top of Weaverse/Maison:

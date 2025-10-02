@@ -3,7 +3,7 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-cabin: Cabin Variable, ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: Poppins, sans-serif;
   --font-serif: Arial, IBMPlexSerif, Palatino, ui-serif;
 
   --breakpoint-sm: 32em;
@@ -379,7 +379,7 @@
   }
 
   html {
-    @apply font-cabin;
+    @apply font-poppins;
     scroll-padding-top: 10rem;
   }
 

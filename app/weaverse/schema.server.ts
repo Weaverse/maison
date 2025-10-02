@@ -228,13 +228,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Text",
           name: "colorText",
-          defaultValue: "#0F0F0F",
+          defaultValue: "#24211E",
         },
         {
           type: "color",
           label: "Text (subtle)",
           name: "colorTextSubtle",
-          defaultValue: "#88847F",
+          defaultValue: "#524B46",
         },
         {
           type: "color",
@@ -246,13 +246,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Borders",
           name: "colorLine",
-          defaultValue: "#3B352C",
+          defaultValue: "#A79D95",
         },
         {
           type: "color",
           label: "Borders (subtle)",
           name: "colorLineSubtle",
-          defaultValue: "#A19B91",
+          defaultValue: "#DBD7D1",
         },
         {
           type: "heading",
@@ -316,13 +316,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Background color",
           name: "buttonPrimaryBg",
-          defaultValue: "#000000",
+          defaultValue: "#908379",
         },
         {
           type: "color",
           label: "Text color",
           name: "buttonPrimaryColor",
-          defaultValue: "#ffffff",
+          defaultValue: "#F1EEEA",
         },
         {
           type: "heading",
@@ -332,13 +332,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Background color",
           name: "buttonSecondaryBg",
-          defaultValue: "#ffffff",
+          defaultValue: "#F0EFED",
         },
         {
           type: "color",
           label: "Text color",
           name: "buttonSecondaryColor",
-          defaultValue: "#000000",
+          defaultValue: "#24211E",
         },
         {
           type: "heading",
@@ -348,7 +348,7 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Text and border",
           name: "buttonOutlineTextAndBorder",
-          defaultValue: "#000000",
+          defaultValue: "#524B46",
         },
         {
           type: "heading",
