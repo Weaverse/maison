@@ -77,7 +77,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
               </div>
               <div className="space-y-2.5">
                 <h6
-                  className="text-2xl leading-7 font-medium"
+                  className="text-2xl leading-8 font-medium"
                   style={{ color: titleColor }}
                 >
                   Title here
@@ -169,13 +169,9 @@ function ArticleCard({
           className="inline-block"
         >
           <h6
-            className="text-2xl leading-7 font-medium hover:underline"
+            className="text-2xl leading-8 font-medium hover:underline line-clamp-2"
             style={{
               color: titleColor,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
             }}
           >
             {article.title}
