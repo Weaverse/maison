@@ -64,31 +64,29 @@ function ArticlesItems(props: ArticlesItemsProps) {
   if (!data?.articles?.length) {
     return (
       <div ref={ref} {...rest}>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex flex-col gap-5">
               <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
                 <Image
                   data={{ url: IMAGES_PLACEHOLDERS.image }}
                   aspectRatio="1/1"
-                  sizes="(min-width: 768px) 25vw, 100vw"
-                  loading="lazy"
+                  sizes="auto"
                 />
               </div>
               <div className="space-y-2.5">
                 <h6
-                  className="text-2xl leading-8 font-medium"
+                  className="text-2xl leading-8 font-normal"
                   style={{ color: titleColor }}
                 >
                   Title here
                 </h6>
                 <div
-                  className="flex items-center gap-2 text-sm"
+                  className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
                   style={{ color: metaColor }}
                 >
-                  <span>Date here</span>
-                  <span>—</span>
-                  <span>Author here</span>
+                  <span className="text-sm">Date here —</span>
+                  <span className="text-sm">Author here</span>
                 </div>
               </div>
             </div>
@@ -102,13 +100,12 @@ function ArticlesItems(props: ArticlesItemsProps) {
 
   return (
     <div ref={ref} {...rest}>
-      <div className={cn("grid grid-cols-1 lg:grid-cols-4", variants({ gap }))}>
+      <div className={cn("grid grid-cols-2 lg:grid-cols-4", variants({ gap }))}>
         {articles.map((article, i) => (
           <ArticleCard
             key={article.id}
             article={article}
             blogHandle={blogHandle}
-            loading={i < 2 ? "eager" : "lazy"}
             imageAspectRatio={imageAspectRatio}
             showAuthor={showAuthor}
             showDate={showDate}
@@ -126,7 +123,6 @@ function ArticlesItems(props: ArticlesItemsProps) {
 function ArticleCard({
   article,
   blogHandle,
-  loading,
   imageAspectRatio,
   showAuthor,
   showDate,
@@ -137,7 +133,6 @@ function ArticleCard({
 }: {
   article: ArticleFragment;
   blogHandle?: string;
-  loading?: HTMLImageElement["loading"];
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;
   showDate: boolean;
@@ -157,8 +152,7 @@ function ArticleCard({
             alt={article.image.altText || article.title}
             data={article.image}
             aspectRatio={calculateAspectRatio(article.image, imageAspectRatio)}
-            loading={loading}
-            sizes="(min-width: 768px) 50vw, 100vw"
+            sizes="auto"
             style={{ borderRadius: `${imageBorderRadius}px` }}
           />
         </Link>
@@ -169,7 +163,7 @@ function ArticleCard({
           className="inline-block"
         >
           <h6
-            className="text-2xl leading-8 font-medium hover:underline line-clamp-2"
+            className="text-2xl leading-8 font-normal hover:underline sm:line-clamp-2"
             style={{
               color: titleColor,
             }}
@@ -179,7 +173,7 @@ function ArticleCard({
         </Link>
         {(showDate || showAuthor) && (
           <div
-            className="flex items-center gap-1 text-sm"
+            className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
             style={{ color: metaColor }}
           >
             {showDate && (
@@ -189,9 +183,9 @@ function ArticleCard({
                   day: "numeric",
                   year: "numeric",
                 })}
+                {showAuthor && " —"}
               </span>
             )}
-            {showDate && showAuthor && <span className="text-sm">—</span>}
             {showAuthor && (
               <span className="text-sm">{article.author?.name}</span>
             )}

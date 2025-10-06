@@ -79,7 +79,7 @@ export default function Articles(props: ArticlesProps) {
       style={undefined}
     >
       <div
-        className="flex items-center justify-between"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         style={{ marginBottom: `${itemSpacing}px` }}
       >
         <Heading
