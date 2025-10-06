@@ -504,6 +504,23 @@ export const themeSchema: HydrogenThemeSchema = {
       ],
     },
     {
+      group: "Buttons",
+      inputs: [
+        {
+          type: "range",
+          label: "Corner radius",
+          name: "btnCornerRadius",
+          configs: {
+            min: 0,
+            max: 100,
+            step: 1,
+            unit: "px"
+          },
+          defaultValue: 4
+        }
+      ]
+    },
+    {
       group: "Product badges",
       inputs: [
         {

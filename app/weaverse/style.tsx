@@ -38,6 +38,7 @@ export function GlobalStyle() {
       navHeightDesktop,
       navHeightTablet,
       pageWidth,
+      btnCornerRadius,
     } = settings;
 
     return (
@@ -83,6 +84,9 @@ export function GlobalStyle() {
               --color-bundle-badge: ${bundleBadgeColor};
               --color-sold-out-and-unavailable: ${soldOutBadgeColor};
               --color-product-reviews: ${productReviewsColor};
+
+              /* button style */
+              --btn-border-radius: ${btnCornerRadius}px;
 
               /* Typography */
               --body-base-size: ${bodyBaseSize}px;
