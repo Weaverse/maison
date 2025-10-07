@@ -181,6 +181,10 @@ export default function HeroVideo(props: HeroVideoProps) {
           overlayColor={overlayColor}
           overlayColorHover={overlayColorHover}
           overlayOpacity={overlayOpacity}
+          gradientDirection={gradientDirection}
+          gradientFrom={gradientFrom}
+          gradientTo={gradientTo}
+          gradientToOpacity={gradientToOpacity}
           className="z-0"
         />
         <div ref={scope} className={clsx(variants({ gap }))}>
