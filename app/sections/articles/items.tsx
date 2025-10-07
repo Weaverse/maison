@@ -14,8 +14,19 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { cn } from "~/utils/cn";
 
-const variants = cva("", {
+const variants = cva("grid", {
   variants: {
+    mobileGridSize: {
+      "1": "grid-cols-1",
+      "2": "grid-cols-2",
+      "3": "grid-cols-3",
+    },
+    desktopGridSize: {
+      "3": "md:grid-cols-3",
+      "4": "md:grid-cols-4",
+      "5": "md:grid-cols-5",
+      "6": "md:grid-cols-6",
+    },
     gap: {
       8: "gap-2",
       12: "gap-3",
@@ -27,21 +38,23 @@ const variants = cva("", {
     },
   },
   defaultVariants: {
+    mobileGridSize: "2",
+    desktopGridSize: "4",
     gap: 16,
   },
 });
 
-interface ArticlesItemsProps
-  extends HydrogenComponentProps,
-    VariantProps<typeof variants> {
+interface ArticlesItemsProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;
   showDate: boolean;
   imageBorderRadius: number;
-  itemSpacing: number;
   titleColor: string;
   metaColor: string;
+  gap: number;
+  mobileGridSize: "1" | "2" | "3";
+  desktopGridSize: "3" | "4" | "5" | "6";
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
@@ -52,20 +65,30 @@ function ArticlesItems(props: ArticlesItemsProps) {
     showAuthor,
     showDate,
     imageBorderRadius,
-    itemSpacing,
     titleColor,
     metaColor,
+    mobileGridSize,
+    desktopGridSize,
     ...rest
   } = props;
 
   const parent = useParentInstance();
   const data: ArticlesLoaderData = parent.data?.loaderData;
+  const itemsToShow = Number(parent.data?.data?.articlesToShow ?? 4);
 
   if (!data?.articles?.length) {
     return (
       <div ref={ref} {...rest}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          className={cn(
+            variants({
+              mobileGridSize,
+              desktopGridSize,
+              gap,
+            }),
+          )}
+        >
+          {Array.from({ length: itemsToShow }).map((_, i) => (
             <div key={i} className="flex flex-col gap-5">
               <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
                 <Image
@@ -74,7 +97,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
                   sizes="auto"
                 />
               </div>
-              <div className="space-y-2.5">
+              <div className="flex flex-col gap-4">
                 <h6
                   className="text-2xl leading-8 font-normal"
                   style={{ color: titleColor }}
@@ -100,8 +123,16 @@ function ArticlesItems(props: ArticlesItemsProps) {
 
   return (
     <div ref={ref} {...rest}>
-      <div className={cn("grid grid-cols-2 lg:grid-cols-4", variants({ gap }))}>
-        {articles.map((article, i) => (
+      <div
+        className={cn(
+          variants({
+            mobileGridSize,
+            desktopGridSize,
+            gap,
+          }),
+        )}
+      >
+        {articles.slice(0, itemsToShow).map((article, i) => (
           <ArticleCard
             key={article.id}
             article={article}
@@ -110,7 +141,6 @@ function ArticlesItems(props: ArticlesItemsProps) {
             showAuthor={showAuthor}
             showDate={showDate}
             imageBorderRadius={imageBorderRadius}
-            itemSpacing={itemSpacing}
             titleColor={titleColor}
             metaColor={metaColor}
           />
@@ -127,7 +157,6 @@ function ArticleCard({
   showAuthor,
   showDate,
   imageBorderRadius,
-  itemSpacing,
   titleColor,
   metaColor,
 }: {
@@ -137,12 +166,11 @@ function ArticleCard({
   showAuthor: boolean;
   showDate: boolean;
   imageBorderRadius: number;
-  itemSpacing: number;
   titleColor: string;
   metaColor: string;
 }) {
   return (
-    <div className="flex flex-col" style={{ gap: `${itemSpacing}px` }}>
+    <div className="flex flex-col gap-5">
       {article.image && (
         <Link
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : `#`}
@@ -157,7 +185,7 @@ function ArticleCard({
           />
         </Link>
       )}
-      <div className="flex flex-col" style={{ gap: `${itemSpacing / 2}px` }}>
+      <div className="flex flex-col gap-4">
         <Link
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : `#`}
           className="inline-block"
@@ -203,7 +231,7 @@ export const schema = createSchema({
   title: "Articles items",
   settings: [
     {
-      group: "Articles items",
+      group: "Layout",
       inputs: [
         {
           type: "range",
@@ -216,6 +244,33 @@ export const schema = createSchema({
           },
           defaultValue: 16,
         },
+        {
+          type: "toggle-group",
+          name: "mobileGridSize",
+          label: "Mobile grid layout",
+          defaultValue: "2",
+          configs: {
+            options: [
+              { value: "1", label: "1" },
+              { value: "2", label: "2" },
+              { value: "3", label: "3" },
+            ],
+          },
+        },
+        {
+          type: "toggle-group",
+          name: "desktopGridSize",
+          label: "Desktop grid layout",
+          defaultValue: "4",
+          configs: {
+            options: [
+              { value: "3", label: "3" },
+              { value: "4", label: "4" },
+              { value: "5", label: "5" },
+              { value: "6", label: "6" },
+            ],
+          },
+        },
       ],
     },
     {
@@ -225,13 +280,11 @@ export const schema = createSchema({
           type: "color",
           name: "titleColor",
           label: "Title color",
-          defaultValue: "#3C3428",
         },
         {
           type: "color",
           name: "metaColor",
           label: "Meta color (date/author)",
-          defaultValue: "#7B7165",
         },
         {
           type: "select",
@@ -273,19 +326,18 @@ export const schema = createSchema({
             unit: "px",
           },
         },
-        {
-          type: "range",
-          name: "itemSpacing",
-          label: "Item spacing",
-          defaultValue: 20,
-          configs: {
-            min: 0,
-            max: 40,
-            step: 1,
-            unit: "px",
-          },
-        },
       ],
     },
   ],
+  presets: {
+    gap: 16,
+    mobileGridSize: "2",
+    desktopGridSize: "4",
+    imageAspectRatio: "1/1",
+    showAuthor: true,
+    showDate: true,
+    imageBorderRadius: 4,
+    titleColor: "#000000",
+    metaColor: "#666666",
+  },
 });

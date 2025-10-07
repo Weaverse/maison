@@ -6,6 +6,7 @@ import {
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
 import { Link } from "~/components/link";
+import { backgroundInputs } from "~/components/background-image";
 import Heading, {
   headingInputs,
   type HeadingProps,
@@ -16,7 +17,7 @@ interface ArticlesData {
   articlesToShow: number;
   heading: string;
   headingTagName?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  color?: HeadingProps["color"];
+  headingTextColor?: string;
   size?: HeadingProps["size"];
   mobileSize?: HeadingProps["mobileSize"];
   desktopSize?: HeadingProps["desktopSize"];
@@ -27,19 +28,10 @@ interface ArticlesData {
   maxSize?: HeadingProps["maxSize"];
   animate?: HeadingProps["animate"];
   viewAllText: string;
-  viewAllTextColor: string;
-  imageAspectRatio: "adapt" | "1/1" | "3/4" | "4/3" | "16/9";
-  titleLineClamp: number;
-  showAuthor: boolean;
-  showDate: boolean;
-  imageBorderRadius: number;
   itemSpacing: number;
-  backgroundColor: string;
 }
 
-interface ArticlesProps
-  extends Omit<SectionProps<ArticlesLoaderData>, "backgroundColor">,
-    ArticlesData {
+interface ArticlesProps extends SectionProps<ArticlesLoaderData>, ArticlesData {
   ref: React.Ref<HTMLElement>;
 }
 
@@ -50,7 +42,7 @@ export default function Articles(props: ArticlesProps) {
     children,
     heading,
     headingTagName,
-    color,
+    headingTextColor,
     size,
     mobileSize,
     desktopSize,
@@ -61,67 +53,58 @@ export default function Articles(props: ArticlesProps) {
     maxSize,
     animate,
     viewAllText,
-    viewAllTextColor,
-    imageAspectRatio,
-    titleLineClamp,
-    showAuthor,
-    showDate,
-    imageBorderRadius,
     itemSpacing,
-    backgroundColor,
     ...rest
   } = props;
   return (
-    <Section
-      ref={ref}
-      {...rest}
-      backgroundColor={backgroundColor}
-      style={undefined}
-    >
-      <div
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-        style={{ marginBottom: `${itemSpacing}px` }}
-      >
-        <Heading
-          content={heading}
-          as={headingTagName}
-          color={color}
-          size={size}
-          mobileSize={mobileSize}
-          desktopSize={desktopSize}
-          weight={weight}
-          letterSpacing={letterSpacing}
-          alignment={alignment}
-          minSize={minSize}
-          maxSize={maxSize}
-          animate={animate}
-        />
-        {loaderData?.blogHandle && (
-          <div className="flex items-center gap-2">
-            <Link
-              to={`/blogs/${loaderData.blogHandle}`}
-              className="text-sm"
-              style={{ color: viewAllTextColor }}
-            >
-              {viewAllText}
-            </Link>
-            {/* <ArrowRightIcon /> */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="11"
-              viewBox="0 0 20 11"
-              fill="none"
-            >
-              <path
-                d="M14.0575 0.376953L13.1737 1.26082L16.9236 5.0107H0.625V6.26074H16.9234L13.1737 10.0105L14.0575 10.8944L19.3163 5.63566L14.0575 0.376953Z"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
-        )}
+    <Section ref={ref} {...rest}>
+      <div className="flex flex-col" style={{ gap: `${itemSpacing}px` }}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Heading
+            content={heading}
+            as={headingTagName}
+            color={headingTextColor}
+            size={size}
+            mobileSize={mobileSize}
+            desktopSize={desktopSize}
+            weight={weight}
+            letterSpacing={letterSpacing}
+            alignment={alignment}
+            minSize={minSize}
+            maxSize={maxSize}
+            animate={animate}
+          />
+          {viewAllText && (
+            <div className="flex items-center gap-2">
+              <Link
+                to={
+                  loaderData?.blogHandle
+                    ? `/blogs/${loaderData.blogHandle}`
+                    : "#"
+                }
+                className="text-sm"
+                style={{ color: headingTextColor }}
+              >
+                {viewAllText}
+              </Link>
+              {/* <ArrowRightIcon /> */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="11"
+                viewBox="0 0 20 11"
+                fill="none"
+              >
+                <path
+                  d="M14.0575 0.376953L13.1737 1.26082L16.9236 5.0107H0.625V6.26074H16.9234L13.1737 10.0105L14.0575 10.8944L19.3163 5.63566L14.0575 0.376953Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
+        <div>{children}</div>
       </div>
-      <div>{children}</div>
     </Section>
   );
 }
@@ -187,10 +170,6 @@ export const schema = createSchema({
   childTypes: ["articles-items"],
   settings: [
     {
-      group: "Layout",
-      inputs: layoutInputs.filter((i) => i.name !== "borderRadius"),
-    },
-    {
       group: "Article selection",
       inputs: [
         {
@@ -214,7 +193,28 @@ export const schema = createSchema({
       ],
     },
     {
-      group: "Content",
+      group: "Layout",
+      inputs: [
+        ...layoutInputs.filter(
+          (i) => i.name !== "borderRadius" && i.name !== "gap",
+        ),
+        {
+          type: "range",
+          name: "itemSpacing",
+          label: "Item spacing",
+          defaultValue: 60,
+          shouldRevalidate: true,
+          configs: {
+            min: 0,
+            max: 100,
+            step: 5,
+            unit: "px",
+          },
+        },
+      ],
+    },
+    {
+      group: "Header",
       inputs: [
         {
           type: "text",
@@ -223,58 +223,56 @@ export const schema = createSchema({
           defaultValue: "Articles",
           placeholder: "Articles",
         },
-        ...headingInputs.map((input) => {
-          if (input.name === "as")
-            return { ...input, name: "headingTagName", defaultValue: "h3" };
-          if (input.name === "weight") return { ...input, defaultValue: 400 };
-          return input;
-        }),
+        ...headingInputs
+          .filter((input) => input.name !== "color")
+          .map((input) => {
+            if (input.name === "as")
+              return { ...input, name: "headingTagName", defaultValue: "h3" };
+            if (input.name === "weight") return { ...input, defaultValue: 400 };
+            return input;
+          }),
+        {
+          type: "color",
+          name: "headingTextColor",
+          label: "Heading text color",
+        },
         {
           type: "text",
           name: "viewAllText",
           label: "View all text",
           defaultValue: "VIEW ALL",
         },
-        {
-          type: "color",
-          name: "viewAllTextColor",
-          label: "View all text color",
-          defaultValue: "#3C3428",
-        },
       ],
     },
     {
-      group: "Colors",
+      group: "Background",
       inputs: [
-        {
-          type: "color",
-          name: "backgroundColor",
-          label: "Background color",
-          defaultValue: "#F9F7F4",
-        },
+        ...backgroundInputs.filter(
+          (inp) =>
+            inp.name !== "backgroundImage" &&
+            inp.name !== "backgroundFit" &&
+            inp.name !== "backgroundPosition",
+        ),
       ],
     },
   ],
   presets: {
-    gap: 60,
     heading: "Articles",
     headingTagName: "h3",
     weight: 400,
     alignment: "left",
-    color: "#3C3428",
     viewAllText: "VIEW ALL",
-    viewAllTextColor: "#3C3428",
     itemSpacing: 60,
-    backgroundColor: "#F9F7F4",
     children: [
       {
         type: "articles-items",
+        gap: 16,
+        mobileGridSize: "2",
+        desktopGridSize: "4",
         imageAspectRatio: "1/1",
-        titleLineClamp: 2,
         showAuthor: true,
         showDate: true,
         imageBorderRadius: 4,
-        gap: 16,
         itemSpacing: 20,
       },
     ],

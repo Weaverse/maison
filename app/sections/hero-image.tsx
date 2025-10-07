@@ -33,12 +33,13 @@ const variants = cva(
         "top center": "items-center justify-start [&_.paragraph]:text-center",
         "top right": "items-end justify-start [&_.paragraph]:text-right",
         "center left": "items-start justify-center [&_.paragraph]:text-left",
-        "center center": "items-center justify-center [&_.paragraph]:text-center",
+        "center center":
+          "items-center justify-center [&_.paragraph]:text-center",
         "center right": "items-end justify-center [&_.paragraph]:text-right",
         "bottom left": "items-start justify-end [&_.paragraph]:text-left",
         "bottom center": "items-center justify-end [&_.paragraph]:text-center",
         "bottom right": "items-end justify-end [&_.paragraph]:text-right",
-      },  
+      },
     },
     compoundVariants: [
       {
@@ -101,7 +102,7 @@ export const schema = createSchema({
           type: "position",
           name: "contentPosition",
           label: "Content position",
-          defaultValue: "bottom left",
+          defaultValue: "center center",
         },
         ...layoutInputs.filter(
           (inp) => inp.name !== "divider" && inp.name !== "borderRadius",
@@ -122,30 +123,25 @@ export const schema = createSchema({
   childTypes: ["subheading", "heading", "paragraph", "button"],
   presets: {
     height: "large",
-    contentPosition: "bottom left",
+    contentPosition: "center center",
     backgroundImage: IMAGES_PLACEHOLDERS.banner_1,
     backgroundFit: "cover",
     enableOverlay: true,
-    overlayType: "gradient",
-    gradientDirection: "to top",
-    gradientFrom: "#EBE6D7",
-    gradientTo: "#FAF5E5",
-    gradientToOpacity: 22,
+    overlayOpacity: 40,
     children: [
       {
         type: "heading",
-        content: "Cloud like sofas that support relaxing anytime",
+        content: "Hero image with text overlay",
         as: "h3",
         weight: 400,
-        alignment: "left",
-        color: "#7b7165",
+        color: "#ffffff",
         size: "default",
       },
       {
         type: "paragraph",
         content:
-          "A thoughtfully designed, curated furniture collection-made for real life.",
-        color: "#7b7165",
+          "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.",
+        color: "#ffffff",
       },
       {
         type: "button",
