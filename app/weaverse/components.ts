@@ -7,8 +7,8 @@ import * as AllProducts from "~/sections/all-products";
 import * as BlogPost from "~/sections/blog-post";
 import * as Blogs from "~/sections/blogs";
 import * as CollectionFilters from "~/sections/collection-filters";
-import * as CollectionList from "~/sections/collection-list";
-import * as CollectionListItems from "~/sections/collection-list/collections-items";
+import * as CollectionList from "~/sections/collection-list-page";
+import * as CollectionListItems from "~/sections/collection-list-page/collections-items";
 import * as ColumnsWithImages from "~/sections/columns-with-images";
 import * as ColumnWithImageItem from "~/sections/columns-with-images/column";
 import * as ColumnsWithImagesItems from "~/sections/columns-with-images/items";
@@ -66,6 +66,8 @@ import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
 import * as Articles from "~/sections/articles";
 import * as ArticlesItem from "~/sections/articles/items";
+import * as CollectionListDynamic from "~/sections/collection-list-dynamic";
+import * as CollectionListDynamicItems from "~/sections/collection-list-dynamic/items";
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -140,4 +142,6 @@ export const components: HydrogenComponent[] = [
   Spacer,
   Articles,
   ArticlesItem,
+  CollectionListDynamic,
+  CollectionListDynamicItems,
 ];
