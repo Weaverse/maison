@@ -94,9 +94,14 @@ export default function HeroVideo(props: HeroVideoProps) {
     heightOnDesktop,
     heightOnMobile,
     enableOverlay,
+    overlayType,
     overlayColor,
     overlayColorHover,
     overlayOpacity,
+    gradientDirection,
+    gradientFrom,
+    gradientTo,
+    gradientToOpacity,
     children,
     ...rest
   } = props;
@@ -178,6 +183,7 @@ export default function HeroVideo(props: HeroVideoProps) {
         )}
         <Overlay
           enableOverlay={enableOverlay}
+          overlayType={overlayType}
           overlayColor={overlayColor}
           overlayColorHover={overlayColorHover}
           overlayOpacity={overlayOpacity}

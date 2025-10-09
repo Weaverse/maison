@@ -227,7 +227,7 @@ export const schema = createSchema({
           .filter((input) => input.name !== "color")
           .map((input) => {
             if (input.name === "as")
-              return { ...input, name: "headingTagName", defaultValue: "h3" };
+              return { ...input, name: "headingTagName", defaultValue: "h4" };
             if (input.name === "weight") return { ...input, defaultValue: 400 };
             return input;
           }),
@@ -258,7 +258,7 @@ export const schema = createSchema({
   ],
   presets: {
     heading: "Articles",
-    headingTagName: "h3",
+    headingTagName: "h4",
     weight: 400,
     alignment: "left",
     viewAllText: "VIEW ALL",

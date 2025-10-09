@@ -1,4 +1,3 @@
-import { EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useFetcher } from "react-router";
@@ -30,21 +29,23 @@ function NewsLetterForm(props: NewsLetterInputProps) {
   const { ok, errorMessage } = data || {};
 
   return (
-    <div ref={ref} {...rest} className="mx-auto max-w-full" style={{ width }}>
+    <div ref={ref} {...rest} className="mx-auto max-w-full">
       <Form
         method="POST"
         action="/api/customer"
-        className="flex w-full items-center"
+        className="flex w-full items-center justify-center gap-[17px]"
         data-motion="fade-up"
       >
-        <div className="flex grow items-center border-y border-r-0 border-l">
-          <EnvelopeSimpleIcon className="mr-1.5 ml-3 h-5 w-5 shrink-0" />
+        <div
+          className="flex items-center border border-[var(--color-line-subtle)] rounded-sm"
+          style={{ width }}
+        >
           <input
             name="email"
             type="email"
             required
             placeholder={placeholder}
-            className="w-full bg-transparent py-3 pr-3 pl-1.5 leading-tight focus:outline-hidden"
+            className="w-full bg-transparent p-3 leading-tight focus:outline-hidden"
           />
         </div>
         <Button
@@ -55,13 +56,6 @@ function NewsLetterForm(props: NewsLetterInputProps) {
           {buttonText}
         </Button>
       </Form>
-      {helpText && (
-        <div
-          className="mt-2 text-body-subtle"
-          data-motion="fade-up"
-          dangerouslySetInnerHTML={{ __html: helpText }}
-        />
-      )}
       <div
         className={clsx(
           "mx-auto mt-4 text-center font-medium",
@@ -100,15 +94,8 @@ export const schema = createSchema({
           type: "text",
           name: "placeholder",
           label: "Placeholder",
-          defaultValue: "Enter your email",
-          placeholder: "Enter your email",
-        },
-        {
-          type: "richtext",
-          name: "helpText",
-          label: "Help text",
-          defaultValue:
-            '<div>We care about the protection of your data. Read our <a href="/policies/privacy-policy" style="color: #007AFF; text-decoration: underline;">Privacy Policy</a>.</div>',
+          defaultValue: "Enter your email*",
+          placeholder: "Enter your email*",
         },
         {
           type: "text",
@@ -121,8 +108,8 @@ export const schema = createSchema({
           type: "text",
           name: "buttonText",
           label: "Button text",
-          placeholder: "Subscribe",
-          defaultValue: "Subscribe",
+          placeholder: "Submit",
+          defaultValue: "Submit",
         },
       ],
     },

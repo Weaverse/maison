@@ -27,20 +27,10 @@ const variants = cva("grid", {
       "5": "md:grid-cols-5",
       "6": "md:grid-cols-6",
     },
-    gap: {
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-    },
   },
   defaultVariants: {
     mobileGridSize: "2",
     desktopGridSize: "4",
-    gap: 16,
   },
 });
 
@@ -84,9 +74,9 @@ function ArticlesItems(props: ArticlesItemsProps) {
             variants({
               mobileGridSize,
               desktopGridSize,
-              gap,
             }),
           )}
+          style={{ gap: `${gap}px` }}
         >
           {Array.from({ length: itemsToShow }).map((_, i) => (
             <div key={i} className="flex flex-col gap-5">
@@ -128,9 +118,9 @@ function ArticlesItems(props: ArticlesItemsProps) {
           variants({
             mobileGridSize,
             desktopGridSize,
-            gap,
           }),
         )}
+        style={{ gap: `${gap}px` }}
       >
         {articles.slice(0, itemsToShow).map((article, i) => (
           <ArticleCard
@@ -191,7 +181,7 @@ function ArticleCard({
           className="inline-block"
         >
           <h6
-            className="text-2xl leading-8 font-normal hover:underline sm:line-clamp-2"
+            className="text-2xl leading-8 font-normal hover:underline"
             style={{
               color: titleColor,
             }}
@@ -241,6 +231,7 @@ export const schema = createSchema({
             min: 8,
             max: 32,
             step: 4,
+            unit: 'px'
           },
           defaultValue: 16,
         },
@@ -337,7 +328,5 @@ export const schema = createSchema({
     showAuthor: true,
     showDate: true,
     imageBorderRadius: 4,
-    titleColor: "#000000",
-    metaColor: "#666666",
   },
 });

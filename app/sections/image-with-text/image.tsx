@@ -125,7 +125,7 @@ export const schema = createSchema({
           type: "select",
           name: "width",
           label: "Width",
-          defaultValue: "medium",
+          defaultValue: "large",
           configs: {
             options: [
               { value: "small", label: "Small" },

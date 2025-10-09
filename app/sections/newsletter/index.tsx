@@ -27,12 +27,14 @@ export const schema = createSchema({
     children: [
       {
         type: "heading",
-        content: "SIGN UP & SAVE 15%",
+        content: "Newsletter",
+        as: "h3",
       },
       {
         type: "paragraph",
         content:
-          "Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.",
+          "Be the first to know about new collections and exclusive offers.",
+        textSize: "sm",
       },
       { type: "newsletter-form" },
     ],

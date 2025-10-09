@@ -20,9 +20,14 @@ export function CollectionCard({
   collectionNameColor,
   loading,
   enableOverlay,
+  overlayType,
   overlayColor,
   overlayColorHover,
   overlayOpacity,
+  gradientDirection,
+  gradientFrom,
+  gradientTo,
+  gradientToOpacity,
 }: CollectionCardProps) {
   if (collection.products.nodes.length === 0) {
     return null;
@@ -74,9 +79,14 @@ export function CollectionCard({
         </h5>
         <Overlay
           enableOverlay={enableOverlay}
+          overlayType={overlayType}
           overlayColor={overlayColor}
           overlayColorHover={overlayColorHover}
           overlayOpacity={overlayOpacity}
+          gradientDirection={gradientDirection}
+          gradientFrom={gradientFrom}
+          gradientTo={gradientTo}
+          gradientToOpacity={gradientToOpacity}
           className="z-0"
         />
       </div>

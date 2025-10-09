@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority";
 import clsx from "clsx";
 
 const variants = cva(
-  "flex grow flex-col justify-center gap-5 px-4 py-6 md:px-8 md:py-8 [&_.paragraph]:mx-[unset] [&_.paragraph]:w-auto",
+  "flex grow flex-col justify-center gap-6 px-5 py-10 md:px-10 [&_.paragraph]:mx-[unset] [&_.paragraph]:w-auto",
   {
     variants: {
       alignment: {
@@ -22,13 +22,19 @@ const variants = cva(
 interface ImageWithTextContentProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
+  backgroundColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
 function ImageWithTextContent(props: ImageWithTextContentProps) {
-  const { alignment, children, ref, ...rest } = props;
+  const { alignment, backgroundColor, children, ref, ...rest } = props;
   return (
-    <div ref={ref} {...rest} className={clsx(variants({ alignment }))}>
+    <div 
+      ref={ref} 
+      {...rest} 
+      className={clsx(variants({ alignment }))}
+      style={{ backgroundColor }}
+    >
       {children}
     </div>
   );
@@ -58,6 +64,11 @@ export const schema = createSchema({
           helpText:
             "This will override the default alignment setting of all children components.",
         },
+        {
+          type: "color",
+          name: "backgroundColor",
+          label: "Background color",
+        },
       ],
     },
   ],
@@ -72,14 +83,16 @@ export const schema = createSchema({
       {
         type: "heading",
         content: "Heading for image",
+        as: "h3",
       },
       {
         type: "paragraph",
         content: "Pair large text with an image to tell a story.",
+        textSize: "sm",
       },
       {
         type: "button",
-        text: "Shop now",
+        text: "Discover now",
       },
     ],
   },

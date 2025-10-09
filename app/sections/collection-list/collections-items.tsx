@@ -26,9 +26,14 @@ function CollectionsItems(props: CollectionsItemsProps) {
     imageAspectRatio,
     collectionNameColor,
     enableOverlay,
+    overlayType,
     overlayColor,
     overlayColorHover,
     overlayOpacity,
+    gradientDirection,
+    gradientFrom,
+    gradientTo,
+    gradientToOpacity,
     ref,
     ...rest
   } = props;
@@ -60,9 +65,14 @@ function CollectionsItems(props: CollectionsItemsProps) {
                   collectionNameColor={collectionNameColor}
                   loading={getImageLoadingPriority(i, 2)}
                   enableOverlay={enableOverlay}
+                  overlayType={overlayType}
                   overlayColor={overlayColor}
                   overlayColorHover={overlayColorHover}
                   overlayOpacity={overlayOpacity}
+                  gradientDirection={gradientDirection}
+                  gradientFrom={gradientFrom}
+                  gradientTo={gradientTo}
+                  gradientToOpacity={gradientToOpacity}
                 />
               ))}
             </div>
