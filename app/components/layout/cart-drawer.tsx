@@ -2,6 +2,7 @@ import { HandbagIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { type CartReturn, useAnalytics } from "@shopify/hydrogen";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { Await, useRouteLoaderData } from "react-router";
 import { Cart } from "~/components/cart/cart";
@@ -53,41 +54,69 @@ export function CartDrawer() {
                 </div>
               )}
             </Dialog.Trigger>
-            <Dialog.Portal>
-              <Dialog.Overlay
-                className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in"
-                style={{ "--fade-in-duration": "100ms" } as React.CSSProperties}
-              />
-              <Dialog.Content
-                onCloseAutoFocus={(e) => e.preventDefault()}
-                className={clsx([
-                  "fixed inset-y-0 right-0 z-10 w-screen max-w-[400px] bg-background py-4",
-                  "data-[state=open]:animate-enter-from-right",
-                ])}
-                aria-describedby={undefined}
-              >
-                <div className="flex h-full flex-col space-y-6">
-                  <div className="flex items-center justify-between gap-2 px-4">
-                    <Dialog.Title asChild className="text-base">
-                      <span className="font-bold">Cart</span>
-                    </Dialog.Title>
-                    <Dialog.Close asChild>
-                      <button
-                        type="button"
-                        className="translate-x-2 p-2"
-                        aria-label="Close cart drawer"
-                      >
-                        <XIcon className="h-4 w-4" />
-                      </button>
-                    </Dialog.Close>
-                  </div>
-                  <Cart layout="drawer" cart={cart as CartReturn} />
+            <AnimatedDrawer open={open}>
+              <div className="flex h-full flex-col space-y-6">
+                <div className="flex items-center justify-between gap-2 px-4">
+                  <Dialog.Title asChild className="text-base">
+                    <span className="font-bold">Cart</span>
+                  </Dialog.Title>
+                  <Dialog.Close asChild>
+                    <button
+                      type="button"
+                      className="translate-x-2 p-2"
+                      aria-label="Close cart drawer"
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </button>
+                  </Dialog.Close>
                 </div>
-              </Dialog.Content>
-            </Dialog.Portal>
+                <Cart layout="drawer" cart={cart as CartReturn} />
+              </div>
+            </AnimatedDrawer>
           </Dialog.Root>
         )}
       </Await>
     </Suspense>
+  );
+}
+
+function AnimatedDrawer({ open, children }) {
+  return (
+    <Dialog.Portal forceMount>
+      <AnimatePresence>
+        {open && (
+          <>
+            <Dialog.Overlay forceMount>
+              <motion.div
+                className="fixed inset-0 z-10 bg-black/50 backdrop-blur-xs"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            </Dialog.Overlay>
+            <Dialog.Content
+              forceMount
+              onCloseAutoFocus={(e) => e.preventDefault()}
+              className="fixed inset-y-0 right-0 z-10"
+              aria-describedby={undefined}
+            >
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{
+                  type: "spring",
+                  damping: 25,
+                  stiffness: 150,
+                }}
+                className="w-screen max-w-[400px] bg-background py-4 h-full"
+              >
+                {children}
+              </motion.div>
+            </Dialog.Content>
+          </>
+        )}
+      </AnimatePresence>
+    </Dialog.Portal>
   );
 }
