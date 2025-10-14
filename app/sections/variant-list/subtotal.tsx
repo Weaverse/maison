@@ -1,10 +1,7 @@
+import { TrashIcon } from "@phosphor-icons/react";
 import { CartForm } from "@shopify/hydrogen";
-import { useState } from "react";
 import type { FetcherWithComponents } from "react-router";
-import type {
-  CartApiQueryFragment,
-  ProductVariantFragment,
-} from "storefront-api.generated";
+import type { ProductVariantFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 
@@ -16,6 +13,7 @@ type SubtotalProps = {
 export function Subtotal({ cart, variants }: SubtotalProps) {
   let totalItems = 0;
   let subtotal = 0;
+  let existingLineIds: string[] = [];
 
   const currentProductVariantIds = variants.map((v) => v.id);
 
@@ -23,6 +21,7 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
     const currentProductLines = cart.lines.nodes.filter((line) =>
       currentProductVariantIds.includes(line.merchandise.id),
     );
+    existingLineIds = currentProductLines.map((line) => line.id);
 
     totalItems = currentProductLines.reduce(
       (sum, line) => sum + line.quantity,
@@ -40,7 +39,7 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
           <Button variant="outline" onClick={() => toggleCartDrawer(true)}>
             View Cart
           </Button>
-          <RemoveAllFromCartButton cart={cart} />
+          <RemoveAllFromCartButton lineIds={existingLineIds} />
         </div>
         <div className="text-center">Total: {totalItems} items</div>
         <div className="space-y-1">
@@ -55,37 +54,11 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
           </div>
         </div>
       </div>
-      {/* <div className="mt-4 flex justify-end">
-            <AddAllToCartButton lines={lines} />
-          </div> */}
     </div>
   );
 }
 
-function RemoveAllFromCartButton({
-  cart,
-}: {
-  cart: Promise<CartApiQueryFragment> | undefined;
-}) {
-  const [lineIds, setLineIds] = useState<string[]>([]);
-
-  // useEffect(() => {
-  //   if (cart) {
-  //     cart.then((resolvedCart) => {
-  //       if (resolvedCart?.lines?.nodes?.length) {
-  //         const ids = resolvedCart.lines.nodes.map((line) => line.id);
-  //         setLineIds(ids);
-  //       } else {
-  //         setLineIds([]);
-  //       }
-  //     });
-  //   }
-  // }, [cart]);
-
-  if (!cart || lineIds.length === 0) {
-    return null;
-  }
-
+function RemoveAllFromCartButton({ lineIds }: { lineIds: string[] }) {
   return (
     <CartForm
       route="/cart"
@@ -94,12 +67,12 @@ function RemoveAllFromCartButton({
     >
       {(fetcher: FetcherWithComponents<any>) => (
         <Button
-          variant="secondary"
+          className="flex items-center gap-1"
+          variant="underline"
           type="submit"
-          className="uppercase"
           disabled={fetcher.state !== "idle"}
         >
-          Remove All
+          <TrashIcon /> <span>Remove All</span>
         </Button>
       )}
     </CartForm>
