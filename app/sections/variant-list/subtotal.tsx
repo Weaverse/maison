@@ -33,8 +33,8 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
     }, 0);
   }
   return (
-    <div className="border-t border-line pt-6">
-      <div className="grid grid-cols-[3fr_1fr_2fr] gap-4 items-center">
+    <div className="border-t border-line-subtle pt-6">
+      <div className="grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 items-center">
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={() => toggleCartDrawer(true)}>
             View Cart
@@ -42,7 +42,7 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
           <RemoveAllFromCartButton lineIds={existingLineIds} />
         </div>
         <div className="text-center">Total: {totalItems} items</div>
-        <div className="space-y-1">
+        <div className="space-y-1 col-span-2">
           <div className="text-right">
             <div className="text-sm">Subtotal:</div>
             <div className="font-semibold">${subtotal.toFixed(2)}</div>

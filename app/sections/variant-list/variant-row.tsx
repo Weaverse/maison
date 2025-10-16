@@ -18,19 +18,12 @@ import { cn } from "~/utils/cn";
 
 interface VariantRowProps {
   variant: ProductVariantFragment;
-  enableAutoUpdate?: boolean;
 }
 
-export function VariantRow({
-  variant,
-  enableAutoUpdate = false,
-}: VariantRowProps) {
+export function VariantRow({ variant }: VariantRowProps) {
   const rootData = useRouteLoaderData<RootLoader>("root");
 
   const variantTitle = variant.title === "Default Title" ? "" : variant.title;
-  const unitPrice = variant.price?.amount
-    ? Number.parseFloat(variant.price.amount)
-    : 0;
 
   const isLowStock =
     variant.quantityAvailable !== null &&
@@ -74,28 +67,30 @@ export function VariantRow({
           )}
         </div>
       </div>
-      <Await resolve={rootData.cart}>
-        {(resolvedCart) => (
-          <QuantityUpdateButtons cart={resolvedCart} variant={variant} />
-        )}
-      </Await>
-
-      <div className="font-medium text-center">
-        ${unitPrice.toFixed(2)}/unit
-      </div>
 
       <Await resolve={rootData.cart}>
         {(resolvedCart) => {
           const cartLine = resolvedCart?.lines?.nodes?.find(
             (line) => line.merchandise.id === variant.id,
           );
-          const cartQuantity = cartLine?.quantity || 0;
-          const totalPrice = unitPrice * cartQuantity;
+          let unitPrice = cartLine
+            ? cartLine.cost.amountPerQuantity
+            : variant.price;
+          const totalPrice = cartLine?.cost.totalAmount || {
+            amount: "0",
+            currencyCode: variant.price?.currencyCode,
+          };
 
           return (
-            <div className="text-right font-semibold">
-              ${totalPrice.toFixed(2)}
-            </div>
+            <>
+              <QuantityUpdateButtons cart={resolvedCart} variant={variant} />
+              <div className="font-medium text-center">
+                <Money data={unitPrice} as="span" withoutTrailingZeros />
+              </div>
+              <div className="text-right font-semibold">
+                <Money data={totalPrice} as="span" withoutTrailingZeros />
+              </div>
+            </>
           );
         }}
       </Await>
@@ -115,6 +110,8 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
     quantity?: number;
   };
 
+  const increment = 5;
+
   const existingLine = cart?.lines?.nodes?.find(
     (line) => line.merchandise.id === variant.id,
   );
@@ -123,8 +120,8 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
   const currentQuantity = existingLine?.quantity || 0;
   const optimisticQuantity = optimisticData?.quantity || currentQuantity;
 
-  const prevQuantity = Number(Math.max(0, optimisticQuantity - 1).toFixed(0));
-  const nextQuantity = Number((optimisticQuantity + 1).toFixed(0));
+  const prevQuantity = Number(Math.max(0, optimisticQuantity - increment));
+  const nextQuantity = Number(optimisticQuantity + increment);
   const isOutOfStock = !variant.availableForSale;
 
   // Use the same UI for both existing and new items
@@ -149,7 +146,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
             className="h-9 w-9 transition disabled:cursor-not-allowed disabled:text-body-subtle"
             value={prevQuantity}
             disabled={
-              optimisticQuantity <= 1 ||
+              optimisticQuantity <= 0 ||
               existingLine?.isOptimistic ||
               !existingLine
             }
@@ -196,7 +193,9 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
           <CartForm
             route="/cart"
             action={CartForm.ACTIONS.LinesAdd}
-            inputs={{ lines: [{ merchandiseId: variant.id, quantity: 1 }] }}
+            inputs={{
+              lines: [{ merchandiseId: variant.id, quantity: increment }],
+            }}
           >
             <button
               type="submit"
@@ -208,49 +207,73 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
           </CartForm>
         )}
       </div>
-
-      {showTrashButton && (
-        <CartForm
-          route="/cart"
-          action={CartForm.ACTIONS.LinesRemove}
-          inputs={{ lineIds: [existingLine.id] }}
-        >
-          <button
-            type="submit"
-            aria-label="Remove from cart"
-            className="flex h-8 w-8 items-center justify-center border-none hover:text-red-600 transition"
+      <div className="w-8">
+        {showTrashButton && (
+          <CartForm
+            route="/cart"
+            action={CartForm.ACTIONS.LinesRemove}
+            inputs={{ lineIds: [existingLine.id] }}
           >
-            <span className="sr-only">Remove</span>
-            <TrashIcon aria-hidden="true" className="h-4 w-4" />
-            <OptimisticInput id={existingLine.id} data={{ action: "remove" }} />
-          </button>
-        </CartForm>
-      )}
+            <button
+              type="submit"
+              aria-label="Remove from cart"
+              className="flex h-8 w-8 items-center justify-center border-none hover:text-red-600 transition"
+            >
+              <span className="sr-only">Remove</span>
+              <TrashIcon aria-hidden="true" className="h-4 w-4" />
+              <OptimisticInput
+                id={existingLine.id}
+                data={{ action: "remove" }}
+              />
+            </button>
+          </CartForm>
+        )}
+      </div>
     </div>
   );
 }
 
 function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
-  const volumes = variant.quantityPriceBreaks;
+  const volumes = [
+    {
+      minimumQuantity: 1,
+      price: variant.price,
+    },
+    ...variant.quantityPriceBreaks.nodes,
+  ];
+  const rule = variant.quantityRule;
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <InfoIcon className="cursor-pointer hover:scale-125 duration-300" />
       </TooltipTrigger>
       <TooltipContent
-        className="bg-white text-body shadow-md rounded-md p-2 space-y-2"
+        className="bg-white text-body shadow-lg rounded-lg p-0"
         side="left"
         sideOffset={5}
         arrow={false}
       >
-        {volumes.nodes.map((node, ind) => (
-          <div key={ind} className="flex items-center gap-2 justify-between">
-            <span>{node.minimumQuantity}+</span>
-            <span>
-              <Money data={node.price} />
-            </span>
+        <div className="py-3 px-5 space-y-1">
+          <div className="font-semibold">
+            Min {rule.minimum} {rule.maximum ? `- Max ${rule.maximum}` : ""}
           </div>
-        ))}
+          <div>Increments of {rule.increment}</div>
+        </div>
+        <ul className="space-y-1">
+          {volumes.map((node, ind) => (
+            <li
+              key={ind}
+              className="flex items-center gap-6 justify-between odd:bg-gray-100 py-2.5 px-5"
+            >
+              <span>{node.minimumQuantity}+</span>
+              <div>
+                <Money data={node.price} as="span" withoutTrailingZeros />
+                <span className="ml-1">{node.price.currencyCode}/ea</span>
+              </div>
+            </li>
+          ))}
+        </ul>
       </TooltipContent>
     </Tooltip>
   );

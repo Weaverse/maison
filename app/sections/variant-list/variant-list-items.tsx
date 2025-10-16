@@ -54,11 +54,7 @@ export function VariantListItems({ variants }: VariantListItemsProps) {
         </div>
         <div className="space-y-6">
           {variants.map((variant) => (
-            <VariantRow
-              key={variant.id}
-              variant={variant}
-              enableAutoUpdate={true}
-            />
+            <VariantRow key={variant.id} variant={variant} />
           ))}
         </div>
       </div>
