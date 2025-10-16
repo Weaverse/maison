@@ -35,7 +35,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
 
   let buyer = await customerAccount.getBuyer();
   let buyerVariables =
-    buyer.companyLocationId && buyer?.customerAccessToken
+    buyer?.companyLocationId && buyer?.customerAccessToken
       ? {
           buyer,
         }

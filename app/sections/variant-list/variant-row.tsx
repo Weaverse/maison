@@ -86,6 +86,7 @@ export function VariantRow({ variant }: VariantRowProps) {
               <QuantityUpdateButtons cart={resolvedCart} variant={variant} />
               <div className="font-medium text-center">
                 <Money data={unitPrice} as="span" withoutTrailingZeros />
+                <span>/unit</span>
               </div>
               <div className="text-right font-semibold">
                 <Money data={totalPrice} as="span" withoutTrailingZeros />
@@ -110,7 +111,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
     quantity?: number;
   };
 
-  const increment = 5;
+  const increment = variant.quantityRule.increment || 1;
 
   const existingLine = cart?.lines?.nodes?.find(
     (line) => line.merchandise.id === variant.id,
