@@ -3,6 +3,20 @@ export const PRODUCT_VARIANT_FRAGMENT = `#graphql
     id
     availableForSale
     quantityAvailable
+    quantityRule {
+          increment
+          maximum
+          minimum
+        }
+        quantityPriceBreaks (first: 10) {
+          nodes {
+            price {
+              amount
+              currencyCode
+            }
+            minimumQuantity
+          }
+        }
     selectedOptions {
       name
       value

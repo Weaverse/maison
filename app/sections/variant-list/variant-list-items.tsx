@@ -38,24 +38,6 @@ interface VariantQuantity {
 export function VariantListItems({ variants }: VariantListItemsProps) {
   console.log("🚀 ~ VariantListItems ~ variants:", variants);
   const rootData = useRouteLoaderData<RootLoader>("root");
-  const cart = rootData?.cart;
-  let totalItems = 0;
-  let subtotal = 30;
-  // const totalItems = Object.values(quantities).reduce(
-  //   (sum, qty) => sum + qty,
-  //   0,
-  // );
-
-  // const subtotal = Object.entries(quantities).reduce(
-  //   (sum, [variantId, qty]) => {
-  //     const variant = variants.find((v) => v.id === variantId);
-  //     if (variant?.price?.amount) {
-  //       return sum + Number.parseFloat(variant.price.amount) * qty;
-  //     }
-  //     return sum;
-  //   },
-  //   0,
-  // );
 
   return (
     <div className="space-y-6">

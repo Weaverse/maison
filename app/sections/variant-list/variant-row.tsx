@@ -1,6 +1,7 @@
-import { Info, Trash } from "@phosphor-icons/react";
+import { InfoIcon, TrashIcon } from "@phosphor-icons/react";
 import {
   CartForm,
+  Money,
   OptimisticInput,
   useOptimisticData,
   type OptimisticCart,
@@ -11,6 +12,7 @@ import type {
   ProductVariantFragment,
 } from "storefront-api.generated";
 import { Image } from "~/components/image";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 
@@ -61,7 +63,7 @@ export function VariantRow({
             <div className="text-sm text-red-600 font-medium">Out of Stock</div>
           ) : isLowStock ? (
             <div className="flex items-center gap-1 text-sm text-orange-600">
-              <Info size={14} />
+              <InfoIcon size={14} />
               <span>Low in Stock</span>
             </div>
           ) : (
@@ -131,7 +133,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <Info />
+      <VolumePricingInfo variant={variant} />
       <div className="flex items-center border border-border divide-x divide-border rounded-(--btn-border-radius)">
         <CartForm
           route="/cart"
@@ -219,11 +221,37 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
             className="flex h-8 w-8 items-center justify-center border-none hover:text-red-600 transition"
           >
             <span className="sr-only">Remove</span>
-            <Trash aria-hidden="true" className="h-4 w-4" />
+            <TrashIcon aria-hidden="true" className="h-4 w-4" />
             <OptimisticInput id={existingLine.id} data={{ action: "remove" }} />
           </button>
         </CartForm>
       )}
     </div>
+  );
+}
+
+function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
+  const volumes = variant.quantityPriceBreaks;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <InfoIcon className="cursor-pointer hover:scale-125 duration-300" />
+      </TooltipTrigger>
+      <TooltipContent
+        className="bg-white text-body shadow-md rounded-md p-2 space-y-2"
+        side="left"
+        sideOffset={5}
+        arrow={false}
+      >
+        {volumes.nodes.map((node, ind) => (
+          <div key={ind} className="flex items-center gap-2 justify-between">
+            <span>{node.minimumQuantity}+</span>
+            <span>
+              <Money data={node.price} />
+            </span>
+          </div>
+        ))}
+      </TooltipContent>
+    </Tooltip>
   );
 }
