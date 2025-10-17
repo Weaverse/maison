@@ -30,20 +30,18 @@ export interface ImageProps
   };
 }
 
+const imageLoadedCache = new Set();
+
 export function Image({ ref, className, onLoad, ...rest }: ImageProps) {
   /**
    * Use useRef for HydrogenImage, so we can access the HydrogenImage's ref
    * even when using ref prop for the outer div
    */
   const hydrogenImageRef = useRef<HTMLImageElement>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    if (hydrogenImageRef.current?.complete) {
-      setLoaded(true);
-      onLoad?.({} as React.SyntheticEvent<HTMLImageElement>);
-    }
-  }, [onLoad]);
+  const url = rest.data?.url || "";
+  const [loaded, setLoaded] = useState(() =>
+    imageLoadedCache.has(rest.data.url),
+  );
 
   return (
     <div
@@ -62,6 +60,7 @@ export function Image({ ref, className, onLoad, ...rest }: ImageProps) {
           loaded ? "blur-0" : "blur-xl",
         )}
         onLoad={(e) => {
+          imageLoadedCache.add(url);
           setLoaded(true);
           onLoad?.(e);
         }}

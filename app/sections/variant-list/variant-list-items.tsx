@@ -36,7 +36,6 @@ interface VariantQuantity {
 }
 
 export function VariantListItems({ variants }: VariantListItemsProps) {
-  console.log("🚀 ~ VariantListItems ~ variants:", variants);
   const rootData = useRouteLoaderData<RootLoader>("root");
 
   return (
