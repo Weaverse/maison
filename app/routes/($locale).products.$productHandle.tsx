@@ -31,12 +31,23 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
 
   invariant(handle, "Missing productHandle param, check route filename");
 
-  const { storefront, weaverse } = context;
+  const { storefront, weaverse, customerAccount } = context;
+
+  let buyer = await customerAccount.getBuyer();
+  let buyerVariables =
+    buyer?.companyLocationId && buyer?.customerAccessToken
+      ? {
+          buyer,
+        }
+      : {};
+
   const selectedOptions = getSelectedProductOptions(request);
+
   const [{ shop, product }, weaverseData] = await Promise.all([
     storefront.query<ProductQuery>(PRODUCT_QUERY, {
       variables: {
         handle,
+        ...buyerVariables,
         selectedOptions,
         country: storefront.i18n.country,
         language: storefront.i18n.language,
