@@ -4,16 +4,16 @@ import { cn } from "~/utils/cn";
 
 export interface OverlayData {
   enableOverlay: boolean;
-  overlayType: "solid" | "gradient";
+  overlayType?: "solid" | "gradient";
   // Solid overlay options
   overlayColor: string;
   overlayColorHover: string;
   overlayOpacity: number;
   // Gradient overlay options
-  gradientDirection: "to top" | "to bottom" | "to left" | "to right";
-  gradientFrom: string;
-  gradientTo: string;
-  gradientToOpacity: number;
+  gradientDirection?: "to top" | "to bottom" | "to left" | "to right";
+  gradientFrom?: string;
+  gradientTo?: string;
+  gradientToOpacity?: number;
 }
 
 export type OverlayProps = OverlayData & {
@@ -34,7 +34,9 @@ export function Overlay(props: OverlayProps) {
     className,
   } = props;
 
-  if (!enableOverlay) return null;
+  if (!enableOverlay) {
+    return null;
+  }
 
   // Convert hex color to rgba format for gradient overlays
   function hexToRgba(hex: string, opacity: number) {
@@ -48,21 +50,18 @@ export function Overlay(props: OverlayProps) {
         : sanitized,
       16,
     );
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
+    const r = Math.floor(bigint / 65_536) % 256;
+    const g = Math.floor(bigint / 256) % 256;
+    const b = bigint % 256;
     const a = Math.max(0, Math.min(1, opacity / 100));
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
-  // Render gradient overlay
+  // Gradient overlay
   if (overlayType === "gradient") {
     return (
       <div
-        className={cn(
-          "pointer-events-none absolute inset-0 z-0",
-          className,
-        )}
+        className={cn("pointer-events-none absolute inset-0 z-0", className)}
         style={
           {
             background: `linear-gradient(${gradientDirection}, ${hexToRgba(
@@ -75,7 +74,7 @@ export function Overlay(props: OverlayProps) {
     );
   }
 
-  // Render solid overlay
+  // Solid overlay
   return (
     <div
       className={cn(
@@ -116,19 +115,20 @@ export const overlayInputs: InspectorGroup["inputs"] = [
       ],
     },
   },
-  // Solid overlay options
   {
     type: "color",
     name: "overlayColor",
     label: "Overlay color",
     defaultValue: "#000000",
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "solid",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "solid",
   },
   {
     type: "color",
     name: "overlayColorHover",
     label: "Overlay color (hover)",
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "solid",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "solid",
   },
   {
     type: "range",
@@ -141,14 +141,15 @@ export const overlayInputs: InspectorGroup["inputs"] = [
       step: 1,
       unit: "%",
     },
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "solid",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "solid",
   },
-  // Gradient overlay options
   {
     type: "select",
     name: "gradientDirection",
     label: "Gradient direction",
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "gradient",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "gradient",
     configs: {
       options: [
         { value: "to top", label: "To top" },
@@ -164,14 +165,16 @@ export const overlayInputs: InspectorGroup["inputs"] = [
     name: "gradientFrom",
     label: "Gradient from color",
     defaultValue: "#000000",
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "gradient",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "gradient",
   },
   {
     type: "color",
     name: "gradientTo",
     label: "Gradient to color",
     defaultValue: "#000000",
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "gradient",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "gradient",
   },
   {
     type: "range",
@@ -184,6 +187,7 @@ export const overlayInputs: InspectorGroup["inputs"] = [
       step: 1,
       unit: "%",
     },
-    condition: (data: OverlayData) => data.enableOverlay && data.overlayType === "gradient",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "gradient",
   },
 ];

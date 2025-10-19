@@ -1,18 +1,18 @@
 import {
   createSchema,
   type HydrogenComponentProps,
-  useParentInstance,
   IMAGES_PLACEHOLDERS,
+  useParentInstance,
 } from "@weaverse/hydrogen";
+import { cva, type VariantProps } from "class-variance-authority";
 import type { ArticleFragment } from "storefront-api.generated";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
-import type { ArticlesLoaderData } from ".";
-import { calculateAspectRatio } from "~/utils/image";
+import { useAnimation } from "~/hooks/use-animation";
 import type { ImageAspectRatio } from "~/types/image";
-import type { VariantProps } from "class-variance-authority";
-import { cva } from "class-variance-authority";
 import { cn } from "~/utils/cn";
+import { calculateAspectRatio } from "~/utils/image";
+import type { ArticlesLoaderData } from ".";
 
 const variants = cva("grid", {
   variants: {
@@ -34,7 +34,9 @@ const variants = cva("grid", {
   },
 });
 
-interface ArticlesItemsProps extends HydrogenComponentProps {
+interface ArticlesItemsProps
+  extends VariantProps<typeof variants>,
+    HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;
@@ -43,8 +45,6 @@ interface ArticlesItemsProps extends HydrogenComponentProps {
   titleColor: string;
   metaColor: string;
   gap: number;
-  mobileGridSize: "1" | "2" | "3";
-  desktopGridSize: "3" | "4" | "5" | "6";
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
@@ -62,49 +62,46 @@ function ArticlesItems(props: ArticlesItemsProps) {
     ...rest
   } = props;
 
+  const [scope] = useAnimation(ref);
+
   const parent = useParentInstance();
   const data: ArticlesLoaderData = parent.data?.loaderData;
   const itemsToShow = Number(parent.data?.data?.articlesToShow ?? 4);
 
   if (!data?.articles?.length) {
     return (
-      <div ref={ref} {...rest}>
-        <div
-          className={cn(
-            variants({
-              mobileGridSize,
-              desktopGridSize,
-            }),
-          )}
-          style={{ gap: `${gap}px` }}
-        >
-          {Array.from({ length: itemsToShow }).map((_, i) => (
-            <div key={i} className="flex flex-col gap-5">
-              <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
-                <Image
-                  data={{ url: IMAGES_PLACEHOLDERS.image }}
-                  aspectRatio="1/1"
-                  sizes="auto"
-                />
-              </div>
-              <div className="flex flex-col gap-4">
-                <h6
-                  className="text-2xl leading-8 font-normal"
-                  style={{ color: titleColor }}
-                >
-                  Title here
-                </h6>
-                <div
-                  className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
-                  style={{ color: metaColor }}
-                >
-                  <span className="text-sm">Date here —</span>
-                  <span className="text-sm">Author here</span>
-                </div>
+      <div
+        ref={scope}
+        {...rest}
+        className={cn(variants({ mobileGridSize, desktopGridSize }))}
+        style={{ gap: `${gap}px` }}
+      >
+        {Array.from({ length: itemsToShow }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-5">
+            <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
+              <Image
+                data={{ url: IMAGES_PLACEHOLDERS.image }}
+                aspectRatio="1/1"
+                sizes="auto"
+              />
+            </div>
+            <div className="flex flex-col gap-4">
+              <h6
+                className="text-2xl leading-8 font-normal"
+                style={{ color: titleColor }}
+              >
+                Title here
+              </h6>
+              <div
+                className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
+                style={{ color: metaColor }}
+              >
+                <span className="text-sm">Date here —</span>
+                <span className="text-sm">Author here</span>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -112,7 +109,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
   const { articles, blogHandle } = data;
 
   return (
-    <div ref={ref} {...rest}>
+    <div ref={scope} {...rest}>
       <div
         className={cn(
           variants({
@@ -122,7 +119,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
         )}
         style={{ gap: `${gap}px` }}
       >
-        {articles.slice(0, itemsToShow).map((article, i) => (
+        {articles.slice(0, itemsToShow).map((article) => (
           <ArticleCard
             key={article.id}
             article={article}
@@ -163,7 +160,7 @@ function ArticleCard({
     <div className="flex flex-col gap-5">
       {article.image && (
         <Link
-          to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : `#`}
+          to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
           className="flex flex-col"
         >
           <Image
@@ -177,11 +174,11 @@ function ArticleCard({
       )}
       <div className="flex flex-col gap-4">
         <Link
-          to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : `#`}
+          to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
           className="inline-block"
         >
           <h6
-            className="text-2xl leading-8 font-normal hover:underline"
+            className="text-2xl leading-8 font-normal hover:underline line-clamp-2"
             style={{
               color: titleColor,
             }}
@@ -231,7 +228,7 @@ export const schema = createSchema({
             min: 8,
             max: 32,
             step: 4,
-            unit: 'px'
+            unit: "px",
           },
           defaultValue: 16,
         },
@@ -320,13 +317,4 @@ export const schema = createSchema({
       ],
     },
   ],
-  presets: {
-    gap: 16,
-    mobileGridSize: "2",
-    desktopGridSize: "4",
-    imageAspectRatio: "1/1",
-    showAuthor: true,
-    showDate: true,
-    imageBorderRadius: 4,
-  },
 });

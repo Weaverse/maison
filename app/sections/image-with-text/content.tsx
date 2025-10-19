@@ -22,19 +22,13 @@ const variants = cva(
 interface ImageWithTextContentProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
-  backgroundColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
 function ImageWithTextContent(props: ImageWithTextContentProps) {
-  const { alignment, backgroundColor, children, ref, ...rest } = props;
+  const { alignment, children, ref, ...rest } = props;
   return (
-    <div 
-      ref={ref} 
-      {...rest} 
-      className={clsx(variants({ alignment }))}
-      style={{ backgroundColor }}
-    >
+    <div ref={ref} {...rest} className={clsx(variants({ alignment }))}>
       {children}
     </div>
   );
@@ -63,11 +57,6 @@ export const schema = createSchema({
           },
           helpText:
             "This will override the default alignment setting of all children components.",
-        },
-        {
-          type: "color",
-          name: "backgroundColor",
-          label: "Background color",
         },
       ],
     },

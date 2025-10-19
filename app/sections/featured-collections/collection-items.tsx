@@ -38,7 +38,9 @@ const gridVariants = cva("grid", {
   },
 });
 
-interface CollectionItemsData extends VariantProps<typeof gridVariants> {
+interface CollectionItemsData
+  extends VariantProps<typeof gridVariants>,
+    HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   imageBorderRadius: number;
@@ -53,7 +55,7 @@ interface CollectionItemsData extends VariantProps<typeof gridVariants> {
   desktopGridSize: "3" | "4" | "5" | "6";
 }
 
-function CollectionItems(props: CollectionItemsData & HydrogenComponentProps) {
+function CollectionItems(props: CollectionItemsData) {
   const {
     ref,
     gap,
@@ -73,8 +75,9 @@ function CollectionItems(props: CollectionItemsData & HydrogenComponentProps) {
 
   const parent = useParentInstance();
   const itemsToShow = Number(parent.data?.data?.collectionsToShow ?? 10);
-  const collections: FeaturedCollectionsLoaderData = parent.data?.loaderData?.length 
-    ? parent.data.loaderData 
+  const collections: FeaturedCollectionsLoaderData = parent.data?.loaderData
+    ?.length
+    ? parent.data.loaderData
     : new Array(itemsToShow).fill(COLLECTION_PLACEHOLDER);
 
   return (
@@ -119,7 +122,7 @@ function CollectionItems(props: CollectionItemsData & HydrogenComponentProps) {
               )}
               <div className="flex flex-col gap-1">
                 <h6
-                  className="font-normal text-[26px]"
+                  className="font-normal text-[26px] line-clamp-1"
                   style={{ color: titleColor }}
                 >
                   {collection.title ?? "Title here"}

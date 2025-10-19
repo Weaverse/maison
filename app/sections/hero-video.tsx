@@ -12,7 +12,6 @@ import { useInView } from "react-intersection-observer";
 import type { OverlayProps } from "~/components/overlay";
 import { Overlay, overlayInputs } from "~/components/overlay";
 import { useAnimation } from "~/hooks/use-animation";
-
 const SECTION_HEIGHTS = {
   small: {
     desktop: "40vh",
@@ -28,18 +27,15 @@ const SECTION_HEIGHTS = {
   },
   custom: null,
 };
-
 interface HeroVideoData extends OverlayProps, VariantProps<typeof variants> {
   videoURL: string;
   height: "small" | "medium" | "large" | "custom";
   heightOnDesktop: number;
   heightOnMobile: number;
 }
-
 export interface HeroVideoProps extends HeroVideoData, HydrogenComponentProps {
   ref: React.Ref<HTMLElement>;
 }
-
 const variants = cva(
   "absolute inset-0 z-10 mx-auto flex max-w-screen flex-col items-center justify-center px-3",
   {
@@ -68,7 +64,6 @@ const variants = cva(
     },
   },
 );
-
 function getPlayerSize(id: string) {
   if (isBrowser) {
     const section = document.querySelector(`[data-wv-id="${id}"]`);
@@ -82,9 +77,7 @@ function getPlayerSize(id: string) {
   }
   return { width: "100%", height: "auto" };
 }
-
 const ReactPlayer = lazy(() => import("react-player/lazy"));
-
 export default function HeroVideo(props: HeroVideoProps) {
   const {
     ref,
@@ -94,21 +87,14 @@ export default function HeroVideo(props: HeroVideoProps) {
     heightOnDesktop,
     heightOnMobile,
     enableOverlay,
-    overlayType,
     overlayColor,
     overlayColorHover,
     overlayOpacity,
-    gradientDirection,
-    gradientFrom,
-    gradientTo,
-    gradientToOpacity,
     children,
     ...rest
   } = props;
-
   const id = rest["data-wv-id"];
   const [size, setSize] = useState(() => getPlayerSize(id));
-
   const desktopHeight =
     SECTION_HEIGHTS[height]?.desktop || `${heightOnDesktop}px`;
   const mobileHeight = SECTION_HEIGHTS[height]?.mobile || `${heightOnMobile}px`;
@@ -116,11 +102,9 @@ export default function HeroVideo(props: HeroVideoProps) {
     "--desktop-height": desktopHeight,
     "--mobile-height": mobileHeight,
   } as CSSProperties;
-
   const { ref: inViewRef, inView } = useInView({
     triggerOnce: true,
   });
-
   // Use `useCallback` so we don't recreate the function on each render
   const setRefs = useCallback(
     (node: HTMLElement) => {
@@ -135,11 +119,9 @@ export default function HeroVideo(props: HeroVideoProps) {
     },
     [inViewRef, ref],
   );
-
   function handleResize() {
     setSize(getPlayerSize(id));
   }
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
   useEffect(() => {
     handleResize();
@@ -148,9 +130,7 @@ export default function HeroVideo(props: HeroVideoProps) {
       window.removeEventListener("resize", handleResize);
     };
   }, [inView, height, heightOnDesktop, heightOnMobile]);
-
   const [scope] = useAnimation();
-
   return (
     <section
       ref={setRefs}
@@ -183,14 +163,9 @@ export default function HeroVideo(props: HeroVideoProps) {
         )}
         <Overlay
           enableOverlay={enableOverlay}
-          overlayType={overlayType}
           overlayColor={overlayColor}
           overlayColorHover={overlayColorHover}
           overlayOpacity={overlayOpacity}
-          gradientDirection={gradientDirection}
-          gradientFrom={gradientFrom}
-          gradientTo={gradientTo}
-          gradientToOpacity={gradientToOpacity}
           className="z-0"
         />
         <div ref={scope} className={clsx(variants({ gap }))}>
@@ -200,7 +175,6 @@ export default function HeroVideo(props: HeroVideoProps) {
     </section>
   );
 }
-
 export const schema = createSchema({
   type: "hero-video",
   title: "Hero video",

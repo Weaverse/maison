@@ -14,9 +14,7 @@ export interface HeroImageProps extends VariantProps<typeof variants> {
   ref: React.Ref<HTMLElement>;
 }
 
-const variants = cva(
-  "flex flex-col [&_.paragraph]:mx-[unset] [&_.heading]:max-w-[660px]",
-  {
+const variants = cva("flex flex-col [&_.paragraph]:mx-[unset] [&_.heading]:max-w-[660px]", {
     variants: {
       height: {
         small: "min-h-[40vh] lg:min-h-[50vh]",
@@ -33,8 +31,7 @@ const variants = cva(
         "top center": "items-center justify-start [&_.paragraph]:text-center",
         "top right": "items-end justify-start [&_.paragraph]:text-right",
         "center left": "items-start justify-center [&_.paragraph]:text-left",
-        "center center":
-          "items-center justify-center [&_.paragraph]:text-center",
+        "center center": "items-center justify-center [&_.paragraph]:text-center",
         "center right": "items-end justify-center [&_.paragraph]:text-right",
         "bottom left": "items-start justify-end [&_.paragraph]:text-left",
         "bottom center": "items-center justify-end [&_.paragraph]:text-center",
@@ -57,8 +54,7 @@ const variants = cva(
       height: "large",
       contentPosition: "center center",
     },
-  },
-);
+  });
 
 export default function HeroImage(props: HeroImageProps & SectionProps) {
   const { ref, children, height, contentPosition, ...rest } = props;

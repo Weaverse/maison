@@ -16,6 +16,7 @@ import * as Countdown from "~/sections/countdown";
 import * as CountDownTimer from "~/sections/countdown/timer";
 import * as FeaturedCollections from "~/sections/featured-collections";
 import * as FeaturedCollectionItems from "~/sections/featured-collections/collection-items";
+import * as FeaturedCollectionHeader from "~/sections/featured-collections/collection-header";
 import * as FeaturedProducts from "~/sections/featured-products";
 import * as FeaturedProductItems from "~/sections/featured-products/product-items";
 import * as HeroImage from "~/sections/hero-image";
@@ -65,8 +66,16 @@ import * as TestimonialItems from "~/sections/testimonials/items";
 import * as VariantList from "~/sections/variant-list";
 import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
+import * as ViewAllButton from "~/components/view-all-button";
+import * as AccordionGroup from "~/sections/accordion/accordion-group";
+import * as AccordionItem from "~/sections/accordion/accordion-item";
+import * as AccordionInformationGroup from "~/sections/accordion/content-information";
+import * as AccordionSection from "~/sections/accordion/index";
+import * as AccordionInformationItem from "~/sections/accordion/information-item";
 import * as Articles from "~/sections/articles";
-import * as ArticlesItem from "~/sections/articles/items";
+import * as ArticlesItems from "~/sections/articles/articles-items";
+import * as ArticlesHeaderContainer from "~/sections/articles/articles-header";
+
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -78,6 +87,7 @@ export const components: HydrogenComponent[] = [
   AllProducts,
   FeaturedCollections,
   FeaturedCollectionItems,
+  FeaturedCollectionHeader,
   BlogPost,
   Blogs,
   Page,
@@ -141,5 +151,12 @@ export const components: HydrogenComponent[] = [
   Spacer,
   VariantList,
   Articles,
-  ArticlesItem,
+  ArticlesItems,
+  ArticlesHeaderContainer,
+  ViewAllButton,
+  AccordionSection,
+  AccordionInformationItem,
+  AccordionInformationGroup,
+  AccordionGroup,
+  AccordionItem,
 ];

@@ -1,0 +1,50 @@
+import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import { forwardRef } from "react";
+
+interface HeaderContainerProps extends HydrogenComponentProps {
+  ref?: React.Ref<HTMLDivElement>;
+  headerGap?: number;
+}
+
+const HeaderContainer = forwardRef<HTMLDivElement, HeaderContainerProps>(
+  (props, ref) => {
+    const { children, headerGap } = props;
+
+    return (
+      <div
+        ref={ref}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+        style={{ gap: `${headerGap}px` }}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
+export default HeaderContainer;
+
+export const schema = createSchema({
+  type: "collection-header",
+  title: "Collection header",
+  childTypes: ["heading", "view-all-button"],
+  settings: [
+    {
+      group: "Header layout",
+      inputs: [
+        {
+          type: "range",
+          name: "headerGap",
+          label: "Item spacing (mobile)",
+          defaultValue: 16,
+          configs: {
+            min: 0,
+            max: 32,
+            step: 4,
+            unit: "px",
+          },
+        },
+      ],
+    },
+  ],
+});
