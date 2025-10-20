@@ -135,6 +135,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
       <div className="flex items-center border border-border divide-x divide-border rounded-(--btn-border-radius)">
         <CartForm
           route="/cart"
+          fetcherKey="variant-list"
           action={CartForm.ACTIONS.LinesUpdate}
           inputs={{
             lines: [{ id: existingLine?.id, quantity: prevQuantity }],
@@ -170,6 +171,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
         {existingLine ? (
           <CartForm
             route="/cart"
+            fetcherKey="variant-list"
             action={CartForm.ACTIONS.LinesUpdate}
             inputs={{
               lines: [{ id: existingLine.id, quantity: nextQuantity }],
@@ -193,6 +195,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
         ) : (
           <CartForm
             route="/cart"
+            fetcherKey="variant-list"
             action={CartForm.ACTIONS.LinesAdd}
             inputs={{
               lines: [{ merchandiseId: variant.id, quantity: increment }],
@@ -212,6 +215,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
         {showTrashButton && (
           <CartForm
             route="/cart"
+            fetcherKey="variant-list"
             action={CartForm.ACTIONS.LinesRemove}
             inputs={{ lineIds: [existingLine.id] }}
           >

@@ -1,4 +1,4 @@
-import { TrashIcon } from "@phosphor-icons/react";
+import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
 import {
   CartForm,
   Money,
@@ -13,6 +13,7 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
 import { useRef } from "react";
+import { useFetcher } from "react-router";
 import useScroll from "react-use/esm/useScroll";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
@@ -446,6 +447,7 @@ function UpdateCartButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
+      fetcherKey={lines[0]?.id}
       inputs={{
         lines,
       }}
@@ -464,8 +466,15 @@ function CartLinePrice({
   priceType?: "regular" | "compareAt";
   [key: string]: any;
 }) {
+  let fetcher = useFetcher({
+    key: line.id,
+  });
   if (!(line?.cost?.amountPerQuantity && line?.cost?.totalAmount)) {
     return null;
+  }
+
+  if (fetcher.state !== "idle") {
+    return <CircleNotchIcon size={18} className="animate-spin" />;
   }
 
   const moneyV2 =
