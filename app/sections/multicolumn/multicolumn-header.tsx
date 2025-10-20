@@ -17,13 +17,6 @@ const variants = cva(
         24: "gap-6",
         28: "gap-7",
         32: "gap-8",
-        36: "gap-9",
-        40: "gap-10",
-        44: "gap-11",
-        48: "gap-12",
-        52: "gap-[52px]",
-        56: "gap-14",
-        60: "gap-[60px]",
       },
     },
     defaultVariants: {
@@ -53,12 +46,12 @@ const HeaderContainer = forwardRef<HTMLDivElement, HeaderContainerProps>(
 export default HeaderContainer;
 
 export const schema = createSchema({
-  type: "articles-header",
-  title: "Articles header",
+  type: "multicolumn-header",
+  title: "Multicolumn header",
   childTypes: ["heading", "view-all-button"],
   settings: [
     {
-      group: "Header layout",
+      group: "Header Layout",
       inputs: [
         {
           type: "range",
@@ -67,7 +60,7 @@ export const schema = createSchema({
           defaultValue: 16,
           configs: {
             min: 0,
-            max: 60,
+            max: 32,
             step: 4,
             unit: "px",
           },

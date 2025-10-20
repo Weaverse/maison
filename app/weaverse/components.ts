@@ -75,7 +75,13 @@ import * as AccordionInformationItem from "~/sections/accordion/information-item
 import * as Articles from "~/sections/articles";
 import * as ArticlesItems from "~/sections/articles/articles-items";
 import * as ArticlesHeaderContainer from "~/sections/articles/articles-header";
-
+import * as Multicolumn from "~/sections/multicolumn";
+import * as MulticolumnHeader from "~/sections/multicolumn/multicolumn-header";
+import * as MulticolumnItems from "~/sections/multicolumn/items";
+import * as MulticolumnItem from "~/sections/multicolumn/item";
+import * as ContactForm from "~/sections/contact-form";
+import * as ContactFormForm from "~/sections/contact-form/form";
+import * as RichText from "~/sections/rich-text";
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -159,4 +165,11 @@ export const components: HydrogenComponent[] = [
   AccordionInformationGroup,
   AccordionGroup,
   AccordionItem,
+  Multicolumn,
+  MulticolumnHeader,
+  MulticolumnItems,
+  MulticolumnItem,
+  ContactForm,
+  ContactFormForm,
+  RichText,
 ];

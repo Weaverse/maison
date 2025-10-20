@@ -1,15 +1,15 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import { forwardRef } from "react";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { forwardRef } from "react";
 
 const variants = cva("grid", {
   variants: {
     columns: {
-      "2": "grid-cols-2",
-      "3": "grid-cols-2 sm:grid-cols-3",
-      "4": "grid-cols-2 sm:grid-cols-4",
-      "6": "grid-cols-2 sm:grid-cols-6",
+      "1": "grid-cols-1",
+      "2": "grid-cols-1 sm:grid-cols-2",
+      "3": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+      "4": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
     },
     gap: {
       0: "gap-0",
@@ -31,18 +31,18 @@ const variants = cva("grid", {
     },
   },
   defaultVariants: {
-    columns: "6",
+    columns: "4",
     gap: 16,
   },
 });
 
-interface ImageGalleryItemsProps
+interface MulticolumnItemsProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const ImageGalleryItems = forwardRef<HTMLDivElement, ImageGalleryItemsProps>(
+const MulticolumnItems = forwardRef<HTMLDivElement, MulticolumnItemsProps>(
   (props, ref) => {
     const { children, columns, gap } = props;
 
@@ -54,12 +54,12 @@ const ImageGalleryItems = forwardRef<HTMLDivElement, ImageGalleryItemsProps>(
   },
 );
 
-export default ImageGalleryItems;
+export default MulticolumnItems;
 
 export const schema = createSchema({
-  type: "images",
-  title: "Images",
-  childTypes: ["image"],
+  type: "multicolumn-items",
+  title: "Multicolumn items",
+  childTypes: ["multicolumn-item"],
   settings: [
     {
       group: "Layout",
@@ -70,13 +70,13 @@ export const schema = createSchema({
           label: "Columns",
           configs: {
             options: [
+              { value: "1", label: "1 column" },
               { value: "2", label: "2 columns" },
               { value: "3", label: "3 columns" },
               { value: "4", label: "4 columns" },
-              { value: "6", label: "6 columns" },
             ],
           },
-          defaultValue: "6",
+          defaultValue: "4",
         },
         {
           type: "range",

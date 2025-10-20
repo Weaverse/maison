@@ -3,14 +3,40 @@ import {
   createSchema,
   type WeaverseBlog,
 } from "@weaverse/hydrogen";
+import { cva } from "class-variance-authority";
 import { backgroundInputs } from "~/components/background-image";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
 
+const variants = cva("flex flex-col", {
+  variants: {
+    gap: {
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
+      44: "gap-11",
+      48: "gap-12",
+      52: "gap-[52px]",
+      56: "gap-14",
+      60: "gap-[60px]",
+    },
+  },
+  defaultVariants: {
+    gap: 60,
+  },
+});
+
 interface ArticlesData {
   blog?: WeaverseBlog;
   articlesToShow: number;
-  itemSpacing: number;
 }
 
 interface ArticlesProps extends SectionProps<ArticlesLoaderData>, ArticlesData {
@@ -18,12 +44,10 @@ interface ArticlesProps extends SectionProps<ArticlesLoaderData>, ArticlesData {
 }
 
 export default function Articles(props: ArticlesProps) {
-  const { ref, children, itemSpacing, ...rest } = props;
+  const { ref, children, gap, ...rest } = props;
   return (
     <Section ref={ref} {...rest}>
-      <div className="flex flex-col" style={{ gap: `${itemSpacing}px` }}>
-        {children}
-      </div>
+      <div className={variants({ gap })}>{children}</div>
     </Section>
   );
 }
@@ -118,12 +142,12 @@ export const schema = createSchema({
         ),
         {
           type: "range",
-          name: "itemSpacing",
+          name: "gap",
           label: "Item spacing",
           defaultValue: 60,
           configs: {
             min: 0,
-            max: 100,
+            max: 60,
             step: 4,
             unit: "px",
           },
@@ -143,10 +167,11 @@ export const schema = createSchema({
     },
   ],
   presets: {
-    itemSpacing: 60,
+    gap: 60,
     children: [
       {
         type: "articles-header",
+        gap: 16,
         children: [
           {
             type: "heading",
@@ -172,7 +197,6 @@ export const schema = createSchema({
         showAuthor: true,
         showDate: true,
         imageBorderRadius: 4,
-        itemSpacing: 20,
       },
     ],
   },

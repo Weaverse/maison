@@ -1,4 +1,6 @@
 import type { HydrogenComponentSchema } from "@weaverse/hydrogen";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import clsx from "clsx";
 import { forwardRef } from "react";
 import { backgroundInputs } from "~/components/background-image";
@@ -6,25 +8,51 @@ import { overlayInputs } from "~/components/overlay";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
 
+const variants = cva("grid h-full w-full items-start", {
+  variants: {
+    accordionLayout: {
+      column: "grid-cols-1 md:grid-cols-2",
+      row: "grid-cols-1 justify-center [&_.accordion--group]:max-w-[660px] [&_.accordion--group]:mx-auto",
+    },
+    gap: {
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
+      44: "gap-11",
+      48: "gap-12",
+      52: "gap-[52px]",
+      56: "gap-14",
+      60: "gap-[60px]",
+    },
+  },
+  defaultVariants: {
+    accordionLayout: "column",
+    gap: 16,
+  },
+});
+
 // Accordion Section Props
-interface AccordionSectionProps extends SectionProps {
+interface AccordionSectionProps
+  extends SectionProps,
+    VariantProps<typeof variants> {
   accordionLayout: "column" | "row";
 }
 
 const AccordionSection = forwardRef<HTMLElement, AccordionSectionProps>(
   (props, ref) => {
-    let { accordionLayout, children, ...rest } = props;
+    const { accordionLayout, gap, children, ...rest } = props;
 
     return (
       <Section ref={ref} {...rest}>
-        <div
-          className={clsx(
-            "grid h-full w-full items-start gap-8 md:gap-12 lg:gap-16",
-            accordionLayout === "row"
-              ? "grid-cols-1 justify-center [&_.accordion--group]:max-w-[660px] [&_.accordion--group]:mx-auto"
-              : "grid-cols-1 md:grid-cols-2",
-          )}
-        >
+        <div className={clsx(variants({ accordionLayout, gap }))}>
           {children}
         </div>
       </Section>
@@ -61,11 +89,24 @@ export const schema: HydrogenComponentSchema = {
             ],
           },
         },
+        {
+          type: "range",
+          name: "gap",
+          label: "Items gap",
+          defaultValue: 16,
+          configs: {
+            min: 0,
+            max: 60,
+            step: 4,
+            unit: "px",
+          },
+        },
       ],
     },
   ],
   childTypes: ["content-information", "accordion-group"],
   presets: {
+    gap: 16,
     children: [
       {
         type: "content-information",

@@ -1,17 +1,14 @@
-import {
-  createSchema,
-  IMAGES_PLACEHOLDERS,
-  useThemeSettings,
-} from "@weaverse/hydrogen";
+import { createSchema } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { backgroundInputs } from "~/components/background-image";
 import { overlayInputs } from "~/components/overlay";
-import type { SectionProps } from "~/components/section";
-import { layoutInputs, Section } from "~/components/section";
+import { layoutInputs, Section, type SectionProps } from "~/components/section";
 
-export interface HeroImageProps extends VariantProps<typeof variants> {
-  ref: React.Ref<HTMLElement>;
+export interface RichTextProps
+  extends VariantProps<typeof variants>,
+    SectionProps {
+  ref?: React.Ref<HTMLElement>;
 }
 
 const variants = cva(
@@ -22,11 +19,7 @@ const variants = cva(
         small: "min-h-[40vh] lg:min-h-[50vh]",
         medium: "min-h-[50vh] lg:min-h-[60vh]",
         large: "min-h-[70vh] lg:min-h-[80vh]",
-        full: "",
-      },
-      enableTransparentHeader: {
-        true: "",
-        false: "",
+        full: "min-h-screen",
       },
       contentPosition: {
         "top left": "items-start justify-start [&_.paragraph]:text-left",
@@ -41,37 +34,21 @@ const variants = cva(
         "bottom right": "items-end justify-end [&_.paragraph]:text-right",
       },
     },
-    compoundVariants: [
-      {
-        height: "full",
-        enableTransparentHeader: true,
-        className: "h-screen-no-topbar",
-      },
-      {
-        height: "full",
-        enableTransparentHeader: false,
-        className: "h-screen-dynamic",
-      },
-    ],
     defaultVariants: {
-      height: "large",
+      height: "medium",
       contentPosition: "center center",
     },
   },
 );
 
-export default function HeroImage(props: HeroImageProps & SectionProps) {
+export default function RichText(props: RichTextProps) {
   const { ref, children, height, contentPosition, ...rest } = props;
-  const { enableTransparentHeader } = useThemeSettings();
+
   return (
     <Section
       ref={ref}
       {...rest}
-      containerClassName={variants({
-        contentPosition,
-        height,
-        enableTransparentHeader,
-      })}
+      containerClassName={variants({ contentPosition, height })}
     >
       {children}
     </Section>
@@ -79,8 +56,8 @@ export default function HeroImage(props: HeroImageProps & SectionProps) {
 }
 
 export const schema = createSchema({
-  type: "hero-image",
-  title: "Hero image",
+  type: "rich-text",
+  title: "Rich text",
   settings: [
     {
       group: "Layout",
@@ -120,32 +97,31 @@ export const schema = createSchema({
     },
     { group: "Overlay", inputs: overlayInputs },
   ],
-  childTypes: ["subheading", "heading", "paragraph", "button"],
+  childTypes: ["heading", "paragraph", "button"],
   presets: {
-    height: "large",
+    height: "medium",
     contentPosition: "center center",
-    backgroundImage: IMAGES_PLACEHOLDERS.banner_1,
-    backgroundFit: "cover",
     enableOverlay: true,
-    overlayOpacity: 40,
+    gap: 24,
     children: [
       {
         type: "heading",
-        content: "Hero image with text overlay",
+        content: "Cloud like sofas that support relaxing anytime",
         as: "h3",
         weight: 400,
-        color: "#ffffff",
-        size: "default",
       },
       {
         type: "paragraph",
         content:
-          "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.",
-        color: "#ffffff",
+          "A thoughtfully designed, curated furniture collection—made for real life.",
+        width: "fixed",
+        maxWidth: 660,
+        textSize: "base",
       },
       {
         type: "button",
-        text: "Discover now",
+        text: "Discover Now",
+        variant: "primary",
       },
     ],
   },

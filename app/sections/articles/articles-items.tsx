@@ -27,10 +27,24 @@ const variants = cva("grid", {
       "5": "md:grid-cols-5",
       "6": "md:grid-cols-6",
     },
+    gap: {
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
+    },
   },
   defaultVariants: {
     mobileGridSize: "2",
     desktopGridSize: "4",
+    gap: 16,
   },
 });
 
@@ -44,7 +58,6 @@ interface ArticlesItemsProps
   imageBorderRadius: number;
   titleColor: string;
   metaColor: string;
-  gap: number;
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
@@ -73,8 +86,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
       <div
         ref={scope}
         {...rest}
-        className={cn(variants({ mobileGridSize, desktopGridSize }))}
-        style={{ gap: `${gap}px` }}
+        className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
       >
         {Array.from({ length: itemsToShow }).map((_, i) => (
           <div key={i} className="flex flex-col gap-5">
@@ -110,15 +122,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
 
   return (
     <div ref={scope} {...rest}>
-      <div
-        className={cn(
-          variants({
-            mobileGridSize,
-            desktopGridSize,
-          }),
-        )}
-        style={{ gap: `${gap}px` }}
-      >
+      <div className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}>
         {articles.slice(0, itemsToShow).map((article) => (
           <ArticleCard
             key={article.id}
@@ -225,8 +229,8 @@ export const schema = createSchema({
           name: "gap",
           label: "Items gap",
           configs: {
-            min: 8,
-            max: 32,
+            min: 0,
+            max: 40,
             step: 4,
             unit: "px",
           },

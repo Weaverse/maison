@@ -27,6 +27,8 @@ const gridVariants = cva("grid", {
       "6": "md:grid-cols-6",
     },
     gap: {
+      0: "gap-0",
+      4: "gap-1",
       8: "gap-2",
       12: "gap-3",
       16: "gap-4",
@@ -34,6 +36,8 @@ const gridVariants = cva("grid", {
       24: "gap-6",
       28: "gap-7",
       32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
     },
   },
 });
@@ -44,7 +48,6 @@ interface CollectionItemsData
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   imageBorderRadius: number;
-  itemSpacing: number;
   titleColor?: string;
   countColor?: string;
   showProductCount?: boolean;
@@ -61,7 +64,6 @@ function CollectionItems(props: CollectionItemsData) {
     gap,
     imageAspectRatio,
     imageBorderRadius,
-    itemSpacing,
     titleColor,
     countColor,
     showProductCount = true,
@@ -199,9 +201,10 @@ export const schema = createSchema({
           name: "gap",
           label: "Items gap",
           configs: {
-            min: 8,
-            max: 32,
+            min: 0,
+            max: 40,
             step: 4,
+            unit: "px",
           },
           defaultValue: 16,
         },
@@ -258,13 +261,6 @@ export const schema = createSchema({
             step: 2,
             unit: "px",
           },
-        },
-        {
-          type: "range",
-          name: "itemSpacing",
-          label: "Item spacing",
-          defaultValue: 20,
-          configs: { min: 0, max: 40, step: 1, unit: "px" },
         },
         { type: "color", name: "titleColor", label: "Title color" },
         { type: "color", name: "countColor", label: "Count color" },
