@@ -1,7 +1,10 @@
 import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
-import { CartForm } from "@shopify/hydrogen";
+import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
 import { type FetcherWithComponents, useFetcher } from "react-router";
-import type { ProductVariantFragment } from "storefront-api.generated";
+import type {
+  CartApiQueryFragment,
+  ProductVariantFragment,
+} from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 
@@ -10,10 +13,11 @@ type SubtotalProps = {
   variants: ProductVariantFragment[];
 };
 
-export function Subtotal({ cart, variants }: SubtotalProps) {
+export function Subtotal({ cart: originalCart, variants }: SubtotalProps) {
   let totalItems = 0;
   let subtotal = 0;
   let existingLineIds: string[] = [];
+  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
 
   const currentProductVariantIds = variants.map((v) => v.id);
 
@@ -28,7 +32,7 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
       0,
     );
     subtotal = currentProductLines.reduce((sum, line) => {
-      const amount = Number.parseFloat(line.cost.totalAmount.amount);
+      const amount = Number.parseFloat(line.cost?.totalAmount.amount || "0");
       return sum + amount;
     }, 0);
   }

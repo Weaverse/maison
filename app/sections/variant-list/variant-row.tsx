@@ -3,6 +3,7 @@ import {
   CartForm,
   Money,
   OptimisticInput,
+  useOptimisticCart,
   useOptimisticData,
   type OptimisticCart,
 } from "@shopify/hydrogen";
@@ -74,9 +75,9 @@ export function VariantRow({ variant }: VariantRowProps) {
             (line) => line.merchandise.id === variant.id,
           );
           let unitPrice = cartLine
-            ? cartLine.cost.amountPerQuantity
+            ? cartLine.cost?.amountPerQuantity
             : variant.price;
-          const totalPrice = cartLine?.cost.totalAmount || {
+          const totalPrice = cartLine?.cost?.totalAmount || {
             amount: "0",
             currencyCode: variant.price?.currencyCode,
           };
@@ -104,12 +105,16 @@ interface QuantityUpdateButtonsProps {
   cart: OptimisticCart<CartApiQueryFragment>;
 }
 
-function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
-  type CartLine = OptimisticCart<CartApiQueryFragment>["lines"]["nodes"][0];
+function QuantityUpdateButtons({
+  variant,
+  cart: originalCart,
+}: QuantityUpdateButtonsProps) {
   type OptimisticData = {
     action?: string;
     quantity?: number;
   };
+
+  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
 
   const increment = variant.quantityRule.increment || 1;
 
@@ -117,17 +122,17 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
     (line) => line.merchandise.id === variant.id,
   );
 
-  const optimisticData = useOptimisticData<OptimisticData>(existingLine?.id);
-  const currentQuantity = existingLine?.quantity || 0;
-  const optimisticQuantity = optimisticData?.quantity || currentQuantity;
+  const optimisticId = existingLine?.id;
+  const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
 
-  const prevQuantity = Number(Math.max(0, optimisticQuantity - increment));
-  const nextQuantity = Number(optimisticQuantity + increment);
+  const currentQuantity =
+    optimisticData?.quantity || existingLine?.quantity || 0;
+
+  const prevQuantity = Number(Math.max(0, currentQuantity - increment));
+  const nextQuantity = Number(currentQuantity + increment);
   const isOutOfStock = !variant.availableForSale;
 
-  // Use the same UI for both existing and new items
-  const lineId = existingLine?.id || variant.id;
-  const showTrashButton = !!existingLine;
+  const showTrashButton = Boolean(existingLine);
 
   return (
     <div className="flex items-center gap-3">
@@ -148,7 +153,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
             className="h-9 w-9 transition disabled:cursor-not-allowed disabled:text-body-subtle"
             value={prevQuantity}
             disabled={
-              optimisticQuantity <= 0 ||
+              currentQuantity <= 0 ||
               existingLine?.isOptimistic ||
               !existingLine
             }
@@ -165,7 +170,7 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
           className="px-2 w-16 h-9 flex items-center justify-center"
           data-test="item-quantity"
         >
-          {optimisticQuantity}
+          {currentQuantity}
         </div>
 
         {existingLine ? (
@@ -198,7 +203,13 @@ function QuantityUpdateButtons({ variant, cart }: QuantityUpdateButtonsProps) {
             fetcherKey="variant-list"
             action={CartForm.ACTIONS.LinesAdd}
             inputs={{
-              lines: [{ merchandiseId: variant.id, quantity: increment }],
+              lines: [
+                {
+                  merchandiseId: variant.id,
+                  quantity: increment,
+                  selectedVariant: variant,
+                },
+              ],
             }}
           >
             <button
