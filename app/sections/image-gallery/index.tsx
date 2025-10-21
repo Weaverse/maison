@@ -6,7 +6,7 @@ interface ImageGalleryProps extends SectionProps {
   ref?: React.Ref<HTMLElement>;
 }
 
-export default function ImageGallery(props: ImageGalleryProps) {
+function ImageGallery(props: ImageGalleryProps) {
   const { ref, children, ...rest } = props;
 
   return (
@@ -15,6 +15,8 @@ export default function ImageGallery(props: ImageGalleryProps) {
     </Section>
   );
 }
+
+export default ImageGallery;
 
 export const schema = createSchema({
   type: "image-gallery",

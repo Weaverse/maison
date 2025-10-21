@@ -3,13 +3,37 @@ import {
   type HydrogenComponentProps,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { forwardRef } from "react";
 import { Image } from "~/components/image";
 
-interface ImageGalleryItemProps extends HydrogenComponentProps {
+const variants = cva("relative overflow-hidden aspect-[16/9]", {
+  variants: {
+    borderRadius: {
+      0: "rounded-none",
+      2: "rounded-xs",
+      4: "rounded-sm",
+      6: "rounded-md",
+      8: "rounded-lg",
+      10: "rounded-[10px]",
+      12: "rounded-xl",
+      14: "rounded-[14px]",
+      16: "rounded-2xl",
+      18: "rounded-[18px]",
+      20: "rounded-[20px]",
+    },
+  },
+  defaultVariants: {
+    borderRadius: 4,
+  },
+});
+
+interface ImageGalleryItemProps
+  extends HydrogenComponentProps,
+    VariantProps<typeof variants> {
   src?: WeaverseImage;
   altText?: string;
-  borderRadius?: number;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -21,13 +45,7 @@ const ImageGalleryItem = forwardRef<HTMLDivElement, ImageGalleryItemProps>(
       typeof src === "object" ? src : { url: src, altText: altText || "Image" };
 
     return (
-      <div
-        ref={ref}
-        className="relative overflow-hidden aspect-[16/9]"
-        style={{
-          borderRadius: borderRadius != null ? `${borderRadius}px` : undefined,
-        }}
-      >
+      <div ref={ref} className={variants({ borderRadius })}>
         {src ? (
           <Image
             data={imageData}
@@ -76,7 +94,7 @@ export const schema = createSchema({
           configs: {
             min: 0,
             max: 20,
-            step: 1,
+            step: 2,
             unit: "px",
           },
         },
