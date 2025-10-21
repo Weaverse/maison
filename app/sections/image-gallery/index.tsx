@@ -7,16 +7,11 @@ interface ImageGalleryProps extends SectionProps {
 }
 
 export default function ImageGallery(props: ImageGalleryProps) {
-  const { ref, children, gap, ...rest } = props;
+  const { ref, children, ...rest } = props;
 
   return (
     <Section ref={ref} {...rest}>
-      <div
-        className="flex flex-col"
-        style={{ gap: gap != null ? `${gap}px` : undefined }}
-      >
-        {children}
-      </div>
+      {children}
     </Section>
   );
 }

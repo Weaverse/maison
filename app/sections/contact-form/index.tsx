@@ -30,7 +30,7 @@ const variants = cva("flex flex-col items-center", {
   },
 });
 
-interface ContactFormProps extends VariantProps<typeof variants>, SectionProps {
+interface ContactFormProps extends SectionProps, VariantProps<typeof variants> {
   ref?: React.Ref<HTMLElement>;
 }
 
@@ -57,7 +57,23 @@ export const schema = createSchema({
   settings: [
     {
       group: "Layout",
-      inputs: [...layoutInputs.filter((i) => i.name !== "borderRadius")],
+      inputs: [
+        ...layoutInputs.filter(
+          (i) => i.name !== "borderRadius" && i.name !== "gap",
+        ),
+        {
+          type: "range",
+          name: "gap",
+          label: "Items spacing",
+          defaultValue: 16,
+          configs: {
+            min: 0,
+            max: 60,
+            step: 4,
+            unit: "px",
+          },
+        },
+      ],
     },
     {
       group: "Background",

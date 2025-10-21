@@ -7,16 +7,11 @@ interface MulticolumnProps extends SectionProps {
 }
 
 export default function Multicolumn(props: MulticolumnProps) {
-  const { ref, children, gap, ...rest } = props;
+  const { ref, children, ...rest } = props;
 
   return (
     <Section ref={ref} {...rest}>
-      <div
-        className="flex flex-col"
-        style={{ gap: gap != null ? `${gap}px` : undefined }}
-      >
-        {children}
-      </div>
+      {children}
     </Section>
   );
 }
@@ -54,6 +49,7 @@ export const schema = createSchema({
             content: "Heading",
             as: "h4",
             weight: 400,
+            alignment: "left",
           },
           {
             type: "view-all-button",

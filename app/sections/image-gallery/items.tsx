@@ -5,11 +5,16 @@ import { forwardRef } from "react";
 
 const variants = cva("grid", {
   variants: {
-    columns: {
+    mobileGridSize: {
+      "1": "grid-cols-1",
       "2": "grid-cols-2",
-      "3": "grid-cols-2 sm:grid-cols-3",
-      "4": "grid-cols-2 sm:grid-cols-4",
-      "6": "grid-cols-2 sm:grid-cols-6",
+      "3": "grid-cols-3",
+    },
+    desktopGridSize: {
+      "2": "sm:grid-cols-2",
+      "3": "sm:grid-cols-3",
+      "4": "sm:grid-cols-4",
+      "6": "sm:grid-cols-6",
     },
     gap: {
       0: "gap-0",
@@ -31,7 +36,8 @@ const variants = cva("grid", {
     },
   },
   defaultVariants: {
-    columns: "6",
+    mobileGridSize: "2",
+    desktopGridSize: "6",
     gap: 16,
   },
 });
@@ -44,10 +50,10 @@ interface ImageGalleryItemsProps
 
 const ImageGalleryItems = forwardRef<HTMLDivElement, ImageGalleryItemsProps>(
   (props, ref) => {
-    const { children, columns, gap } = props;
+    const { children, mobileGridSize, desktopGridSize, gap } = props;
 
     return (
-      <div ref={ref} className={variants({ columns, gap })}>
+      <div ref={ref} className={variants({ mobileGridSize, desktopGridSize, gap })}>
         {children}
       </div>
     );
@@ -65,18 +71,31 @@ export const schema = createSchema({
       group: "Layout",
       inputs: [
         {
-          type: "select",
-          name: "columns",
-          label: "Columns",
+          type: "toggle-group",
+          name: "mobileGridSize",
+          label: "Mobile grid layout",
+          defaultValue: "2",
           configs: {
             options: [
-              { value: "2", label: "2 columns" },
-              { value: "3", label: "3 columns" },
-              { value: "4", label: "4 columns" },
-              { value: "6", label: "6 columns" },
+              { value: "1", label: "1" },
+              { value: "2", label: "2" },
+              { value: "3", label: "3" },
             ],
           },
+        },
+        {
+          type: "toggle-group",
+          name: "desktopGridSize",
+          label: "Desktop grid layout",
           defaultValue: "6",
+          configs: {
+            options: [
+              { value: "2", label: "2" },
+              { value: "3", label: "3" },
+              { value: "4", label: "4" },
+              { value: "6", label: "6" },
+            ],
+          },
         },
         {
           type: "range",
