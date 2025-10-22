@@ -1,30 +1,28 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
-import { forwardRef } from "react";
 
 interface InformationItemProps extends HydrogenComponentProps {
   label: string;
   value: string;
   textColor: string;
   fontSize: number;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
-const InformationItem = forwardRef<HTMLDivElement, InformationItemProps>(
-  (props, ref) => {
-    let { label, value, textColor, fontSize, ...rest } = props;
+const InformationItem = (props: InformationItemProps) => {
+  const { ref, label, value, textColor, fontSize, ...rest } = props;
 
-    return (
-      <div
-        ref={ref}
-        {...rest}
-        style={{ fontSize: `${fontSize}px`, color: textColor }}
-        data-motion="fade-up"
-      >
-        <div>{label}</div>
-        <div className="mt-1">{value}</div>
-      </div>
-    );
-  },
-);
+  return (
+    <div
+      ref={ref}
+      style={{ fontSize: `${fontSize}px`, color: textColor }}
+      data-motion="fade-up"
+      {...rest}
+    >
+      <div>{label}</div>
+      <div className="mt-1">{value}</div>
+    </div>
+  );
+};
 
 export default InformationItem;
 

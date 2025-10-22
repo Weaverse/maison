@@ -1,5 +1,4 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
-import { forwardRef } from "react";
 import { Link } from "~/components/link";
 
 interface ViewAllButtonProps extends HydrogenComponentProps {
@@ -10,35 +9,33 @@ interface ViewAllButtonProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const ViewAllButton = forwardRef<HTMLDivElement, ViewAllButtonProps>(
-  (props, ref) => {
-    const { text, link, textColor, showButton } = props;
+const ViewAllButton = (props: ViewAllButtonProps) => {
+  const { ref, text, link, textColor, showButton } = props;
 
-    if (!showButton) {
-      return null;
-    }
+  if (!showButton) {
+    return null;
+  }
 
-    return (
-      <div ref={ref} className="flex gap-2.5 items-center">
-        <Link to={link} className="text-sm" style={{ color: textColor }}>
-          {text}
-        </Link>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="11"
-          viewBox="0 0 20 11"
-          fill="none"
-        >
-          <path
-            d="M14.0575 0.376953L13.1737 1.26082L16.9236 5.0107H0.625V6.26074H16.9234L13.1737 10.0105L14.0575 10.8944L19.3163 5.63566L14.0575 0.376953Z"
-            fill="currentColor"
-          />
-        </svg>
-      </div>
-    );
-  },
-);
+  return (
+    <div ref={ref} className="flex gap-2.5 items-center">
+      <Link to={link} className="text-sm" style={{ color: textColor }}>
+        {text}
+      </Link>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="11"
+        viewBox="0 0 20 11"
+        fill="none"
+      >
+        <path
+          d="M14.0575 0.376953L13.1737 1.26082L16.9236 5.0107H0.625V6.26074H16.9234L13.1737 10.0105L14.0575 10.8944L19.3163 5.63566L14.0575 0.376953Z"
+          fill="currentColor"
+        />
+      </svg>
+    </div>
+  );
+};
 
 export default ViewAllButton;
 

@@ -1,5 +1,4 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
-import { forwardRef } from "react";
 import Heading, {
   type HeadingProps,
   headingInputs,
@@ -23,72 +22,72 @@ interface ContentInformationProps extends HydrogenComponentProps {
   descriptionSize: number;
   descriptionAlignment: "left" | "center" | "right";
   gap: number;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
-const ContentInformation = forwardRef<HTMLDivElement, ContentInformationProps>(
-  (props, ref) => {
-    let {
-      children,
-      gap,
-      heading,
-      headingTagName,
-      headingTextColor,
-      size,
-      mobileSize,
-      desktopSize,
-      weight,
-      letterSpacing,
-      alignment,
-      minSize,
-      maxSize,
-      animate,
-      description,
-      descriptionColor,
-      descriptionSize,
-      descriptionAlignment,
-      ...rest
-    } = props;
+const ContentInformation = (props: ContentInformationProps) => {
+  const {
+    ref,
+    children,
+    gap,
+    heading,
+    headingTagName,
+    headingTextColor,
+    size,
+    mobileSize,
+    desktopSize,
+    weight,
+    letterSpacing,
+    alignment,
+    minSize,
+    maxSize,
+    animate,
+    description,
+    descriptionColor,
+    descriptionSize,
+    descriptionAlignment,
+    ...rest
+  } = props;
 
-    return (
-      <div
-        ref={ref}
-        {...rest}
-        className="flex flex-col"
-        style={{ gap: `${gap}px` }}
-      >
-        <div className="flex flex-col gap-2">
-          <Heading
-            content={heading}
-            as={headingTagName}
-            color={headingTextColor}
-            size={size}
-            mobileSize={mobileSize}
-            desktopSize={desktopSize}
-            weight={weight}
-            letterSpacing={letterSpacing}
-            alignment={alignment}
-            minSize={minSize}
-            maxSize={maxSize}
-            animate={animate}
-          />
-          {description && (
-            <p
-              className="text-sm"
-              style={{
-                color: descriptionColor,
-                fontSize: descriptionSize,
-                textAlign: descriptionAlignment,
-              }}
-            >
-              {description}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-6">{children}</div>
+  return (
+    <div
+      ref={ref}
+      {...rest}
+      className="flex flex-col"
+      style={{ gap: `${gap}px` }}
+    >
+      <div className="flex flex-col gap-2">
+        <Heading
+          content={heading}
+          as={headingTagName}
+          color={headingTextColor}
+          size={size}
+          mobileSize={mobileSize}
+          desktopSize={desktopSize}
+          weight={weight}
+          letterSpacing={letterSpacing}
+          alignment={alignment}
+          minSize={minSize}
+          maxSize={maxSize}
+          animate={animate}
+        />
+        {description && (
+          <p
+            className="text-sm"
+            style={{
+              color: descriptionColor,
+              fontSize: descriptionSize,
+              textAlign: descriptionAlignment,
+            }}
+          >
+            {description}
+          </p>
+        )}
       </div>
-    );
-  },
-);
+      <div className="flex flex-col gap-6">{children}</div>
+    </div>
+  );
+};
 
 export default ContentInformation;
 

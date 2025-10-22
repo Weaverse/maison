@@ -1,7 +1,6 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { forwardRef } from "react";
 
 const variants = cva("flex flex-col items-start gap-5 p-5", {
   variants: {
@@ -31,21 +30,20 @@ interface MulticolumnItemProps
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const MulticolumnItem = forwardRef<HTMLDivElement, MulticolumnItemProps>(
-  (props, ref) => {
-    const { backgroundColor, borderRadius, children } = props;
+const MulticolumnItem = (props: MulticolumnItemProps) => {
+  const { ref, backgroundColor, borderRadius, children, ...rest } = props;
 
-    return (
-      <div
-        ref={ref}
-        className={variants({ borderRadius })}
-        style={{ backgroundColor }}
-      >
-        {children}
-      </div>
-    );
-  },
-);
+  return (
+    <div
+      ref={ref}
+      {...rest}
+      className={variants({ borderRadius })}
+      style={{ backgroundColor }}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default MulticolumnItem;
 

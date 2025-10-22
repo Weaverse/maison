@@ -3,28 +3,26 @@ import type {
   HydrogenComponentProps,
   HydrogenComponentSchema,
 } from "@weaverse/hydrogen";
-import { forwardRef } from "react";
 
 interface AccordionGroupProps extends HydrogenComponentProps {
   allowMultiple: boolean;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
-const AccordionGroup = forwardRef<HTMLDivElement, AccordionGroupProps>(
-  (props, ref) => {
-    let { children, ...rest } = props;
+const AccordionGroup = (props: AccordionGroupProps) => {
+  const { ref, children, ...rest } = props;
 
-    return (
-      <div ref={ref} {...rest}>
-        <RadixAccordion.Root
-          type="multiple"
-          className="accordion--group grid w-full gap-4"
-        >
-          {children}
-        </RadixAccordion.Root>
-      </div>
-    );
-  },
-);
+  return (
+    <div ref={ref} {...rest}>
+      <RadixAccordion.Root
+        type="multiple"
+        className="accordion--group grid w-full gap-4"
+      >
+        {children}
+      </RadixAccordion.Root>
+    </div>
+  );
+};
 
 export default AccordionGroup;
 

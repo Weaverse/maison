@@ -1,5 +1,4 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
-import { forwardRef } from "react";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
@@ -42,17 +41,15 @@ interface MulticolumnItemsProps
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const MulticolumnItems = forwardRef<HTMLDivElement, MulticolumnItemsProps>(
-  (props, ref) => {
-    const { children, columns, gap } = props;
+const MulticolumnItems = (props: MulticolumnItemsProps) => {
+  const { ref, children, columns, gap, ...rest } = props;
 
-    return (
-      <div ref={ref} className={variants({ columns, gap })}>
-        {children}
-      </div>
-    );
-  },
-);
+  return (
+    <div ref={ref} {...rest} className={variants({ columns, gap })}>
+      {children}
+    </div>
+  );
+};
 
 export default MulticolumnItems;
 

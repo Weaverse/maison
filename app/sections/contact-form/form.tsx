@@ -1,7 +1,6 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { forwardRef } from "react";
 
 const variants = cva("flex flex-col items-center max-w-[640px] w-full", {
   variants: {
@@ -90,102 +89,102 @@ interface ContactFormProps
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const ContactForm = forwardRef<HTMLDivElement, ContactFormProps>(
-  (props, ref) => {
-    const {
-      children,
-      gap,
-      inputBorderColor,
-      inputBackgroundColor,
-      inputTextColor,
-      placeholderColor,
-      borderRadius,
-    } = props;
+const ContactForm = (props: ContactFormProps) => {
+  const {
+    ref,
+    gap,
+    inputBorderColor,
+    inputBackgroundColor,
+    inputTextColor,
+    placeholderColor,
+    borderRadius,
+    ...rest
+  } = props;
 
-    return (
-      <div
-        ref={ref}
-        className={variants({ gap })}
-        style={
-          {
-            "--placeholder-color": placeholderColor,
-          } as React.CSSProperties
-        }
-      >
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
+  return (
+    <div
+      ref={ref}
+      {...rest}
+      className={variants({ gap })}
+      style={
+        {
+          "--placeholder-color": placeholderColor,
+        } as React.CSSProperties
+      }
+    >
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
             input::placeholder,
             textarea::placeholder {
               color: var(--placeholder-color) !important;
             }
           `,
+        }}
+      />
+      <div className={rowVariants({ gap })}>
+        <input
+          type="text"
+          placeholder="Your name *"
+          className={inputVariants({ borderRadius })}
+          style={{
+            border: `1px solid ${inputBorderColor}`,
+            backgroundColor: inputBackgroundColor,
+            color: inputTextColor,
           }}
         />
-        <div className={rowVariants({ gap })}>
-          <input
-            type="text"
-            placeholder="Your name *"
-            className={inputVariants({ borderRadius })}
-            style={{
-              border: `1px solid ${inputBorderColor}`,
-              backgroundColor: inputBackgroundColor,
-              color: inputTextColor,
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Company name"
-            className={inputVariants({ borderRadius })}
-            style={{
-              border: `1px solid ${inputBorderColor}`,
-              backgroundColor: inputBackgroundColor,
-              color: inputTextColor,
-            }}
-          />
-        </div>
-
-        <div className={rowVariants({ gap })}>
-          <input
-            type="email"
-            placeholder="Contact email*"
-            className={inputVariants({ borderRadius })}
-            style={{
-              border: `1px solid ${inputBorderColor}`,
-              backgroundColor: inputBackgroundColor,
-              color: inputTextColor,
-            }}
-          />
-          <input
-            type="url"
-            placeholder="Website"
-            className={inputVariants({ borderRadius })}
-            style={{
-              border: `1px solid ${inputBorderColor}`,
-              backgroundColor: inputBackgroundColor,
-              color: inputTextColor,
-            }}
-          />
-        </div>
-
-        <textarea
-          name=""
-          id=""
-          placeholder="Message"
-          className={`${inputVariants({ borderRadius })} h-[116px] resize-none`}
-          style={
-            {
-              border: `1px solid ${inputBorderColor}`,
-              backgroundColor: inputBackgroundColor,
-              color: inputTextColor,
-              "--placeholder-color": placeholderColor,
-            } as React.CSSProperties
-          }
+        <input
+          type="text"
+          placeholder="Company name"
+          className={inputVariants({ borderRadius })}
+          style={{
+            border: `1px solid ${inputBorderColor}`,
+            backgroundColor: inputBackgroundColor,
+            color: inputTextColor,
+          }}
         />
       </div>
-    );
-  },
-);
+
+      <div className={rowVariants({ gap })}>
+        <input
+          type="email"
+          placeholder="Contact email*"
+          className={inputVariants({ borderRadius })}
+          style={{
+            border: `1px solid ${inputBorderColor}`,
+            backgroundColor: inputBackgroundColor,
+            color: inputTextColor,
+          }}
+        />
+        <input
+          type="url"
+          placeholder="Website"
+          className={inputVariants({ borderRadius })}
+          style={{
+            border: `1px solid ${inputBorderColor}`,
+            backgroundColor: inputBackgroundColor,
+            color: inputTextColor,
+          }}
+        />
+      </div>
+
+      <textarea
+        name=""
+        id=""
+        placeholder="Message"
+        className={`${inputVariants({ borderRadius })} h-[116px] resize-none`}
+        style={
+          {
+            border: `1px solid ${inputBorderColor}`,
+            backgroundColor: inputBackgroundColor,
+            color: inputTextColor,
+            "--placeholder-color": placeholderColor,
+          } as React.CSSProperties
+        }
+      />
+    </div>
+  );
+};
 
 export default ContactForm;
 

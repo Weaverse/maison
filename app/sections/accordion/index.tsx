@@ -2,7 +2,6 @@ import type { HydrogenComponentSchema } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
-import { forwardRef } from "react";
 import { backgroundInputs } from "~/components/background-image";
 import { overlayInputs } from "~/components/overlay";
 import type { SectionProps } from "~/components/section";
@@ -46,19 +45,15 @@ interface AccordionSectionProps
   accordionLayout: "column" | "row";
 }
 
-const AccordionSection = forwardRef<HTMLElement, AccordionSectionProps>(
-  (props, ref) => {
-    const { accordionLayout, gap, children, ...rest } = props;
+const AccordionSection = (props: AccordionSectionProps) => {
+  const { ref, accordionLayout, gap, children, ...rest } = props;
 
-    return (
-      <Section ref={ref} {...rest}>
-        <div className={clsx(variants({ accordionLayout, gap }))}>
-          {children}
-        </div>
-      </Section>
-    );
-  },
-);
+  return (
+    <Section ref={ref} {...rest}>
+      <div className={clsx(variants({ accordionLayout, gap }))}>{children}</div>
+    </Section>
+  );
+};
 
 export default AccordionSection;
 

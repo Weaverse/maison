@@ -1,7 +1,6 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { forwardRef } from "react";
 
 const variants = cva(
   "flex flex-col sm:flex-row sm:items-center sm:justify-between",
@@ -31,17 +30,15 @@ interface HeaderContainerProps
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const HeaderContainer = forwardRef<HTMLDivElement, HeaderContainerProps>(
-  (props, ref) => {
-    const { children, gap } = props;
+const HeaderContainer = (props: HeaderContainerProps) => {
+  const { ref, children, gap, ...rest } = props;
 
-    return (
-      <div ref={ref} className={variants({ gap })}>
-        {children}
-      </div>
-    );
-  },
-);
+  return (
+    <div ref={ref} {...rest} className={variants({ gap })}>
+      {children}
+    </div>
+  );
+};
 
 export default HeaderContainer;
 
