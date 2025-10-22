@@ -164,7 +164,7 @@ const COLLECTION_PLACEHOLDER: FeaturedCollectionsLoaderData[0] = {
 export default CollectionItems;
 
 export const schema = createSchema({
-  type: "featured-collections-items",
+  type: "featured-collections--items",
   title: "Collection items",
   settings: [
     {

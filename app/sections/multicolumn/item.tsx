@@ -48,7 +48,7 @@ const MulticolumnItem = (props: MulticolumnItemProps) => {
 export default MulticolumnItem;
 
 export const schema = createSchema({
-  type: "multicolumn-item",
+  type: "multicolumn--item",
   title: "Multicolumn item",
   childTypes: ["heading", "paragraph", "button"],
   settings: [

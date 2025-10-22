@@ -5,13 +5,19 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { forwardRef } from "react";
+import clsx from "clsx";
 import { Image } from "~/components/image";
 
-const variants = cva("relative overflow-hidden aspect-[16/9]", {
+const variants = cva("h-(--image-height)", {
   variants: {
+    columnSpan: {
+      1: "col-span-1",
+      2: "col-span-2",
+      3: "col-span-3",
+      4: "col-span-4",
+    },
     borderRadius: {
-      0: "rounded-none",
+      0: "",
       2: "rounded-xs",
       4: "rounded-sm",
       6: "rounded-md",
@@ -22,81 +28,89 @@ const variants = cva("relative overflow-hidden aspect-[16/9]", {
       16: "rounded-2xl",
       18: "rounded-[18px]",
       20: "rounded-[20px]",
+      22: "rounded-[22px]",
+      24: "rounded-3xl",
+    },
+    hideOnMobile: {
+      true: "hidden sm:block",
+      false: "",
     },
   },
   defaultVariants: {
-    borderRadius: 4,
+    columnSpan: 1,
+    borderRadius: 8,
+    hideOnMobile: false,
   },
 });
 
 interface ImageGalleryItemProps
-  extends HydrogenComponentProps,
-    VariantProps<typeof variants> {
-  src?: WeaverseImage;
-  altText?: string;
-  ref?: React.Ref<HTMLDivElement>;
+  extends VariantProps<typeof variants>,
+    HydrogenComponentProps {
+  src: WeaverseImage;
+  ref?: React.Ref<HTMLImageElement>;
 }
 
-const ImageGalleryItem = forwardRef<HTMLDivElement, ImageGalleryItemProps>(
-  (props, ref) => {
-    const { src, altText, borderRadius, children } = props;
-
-    const imageData =
-      typeof src === "object" ? src : { url: src, altText: altText || "Image" };
-
-    return (
-      <div ref={ref} className={variants({ borderRadius })}>
-        {src ? (
-          <Image
-            data={imageData}
-            className="w-full h-full object-cover"
-            data-motion="slide-in"
-            loading="lazy"
-            width={400}
-            sizes="(min-width: 640px) 16.67vw, 50vw"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500 text-sm">No image</span>
-          </div>
-        )}
-        {children}
-      </div>
-    );
-  },
-);
+function ImageGalleryItem(props: ImageGalleryItemProps) {
+  const { src, columnSpan, borderRadius, hideOnMobile, ref, ...rest } = props;
+  const data = typeof src === "object" ? src : { url: src, altText: src };
+  return (
+    <Image
+      ref={ref}
+      {...rest}
+      className={clsx(variants({ columnSpan, borderRadius, hideOnMobile }))}
+      data-motion="slide-in"
+      loading="lazy"
+      data={data}
+      width={1000}
+      sizes="(min-width: 45em) 50vw, 100vw"
+    />
+  );
+}
 
 export default ImageGalleryItem;
 
 export const schema = createSchema({
-  type: "image",
+  type: "image-gallery--item",
   title: "Image",
-  childTypes: [],
   settings: [
     {
-      group: "Image",
+      group: "Image gallery item",
       inputs: [
         {
           type: "image",
           name: "src",
           label: "Image",
-        },
-        {
-          type: "text",
-          name: "altText",
-          label: "Alt text",
+          defaultValue:
+            "https://cdn.shopify.com/s/files/1/0838/0052/3057/files/h2-placeholder-image.svg",
         },
         {
           type: "range",
-          name: "borderRadius",
+          label: "Column span",
+          name: "columnSpan",
+          configs: {
+            min: 1,
+            max: 4,
+            step: 1,
+          },
+          defaultValue: 1,
+        },
+        {
+          type: "range",
           label: "Border radius",
-          defaultValue: 4,
+          name: "borderRadius",
           configs: {
             min: 0,
-            max: 20,
+            max: 24,
             step: 2,
             unit: "px",
           },
+          defaultValue: 0,
+        },
+        {
+          type: "switch",
+          label: "Hide on mobile",
+          name: "hideOnMobile",
+          defaultValue: false,
         },
       ],
     },

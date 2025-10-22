@@ -99,15 +99,15 @@ export const schema: HydrogenComponentSchema = {
       ],
     },
   ],
-  childTypes: ["content-information", "accordion-group"],
+  childTypes: ["accordion--content-information", "accordion--group"],
   presets: {
     gap: 16,
     children: [
       {
-        type: "content-information",
+        type: "accordion--content-information",
       },
       {
-        type: "accordion-group",
+        type: "accordion--group",
       },
     ],
   },

@@ -81,7 +81,9 @@ import * as MulticolumnItems from "~/sections/multicolumn/items";
 import * as MulticolumnItem from "~/sections/multicolumn/item";
 import * as ContactForm from "~/sections/contact-form";
 import * as ContactFormForm from "~/sections/contact-form/form";
-import * as RichText from "~/sections/rich-text";
+import * as LogoList from "~/sections/logo-list";
+import * as LogoListItems from "~/sections/logo-list/items";
+import * as LogoListItem from "~/sections/logo-list/item";
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -171,5 +173,7 @@ export const components: HydrogenComponent[] = [
   MulticolumnItem,
   ContactForm,
   ContactFormForm,
-  RichText,
+  LogoList,
+  LogoListItems,
+  LogoListItem,
 ];

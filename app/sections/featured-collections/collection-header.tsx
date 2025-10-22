@@ -41,7 +41,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
   const { ref, children, gap, ...rest } = props;
 
   return (
-    <div ref={ref} className={variants({ gap })} {...rest}>
+    <div ref={ref} {...rest} className={variants({ gap })}>
       {children}
     </div>
   );
@@ -50,7 +50,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
 export default HeaderContainer;
 
 export const schema = createSchema({
-  type: "collection-header",
+  type: "featured-collections--header",
   title: "Collection header",
   childTypes: ["heading", "view-all-button"],
   settings: [

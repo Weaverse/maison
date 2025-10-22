@@ -92,7 +92,7 @@ const ContentInformation = (props: ContentInformationProps) => {
 export default ContentInformation;
 
 export const schema = createSchema({
-  type: "content-information",
+  type: "accordion--content-information",
   title: "Content Information",
   settings: [
     {
@@ -182,7 +182,7 @@ export const schema = createSchema({
       ],
     },
   ],
-  childTypes: ["information--item"],
+  childTypes: ["accordion--information-item"],
   presets: {
     heading: "Customer Service",
     headingTagName: "h3",
@@ -194,7 +194,7 @@ export const schema = createSchema({
     gap: 40,
     children: [
       {
-        type: "information--item",
+        type: "accordion--information-item",
         label: "Email",
         value: "support@archercommerce.com",
         labelColor: "#000000",
@@ -202,7 +202,7 @@ export const schema = createSchema({
         fontSize: 14,
       },
       {
-        type: "information--item",
+        type: "accordion--information-item",
         label: "Hours",
         value: "Monday - Friday, 9AM - 5PM ET",
         labelColor: "#000000",
@@ -210,7 +210,7 @@ export const schema = createSchema({
         fontSize: 14,
       },
       {
-        type: "information--item",
+        type: "accordion--information-item",
         label: "Average response time",
         value: "1 Business day",
         labelColor: "#000000",

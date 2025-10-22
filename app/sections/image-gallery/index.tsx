@@ -1,14 +1,13 @@
-import { createSchema, IMAGES_PLACEHOLDERS } from "@weaverse/hydrogen";
-import { backgroundInputs } from "~/components/background-image";
-import { layoutInputs, Section, type SectionProps } from "~/components/section";
+import { createSchema } from "@weaverse/hydrogen";
+import type { SectionProps } from "~/components/section";
+import { Section, sectionSettings } from "~/components/section";
 
 interface ImageGalleryProps extends SectionProps {
   ref?: React.Ref<HTMLElement>;
 }
 
 function ImageGallery(props: ImageGalleryProps) {
-  const { ref, children, ...rest } = props;
-
+  const { children, ref, ...rest } = props;
   return (
     <Section ref={ref} {...rest}>
       {children}
@@ -21,70 +20,21 @@ export default ImageGallery;
 export const schema = createSchema({
   type: "image-gallery",
   title: "Image gallery",
-  childTypes: ["heading", "images"],
-  settings: [
-    {
-      group: "Layout",
-      inputs: [...layoutInputs.filter((i) => i.name !== "borderRadius")],
-    },
-    {
-      group: "Background",
-      inputs: [
-        ...backgroundInputs.filter(
-          (inp) =>
-            inp.name !== "backgroundImage" &&
-            inp.name !== "backgroundFit" &&
-            inp.name !== "backgroundPosition",
-        ),
-      ],
-    },
-  ],
+  childTypes: ["subheading", "heading", "paragraph", "image-gallery--items"],
+  settings: sectionSettings,
   presets: {
-    gap: 60,
     children: [
       {
         type: "heading",
-        content: "Images",
-        as: "h4",
-        weight: 400,
-        alignment: "left",
+        content: "Image Gallery",
       },
       {
-        type: "images",
-        columns: "6",
-        gap: 16,
-        children: [
-          {
-            type: "image",
-            src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
-          },
-          {
-            type: "image",
-            src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
-          },
-          {
-            type: "image",
-            src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
-          },
-          {
-            type: "image",
-            src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
-          },
-          {
-            type: "image",
-            src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
-          },
-          {
-            type: "image",
-            src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
-          },
-        ],
+        type: "paragraph",
+        content:
+          "Showcase your chosen images. This visual focus will enhance user engagement and understanding of your offerings.",
+      },
+      {
+        type: "image-gallery--items",
       },
     ],
   },

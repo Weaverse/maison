@@ -21,7 +21,7 @@ export const schema = createSchema({
   type: "newsletter",
   title: "Newsletter",
   settings: sectionSettings,
-  childTypes: ["subheading", "heading", "paragraph", "newsletter-form"],
+  childTypes: ["subheading", "heading", "paragraph", "newsletter--form"],
   presets: {
     gap: 20,
     children: [
@@ -36,7 +36,7 @@ export const schema = createSchema({
           "Be the first to know about new collections and exclusive offers.",
         textSize: "sm",
       },
-      { type: "newsletter-form" },
+      { type: "newsletter--form" },
     ],
   },
 });

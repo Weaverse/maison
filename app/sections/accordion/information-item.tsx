@@ -27,7 +27,7 @@ const InformationItem = (props: InformationItemProps) => {
 export default InformationItem;
 
 export const schema = createSchema({
-  type: "information--item",
+  type: "accordion--information-item",
   title: "Information Item",
   settings: [
     {

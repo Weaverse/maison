@@ -83,7 +83,7 @@ export const loader = async (args: ComponentLoaderArgs<ArticlesData>) => {
 export const schema = createSchema({
   type: "articles",
   title: "Articles",
-  childTypes: ["articles-header", "articles-items"],
+  childTypes: ["articles--header", "articles--items"],
   settings: [
     {
       group: "Article selection",
@@ -127,7 +127,7 @@ export const schema = createSchema({
     gap: 60,
     children: [
       {
-        type: "articles-header",
+        type: "articles--header",
         gap: 16,
         children: [
           {
@@ -146,7 +146,7 @@ export const schema = createSchema({
         ],
       },
       {
-        type: "articles-items",
+        type: "articles--items",
         gap: 16,
         mobileGridSize: "2",
         desktopGridSize: "4",

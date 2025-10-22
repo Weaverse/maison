@@ -218,7 +218,7 @@ function ArticleCard({
 export default ArticlesItems;
 
 export const schema = createSchema({
-  type: "articles-items",
+  type: "articles--items",
   title: "Articles items",
   settings: [
     {

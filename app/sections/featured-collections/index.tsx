@@ -80,7 +80,7 @@ export const loader = async ({
 export const schema = createSchema({
   type: "featured-collections",
   title: "Featured collections",
-  childTypes: ["collection-header", "featured-collections-items"],
+  childTypes: ["featured-collections--header", "featured-collections--items"],
   settings: [
     {
       group: "Featured collections",
@@ -120,7 +120,7 @@ export const schema = createSchema({
     gap: 60,
     children: [
       {
-        type: "collection-header",
+        type: "featured-collections--header",
         gap: 16,
         children: [
           {
@@ -139,7 +139,7 @@ export const schema = createSchema({
         ],
       },
       {
-        type: "featured-collections-items",
+        type: "featured-collections--items",
         mobileGridSize: "2",
         desktopGridSize: "5",
         gap: 16,

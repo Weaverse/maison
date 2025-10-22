@@ -80,7 +80,7 @@ function NewsLetterForm(props: NewsLetterInputProps) {
 export default NewsLetterForm;
 
 export const schema = createSchema({
-  type: "newsletter-form",
+  type: "newsletter--form",
   title: "Form",
   settings: [
     {

@@ -19,7 +19,7 @@ export default function Multicolumn(props: MulticolumnProps) {
 export const schema = createSchema({
   type: "multicolumn",
   title: "Multicolumn",
-  childTypes: ["multicolumn-header", "multicolumn-items"],
+  childTypes: ["multicolumn--header", "multicolumn--items"],
   settings: [
     {
       group: "Layout",
@@ -41,7 +41,7 @@ export const schema = createSchema({
     gap: 60,
     children: [
       {
-        type: "multicolumn-header",
+        type: "multicolumn--header",
         gap: 16,
         children: [
           {
@@ -60,12 +60,12 @@ export const schema = createSchema({
         ],
       },
       {
-        type: "multicolumn-items",
+        type: "multicolumn--items",
         columns: "4",
         gap: 16,
         children: [
           {
-            type: "multicolumn-item",
+            type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
             borderRadius: 4,
             children: [
@@ -92,7 +92,7 @@ export const schema = createSchema({
             ],
           },
           {
-            type: "multicolumn-item",
+            type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
             borderRadius: 4,
             children: [
@@ -119,7 +119,7 @@ export const schema = createSchema({
             ],
           },
           {
-            type: "multicolumn-item",
+            type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
             borderRadius: 4,
             children: [
@@ -146,7 +146,7 @@ export const schema = createSchema({
             ],
           },
           {
-            type: "multicolumn-item",
+            type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
             borderRadius: 4,
             children: [

@@ -50,7 +50,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
 export default HeaderContainer;
 
 export const schema = createSchema({
-  type: "articles-header",
+  type: "articles--header",
   title: "Articles header",
   childTypes: ["heading", "view-all-button"],
   settings: [

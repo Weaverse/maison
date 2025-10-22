@@ -12,6 +12,7 @@ interface AccordionItemProps extends HydrogenComponentProps {
   content: string;
   icon: string;
   backgroundColor: string;
+  textColor: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -19,7 +20,8 @@ const isSvgString = (icon: string) =>
   icon.trim().startsWith("<svg") || icon.trim().startsWith("<?xml");
 
 const AccordionItem = (props: AccordionItemProps) => {
-  const { ref, title, content, icon, backgroundColor, ...rest } = props;
+  const { ref, title, content, icon, backgroundColor, textColor, ...rest } =
+    props;
 
   const renderIcon = () => {
     if (!icon) {
@@ -52,7 +54,7 @@ const AccordionItem = (props: AccordionItemProps) => {
     >
       <Accordion.Header>
         <Accordion.Trigger
-          style={{ backgroundColor } as React.CSSProperties}
+          style={{ backgroundColor, color: textColor } as React.CSSProperties}
           className="group mb-1 flex w-full gap-3 p-4 text-left"
         >
           {renderIcon()}
@@ -103,7 +105,9 @@ const AccordionItem = (props: AccordionItemProps) => {
           "data-[state=open]:animate-expand",
         )}
       >
-        <div className="p-4 text-body-subtle">{content}</div>
+        <div className="p-4" style={{ color: textColor }}>
+          {content}
+        </div>
       </Accordion.Content>
     </Accordion.Item>
   );
@@ -112,7 +116,7 @@ const AccordionItem = (props: AccordionItemProps) => {
 export default AccordionItem;
 
 export const schema: HydrogenComponentSchema = {
-  type: "accordion-item",
+  type: "accordion--item",
   title: "Accordion Item",
   settings: [
     {
@@ -144,6 +148,12 @@ export const schema: HydrogenComponentSchema = {
           name: "backgroundColor",
           label: "Background Color",
           defaultValue: "#EFEEEA",
+        },
+        {
+          type: "color",
+          name: "textColor",
+          label: "Text Color",
+          defaultValue: "#000000",
         },
       ],
     },
