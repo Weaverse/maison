@@ -6,17 +6,19 @@ import type {
 
 interface AccordionGroupProps extends HydrogenComponentProps {
   allowMultiple: boolean;
+  gap?: number;
   ref?: React.Ref<HTMLDivElement>;
 }
 
 const AccordionGroup = (props: AccordionGroupProps) => {
-  const { ref, children, ...rest } = props;
+  const { ref, children, gap, ...rest } = props;
 
   return (
     <div ref={ref} {...rest}>
       <RadixAccordion.Root
         type="multiple"
-        className="accordion--group grid w-full gap-4"
+        className="accordion--group grid w-full"
+        style={{ gap: `${gap}px` }}
       >
         {children}
       </RadixAccordion.Root>
@@ -32,7 +34,20 @@ export const schema: HydrogenComponentSchema = {
   settings: [
     {
       group: "Accordion settings",
-      inputs: [],
+      inputs: [
+        {
+          type: "range",
+          name: "gap",
+          label: "Items spacing",
+          configs: {
+            min: 0,
+            max: 60,
+            step: 4,
+            unit: "px",
+          },
+          defaultValue: 16,
+        },
+      ],
     },
   ],
   childTypes: ["accordion--item", "subheading", "heading", "paragraph"],

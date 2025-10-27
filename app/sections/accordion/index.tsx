@@ -13,28 +13,9 @@ const variants = cva("grid h-full w-full items-start", {
       column: "grid-cols-1 md:grid-cols-2",
       row: "grid-cols-1 justify-center [&_.accordion--items]:max-w-[660px] [&_.accordion--items]:mx-auto",
     },
-    gap: {
-      0: "gap-0",
-      4: "gap-1",
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-      36: "gap-9",
-      40: "gap-10",
-      44: "gap-11",
-      48: "gap-12",
-      52: "gap-[52px]",
-      56: "gap-14",
-      60: "gap-[60px]",
-    },
   },
   defaultVariants: {
     accordionLayout: "column",
-    gap: 16,
   },
 });
 
@@ -42,16 +23,17 @@ interface AccordionSectionProps
   extends SectionProps,
     VariantProps<typeof variants> {
   accordionLayout: "column" | "row";
+  ref?: React.Ref<HTMLElement>;
 }
 
 const AccordionSection = (props: AccordionSectionProps) => {
-  const { ref, accordionLayout, gap, children, ...rest } = props;
+  const { ref, accordionLayout, children, ...rest } = props;
 
   return (
     <Section
       ref={ref}
       {...rest}
-      containerClassName={clsx(variants({ accordionLayout, gap }))}
+      containerClassName={clsx(variants({ accordionLayout }))}
     >
       {children}
     </Section>
@@ -66,11 +48,7 @@ export const schema: HydrogenComponentSchema = {
   settings: [
     {
       group: "Accordion settings",
-      inputs: [
-        ...layoutInputs.filter((input) => input.name !== "gap"),
-        ...backgroundInputs,
-        ...overlayInputs,
-      ],
+      inputs: [...layoutInputs, ...backgroundInputs, ...overlayInputs],
     },
     {
       group: "Accordion layout",
@@ -85,18 +63,6 @@ export const schema: HydrogenComponentSchema = {
               { value: "column", label: "Column" },
               { value: "row", label: "Row" },
             ],
-          },
-        },
-        {
-          type: "range",
-          name: "gap",
-          label: "Items gap",
-          defaultValue: 16,
-          configs: {
-            min: 0,
-            max: 60,
-            step: 4,
-            unit: "px",
           },
         },
       ],
