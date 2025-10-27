@@ -1,47 +1,20 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
-import type { VariantProps } from "class-variance-authority";
-import { cva } from "class-variance-authority";
 
-const variants = cva(
-  "flex flex-col sm:flex-row sm:items-center sm:justify-between",
-  {
-    variants: {
-      gap: {
-        0: "gap-0",
-        4: "gap-1",
-        8: "gap-2",
-        12: "gap-3",
-        16: "gap-4",
-        20: "gap-5",
-        24: "gap-6",
-        28: "gap-7",
-        32: "gap-8",
-        36: "gap-9",
-        40: "gap-10",
-        44: "gap-11",
-        48: "gap-12",
-        52: "gap-[52px]",
-        56: "gap-14",
-        60: "gap-[60px]",
-      },
-    },
-    defaultVariants: {
-      gap: 16,
-    },
-  },
-);
-
-interface HeaderContainerProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+interface HeaderContainerProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
+  gap?: number;
 }
 
 const HeaderContainer = (props: HeaderContainerProps) => {
-  const { ref, children, gap, ...rest } = props;
+  const { ref, children, gap = 16, ...rest } = props;
 
   return (
-    <div ref={ref} {...rest} className={variants({ gap })}>
+    <div
+      ref={ref}
+      {...rest}
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      style={{ gap: `${gap}px` }}
+    >
       {children}
     </div>
   );

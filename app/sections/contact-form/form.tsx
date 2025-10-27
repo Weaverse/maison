@@ -2,32 +2,6 @@ import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
-const variants = cva("flex flex-col items-center max-w-[640px] w-full", {
-  variants: {
-    gap: {
-      0: "gap-0",
-      4: "gap-1",
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-      36: "gap-9",
-      40: "gap-10",
-      44: "gap-11",
-      48: "gap-12",
-      52: "gap-[52px]",
-      56: "gap-14",
-      60: "gap-[60px]",
-    },
-  },
-  defaultVariants: {
-    gap: 16,
-  },
-});
-
 const inputVariants = cva(
   "px-3 py-3.5 w-full focus:outline-none focus:ring-0",
   {
@@ -52,36 +26,10 @@ const inputVariants = cva(
   },
 );
 
-const rowVariants = cva("flex flex-col sm:flex-row w-full", {
-  variants: {
-    gap: {
-      0: "gap-0",
-      4: "gap-1",
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-      36: "gap-9",
-      40: "gap-10",
-      44: "gap-11",
-      48: "gap-12",
-      52: "gap-[52px]",
-      56: "gap-14",
-      60: "gap-[60px]",
-    },
-  },
-  defaultVariants: {
-    gap: 16,
-  },
-});
-
 interface ContactFormProps
-  extends VariantProps<typeof variants>,
-    VariantProps<typeof inputVariants>,
+  extends VariantProps<typeof inputVariants>,
     HydrogenComponentProps {
+  gap?: number;
   inputBorderColor?: string;
   inputBackgroundColor?: string;
   inputTextColor?: string;
@@ -105,9 +53,10 @@ const ContactForm = (props: ContactFormProps) => {
     <div
       ref={ref}
       {...rest}
-      className={variants({ gap })}
+      className="flex flex-col items-center max-w-[640px] w-full"
       style={
         {
+          gap: `${gap}px`,
           "--placeholder-color": placeholderColor,
         } as React.CSSProperties
       }
@@ -122,7 +71,10 @@ const ContactForm = (props: ContactFormProps) => {
           `,
         }}
       />
-      <div className={rowVariants({ gap })}>
+      <div
+        className="flex flex-col sm:flex-row w-full"
+        style={{ gap: `${gap}px` }}
+      >
         <input
           type="text"
           placeholder="Your name *"
@@ -145,7 +97,10 @@ const ContactForm = (props: ContactFormProps) => {
         />
       </div>
 
-      <div className={rowVariants({ gap })}>
+      <div
+        className="flex flex-col sm:flex-row w-full"
+        style={{ gap: `${gap}px` }}
+      >
         <input
           type="email"
           placeholder="Contact email*"

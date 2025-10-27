@@ -49,8 +49,12 @@ const AccordionSection = (props: AccordionSectionProps) => {
   const { ref, accordionLayout, gap, children, ...rest } = props;
 
   return (
-    <Section ref={ref} {...rest}>
-      <div className={clsx(variants({ accordionLayout, gap }))}>{children}</div>
+    <Section
+      ref={ref}
+      {...rest}
+      containerClassName={clsx(variants({ accordionLayout, gap }))}
+    >
+      {children}
     </Section>
   );
 };
