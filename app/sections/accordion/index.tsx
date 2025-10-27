@@ -38,7 +38,6 @@ const variants = cva("grid h-full w-full items-start", {
   },
 });
 
-// Accordion Section Props
 interface AccordionSectionProps
   extends SectionProps,
     VariantProps<typeof variants> {

@@ -32,10 +32,9 @@ const AccordionItem = (props: AccordionItemProps) => {
       return null;
     }
 
-    // Icon mapping
     const iconMap = {
       truck: TruckIcon,
-      "paint-brush-household": PaintBrushHouseholdIcon, // Custom string name
+      "paint-brush-household": PaintBrushHouseholdIcon,
       ruler: RulerIcon,
       package: PackageIcon,
     };
