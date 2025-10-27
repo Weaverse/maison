@@ -19,6 +19,8 @@ import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
 import { PredictiveSearchButton } from "./predictive-search";
+import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query";
+import { useB2BLocation } from "../b2b/b2b-location-provider";
 
 const variants = cva("", {
   variants: {
@@ -100,6 +102,7 @@ export function Header() {
         <Logo />
         <DesktopMenu />
         <div className="z-1 flex items-center gap-1">
+          <ChangeLocation />
           <PredictiveSearchButton />
           <AccountLink className="relative flex h-8 w-8 items-center justify-center" />
           <CartDrawer />
@@ -130,5 +133,28 @@ function AccountLink({ className }: { className?: string }) {
         </Await>
       </Suspense>
     </Link>
+  );
+}
+
+function ChangeLocation() {
+  const { company, companyLocationId, setModalOpen } = useB2BLocation();
+  console.log("🚀 ~ ChangeLocation ~ company:", company);
+
+  const locations = company?.locations?.edges
+    ? company.locations.edges.map(
+        (location: CustomerCompanyLocationConnection) => {
+          return { ...location.node };
+        },
+      )
+    : [];
+  console.log("🚀 ~ ChangeLocation ~ locations:", companyLocationId, locations);
+
+  // if (locations.length <= 1 || !company) return null;
+  return (
+    <button onClick={() => setModalOpen(true)}>
+      {locations.find(
+        (companyLocation) => companyLocation.id == companyLocationId,
+      )?.name || "Select Location"}
+    </button>
   );
 }
