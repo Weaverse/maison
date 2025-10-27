@@ -27,8 +27,8 @@ const AccordionGroup = (props: AccordionGroupProps) => {
 export default AccordionGroup;
 
 export const schema: HydrogenComponentSchema = {
-  type: "accordion--group",
-  title: "Accordion Group",
+  type: "accordion--items",
+  title: "Accordion items",
   settings: [
     {
       group: "Accordion settings",

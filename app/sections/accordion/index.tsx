@@ -11,7 +11,7 @@ const variants = cva("grid h-full w-full items-start", {
   variants: {
     accordionLayout: {
       column: "grid-cols-1 md:grid-cols-2",
-      row: "grid-cols-1 justify-center [&_.accordion--group]:max-w-[660px] [&_.accordion--group]:mx-auto",
+      row: "grid-cols-1 justify-center [&_.accordion--items]:max-w-[660px] [&_.accordion--items]:mx-auto",
     },
     gap: {
       0: "gap-0",
@@ -103,15 +103,15 @@ export const schema: HydrogenComponentSchema = {
       ],
     },
   ],
-  childTypes: ["accordion--content-information", "accordion--group"],
+  childTypes: ["accordion--info-group", "accordion--items"],
   presets: {
     gap: 16,
     children: [
       {
-        type: "accordion--content-information",
+        type: "accordion--info-group",
       },
       {
-        type: "accordion--group",
+        type: "accordion--items",
       },
     ],
   },

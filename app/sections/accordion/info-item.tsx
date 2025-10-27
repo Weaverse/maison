@@ -1,34 +1,38 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 
-interface InformationItemProps extends HydrogenComponentProps {
+interface ContactInfoItemProps extends HydrogenComponentProps {
   label: string;
   value: string;
-  textColor: string;
+  labelColor: string;
+  valueColor: string;
   fontSize: number;
   ref?: React.Ref<HTMLDivElement>;
 }
 
-const InformationItem = (props: InformationItemProps) => {
-  const { ref, label, value, textColor, fontSize, ...rest } = props;
+const ContactInfoItem = (props: ContactInfoItemProps) => {
+  const { ref, label, value, labelColor, valueColor, fontSize, ...rest } =
+    props;
 
   return (
     <div
       ref={ref}
-      style={{ fontSize: `${fontSize}px`, color: textColor }}
+      style={{ fontSize: `${fontSize}px` }}
       data-motion="fade-up"
       {...rest}
     >
-      <div>{label}</div>
-      <div className="mt-1">{value}</div>
+      <div style={{ color: labelColor }}>{label}</div>
+      <div className="mt-1" style={{ color: valueColor }}>
+        {value}
+      </div>
     </div>
   );
 };
 
-export default InformationItem;
+export default ContactInfoItem;
 
 export const schema = createSchema({
-  type: "accordion--information-item",
-  title: "Information Item",
+  type: "accordion--info-item",
+  title: "Information item",
   settings: [
     {
       group: "Content settings",
@@ -49,8 +53,15 @@ export const schema = createSchema({
         },
         {
           type: "color",
-          name: "textColor",
-          label: "Information text color",
+          name: "labelColor",
+          label: "Label color",
+          defaultValue: "#000000",
+        },
+        {
+          type: "color",
+          name: "valueColor",
+          label: "Value color",
+          defaultValue: "#666666",
         },
         {
           type: "range",
