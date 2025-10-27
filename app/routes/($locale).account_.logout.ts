@@ -7,6 +7,10 @@ import {
 } from "react-router";
 
 export async function doLogout(context: AppLoadContext) {
+  await context.cart.updateBuyerIdentity({
+    companyLocationId: null,
+    customerAccessToken: null,
+  });
   return context.customerAccount.logout();
 }
 

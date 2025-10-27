@@ -42,6 +42,11 @@ export function Image({ ref, className, onLoad, ...rest }: ImageProps) {
   const [loaded, setLoaded] = useState(() =>
     imageLoadedCache.has(rest.data.url),
   );
+  useEffect(() => {
+    if (hydrogenImageRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, []);
 
   return (
     <div

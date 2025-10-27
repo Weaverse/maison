@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useLoaderData } from "react-router";
 import type { ProductQuery } from "storefront-api.generated";
 import invariant from "tiny-invariant";
+import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query";
 import { PRODUCT_QUERY } from "~/graphql/queries";
 import { routeHeaders } from "~/utils/cache";
 import {
@@ -26,7 +27,32 @@ import { WeaverseContent } from "~/weaverse";
 
 export const headers = routeHeaders;
 
-export async function loader({ params, request, context }: LoaderFunctionArgs) {
+export async function loadB2BCustomerData(args: LoaderFunctionArgs) {
+  const { customerAccount } = args.context;
+  let buyer = await customerAccount.getBuyer();
+  let companyLocationId = buyer?.companyLocationId || null;
+  if (buyer) {
+    if (buyer.companyLocationId) {
+      return {
+        buyer,
+      };
+    }
+    const result = await customerAccount.query(CUSTOMER_LOCATIONS_QUERY);
+    companyLocationId =
+      result.data?.customer?.companyContacts?.edges?.[0]?.node?.company
+        ?.locations?.edges?.[0]?.node?.id || null;
+    return {
+      buyer: {
+        ...buyer,
+        companyLocationId,
+      },
+    };
+  }
+  return {};
+}
+
+export async function loader(args: LoaderFunctionArgs) {
+  const { request, context, params } = args;
   const { productHandle: handle } = params;
 
   invariant(handle, "Missing productHandle param, check route filename");

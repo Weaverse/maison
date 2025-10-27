@@ -1,7 +1,10 @@
-import { TrashIcon } from "@phosphor-icons/react";
-import { CartForm } from "@shopify/hydrogen";
-import type { FetcherWithComponents } from "react-router";
-import type { ProductVariantFragment } from "storefront-api.generated";
+import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
+import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
+import { type FetcherWithComponents, useFetcher } from "react-router";
+import type {
+  CartApiQueryFragment,
+  ProductVariantFragment,
+} from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 
@@ -10,10 +13,11 @@ type SubtotalProps = {
   variants: ProductVariantFragment[];
 };
 
-export function Subtotal({ cart, variants }: SubtotalProps) {
+export function Subtotal({ cart: originalCart, variants }: SubtotalProps) {
   let totalItems = 0;
   let subtotal = 0;
   let existingLineIds: string[] = [];
+  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
 
   const currentProductVariantIds = variants.map((v) => v.id);
 
@@ -28,7 +32,7 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
       0,
     );
     subtotal = currentProductLines.reduce((sum, line) => {
-      const amount = Number.parseFloat(line.cost.totalAmount.amount);
+      const amount = Number.parseFloat(line.cost?.totalAmount.amount || "0");
       return sum + amount;
     }, 0);
   }
@@ -39,7 +43,7 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
           <Button variant="outline" onClick={() => toggleCartDrawer(true)}>
             View Cart
           </Button>
-          <RemoveAllFromCartButton lineIds={existingLineIds} />
+          {<RemoveAllFromCartButton lineIds={existingLineIds} />}
         </div>
         <div className="text-center">Total: {totalItems} items</div>
         <div className="space-y-1 col-span-2">
@@ -59,11 +63,27 @@ export function Subtotal({ cart, variants }: SubtotalProps) {
 }
 
 function RemoveAllFromCartButton({ lineIds }: { lineIds: string[] }) {
+  const fetcher = useFetcher({
+    key: "variant-list",
+  });
+
+  if (fetcher.state !== "idle") {
+    return (
+      <div>
+        <CircleNotchIcon size={24} className="animate-spin" />
+      </div>
+    );
+  }
+  if (!lineIds.length) {
+    return null;
+  }
+
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds }}
+      fetcherKey="variant-list"
     >
       {(fetcher: FetcherWithComponents<any>) => (
         <Button
