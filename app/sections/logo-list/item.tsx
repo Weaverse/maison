@@ -37,13 +37,13 @@ interface LogoListItemProps
 }
 
 const LogoListItem = (props: LogoListItemProps) => {
-  const { ref, src, altText, borderRadius, children } = props;
+  const { ref, src, altText, borderRadius, children, ...rest } = props;
 
   const imageData =
     typeof src === "object" ? src : { url: src, altText: altText || "Image" };
 
   return (
-    <div ref={ref} className={variants({ borderRadius })}>
+    <div ref={ref} {...rest} className={variants({ borderRadius })}>
       {src ? (
         <Image
           data={imageData}

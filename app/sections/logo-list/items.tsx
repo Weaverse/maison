@@ -48,11 +48,13 @@ interface LogoListItemsProps
 }
 
 const LogoListItems = (props: LogoListItemsProps) => {
-  const { ref, children, mobileGridSize, desktopGridSize, gap } = props;
+  const { ref, children, mobileGridSize, desktopGridSize, gap, ...rest } =
+    props;
 
   return (
     <div
       ref={ref}
+      {...rest}
       className={variants({ mobileGridSize, desktopGridSize, gap })}
     >
       {children}
