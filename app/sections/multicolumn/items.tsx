@@ -10,28 +10,9 @@ const variants = cva("grid", {
       "3": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
       "4": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
     },
-    gap: {
-      0: "gap-0",
-      4: "gap-1",
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-      36: "gap-9",
-      40: "gap-10",
-      44: "gap-11",
-      48: "gap-12",
-      52: "gap-[52px]",
-      56: "gap-14",
-      60: "gap-[60px]",
-    },
   },
   defaultVariants: {
     columns: "4",
-    gap: 16,
   },
 });
 
@@ -39,13 +20,19 @@ interface MulticolumnItemsProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
+  gap?: number;
 }
 
 const MulticolumnItems = (props: MulticolumnItemsProps) => {
   const { ref, children, columns, gap, ...rest } = props;
 
   return (
-    <div ref={ref} {...rest} className={variants({ columns, gap })}>
+    <div
+      ref={ref}
+      {...rest}
+      className={variants({ columns })}
+      style={{ gap: `${gap}px` }}
+    >
       {children}
     </div>
   );

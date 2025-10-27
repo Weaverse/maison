@@ -67,11 +67,13 @@ import * as VariantList from "~/sections/variant-list";
 import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
 import * as ViewAllButton from "~/components/view-all-button";
-import * as AccordionGroup from "~/sections/accordion/accordion-group";
-import * as AccordionItem from "~/sections/accordion/accordion-item";
-import * as AccordionInformationGroup from "~/sections/accordion/content-information";
 import * as AccordionSection from "~/sections/accordion/index";
-import * as AccordionInformationItem from "~/sections/accordion/information-item";
+import * as AccordionItems from "~/sections/accordion/accordion-items";
+import * as AccordionItem from "~/sections/accordion/accordion-item";
+import * as AccordionInfoGroup from "~/sections/accordion/info-group";
+import * as AccordionHeader from "~/sections/accordion/header";
+import * as AccordionInfoItems from "~/sections/accordion/info-items";
+import * as AccordionInfoItem from "~/sections/accordion/info-item";
 import * as Articles from "~/sections/articles";
 import * as ArticlesItems from "~/sections/articles/articles-items";
 import * as ArticlesHeaderContainer from "~/sections/articles/articles-header";
@@ -163,10 +165,12 @@ export const components: HydrogenComponent[] = [
   ArticlesHeaderContainer,
   ViewAllButton,
   AccordionSection,
-  AccordionInformationItem,
-  AccordionInformationGroup,
-  AccordionGroup,
+  AccordionItems,
   AccordionItem,
+  AccordionInfoGroup,
+  AccordionHeader,
+  AccordionInfoItems,
+  AccordionInfoItem,
   Multicolumn,
   MulticolumnHeader,
   MulticolumnItems,
