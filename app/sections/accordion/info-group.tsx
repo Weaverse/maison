@@ -1,11 +1,11 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 
-interface ContactInfoGroupProps extends HydrogenComponentProps {
-  gap?: number;
+interface InfoGroupProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
+  gap?: number;
 }
 
-const ContactInfoGroup = (props: ContactInfoGroupProps) => {
+const InfoGroup = (props: InfoGroupProps) => {
   const { ref, children, gap, ...rest } = props;
 
   return (
@@ -20,84 +20,50 @@ const ContactInfoGroup = (props: ContactInfoGroupProps) => {
   );
 };
 
-export default ContactInfoGroup;
+export default InfoGroup;
 
 export const schema = createSchema({
   type: "accordion--info-group",
   title: "Information group",
   settings: [
     {
-      group: "Content settings",
+      group: "Layout",
       inputs: [
         {
           type: "range",
           name: "gap",
-          label: "Items spacing",
+          label: "Item spacing",
           configs: {
             min: 0,
             max: 60,
             step: 4,
             unit: "px",
           },
-          defaultValue: 40,
+          defaultValue: 8,
         },
       ],
     },
   ],
-  childTypes: ["accordion--header", "accordion--info-items"],
+  childTypes: ["heading", "subheading", "paragraph"],
   presets: {
-    gap: 40,
     children: [
       {
-        type: "accordion--header",
-        gap: 8,
-        children: [
-          {
-            type: "heading",
-            content: "Customer Service",
-            as: "h3",
-            weight: 400,
-            alignment: "left",
-          },
-          {
-            type: "paragraph",
-            content: "We offer support via email.",
-            as: "p",
-            width: "full",
-            alignment: "left",
-            textSize: "sm",
-          },
-        ],
+        type: "heading",
+        as: "h3",
+        weight: 400,
+        alignment: "left",
       },
       {
-        type: "accordion--info-items",
-        gap: 24,
-        children: [
-          {
-            type: "accordion--info-item",
-            label: "Email",
-            value: "support@archercommerce.com",
-            labelColor: "#000000",
-            valueColor: "#666666",
-            fontSize: 14,
-          },
-          {
-            type: "accordion--info-item",
-            label: "Hours",
-            value: "Monday - Friday, 9AM - 5PM ET",
-            labelColor: "#000000",
-            valueColor: "#666666",
-            fontSize: 14,
-          },
-          {
-            type: "accordion--info-item",
-            label: "Average response time",
-            value: "1 Business day",
-            labelColor: "#000000",
-            valueColor: "#666666",
-            fontSize: 14,
-          },
-        ],
+        type: "subheading",
+        alignment: "left",
+      },
+      {
+        type: "paragraph",
+        content: "Add more content here",
+        as: "p",
+        width: "full",
+        alignment: "left",
+        textSize: "sm",
       },
     ],
   },

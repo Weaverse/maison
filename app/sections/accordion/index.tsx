@@ -3,7 +3,6 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
 import { backgroundInputs } from "~/components/background-image";
-import { overlayInputs } from "~/components/overlay";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
 
@@ -47,7 +46,10 @@ export const schema: HydrogenComponentSchema = {
   settings: [
     {
       group: "Accordion settings",
-      inputs: [...layoutInputs, ...backgroundInputs, ...overlayInputs],
+      inputs: [
+        ...layoutInputs.filter((input) => input.name !== "borderRadius"),
+        ...backgroundInputs.filter((input) => input.name !== "backgroundImage"),
+      ],
     },
     {
       group: "Accordion layout",

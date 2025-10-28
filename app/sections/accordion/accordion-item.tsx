@@ -53,7 +53,10 @@ const AccordionItem = (props: AccordionItemProps) => {
       ref={ref}
       {...rest}
       value={title}
-      className={cn("w-full", "focus-within:relative focus-within:z-10")}
+      className={cn(
+        "w-full max-w-[628px] mx-auto",
+        "focus-within:relative focus-within:z-10",
+      )}
     >
       <Accordion.Header>
         <Accordion.Trigger
@@ -119,7 +122,7 @@ export const schema: HydrogenComponentSchema = {
           type: "text",
           name: "title",
           label: "Title",
-          defaultValue: "Accordion Item Title",
+          defaultValue: "Accordion item title",
           placeholder: "Enter item title",
         },
         {
@@ -133,7 +136,7 @@ export const schema: HydrogenComponentSchema = {
           type: "color",
           name: "backgroundColor",
           label: "Background Color",
-          defaultValue: "#EFEEEA",
+          defaultValue: "#efefef",
         },
         {
           type: "color",

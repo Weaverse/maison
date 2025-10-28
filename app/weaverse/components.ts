@@ -71,9 +71,6 @@ import * as AccordionSection from "~/sections/accordion/index";
 import * as AccordionItems from "~/sections/accordion/accordion-items";
 import * as AccordionItem from "~/sections/accordion/accordion-item";
 import * as AccordionInfoGroup from "~/sections/accordion/info-group";
-import * as AccordionHeader from "~/sections/accordion/header";
-import * as AccordionInfoItems from "~/sections/accordion/info-items";
-import * as AccordionInfoItem from "~/sections/accordion/info-item";
 import * as Articles from "~/sections/articles";
 import * as ArticlesItems from "~/sections/articles/articles-items";
 import * as ArticlesHeaderContainer from "~/sections/articles/articles-header";
@@ -168,9 +165,6 @@ export const components: HydrogenComponent[] = [
   AccordionItems,
   AccordionItem,
   AccordionInfoGroup,
-  AccordionHeader,
-  AccordionInfoItems,
-  AccordionInfoItem,
   Multicolumn,
   MulticolumnHeader,
   MulticolumnItems,
