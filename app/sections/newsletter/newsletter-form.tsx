@@ -1,4 +1,3 @@
-import { EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useFetcher } from "react-router";
@@ -11,6 +10,8 @@ interface NewsLetterInputProps extends HydrogenComponentProps {
   buttonText: string;
   helpText: string;
   successText?: string;
+  inputBorderColor?: string;
+  inputBackgroundColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -21,6 +22,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
     placeholder,
     helpText,
     successText,
+    inputBorderColor,
+    inputBackgroundColor,
     ref,
     ...rest
   } = props;
@@ -30,21 +33,27 @@ function NewsLetterForm(props: NewsLetterInputProps) {
   const { ok, errorMessage } = data || {};
 
   return (
-    <div ref={ref} {...rest} className="mx-auto max-w-full" style={{ width }}>
+    <div ref={ref} {...rest} className="mx-auto max-w-full">
       <Form
         method="POST"
         action="/api/customer"
-        className="flex w-full items-center"
+        className="flex w-full items-center justify-center gap-[17px]"
         data-motion="fade-up"
       >
-        <div className="flex grow items-center border-y border-r-0 border-l">
-          <EnvelopeSimpleIcon className="mr-1.5 ml-3 h-5 w-5 shrink-0" />
+        <div
+          className="flex items-center border rounded-sm"
+          style={{
+            width,
+            borderColor: inputBorderColor,
+            backgroundColor: inputBackgroundColor,
+          }}
+        >
           <input
             name="email"
             type="email"
             required
             placeholder={placeholder}
-            className="w-full bg-transparent py-3 pr-3 pl-1.5 leading-tight focus:outline-hidden"
+            className="w-full p-3 leading-tight focus:outline-hidden"
           />
         </div>
         <Button
@@ -55,13 +64,6 @@ function NewsLetterForm(props: NewsLetterInputProps) {
           {buttonText}
         </Button>
       </Form>
-      {helpText && (
-        <div
-          className="mt-2 text-body-subtle"
-          data-motion="fade-up"
-          dangerouslySetInnerHTML={{ __html: helpText }}
-        />
-      )}
       <div
         className={clsx(
           "mx-auto mt-4 text-center font-medium",
@@ -78,7 +80,7 @@ function NewsLetterForm(props: NewsLetterInputProps) {
 export default NewsLetterForm;
 
 export const schema = createSchema({
-  type: "newsletter-form",
+  type: "newsletter--form",
   title: "Form",
   settings: [
     {
@@ -104,13 +106,6 @@ export const schema = createSchema({
           placeholder: "Enter your email",
         },
         {
-          type: "richtext",
-          name: "helpText",
-          label: "Help text",
-          defaultValue:
-            '<div>We care about the protection of your data. Read our <a href="/policies/privacy-policy" style="color: #007AFF; text-decoration: underline;">Privacy Policy</a>.</div>',
-        },
-        {
           type: "text",
           name: "successText",
           label: "Success message",
@@ -123,6 +118,21 @@ export const schema = createSchema({
           label: "Button text",
           placeholder: "Subscribe",
           defaultValue: "Subscribe",
+        },
+      ],
+    },
+    {
+      group: "Input styling",
+      inputs: [
+        {
+          type: "color",
+          name: "inputBorderColor",
+          label: "Border color",
+        },
+        {
+          type: "color",
+          name: "inputBackgroundColor",
+          label: "Background color",
         },
       ],
     },
