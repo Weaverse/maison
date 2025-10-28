@@ -148,7 +148,7 @@ function ChangeLocation() {
       )
     : [];
   console.log("🚀 ~ ChangeLocation ~ locations:", companyLocationId, locations);
-
+  // new
   // if (locations.length <= 1 || !company) return null;
   return (
     <button onClick={() => setModalOpen(true)}>
