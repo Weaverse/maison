@@ -13,9 +13,14 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
     backgroundFit,
     backgroundPosition,
     enableOverlay,
+    overlayType,
     overlayColor,
     overlayColorHover,
     overlayOpacity,
+    gradientDirection,
+    gradientFrom,
+    gradientTo,
+    gradientToOpacity,
   } = props;
   return (
     <>
@@ -26,9 +31,14 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
       />
       <Overlay
         enableOverlay={enableOverlay}
+        overlayType={overlayType}
         overlayColor={overlayColor}
         overlayColorHover={overlayColorHover}
         overlayOpacity={overlayOpacity}
+        gradientDirection={gradientDirection}
+        gradientFrom={gradientFrom}
+        gradientTo={gradientTo}
+        gradientToOpacity={gradientToOpacity}
       />
     </>
   );
