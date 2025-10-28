@@ -15,29 +15,10 @@ const variants = cva("grid", {
       "4": "sm:grid-cols-4",
       "6": "sm:grid-cols-6",
     },
-    gap: {
-      0: "gap-0",
-      4: "gap-1",
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-      36: "gap-9",
-      40: "gap-10",
-      44: "gap-11",
-      48: "gap-12",
-      52: "gap-[52px]",
-      56: "gap-14",
-      60: "gap-[60px]",
-    },
   },
   defaultVariants: {
     mobileGridSize: "2",
     desktopGridSize: "6",
-    gap: 16,
   },
 });
 
@@ -45,6 +26,7 @@ interface LogoListItemsProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
+  gap?: number;
 }
 
 const LogoListItems = (props: LogoListItemsProps) => {
@@ -55,7 +37,8 @@ const LogoListItems = (props: LogoListItemsProps) => {
     <div
       ref={ref}
       {...rest}
-      className={variants({ mobileGridSize, desktopGridSize, gap })}
+      className={variants({ mobileGridSize, desktopGridSize })}
+      style={{ gap: `${gap}px` }}
     >
       {children}
     </div>
