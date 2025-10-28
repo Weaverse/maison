@@ -14,9 +14,7 @@ export interface HeroImageProps extends VariantProps<typeof variants> {
   ref: React.Ref<HTMLElement>;
 }
 
-const variants = cva(
-  "flex flex-col [&_.paragraph]:mx-[unset] [&_.heading]:max-w-[660px]",
-  {
+const variants = cva("flex flex-col [&_.paragraph]:mx-[unset] [&_.heading]:max-w-[660px]", {
     variants: {
       height: {
         small: "min-h-[40vh] lg:min-h-[50vh]",
