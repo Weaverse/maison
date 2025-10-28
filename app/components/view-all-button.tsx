@@ -32,8 +32,12 @@ const ViewAllButton = (props: ViewAllButtonProps) => {
   }
 
   return (
-    <div ref={ref} className="flex gap-2.5 items-center">
-      <Link to={link} className="text-sm" style={{ color: textColor }}>
+    <div
+      ref={ref}
+      className="flex gap-2.5 items-center"
+      style={{ color: textColor }}
+    >
+      <Link to={link} className="text-sm">
         {text}
       </Link>
       <ArrowRight />

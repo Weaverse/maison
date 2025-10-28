@@ -72,16 +72,14 @@ export const schema = createSchema({
       {
         type: "heading",
         content: "Heading for image",
-        as: "h3",
       },
       {
         type: "paragraph",
         content: "Pair large text with an image to tell a story.",
-        textSize: "sm",
       },
       {
         type: "button",
-        text: "Discover now",
+        text: "Shop now",
       },
     ],
   },
