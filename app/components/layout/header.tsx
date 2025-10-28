@@ -138,7 +138,6 @@ function AccountLink({ className }: { className?: string }) {
 
 function ChangeLocation() {
   const { company, companyLocationId, setModalOpen } = useB2BLocation();
-  console.log("🚀 ~ ChangeLocation ~ company:", company);
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
@@ -147,9 +146,8 @@ function ChangeLocation() {
         },
       )
     : [];
-  console.log("🚀 ~ ChangeLocation ~ locations:", companyLocationId, locations);
-  // new
-  // if (locations.length <= 1 || !company) return null;
+
+  if (locations.length <= 1 || !company) return null;
   return (
     <button onClick={() => setModalOpen(true)}>
       {locations.find(
