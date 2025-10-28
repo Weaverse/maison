@@ -1,21 +1,33 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
+import { clsx } from "clsx";
 
-interface TestimonialsItemsProps extends HydrogenComponentProps {
+const variants = cva("grid lg:grid-cols-3", {
+  variants: {
+    gap: {
+      16: "gap-4",
+      24: "gap-6",
+      32: "gap-8",
+      40: "gap-10",
+    },
+  },
+  defaultVariants: {
+    gap: 32,
+  },
+});
+
+interface TestimonialsItemsProps
+  extends VariantProps<typeof variants>,
+    HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
-  gap?: number;
 }
 
 function TestimonialsItems(props: TestimonialsItemsProps) {
   const { gap, children, ref, ...rest } = props;
 
   return (
-    <div
-      ref={ref}
-      {...rest}
-      className="grid lg:grid-cols-3"
-      style={{ gap: `${gap}px` }}
-    >
+    <div ref={ref} {...rest} className={clsx(variants({ gap }))}>
       <div className="space-y-6">{children?.filter((_, i) => i % 3 === 0)}</div>
       <div className="space-y-6">{children?.filter((_, i) => i % 3 === 1)}</div>
       <div className="space-y-6">{children?.filter((_, i) => i % 3 === 2)}</div>
