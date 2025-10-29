@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { useLoaderData } from "react-router";
 import type { ProductQuery } from "storefront-api.generated";
 import invariant from "tiny-invariant";
-import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query";
+import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query.account";
 import { PRODUCT_QUERY } from "~/graphql/queries";
 import { routeHeaders } from "~/utils/cache";
 import {

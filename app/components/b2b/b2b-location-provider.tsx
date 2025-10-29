@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { useFetcher } from "react-router";
-import type { CustomerCompany } from "~/graphql/customer-locations-query";
+import type { CustomerCompany } from "~/graphql/customer-locations-query.account";
 
 export type B2BLocationContextValue = {
   company?: CustomerCompany;

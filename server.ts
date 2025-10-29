@@ -243,6 +243,11 @@ const CART_QUERY_FRAGMENT = `#graphql
           name
           value
         }
+        quantityRule {
+          increment
+          minimum
+          maximum
+        }
       }
     }
   }
@@ -292,6 +297,11 @@ const CART_QUERY_FRAGMENT = `#graphql
         selectedOptions {
           name
           value
+        }
+        quantityRule {
+          increment
+          minimum
+          maximum
         }
         requiresComponents
         components(first: 10) {

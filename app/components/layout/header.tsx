@@ -19,7 +19,7 @@ import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
 import { PredictiveSearchButton } from "./predictive-search";
-import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query";
+import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query.account";
 import { useB2BLocation } from "../b2b/b2b-location-provider";
 
 const variants = cva("", {

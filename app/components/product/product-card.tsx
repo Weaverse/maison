@@ -155,7 +155,6 @@ export function ProductCard({
             showOnHover={pcardShowQuickShopOnHover}
             buttonType={pcardQuickShopButtonType}
             buttonText={pcardQuickShopButtonText}
-            panelType={pcardQuickShopPanelType}
           />
         )}
       </div>

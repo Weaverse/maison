@@ -384,9 +384,22 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
 
   const optimisticQuantity = optimisticData?.quantity || line.quantity;
 
-  const { id: lineId, isOptimistic } = line;
-  const prevQuantity = Number(Math.max(0, optimisticQuantity - 1).toFixed(0));
-  const nextQuantity = Number((optimisticQuantity + 1).toFixed(0));
+  const { id: lineId, isOptimistic, merchandise } = line;
+
+  // Get quantity rules from merchandise (B2B feature)
+  const quantityRule = merchandise?.quantityRule;
+  const increment = quantityRule?.increment || 1;
+  const minimum = quantityRule?.minimum || 1;
+  const maximum = quantityRule?.maximum || null;
+
+  // Calculate previous and next quantities based on increment
+  const prevQuantity = Number(
+    Math.max(minimum, optimisticQuantity - increment).toFixed(0),
+  );
+  const nextQuantity = Number((optimisticQuantity + increment).toFixed(0));
+
+  // Check if we've reached the maximum
+  const isAtMaximum = maximum !== null && nextQuantity > maximum;
 
   return (
     <>
@@ -398,10 +411,15 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
           <button
             type="submit"
             name="decrease-quantity"
-            aria-label="Decrease quantity"
+            aria-label={`Decrease quantity by ${increment}`}
             className="h-9 w-9 transition disabled:cursor-not-allowed disabled:text-body-subtle"
             value={prevQuantity}
-            disabled={optimisticQuantity <= 1 || isOptimistic}
+            disabled={optimisticQuantity <= minimum || isOptimistic}
+            title={
+              optimisticQuantity <= minimum
+                ? `Minimum quantity is ${minimum}`
+                : ""
+            }
           >
             <span>&#8722;</span>
             <OptimisticInput
@@ -421,8 +439,9 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
             className="h-9 w-9 transition disabled:cursor-not-allowed disabled:text-body-subtle"
             name="increase-quantity"
             value={nextQuantity}
-            aria-label="Increase quantity"
-            disabled={isOptimistic}
+            aria-label={`Increase quantity by ${increment}`}
+            disabled={isOptimistic || isAtMaximum}
+            title={isAtMaximum ? `Maximum quantity is ${maximum}` : ""}
           >
             <span>&#43;</span>
             <OptimisticInput
