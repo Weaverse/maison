@@ -12,7 +12,6 @@ interface NewsLetterInputProps extends HydrogenComponentProps {
   successText?: string;
   inputBorderColor?: string;
   inputBackgroundColor?: string;
-  inputPlaceholderColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -25,7 +24,6 @@ function NewsLetterForm(props: NewsLetterInputProps) {
     successText,
     inputBorderColor,
     inputBackgroundColor,
-    inputPlaceholderColor,
     ref,
     ...rest
   } = props;
@@ -54,13 +52,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
             type="email"
             required
             placeholder={placeholder}
-            className="p-3 leading-tight focus:outline-hidden placeholder:text-[var(--placeholder-color)]"
-            style={
-              {
-                width,
-                "--placeholder-color": inputPlaceholderColor,
-              } as React.CSSProperties
-            }
+            className="p-3 leading-tight focus:outline-hidden"
+            style={{ width }}
           />
         </div>
         <Button
@@ -141,11 +134,6 @@ export const schema = createSchema({
           type: "color",
           name: "inputBackgroundColor",
           label: "Background color",
-        },
-        {
-          type: "color",
-          name: "inputPlaceholderColor",
-          label: "Placeholder color",
         },
       ],
     },
