@@ -14,13 +14,8 @@ interface CompanyStorySeparatorProps
 }
 
 const CompanyStorySeparator = (props: CompanyStorySeparatorProps) => {
-  const {
-    ref,
-    hideSeparator = false,
-    separatorThickness = 2,
-    separatorColor = "#DCDCDC",
-    ...rest
-  } = props;
+  const { ref, hideSeparator, separatorThickness, separatorColor, ...rest } =
+    props;
 
   if (hideSeparator) {
     return null;

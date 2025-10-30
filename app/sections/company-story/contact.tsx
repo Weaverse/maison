@@ -26,10 +26,10 @@ const CompanyStoryContact = (props: CompanyStoryContactProps) => {
         backgroundColor: contentBackgroundColor,
       }}
     >
-      <div className="flex flex-col items-center md:flex-row">
+      <div className="flex flex-col gap-5 items-center md:flex-row">
         <div className="w-full md:w-2/3">
           <div
-            className="flex flex-col justify-between py-6"
+            className="flex flex-col items-center"
             style={{ gap: `${gap}px` }}
           >
             {children}
@@ -37,7 +37,7 @@ const CompanyStoryContact = (props: CompanyStoryContactProps) => {
         </div>
 
         {/* map */}
-        <div className="flex-shrink-0 size-full overflow-hidden rounded-sm md:w-1/3">
+        <div className="overflow-hidden rounded-sm w-full md:w-1/3 ">
           <iframe
             className="size-full"
             title="Google map embedded frame"
