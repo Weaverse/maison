@@ -3,7 +3,7 @@ import { useB2BLocation } from "./b2b-location-provider";
 import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
-} from "~/graphql/customer-locations-query";
+} from "~/graphql/customer-locations-query.account";
 
 export function B2BLocationSelector() {
   const { company, modalOpen, setModalOpen } = useB2BLocation();

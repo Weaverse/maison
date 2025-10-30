@@ -19,7 +19,7 @@ import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
 import { PredictiveSearchButton } from "./predictive-search";
-import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query";
+import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query.account";
 import { useB2BLocation } from "../b2b/b2b-location-provider";
 
 const variants = cva("", {
@@ -138,7 +138,6 @@ function AccountLink({ className }: { className?: string }) {
 
 function ChangeLocation() {
   const { company, companyLocationId, setModalOpen } = useB2BLocation();
-  console.log("🚀 ~ ChangeLocation ~ company:", company);
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
@@ -147,9 +146,8 @@ function ChangeLocation() {
         },
       )
     : [];
-  console.log("🚀 ~ ChangeLocation ~ locations:", companyLocationId, locations);
 
-  // if (locations.length <= 1 || !company) return null;
+  if (locations.length <= 1 || !company) return null;
   return (
     <button onClick={() => setModalOpen(true)}>
       {locations.find(
