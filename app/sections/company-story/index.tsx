@@ -1,0 +1,64 @@
+import type { HydrogenComponentProps } from "@weaverse/hydrogen";
+import { createSchema } from "@weaverse/hydrogen";
+import { Section } from "~/components/section";
+import { layoutInputs } from "~/components/section";
+import { backgroundInputs } from "~/components/background-image";
+
+interface CompanyStoryProps extends HydrogenComponentProps {
+  ref?: React.Ref<HTMLElement>;
+}
+
+function CompanyStory(props: CompanyStoryProps) {
+  const { ref, children, ...rest } = props;
+
+  return (
+    <Section
+      ref={ref}
+      {...rest}
+      containerClassName="mx-auto max-w-[846px] px-5 md:px-6 lg:px-0"
+    >
+      {children}
+    </Section>
+  );
+}
+
+export default CompanyStory;
+
+export const schema = createSchema({
+  type: "company-story",
+  title: "Company story",
+  childTypes: [
+    "company-story--image",
+    "company-story--content",
+    "company-story--separator",
+    "company-story--contact",
+  ],
+  settings: [
+    {
+      group: "Layout",
+      inputs: [
+        ...layoutInputs.filter(
+          (i) =>
+            i.name !== "borderRadius" && i.name !== "width" && i.name !== "gap",
+        ),
+      ],
+    },
+    {
+      group: "Background",
+      inputs: [
+        ...backgroundInputs.filter(
+          (input) =>
+            input.name !== "backgroundFor" && input.name !== "backgroundImage",
+        ),
+      ],
+    },
+  ],
+  presets: {
+    children: [
+      { type: "company-story--image" },
+      { type: "company-story--content" },
+      { type: "company-story--separator" },
+      { type: "company-story--contact" },
+    ],
+  },
+});

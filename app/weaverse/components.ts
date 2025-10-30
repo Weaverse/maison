@@ -83,6 +83,11 @@ import * as ContactFormForm from "~/sections/contact-form/form";
 import * as LogoList from "~/sections/logo-list";
 import * as LogoListItems from "~/sections/logo-list/items";
 import * as LogoListItem from "~/sections/logo-list/item";
+import * as CompanyStory from "~/sections/company-story";
+import * as CompanyStoryImage from "~/sections/company-story/image";
+import * as CompanyStoryContent from "~/sections/company-story/content";
+import * as CompanyStorySeparator from "~/sections/company-story/separator";
+import * as CompanyStoryContact from "~/sections/company-story/contact";
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -174,4 +179,9 @@ export const components: HydrogenComponent[] = [
   LogoList,
   LogoListItems,
   LogoListItem,
+  CompanyStory,
+  CompanyStoryImage,
+  CompanyStoryContent,
+  CompanyStorySeparator,
+  CompanyStoryContact,
 ];
