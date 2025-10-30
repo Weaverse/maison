@@ -5,23 +5,27 @@ import { Button } from "~/components/button";
 import type { CustomerApiPlayLoad } from "~/routes/($locale).api.customer";
 
 interface NewsLetterInputProps extends HydrogenComponentProps {
+  width: number;
   placeholder: string;
   buttonText: string;
   helpText: string;
   successText?: string;
   inputBorderColor?: string;
   inputBackgroundColor?: string;
+  inputPlaceholderColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
 function NewsLetterForm(props: NewsLetterInputProps) {
   const {
     buttonText,
+    width,
     placeholder,
     helpText,
     successText,
     inputBorderColor,
     inputBackgroundColor,
+    inputPlaceholderColor,
     ref,
     ...rest
   } = props;
@@ -38,17 +42,27 @@ function NewsLetterForm(props: NewsLetterInputProps) {
         className="flex flex-col md:flex-row w-full items-center justify-center gap-[17px]"
         data-motion="fade-up"
       >
-        <input
-          name="email"
-          type="email"
-          required
-          placeholder={placeholder}
-          className="w-full md:w-[400px] p-3 leading-tight border rounded-sm focus:outline-hidden"
+        <div
+          className="border rounded-sm max-w-full"
           style={{
             borderColor: inputBorderColor,
             backgroundColor: inputBackgroundColor,
           }}
-        />
+        >
+          <input
+            name="email"
+            type="email"
+            required
+            placeholder={placeholder}
+            className="p-3 leading-tight focus:outline-hidden placeholder:text-[var(--placeholder-color)]"
+            style={
+              {
+                width,
+                "--placeholder-color": inputPlaceholderColor,
+              } as React.CSSProperties
+            }
+          />
+        </div>
         <Button
           type="submit"
           className="gap-3"
@@ -58,16 +72,15 @@ function NewsLetterForm(props: NewsLetterInputProps) {
         </Button>
       </Form>
 
-      {state === "idle" && data && (
-        <div
-          className={clsx(
-            "mx-auto mt-4 text-center font-medium",
-            ok ? "text-green-700" : "text-red-700",
-          )}
-        >
-          {ok ? successText : errorMessage || "Something went wrong"}
-        </div>
-      )}
+      <div
+        className={clsx(
+          "mx-auto mt-4 text-center font-medium text-sm",
+          state === "idle" && data ? "visible" : "invisible",
+          ok ? "text-green-700" : "text-red-700",
+        )}
+      >
+        {ok ? successText : errorMessage || "Something went wrong"}
+      </div>
     </div>
   );
 }
@@ -81,6 +94,18 @@ export const schema = createSchema({
     {
       group: "Form",
       inputs: [
+        {
+          type: "range",
+          name: "width",
+          label: "Input width",
+          configs: {
+            min: 300,
+            max: 600,
+            step: 10,
+            unit: "px",
+          },
+          defaultValue: 500,
+        },
         {
           type: "text",
           name: "placeholder",
@@ -116,6 +141,11 @@ export const schema = createSchema({
           type: "color",
           name: "inputBackgroundColor",
           label: "Background color",
+        },
+        {
+          type: "color",
+          name: "inputPlaceholderColor",
+          label: "Placeholder color",
         },
       ],
     },
