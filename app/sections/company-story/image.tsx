@@ -25,9 +25,14 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
     heroImage,
     altText,
     enableOverlay,
+    overlayType,
     overlayColor,
     overlayColorHover,
     overlayOpacity,
+    gradientDirection,
+    gradientFrom,
+    gradientTo,
+    gradientToOpacity,
     ...rest
   } = props;
 
@@ -51,9 +56,14 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
           />
           <Overlay
             enableOverlay={enableOverlay}
+            overlayType={overlayType}
             overlayColor={overlayColor}
             overlayColorHover={overlayColorHover}
             overlayOpacity={overlayOpacity}
+            gradientDirection={gradientDirection}
+            gradientFrom={gradientFrom}
+            gradientTo={gradientTo}
+            gradientToOpacity={gradientToOpacity}
             className="z-10"
           />
         </>
