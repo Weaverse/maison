@@ -2,7 +2,7 @@ import type { HydrogenComponentProps } from "@weaverse/hydrogen";
 import { createSchema } from "@weaverse/hydrogen";
 
 interface CompanyStorySeparatorData {
-  hideSeparator?: boolean;
+  enableSeparator?: boolean;
   separatorThickness?: number;
   separatorColor?: string;
 }
@@ -14,10 +14,10 @@ interface CompanyStorySeparatorProps
 }
 
 const CompanyStorySeparator = (props: CompanyStorySeparatorProps) => {
-  const { ref, hideSeparator, separatorThickness, separatorColor, ...rest } =
+  const { ref, enableSeparator, separatorThickness, separatorColor, ...rest } =
     props;
 
-  if (hideSeparator) {
+  if (!enableSeparator) {
     return null;
   }
 
@@ -45,9 +45,9 @@ export const schema = createSchema({
       inputs: [
         {
           type: "switch",
-          name: "hideSeparator",
-          label: "Hide separator",
-          defaultValue: false,
+          name: "enableSeparator",
+          label: "Enable separator",
+          defaultValue: true,
         },
         {
           type: "range",
@@ -61,7 +61,7 @@ export const schema = createSchema({
           },
           defaultValue: 2,
           condition: (data: CompanyStorySeparatorData) =>
-            data.hideSeparator === false,
+            data.enableSeparator === true,
         },
         {
           type: "color",
@@ -69,7 +69,7 @@ export const schema = createSchema({
           label: "Separator color",
           defaultValue: "#DCDCDC",
           condition: (data: CompanyStorySeparatorData) =>
-            data.hideSeparator === false,
+            data.enableSeparator === true,
         },
       ],
     },

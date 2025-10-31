@@ -187,7 +187,7 @@ export const layoutInputs: InspectorGroup["inputs"] = [
     configs: {
       min: 30,
       max: 100,
-      step: 5,
+      step: 4,
       unit: "%",
     },
     defaultValue: 50,
