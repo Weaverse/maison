@@ -45,6 +45,7 @@ export function ProductCard({
     pcardShowSalePrice,
     pcardEnableQuickShop,
     pcardShowQuickShopOnHover,
+    pcardQuickShopButtonPlacement,
     pcardQuickShopButtonType,
     pcardQuickShopButtonText,
     pcardQuickShopPanelType,
@@ -59,6 +60,7 @@ export function ProductCard({
     useState<ProductVariantFragment | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const { images, badges, priceRange } = product;
+  console.log("🚀 ~ ProductCard ~ product:", product);
   const { minVariantPrice, maxVariantPrice } = priceRange;
 
   const firstVariant = product.selectedOrFirstAvailableVariant;
@@ -149,12 +151,13 @@ export function ProductCard({
           {pcardShowNewBadge && <NewBadge publishedAt={product.publishedAt} />}
           {pcardShowOutOfStockBadge && <SoldOutBadge />}
         </div>
-        {pcardEnableQuickShop && (
+        {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "image" && (
           <QuickShopTrigger
             productHandle={product.handle}
             showOnHover={pcardShowQuickShopOnHover}
             buttonType={pcardQuickShopButtonType}
             buttonText={pcardQuickShopButtonText}
+            placement="image"
           />
         )}
       </div>
@@ -221,7 +224,7 @@ export function ProductCard({
             />
           )}
         </div>
-        <ProductCardOptions
+        {/* <ProductCardOptions
           product={product}
           selectedVariant={selectedVariant}
           setSelectedVariant={(variant: ProductVariantFragment) => {
@@ -238,7 +241,16 @@ export function ProductCard({
               pcardAlignment === "right" && "justify-end",
             ],
           )}
-        />
+        /> */}
+        {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (
+          <QuickShopTrigger
+            productHandle={product.handle}
+            showOnHover={pcardShowQuickShopOnHover}
+            buttonType={pcardQuickShopButtonType}
+            buttonText={pcardQuickShopButtonText}
+            placement="bottom"
+          />
+        )}
       </div>
     </div>
   );

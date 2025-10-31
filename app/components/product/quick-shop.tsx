@@ -114,11 +114,13 @@ export function QuickShopTrigger({
   showOnHover = true,
   buttonType = "icon",
   buttonText = "Quick shop",
+  placement = "image",
 }: {
   productHandle: string;
   showOnHover?: boolean;
   buttonType?: "icon" | "text";
   buttonText?: string;
+  placement?: "image" | "bottom";
 }) {
   const [open, setOpen] = useState(false);
   const { load, data } = useFetcher<{ product: ProductQuery["product"] }>();
@@ -135,17 +137,21 @@ export function QuickShopTrigger({
       <Dialog.Trigger asChild>
         <Button
           animate={false}
-          variant="secondary"
+          variant={placement === "image" ? "secondary" : "outline"}
           className={clsx(
-            "group/quick-shop absolute bottom-4 h-10.5 p-3 leading-4",
-            buttonType === "icon"
-              ? "right-4 rounded-full shadow-xl"
-              : "inset-x-4 shadow-xs",
-            showOnHover &&
-              "opacity-0 transition-opacity group-hover:opacity-100",
+            "group/quick-shop h-10.5 p-3 leading-4",
+            placement === "image" && [
+              "absolute bottom-4",
+              buttonType === "icon"
+                ? "right-4 rounded-full shadow-xl"
+                : "inset-x-4 shadow-xs",
+              showOnHover &&
+                "opacity-0 transition-opacity group-hover:opacity-100",
+            ],
+            placement === "bottom" && ["w-full shadow-xs"],
           )}
         >
-          {buttonType === "icon" ? (
+          {buttonType === "icon" && placement === "image" ? (
             <>
               <HandbagSimpleIcon size={16} className="h-4 w-4" />
               <span className="w-0 overflow-hidden pl-0 text-base transition-all group-hover/quick-shop:w-9.5 group-hover/quick-shop:pl-2">
