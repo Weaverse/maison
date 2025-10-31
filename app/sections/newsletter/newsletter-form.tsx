@@ -37,13 +37,12 @@ function NewsLetterForm(props: NewsLetterInputProps) {
       <Form
         method="POST"
         action="/api/customer"
-        className="flex w-full items-center justify-center gap-[17px]"
+        className="flex flex-col md:flex-row w-full items-center justify-center gap-[17px]"
         data-motion="fade-up"
       >
         <div
-          className="flex items-center border rounded-sm"
+          className="border rounded-sm max-w-full"
           style={{
-            width,
             borderColor: inputBorderColor,
             backgroundColor: inputBackgroundColor,
           }}
@@ -53,7 +52,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
             type="email"
             required
             placeholder={placeholder}
-            className="w-full p-3 leading-tight focus:outline-hidden"
+            className="p-3 leading-tight focus:outline-hidden"
+            style={{ width }}
           />
         </div>
         <Button
@@ -64,9 +64,10 @@ function NewsLetterForm(props: NewsLetterInputProps) {
           {buttonText}
         </Button>
       </Form>
+
       <div
         className={clsx(
-          "mx-auto mt-4 text-center font-medium",
+          "mx-auto mt-4 text-center font-medium text-sm",
           state === "idle" && data ? "visible" : "invisible",
           ok ? "text-green-700" : "text-red-700",
         )}

@@ -63,7 +63,6 @@ export const schema = createSchema({
         as: "p",
         width: "full",
         alignment: "left",
-        textSize: "sm",
       },
     ],
   },
