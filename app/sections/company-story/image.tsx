@@ -64,7 +64,7 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
             gradientFrom={gradientFrom}
             gradientTo={gradientTo}
             gradientToOpacity={gradientToOpacity}
-            className="z-10"
+            className="z-[1]"
           />
         </>
       ) : (

@@ -6,7 +6,6 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type React from "react";
 import type { HTMLAttributes } from "react";
-import { useAnimation } from "~/hooks/use-animation";
 import { cn } from "~/utils/cn";
 import type { BackgroundImageProps } from "./background-image";
 import { backgroundInputs } from "./background-image";
@@ -116,7 +115,6 @@ export function Section(props: SectionProps) {
     style = {},
     ...rest
   } = props;
-  const [scope] = useAnimation(ref);
 
   style = {
     ...style,
@@ -127,7 +125,7 @@ export function Section(props: SectionProps) {
   if (width === "custom") {
     style = {
       ...style,
-      "--custom-width": `${customWidth}%`,
+      "--custom-width": `${customWidth}px`,
     } as React.CSSProperties;
   }
 
@@ -136,7 +134,7 @@ export function Section(props: SectionProps) {
 
   return (
     <Component
-      ref={scope}
+      ref={ref}
       {...rest}
       style={style}
       className={cn(
@@ -185,12 +183,12 @@ export const layoutInputs: InspectorGroup["inputs"] = [
     name: "customWidth",
     label: "Custom width",
     configs: {
-      min: 30,
-      max: 100,
+      min: 400,
+      max: 1920,
       step: 4,
-      unit: "%",
+      unit: "px",
     },
-    defaultValue: 50,
+    defaultValue: 900,
     condition: (data: LayoutData) => data.width === "custom",
   },
   {
