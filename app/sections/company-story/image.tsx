@@ -5,8 +5,10 @@ import {
   IMAGES_PLACEHOLDERS,
 } from "@weaverse/hydrogen";
 import { Image } from "~/components/image";
+import type { OverlayProps } from "~/components/overlay";
+import { Overlay, overlayInputs } from "~/components/overlay";
 
-interface CompanyStoryImageData {
+interface CompanyStoryImageData extends OverlayProps {
   heroImage?: WeaverseImage | string;
   altText?: string;
 }
@@ -18,7 +20,16 @@ interface CompanyStoryImageProps
 }
 
 const CompanyStoryImage = (props: CompanyStoryImageProps) => {
-  const { ref, heroImage, altText, ...rest } = props;
+  const {
+    ref,
+    heroImage,
+    altText,
+    enableOverlay,
+    overlayColor,
+    overlayColorHover,
+    overlayOpacity,
+    ...rest
+  } = props;
 
   return (
     <div
@@ -27,7 +38,7 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
       className="relative h-[280px] w-full overflow-hidden"
     >
       {heroImage ? (
-        <div className="relative size-full">
+        <>
           <Image
             data={
               typeof heroImage === "string"
@@ -38,16 +49,21 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
             loading="eager"
             sizes="100vw"
           />
-
-          <div className="absolute inset-0 bg-[rgba(155,141,73,0.24)]" />
-        </div>
+          <Overlay
+            enableOverlay={enableOverlay}
+            overlayColor={overlayColor}
+            overlayColorHover={overlayColorHover}
+            overlayOpacity={overlayOpacity}
+            className="z-10"
+          />
+        </>
       ) : (
         <Image
           data={{
             url: IMAGES_PLACEHOLDERS.banner_2,
             altText: "Company story hero image",
           }}
-          className="size-full border border-[#DCDCDC] object-cover"
+          className="size-full object-cover"
           loading="eager"
           sizes="100vw"
         />
@@ -77,6 +93,10 @@ export const schema = createSchema({
           defaultValue: "Company story hero image",
         },
       ],
+    },
+    {
+      group: "Overlay",
+      inputs: overlayInputs,
     },
   ],
 });

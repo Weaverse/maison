@@ -12,11 +12,7 @@ function CompanyStory(props: CompanyStoryProps) {
   const { ref, children, ...rest } = props;
 
   return (
-    <Section
-      ref={ref}
-      {...rest}
-      containerClassName="mx-auto max-w-[846px] px-5 md:px-6 lg:px-0"
-    >
+    <Section ref={ref} {...rest}>
       {children}
     </Section>
   );
@@ -38,8 +34,7 @@ export const schema = createSchema({
       group: "Layout",
       inputs: [
         ...layoutInputs.filter(
-          (i) =>
-            i.name !== "borderRadius" && i.name !== "width" && i.name !== "gap",
+          (i) => i.name !== "borderRadius" && i.name !== "gap",
         ),
       ],
     },
