@@ -83,6 +83,11 @@ import * as TestimonialItems from "~/sections/testimonials/items";
 import * as VariantList from "~/sections/variant-list";
 import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
+import * as CompanyStory from "~/sections/company-story";
+import * as CompanyStoryImage from "~/sections/company-story/image";
+import * as CompanyStoryContent from "~/sections/company-story/content";
+import * as CompanyStorySeparator from "~/sections/company-story/separator";
+import * as CompanyStoryContact from "~/sections/company-story/contact";
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -174,4 +179,9 @@ export const components: HydrogenComponent[] = [
   LogoList,
   LogoListItems,
   LogoListItem,
+  CompanyStory,
+  CompanyStoryImage,
+  CompanyStoryContent,
+  CompanyStorySeparator,
+  CompanyStoryContact,
 ];
