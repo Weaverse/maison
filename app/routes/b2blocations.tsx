@@ -1,6 +1,6 @@
 import { B2BLocationSelector } from "~/components/b2b/b2b-location-selector";
-import type { Route } from "./+types/b2blocations";
 import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query.account";
+import type { Route } from "./+types/b2blocations";
 
 export async function loader({ context }: Route.LoaderArgs) {
   const { customerAccount } = context;

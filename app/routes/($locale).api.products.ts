@@ -17,7 +17,7 @@ import { maybeFilterOutCombinedListingsQuery } from "~/utils/combined-listings";
  */
 export async function loader({
   request,
-  context: { storefront },
+  context: { storefront, customerAccount },
 }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
@@ -45,6 +45,14 @@ export async function loader({
     // noop
   }
 
+  const buyer = await customerAccount.getBuyer();
+  const buyerVariables =
+    buyer?.companyLocationId && buyer?.customerAccessToken
+      ? {
+          buyer,
+        }
+      : {};
+
   const combinedQuery = [maybeFilterOutCombinedListingsQuery, query]
     .filter(Boolean)
     .join(" ");
@@ -57,6 +65,7 @@ export async function loader({
         query: combinedQuery,
         reverse,
         sortKey,
+        ...buyerVariables,
         country: storefront.i18n.country,
         language: storefront.i18n.language,
       },
@@ -71,13 +80,14 @@ export async function loader({
 
 const API_ALL_PRODUCTS_QUERY = `#graphql
   query ApiAllProducts(
+    $buyer: BuyerInput
     $query: String
     $count: Int
     $reverse: Boolean
     $country: CountryCode
     $language: LanguageCode
     $sortKey: ProductSortKeys
-  ) @inContext(country: $country, language: $language) {
+  ) @inContext(buyer: $buyer, country: $country, language: $language) {
     products(first: $count, sortKey: $sortKey, reverse: $reverse, query: $query) {
       nodes {
         ...ProductCard

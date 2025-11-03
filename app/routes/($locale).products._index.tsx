@@ -14,17 +14,26 @@ export const headers = routeHeaders;
 
 export async function loader({
   request,
-  context: { storefront, weaverse },
+  context: { storefront, weaverse, customerAccount },
 }: LoaderFunctionArgs) {
   const variables = getPaginationVariables(request, {
     pageBy: PAGINATION_SIZE,
   });
+
+  const buyer = await customerAccount.getBuyer();
+  const buyerVariables =
+    buyer?.companyLocationId && buyer?.customerAccessToken
+      ? {
+          buyer,
+        }
+      : {};
 
   // Load products data and weaverseData in parallel
   const [data, weaverseData] = await Promise.all([
     storefront.query(ALL_PRODUCTS_QUERY, {
       variables: {
         ...variables,
+        ...buyerVariables,
         country: storefront.i18n.country,
         language: storefront.i18n.language,
         query: maybeFilterOutCombinedListingsQuery,
@@ -69,6 +78,7 @@ export default function AllProducts() {
 
 const ALL_PRODUCTS_QUERY = `#graphql
   query allProducts(
+    $buyer: BuyerInput
     $country: CountryCode
     $language: LanguageCode
     $first: Int
@@ -76,7 +86,7 @@ const ALL_PRODUCTS_QUERY = `#graphql
     $startCursor: String
     $endCursor: String
     $query: String
-  ) @inContext(country: $country, language: $language) {
+  ) @inContext(buyer: $buyer, country: $country, language: $language) {
     products(first: $first, last: $last, before: $startCursor, after: $endCursor, query: $query) {
       nodes {
         ...ProductCard

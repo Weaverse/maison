@@ -9,8 +9,8 @@ import { cva } from "class-variance-authority";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
 import type { ImageAspectRatio } from "~/types/image";
-import { calculateAspectRatio } from "~/utils/image";
 import { cn } from "~/utils/cn";
+import { calculateAspectRatio } from "~/utils/image";
 import type { FeaturedCollectionsLoaderData } from ".";
 
 const gridVariants = cva("grid", {

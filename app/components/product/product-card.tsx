@@ -60,7 +60,6 @@ export function ProductCard({
     useState<ProductVariantFragment | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const { images, badges, priceRange } = product;
-  console.log("🚀 ~ ProductCard ~ product:", product);
   const { minVariantPrice, maxVariantPrice } = priceRange;
 
   const firstVariant = product.selectedOrFirstAvailableVariant;

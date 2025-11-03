@@ -20,6 +20,8 @@ import {
   useRouteError,
   useRouteLoaderData,
 } from "react-router";
+import { B2BLocationProvider } from "./components/b2b/b2b-location-provider";
+import { B2BLocationSelector } from "./components/b2b/b2b-location-selector";
 import { Footer } from "./components/layout/footer";
 import { Header } from "./components/layout/header";
 import { ScrollingAnnouncement } from "./components/layout/scrolling-announcement";
@@ -35,8 +37,6 @@ import styles from "./styles/app.css?url";
 import { DEFAULT_LOCALE } from "./utils/const";
 import { loadCriticalData, loadDeferredData } from "./utils/root.server";
 import { GlobalStyle } from "./weaverse/style";
-import { B2BLocationProvider } from "./components/b2b/b2b-location-provider";
-import { B2BLocationSelector } from "./components/b2b/b2b-location-selector";
 
 export type RootLoader = typeof loader;
 

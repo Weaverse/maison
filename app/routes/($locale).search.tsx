@@ -27,7 +27,7 @@ import {
 
 export async function loader({
   request,
-  context: { storefront },
+  context: { storefront, customerAccount },
 }: LoaderFunctionArgs) {
   const { searchParams } = new URL(request.url);
   const searchTerm = searchParams.get("q");
@@ -41,10 +41,19 @@ export async function loader({
       pageBy: PAGINATION_SIZE,
     });
 
+    const buyer = await customerAccount.getBuyer();
+    const buyerVariables =
+      buyer?.companyLocationId && buyer?.customerAccessToken
+        ? {
+            buyer,
+          }
+        : {};
+
     const data = await storefront.query<SearchQuery>(SEARCH_QUERY, {
       variables: {
         searchTerm,
         ...variables,
+        ...buyerVariables,
         country: storefront.i18n.country,
         language: storefront.i18n.language,
       },
@@ -258,6 +267,7 @@ function getRecommendations(
 
 const SEARCH_QUERY = `#graphql
   query search(
+    $buyer: BuyerInput
     $country: CountryCode
     $endCursor: String
     $first: Int
@@ -265,7 +275,7 @@ const SEARCH_QUERY = `#graphql
     $last: Int
     $searchTerm: String
     $startCursor: String
-  ) @inContext(country: $country, language: $language) {
+  ) @inContext(buyer: $buyer, country: $country, language: $language) {
     products(
       first: $first,
       last: $last,

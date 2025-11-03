@@ -1,9 +1,9 @@
 import { CartForm } from "@shopify/hydrogen";
-import { useB2BLocation } from "./b2b-location-provider";
 import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
 } from "~/graphql/customer-locations-query.account";
+import { useB2BLocation } from "./b2b-location-provider";
 
 export function B2BLocationSelector() {
   const { company, modalOpen, setModalOpen } = useB2BLocation();
@@ -17,7 +17,7 @@ export function B2BLocationSelector() {
       )
     : [];
 
-  if (!company || !modalOpen) return null;
+  if (!(company && modalOpen)) return null;
 
   return (
     <div className="modal">
