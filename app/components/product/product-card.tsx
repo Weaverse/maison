@@ -163,7 +163,7 @@ export function ProductCard({
       <div
         className={clsx(
           "h-full",
-          "flex flex-col gap-2 py-5 text-sm",
+          "flex flex-col gap-3 py-5 text-sm",
           pcardBackgroundColor && "px-2",
           isVertical && [
             pcardAlignment === "left" && "text-left",
@@ -173,7 +173,7 @@ export function ProductCard({
         )}
       >
         {pcardShowVendor && (
-          <div className="text-body-subtle uppercase">{product.vendor}</div>
+          <div className="text-body-subtle">{product.vendor}</div>
         )}
         {pcardShowReviews && (
           <JudgemeStarsRating
@@ -200,7 +200,7 @@ export function ProductCard({
           <Link
             to={`/products/${product.handle}?${params.toString()}`}
             prefetch="intent"
-            className="font-bold"
+            className="font-semibold"
           >
             <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal">
               {product.title}
@@ -224,7 +224,7 @@ export function ProductCard({
             />
           )}
         </div>
-        <ProductCardOptions
+        {/* <ProductCardOptions
           product={product}
           selectedVariant={selectedVariant}
           setSelectedVariant={(variant: ProductVariantFragment) => {
@@ -241,7 +241,7 @@ export function ProductCard({
               pcardAlignment === "right" && "justify-end",
             ],
           )}
-        />
+        /> */}
         {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes
           ?.length > 0 && (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1">
