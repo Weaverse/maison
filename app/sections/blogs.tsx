@@ -1,19 +1,54 @@
 import { createSchema } from "@weaverse/hydrogen";
 import { useLoaderData } from "react-router";
+import { useState } from "react";
 import type { ArticleFragment, BlogQuery } from "storefront-api.generated";
+import { cva, type VariantProps } from "class-variance-authority";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
-import { RevealUnderline } from "~/components/reveal-underline";
 import { layoutInputs, Section, type SectionProps } from "~/components/section";
+import { Button } from "~/components/button";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio, getImageLoadingPriority } from "~/utils/image";
 
+const variants = cva("grid gap-x-4 gap-y-10", {
+  variants: {
+    mobileGridSize: {
+      "1": "grid-cols-1",
+      "2": "grid-cols-2",
+      "3": "grid-cols-3",
+    },
+    desktopGridSize: {
+      "3": "md:grid-cols-3",
+      "4": "md:grid-cols-4",
+      "5": "md:grid-cols-5",
+      "6": "md:grid-cols-6",
+    },
+  },
+  defaultVariants: {
+    mobileGridSize: "2",
+    desktopGridSize: "4",
+  },
+});
+
+interface BlogsData {
+  layout: "blog" | "default";
+  cardGap: number;
+  titleColor: string;
+  metaColor: string;
+  imageBorderRadius: number;
+  showLoadMore: boolean;
+  loadMoreText: string;
+  initialArticlesToShow: number;
+  loadMoreCount: number;
+}
+
 interface BlogsProps
   extends Omit<ArticleCardProps, "article" | "blogHandle" | "loading">,
-    SectionProps {
+    SectionProps,
+    VariantProps<typeof variants>,
+    BlogsData {
   ref: React.Ref<HTMLElement>;
-  layout: "blog" | "default";
 }
 
 export default function Blogs(props: BlogsProps) {
@@ -25,6 +60,16 @@ export default function Blogs(props: BlogsProps) {
     showDate,
     showReadmore,
     imageAspectRatio,
+    cardGap,
+    mobileGridSize,
+    desktopGridSize,
+    titleColor,
+    metaColor,
+    imageBorderRadius,
+    showLoadMore,
+    loadMoreText,
+    initialArticlesToShow,
+    loadMoreCount,
     ...rest
   } = props;
 
@@ -32,12 +77,19 @@ export default function Blogs(props: BlogsProps) {
     BlogQuery & { articles: ArticleFragment[] }
   >();
 
+  const [visibleCount, setVisibleCount] = useState(initialArticlesToShow);
+  const visibleArticles = articles.slice(0, visibleCount);
+  const hasMore = visibleCount < articles.length;
+
+  const handleLoadMore = () => {
+    setVisibleCount((v) => v + loadMoreCount);
+  };
+
   if (blog) {
     return (
       <Section ref={ref} {...rest}>
-        <h4 className="text-center font-medium">{blog.title}</h4>
-        <div className="grid grid-cols-1 gap-x-4 gap-y-12 lg:grid-cols-3">
-          {articles.map((article, i) => (
+        <div className={cn(variants({ mobileGridSize, desktopGridSize }))}>
+          {visibleArticles.map((article, i) => (
             <ArticleCard
               key={article.id}
               blogHandle={blog.handle}
@@ -48,9 +100,21 @@ export default function Blogs(props: BlogsProps) {
               showDate={showDate}
               showReadmore={showReadmore}
               imageAspectRatio={imageAspectRatio}
+              titleColor={titleColor}
+              metaColor={metaColor}
+              imageBorderRadius={imageBorderRadius}
+              cardGap={cardGap}
             />
           ))}
         </div>
+
+        {showLoadMore && hasMore && (
+          <div className="flex justify-center mt-10">
+            <Button type="button" onClick={handleLoadMore}>
+              {loadMoreText}
+            </Button>
+          </div>
+        )}
       </Section>
     );
   }
@@ -66,6 +130,10 @@ export interface ArticleCardProps {
   showAuthor: boolean;
   showReadmore: boolean;
   imageAspectRatio: ImageAspectRatio;
+  titleColor: string;
+  metaColor: string;
+  imageBorderRadius: number;
+  cardGap: number;
   className?: string;
 }
 
@@ -78,14 +146,21 @@ export function ArticleCard({
   showDate,
   showReadmore,
   imageAspectRatio,
+  titleColor,
+  metaColor,
+  imageBorderRadius,
+  cardGap,
   className,
 }: ArticleCardProps) {
   return (
-    <div className={cn("flex flex-col gap-5", className)}>
+    <div
+      className={cn("flex flex-col", className)}
+      style={{ gap: `${cardGap}px` }}
+    >
       {article.image && (
         <Link
           to={`/blogs/${blogHandle}/${article.handle}`}
-          className="flex flex-col gap-5"
+          className="flex flex-col"
         >
           <Image
             alt={article.image.altText || article.title}
@@ -93,39 +168,58 @@ export function ArticleCard({
             aspectRatio={calculateAspectRatio(article.image, imageAspectRatio)}
             loading={loading}
             sizes="(min-width: 768px) 50vw, 100vw"
+            style={{ borderRadius: `${imageBorderRadius}px` }}
           />
         </Link>
       )}
-      <div className="space-y-2.5">
+      <Link
+        to={`/blogs/${blogHandle}/${article.handle}`}
+        className="inline-block"
+      >
+        <h6
+          className="text-2xl leading-8 font-normal hover:underline line-clamp-2"
+          style={{ color: titleColor }}
+        >
+          {article.title}
+        </h6>
+      </Link>
+      {(showDate || showAuthor) && (
+        <div
+          className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
+          style={{ color: metaColor }}
+        >
+          {showDate && (
+            <span className="text-sm">
+              {new Date(article.publishedAt).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+              {showAuthor && " —"}
+            </span>
+          )}
+          {showAuthor && (
+            <span className="text-sm">{article.author?.name}</span>
+          )}
+        </div>
+      )}
+      {showExcerpt && (
+        <div
+          className="line-clamp-2 lg:line-clamp-4"
+          style={{ color: metaColor }}
+        >
+          {article.excerpt}
+        </div>
+      )}
+      {showReadmore && (
         <Link
           to={`/blogs/${blogHandle}/${article.handle}`}
-          className="inline-block"
+          variant="underline"
+          style={{ color: metaColor }}
         >
-          <RevealUnderline className="text-xl leading-6">
-            {article.title}
-          </RevealUnderline>
+          Read more →
         </Link>
-        <div className="flex items-center gap-2 text-gray-600 empty:hidden">
-          {showDate && <span className="block">{article.publishedAt}</span>}
-          {showDate && showAuthor && <span>•</span>}
-          {showAuthor && <span className="block">{article.author?.name}</span>}
-        </div>
-        {showExcerpt && (
-          <div className="line-clamp-2 text-gray-700 lg:line-clamp-4">
-            {article.excerpt}
-          </div>
-        )}
-        {showReadmore && (
-          <div>
-            <Link
-              to={`/blogs/${blogHandle}/${article.handle}`}
-              variant="underline"
-            >
-              Read more →
-            </Link>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
@@ -138,15 +232,108 @@ export const schema = createSchema({
     pages: ["BLOG"],
   },
   settings: [
-    { group: "Layout", inputs: layoutInputs },
+    {
+      group: "Layout",
+      inputs: layoutInputs.filter(
+        (i) => i.name !== "gap" && i.name !== "borderRadius",
+      ),
+    },
+    {
+      group: "Article item",
+      inputs: [
+        {
+          type: "range",
+          name: "cardGap",
+          label: "Card content gap",
+          configs: {
+            min: 0,
+            max: 40,
+            step: 4,
+            unit: "px",
+          },
+          defaultValue: 16,
+        },
+        {
+          type: "toggle-group",
+          name: "mobileGridSize",
+          label: "Columns (mobile)",
+          defaultValue: "2",
+          configs: {
+            options: [
+              { value: "1", label: "1" },
+              { value: "2", label: "2" },
+              { value: "3", label: "3" },
+            ],
+          },
+        },
+        {
+          type: "toggle-group",
+          name: "desktopGridSize",
+          label: "Columns (desktop)",
+          defaultValue: "4",
+          configs: {
+            options: [
+              { value: "3", label: "3" },
+              { value: "4", label: "4" },
+              { value: "5", label: "5" },
+              { value: "6", label: "6" },
+            ],
+          },
+        },
+        {
+          type: "switch",
+          name: "showLoadMore",
+          label: "Show 'Load more' button",
+          defaultValue: true,
+        },
+        {
+          type: "text",
+          name: "loadMoreText",
+          label: "Load more button text",
+          defaultValue: "LOAD MORE",
+        },
+        {
+          type: "range",
+          name: "initialArticlesToShow",
+          label: "Initial articles to show",
+          configs: {
+            min: 1,
+            max: 20,
+            step: 1,
+          },
+          defaultValue: 12,
+        },
+        {
+          type: "range",
+          name: "loadMoreCount",
+          label: "Load more count",
+          configs: {
+            min: 1,
+            max: 20,
+            step: 1,
+          },
+          defaultValue: 8,
+        },
+      ],
+    },
     {
       group: "Article card",
       inputs: [
         {
+          type: "color",
+          name: "titleColor",
+          label: "Title color",
+        },
+        {
+          type: "color",
+          name: "metaColor",
+          label: "Meta color",
+        },
+        {
           type: "select",
           name: "imageAspectRatio",
           label: "Image aspect ratio",
-          defaultValue: "adapt",
+          defaultValue: "1/1",
           configs: {
             options: [
               { value: "adapt", label: "Adapt to image" },
@@ -163,25 +350,37 @@ export const schema = createSchema({
           type: "switch",
           name: "showExcerpt",
           label: "Show excerpt",
-          defaultValue: true,
+          defaultValue: false,
         },
         {
           type: "switch",
           name: "showDate",
           label: "Show date",
-          defaultValue: false,
+          defaultValue: true,
         },
         {
           type: "switch",
           name: "showAuthor",
-          label: "Show author",
-          defaultValue: false,
+          label: "Show author name",
+          defaultValue: true,
         },
         {
           type: "switch",
           name: "showReadmore",
-          label: "Show read more",
-          defaultValue: true,
+          label: "Show 'Read more' link",
+          defaultValue: false,
+        },
+        {
+          type: "range",
+          name: "imageBorderRadius",
+          label: "Image border radius",
+          defaultValue: 4,
+          configs: {
+            min: 0,
+            max: 50,
+            step: 1,
+            unit: "px",
+          },
         },
       ],
     },
