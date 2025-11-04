@@ -12,15 +12,15 @@ import {
 import useWindowScroll from "react-use/esm/useWindowScroll";
 import Link from "~/components/link";
 import { Logo } from "~/components/logo";
+import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query.account";
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
+import { useB2BLocation } from "../b2b/b2b-location-provider";
 import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
 import { PredictiveSearchButton } from "./predictive-search";
-import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query.account";
-import { useB2BLocation } from "../b2b/b2b-location-provider";
 
 const variants = cva("", {
   variants: {

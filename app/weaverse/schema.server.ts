@@ -757,6 +757,19 @@ export const themeSchema: HydrogenThemeSchema = {
         },
         {
           type: "select",
+          label: "Quick shop button placement",
+          name: "pcardQuickShopButtonPlacement",
+          configs: {
+            options: [
+              { value: "image", label: "On product image" },
+              { value: "bottom", label: "At card bottom" },
+            ],
+          },
+          defaultValue: "image",
+          condition: (theme) => theme.pcardEnableQuickShop === true,
+        },
+        {
+          type: "select",
           label: "Quick shop button type",
           name: "pcardQuickShopButtonType",
           configs: {

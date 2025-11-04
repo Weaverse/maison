@@ -93,7 +93,11 @@ export async function loader(args: LoaderFunctionArgs) {
   }
 
   // Use Hydrogen/Remix streaming for recommended products
-  const recommended = getRecommendedProducts(storefront, product.id);
+  const recommended = getRecommendedProducts(
+    storefront,
+    product.id,
+    buyerVariables,
+  );
 
   return {
     shop,

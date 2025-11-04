@@ -45,6 +45,7 @@ export function ProductCard({
     pcardShowSalePrice,
     pcardEnableQuickShop,
     pcardShowQuickShopOnHover,
+    pcardQuickShopButtonPlacement,
     pcardQuickShopButtonType,
     pcardQuickShopButtonText,
     pcardQuickShopPanelType,
@@ -86,7 +87,7 @@ export function ProductCard({
 
   return (
     <div
-      className={clsx("rounded-(--pcard-radius)", className)}
+      className={clsx("rounded-(--pcard-radius) flex flex-col", className)}
       style={
         {
           backgroundColor: pcardBackgroundColor,
@@ -149,18 +150,20 @@ export function ProductCard({
           {pcardShowNewBadge && <NewBadge publishedAt={product.publishedAt} />}
           {pcardShowOutOfStockBadge && <SoldOutBadge />}
         </div>
-        {pcardEnableQuickShop && (
+        {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "image" && (
           <QuickShopTrigger
             productHandle={product.handle}
             showOnHover={pcardShowQuickShopOnHover}
             buttonType={pcardQuickShopButtonType}
             buttonText={pcardQuickShopButtonText}
+            placement="image"
           />
         )}
       </div>
       <div
         className={clsx(
-          "space-y-2 py-3 text-sm",
+          "h-full",
+          "flex flex-col gap-3 py-5 text-sm",
           pcardBackgroundColor && "px-2",
           isVertical && [
             pcardAlignment === "left" && "text-left",
@@ -170,7 +173,7 @@ export function ProductCard({
         )}
       >
         {pcardShowVendor && (
-          <div className="text-body-subtle uppercase">{product.vendor}</div>
+          <div className="text-body-subtle">{product.vendor}</div>
         )}
         {pcardShowReviews && (
           <JudgemeStarsRating
@@ -197,7 +200,7 @@ export function ProductCard({
           <Link
             to={`/products/${product.handle}?${params.toString()}`}
             prefetch="intent"
-            className="font-bold"
+            className="font-semibold"
           >
             <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal">
               {product.title}
@@ -221,7 +224,7 @@ export function ProductCard({
             />
           )}
         </div>
-        <ProductCardOptions
+        {/* <ProductCardOptions
           product={product}
           selectedVariant={selectedVariant}
           setSelectedVariant={(variant: ProductVariantFragment) => {
@@ -238,8 +241,24 @@ export function ProductCard({
               pcardAlignment === "right" && "justify-end",
             ],
           )}
-        />
+        /> */}
+        {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes
+          ?.length > 0 && (
+          <div className="text-xs text-body-subtle inline-flex items-center gap-1">
+            <span className="block size-1.5 bg-line rounded-full"/>
+            <span>Volume pricing available</span>
+          </div>
+        )}
       </div>
+      {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (
+        <QuickShopTrigger
+          productHandle={product.handle}
+          showOnHover={pcardShowQuickShopOnHover}
+          buttonType={pcardQuickShopButtonType}
+          buttonText={pcardQuickShopButtonText}
+          placement="bottom"
+        />
+      )}
     </div>
   );
 }

@@ -36,8 +36,8 @@ export default function FeaturedProducts(props: FeaturedProductsProps) {
 }
 
 const FEATURED_PRODUCTS_QUERY = `#graphql
-  query featuredProducts($country: CountryCode, $language: LanguageCode, $query: String)
-  @inContext(country: $country, language: $language) {
+  query featuredProducts($buyer: BuyerInput, $country: CountryCode, $language: LanguageCode, $query: String)
+  @inContext(buyer: $buyer, country: $country, language: $language) {
     products(first: 16, query: $query) {
       nodes {
         ...ProductCard
@@ -48,8 +48,8 @@ const FEATURED_PRODUCTS_QUERY = `#graphql
 `;
 
 const COLLECTION_PRODUCTS_QUERY = `#graphql
-  query collectionProducts($country: CountryCode, $language: LanguageCode, $handle: String!)
-  @inContext(country: $country, language: $language) {
+  query collectionProducts($buyer: BuyerInput, $country: CountryCode, $language: LanguageCode, $handle: String!)
+  @inContext(buyer: $buyer, country: $country, language: $language) {
     collection(handle: $handle) {
       products(first: 16) {
         nodes {
@@ -62,8 +62,8 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
 `;
 
 const PRODUCTS_BY_IDS_QUERY = `#graphql
-  query productsByIds($country: CountryCode, $language: LanguageCode, $ids: [ID!]!)
-  @inContext(country: $country, language: $language) {
+  query productsByIds($buyer: BuyerInput, $country: CountryCode, $language: LanguageCode, $ids: [ID!]!)
+  @inContext(buyer: $buyer, country: $country, language: $language) {
     nodes(ids: $ids) {
       ... on Product {
         ...ProductCard
@@ -75,12 +75,15 @@ const PRODUCTS_BY_IDS_QUERY = `#graphql
 
 export type FeaturedProductsLoaderData = Awaited<ReturnType<typeof loader>>;
 
-export const loader = async ({
-  data,
-  weaverse,
-}: ComponentLoaderArgs<FeaturedProductsData>) => {
+export const loader = async (
+  args: ComponentLoaderArgs<FeaturedProductsData>,
+) => {
+  const { data, weaverse } = args;
   const { language, country } = weaverse.storefront.i18n;
   const { selectionMethod = "auto", collection, products } = data;
+
+  const buyer = await weaverse.customerAccount.getBuyer();
+  const buyerVariables = buyer ? { buyer } : {};
 
   if (selectionMethod === "collection" && collection?.handle) {
     const result = await weaverse.storefront.query<CollectionProductsQuery>(
@@ -90,6 +93,7 @@ export const loader = async ({
           country,
           language,
           handle: collection.handle,
+          ...buyerVariables,
         },
       },
     );
@@ -111,6 +115,7 @@ export const loader = async ({
           country,
           language,
           ids,
+          ...buyerVariables,
         },
       },
     );
@@ -129,6 +134,7 @@ export const loader = async ({
         country,
         language,
         query: maybeFilterOutCombinedListingsQuery,
+        ...buyerVariables,
       },
     },
   );
