@@ -99,11 +99,13 @@ export default function CartRoute() {
 
   return (
     <>
-      <div className="space-y-6 px-3 py-6 md:space-y-12 md:px-10 md:py-20 lg:px-16">
-        <h3 className="text-center">Cart</h3>
-        <Await resolve={rootData?.cart}>
-          {(cart) => <Cart layout="page" cart={cart as CartApiQueryFragment} />}
-        </Await>
+      <div className="px-3 py-6 md:px-10 md:py-12 lg:px-16 bg-[#F2F0EE]">
+        <div className="mx-auto w-full max-w-[66em]">
+          <h1 className="mb-8 text-2xl font-normal md:text-3xl leading-normal">Cart</h1>
+          <Await resolve={rootData?.cart}>
+            {(cart) => <Cart layout="page" cart={cart as CartApiQueryFragment} />}
+          </Await>
+        </div>
       </div>
       <Analytics.CartView />
     </>
