@@ -55,6 +55,8 @@ import * as PromotionGrid from "~/sections/promotion-grid";
 import * as PromotionGridButtons from "~/sections/promotion-grid/buttons";
 import * as PromotionGridItem from "~/sections/promotion-grid/item";
 import * as RelatedArticles from "~/sections/related-articles";
+import * as RelatedArticlesHeader from "~/sections/related-articles/related-articles-header";
+import * as RelatedArticlesItems from "~/sections/related-articles/related-articles-items";
 import * as RelatedProducts from "~/sections/related-products";
 import * as SingleProduct from "~/sections/single-product";
 import * as SlideShow from "~/sections/slideshow";
@@ -148,6 +150,8 @@ export const components: HydrogenComponent[] = [
   ProductCollapsibleDetails,
   RelatedProducts,
   RelatedArticles,
+  RelatedArticlesHeader,
+  RelatedArticlesItems,
   CollectionFilters,
   CollectionList,
   CollectionListItems,
