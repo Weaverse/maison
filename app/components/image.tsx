@@ -40,7 +40,7 @@ export function Image({ ref, className, onLoad, ...rest }: ImageProps) {
   const hydrogenImageRef = useRef<HTMLImageElement>(null);
   const url = rest.data?.url || "";
   const [loaded, setLoaded] = useState(() =>
-    imageLoadedCache.has(rest.data.url),
+    rest.data?.url && imageLoadedCache.has(rest.data?.url),
   );
   useEffect(() => {
     if (hydrogenImageRef.current?.complete) {
