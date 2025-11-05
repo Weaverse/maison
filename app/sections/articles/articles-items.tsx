@@ -93,11 +93,11 @@ function ArticlesItems(props: ArticlesItemsProps) {
                 Title here
               </h6>
               <div
-                className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
+                className="flex flex-wrap gap-1 text-sm"
                 style={{ color: metaColor }}
               >
-                <span className="text-sm">Date here —</span>
-                <span className="text-sm">Author here</span>
+                <span>Date here —</span>
+                <span>Author here</span>
               </div>
             </div>
           </div>
@@ -183,11 +183,11 @@ function ArticleCard({
         </Link>
         {(showDate || showAuthor) && (
           <div
-            className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
+            className="flex flex-wrap gap-1 text-sm"
             style={{ color: metaColor }}
           >
             {showDate && (
-              <span className="text-sm">
+              <span>
                 {new Date(article.publishedAt).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -196,9 +196,7 @@ function ArticleCard({
                 {showAuthor && " —"}
               </span>
             )}
-            {showAuthor && (
-              <span className="text-sm">{article.author?.name}</span>
-            )}
+            {showAuthor && <span>{article.author?.name}</span>}
           </div>
         )}
       </div>

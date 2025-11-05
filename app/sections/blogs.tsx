@@ -185,11 +185,11 @@ export function ArticleCard({
       </Link>
       {(showDate || showAuthor) && (
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
+          className="flex flex-wrap text-sm gap-1"
           style={{ color: metaColor }}
         >
           {showDate && (
-            <span className="text-sm">
+            <span>
               {new Date(article.publishedAt).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
@@ -198,9 +198,7 @@ export function ArticleCard({
               {showAuthor && " —"}
             </span>
           )}
-          {showAuthor && (
-            <span className="text-sm">{article.author?.name}</span>
-          )}
+          {showAuthor && <span>{article.author?.name}</span>}
         </div>
       )}
       {showExcerpt && (
