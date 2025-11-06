@@ -82,7 +82,7 @@ export const loader = async (
   const { language, country } = weaverse.storefront.i18n;
   const { selectionMethod = "auto", collection, products } = data;
 
-  const buyer = await weaverse.customerAccount.getBuyer();
+  const buyer = await weaverse.customerAccount?.getBuyer();
   const buyerVariables = buyer ? { buyer } : {};
 
   if (selectionMethod === "collection" && collection?.handle) {
