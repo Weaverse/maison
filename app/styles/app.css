@@ -188,8 +188,8 @@
   }
 
   mark {
-    background-color: none;
-    font-weight: 500;
+    background-color: transparent;
+    font-weight: 600;
   }
 }
 

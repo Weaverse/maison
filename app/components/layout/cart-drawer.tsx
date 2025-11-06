@@ -1,4 +1,4 @@
-import { HandbagIcon, XIcon } from "@phosphor-icons/react";
+import { ShoppingBagIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { type CartReturn, useAnalytics } from "@shopify/hydrogen";
 import clsx from "clsx";
@@ -26,7 +26,7 @@ export function CartDrawer() {
           to="/cart"
           className="relative flex h-8 w-8 items-center justify-center focus:ring-border"
         >
-          <HandbagIcon className="h-5 w-5" />
+          <ShoppingBagIcon className="h-5 w-5" />
         </Link>
       }
     >
@@ -37,7 +37,7 @@ export function CartDrawer() {
               onClick={() => publish("custom_sidecart_viewed", { cart })}
               className="relative flex h-8 w-8 items-center justify-center focus:ring-border"
             >
-              <HandbagIcon className="h-5 w-5" />
+              <ShoppingBagIcon className="h-5 w-5" />
               {cart?.totalQuantity > 0 && (
                 <div
                   className={clsx(
