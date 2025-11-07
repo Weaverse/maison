@@ -19,21 +19,10 @@ interface BlogPostProps extends SectionProps {
   ref: React.Ref<HTMLElement>;
   showTags: boolean;
   showShareButtons: boolean;
-  titleColor: string;
-  metaColor: string;
-  contentColor: string;
 }
 
 export default function BlogPost(props: BlogPostProps) {
-  const {
-    ref,
-    showTags,
-    showShareButtons,
-    titleColor,
-    metaColor,
-    contentColor,
-    ...rest
-  } = props;
+  const { ref, showTags, showShareButtons, ...rest } = props;
   const { layout } = useRouteLoaderData<RootLoader>("root");
   const { article, blog, formattedDate } = useLoaderData<{
     article: ArticleQuery["blog"]["articleByHandle"];
@@ -65,12 +54,9 @@ export default function BlogPost(props: BlogPostProps) {
         )}
 
         <div className="px-5 py-20 md:px-20 lg:px-0 lg:max-w-[728px] mx-auto">
-          <h2 style={{ color: titleColor }}>{title}</h2>
+          <h3 className="h3 leading-tight!">{title}</h3>
 
-          <div
-            className="text-sm flex flex-wrap gap-1 pt-4"
-            style={{ color: metaColor }}
-          >
+          <div className="text-sm flex flex-wrap gap-1 pt-4 text-body-subtle">
             {formattedDate && (
               <span>
                 {formattedDate}
@@ -85,7 +71,6 @@ export default function BlogPost(props: BlogPostProps) {
               <div
                 suppressHydrationWarning
                 dangerouslySetInnerHTML={{ __html: contentHtml }}
-                style={{ color: contentColor }}
               />
 
               {(showTags || showShareButtons) && (
@@ -149,21 +134,6 @@ export const schema = createSchema({
           label: "Show share buttons",
           name: "showShareButtons",
           defaultValue: true,
-        },
-        {
-          type: "color",
-          name: "titleColor",
-          label: "Title color",
-        },
-        {
-          type: "color",
-          name: "metaColor",
-          label: "Meta color (date/author)",
-        },
-        {
-          type: "color",
-          name: "contentColor",
-          label: "Content color",
         },
       ],
     },
