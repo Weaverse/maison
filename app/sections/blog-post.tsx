@@ -54,7 +54,7 @@ export default function BlogPost(props: BlogPostProps) {
         )}
 
         <div className="px-5 py-20 md:px-20 lg:px-0 lg:max-w-[728px] mx-auto">
-          <h3 className="h3 leading-tight!">{title}</h3>
+          <h1 className="h3 leading-tight!">{title}</h1>
 
           <div className="text-sm flex flex-wrap gap-1 pt-4 text-body-subtle">
             {formattedDate && (
@@ -74,31 +74,36 @@ export default function BlogPost(props: BlogPostProps) {
               />
 
               {(showTags || showShareButtons) && (
-                <div className="mx-auto w-1/3 border-line-subtle border-t" />
-              )}
+                <>
+                  <div className="mx-auto w-1/3 border-line-subtle border-t" />
 
-              <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                {showTags && (
-                  <div>
-                    <strong>Tags:</strong>
-                    <span className="ml-2">{tags.join(", ")}</span>
+                  <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                    {showTags && (
+                      <div>
+                        <strong>Tags:</strong>
+                        <span className="ml-2">{tags.join(", ")}</span>
+                      </div>
+                    )}
+                    {showShareButtons && (
+                      <div className="flex items-center gap-2">
+                        <strong>Share:</strong>
+                        <FacebookShareButton url={articleUrl}>
+                          <FacebookLogoIcon size={24} />
+                        </FacebookShareButton>
+                        <PinterestShareButton
+                          url={articleUrl}
+                          media={image?.url}
+                        >
+                          <PinterestLogoIcon size={24} />
+                        </PinterestShareButton>
+                        <TwitterShareButton url={articleUrl} title={title}>
+                          <XLogoIcon size={24} />
+                        </TwitterShareButton>
+                      </div>
+                    )}
                   </div>
-                )}
-                {showShareButtons && (
-                  <div className="flex items-center gap-2">
-                    <strong>Share:</strong>
-                    <FacebookShareButton url={articleUrl}>
-                      <FacebookLogoIcon size={24} />
-                    </FacebookShareButton>
-                    <PinterestShareButton url={articleUrl} media={image?.url}>
-                      <PinterestLogoIcon size={24} />
-                    </PinterestShareButton>
-                    <TwitterShareButton url={articleUrl} title={title}>
-                      <XLogoIcon size={24} />
-                    </TwitterShareButton>
-                  </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </article>
         </div>
