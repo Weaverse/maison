@@ -210,13 +210,15 @@ export function ArticleCard({
         </div>
       )}
       {showReadmore && (
-        <Link
-          to={`/blogs/${blogHandle}/${article.handle}`}
-          variant="underline"
-          style={{ color: metaColor }}
-        >
-          Read more →
-        </Link>
+        <div>
+          <Link
+            to={`/blogs/${blogHandle}/${article.handle}`}
+            variant="underline"
+            style={{ color: metaColor }}
+          >
+            Read more →
+          </Link>
+        </div>
       )}
     </div>
   );
