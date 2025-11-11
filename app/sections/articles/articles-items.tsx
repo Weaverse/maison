@@ -27,10 +27,24 @@ const variants = cva("grid", {
       "5": "md:grid-cols-5",
       "6": "md:grid-cols-6",
     },
+    gap: {
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
+    },
   },
   defaultVariants: {
     mobileGridSize: "2",
     desktopGridSize: "4",
+    gap: 16,
   },
 });
 
@@ -38,7 +52,6 @@ interface ArticlesItemsProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
-  gap?: number;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;
   showDate: boolean;
@@ -73,8 +86,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
       <div
         ref={scope}
         {...rest}
-        className={cn(variants({ mobileGridSize, desktopGridSize }))}
-        style={{ gap: `${gap}px` }}
+        className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
       >
         {Array.from({ length: itemsToShow }).map((_, i) => (
           <div key={i} className="flex flex-col gap-5">
@@ -112,8 +124,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
     <div
       ref={scope}
       {...rest}
-      className={cn(variants({ mobileGridSize, desktopGridSize }))}
-      style={{ gap: `${gap}px` }}
+      className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
     >
       {articles.slice(0, itemsToShow).map((article) => (
         <ArticleCard
