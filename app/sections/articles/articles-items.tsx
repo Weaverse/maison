@@ -109,25 +109,25 @@ function ArticlesItems(props: ArticlesItemsProps) {
   const { articles, blogHandle } = data;
 
   return (
-    <div ref={scope} {...rest}>
-      <div
-        className={cn(variants({ mobileGridSize, desktopGridSize }))}
-        style={{ gap: `${gap}px` }}
-      >
-        {articles.slice(0, itemsToShow).map((article) => (
-          <ArticleCard
-            key={article.id}
-            article={article}
-            blogHandle={blogHandle}
-            imageAspectRatio={imageAspectRatio}
-            showAuthor={showAuthor}
-            showDate={showDate}
-            imageBorderRadius={imageBorderRadius}
-            titleColor={titleColor}
-            metaColor={metaColor}
-          />
-        ))}
-      </div>
+    <div
+      ref={scope}
+      {...rest}
+      className={cn(variants({ mobileGridSize, desktopGridSize }))}
+      style={{ gap: `${gap}px` }}
+    >
+      {articles.slice(0, itemsToShow).map((article) => (
+        <ArticleCard
+          key={article.id}
+          article={article}
+          blogHandle={blogHandle}
+          imageAspectRatio={imageAspectRatio}
+          showAuthor={showAuthor}
+          showDate={showDate}
+          imageBorderRadius={imageBorderRadius}
+          titleColor={titleColor}
+          metaColor={metaColor}
+        />
+      ))}
     </div>
   );
 }
