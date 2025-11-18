@@ -56,8 +56,6 @@ interface ArticlesItemsProps
   showAuthor: boolean;
   showDate: boolean;
   imageBorderRadius: number;
-  titleColor: string;
-  metaColor: string;
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
@@ -68,8 +66,6 @@ function ArticlesItems(props: ArticlesItemsProps) {
     showAuthor,
     showDate,
     imageBorderRadius,
-    titleColor,
-    metaColor,
     mobileGridSize,
     desktopGridSize,
     ...rest
@@ -89,7 +85,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
         className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
       >
         {Array.from({ length: itemsToShow }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-5">
+          <div key={i} className="flex flex-col gap-5" data-motion="fade-up">
             <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
               <Image
                 data={{ url: IMAGES_PLACEHOLDERS.image }}
@@ -98,16 +94,8 @@ function ArticlesItems(props: ArticlesItemsProps) {
               />
             </div>
             <div className="flex flex-col gap-4">
-              <h6
-                className="text-2xl leading-8 font-normal"
-                style={{ color: titleColor }}
-              >
-                Title here
-              </h6>
-              <div
-                className="flex flex-wrap gap-1 text-sm"
-                style={{ color: metaColor }}
-              >
+              <h6 className="text-2xl leading-8 font-normal">Title here</h6>
+              <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
                 <span>Date here —</span>
                 <span>Author here</span>
               </div>
@@ -135,8 +123,6 @@ function ArticlesItems(props: ArticlesItemsProps) {
           showAuthor={showAuthor}
           showDate={showDate}
           imageBorderRadius={imageBorderRadius}
-          titleColor={titleColor}
-          metaColor={metaColor}
         />
       ))}
     </div>
@@ -150,8 +136,6 @@ function ArticleCard({
   showAuthor,
   showDate,
   imageBorderRadius,
-  titleColor,
-  metaColor,
 }: {
   article: ArticleFragment;
   blogHandle?: string;
@@ -159,8 +143,6 @@ function ArticleCard({
   showAuthor: boolean;
   showDate: boolean;
   imageBorderRadius: number;
-  titleColor: string;
-  metaColor: string;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -183,20 +165,12 @@ function ArticleCard({
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
           className="inline-block"
         >
-          <h6
-            className="text-2xl leading-8 font-normal hover:underline line-clamp-2"
-            style={{
-              color: titleColor,
-            }}
-          >
+          <h6 className="text-2xl leading-8 font-normal hover:underline line-clamp-2">
             {article.title}
           </h6>
         </Link>
         {(showDate || showAuthor) && (
-          <div
-            className="flex flex-wrap gap-1 text-sm"
-            style={{ color: metaColor }}
-          >
+          <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
             {showDate && (
               <span>
                 {new Date(article.publishedAt).toLocaleDateString("en-US", {
@@ -239,7 +213,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "mobileGridSize",
-          label: "Mobile grid layout",
+          label: "Mobile columns",
           defaultValue: "2",
           configs: {
             options: [
@@ -252,7 +226,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "desktopGridSize",
-          label: "Desktop grid layout",
+          label: "Desktop columns",
           defaultValue: "4",
           configs: {
             options: [
@@ -268,16 +242,6 @@ export const schema = createSchema({
     {
       group: "Article card",
       inputs: [
-        {
-          type: "color",
-          name: "titleColor",
-          label: "Title color",
-        },
-        {
-          type: "color",
-          name: "metaColor",
-          label: "Meta color (date/author)",
-        },
         {
           type: "select",
           name: "imageAspectRatio",

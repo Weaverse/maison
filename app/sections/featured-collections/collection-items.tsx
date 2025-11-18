@@ -176,7 +176,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "mobileGridSize",
-          label: "Mobile grid layout",
+          label: "Mobile columns",
           defaultValue: "2",
           configs: {
             options: [
@@ -188,7 +188,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "desktopGridSize",
-          label: "Desktop grid layout",
+          label: "Desktop columns",
           defaultValue: "5",
           configs: {
             options: [
