@@ -85,7 +85,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
         className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
       >
         {Array.from({ length: itemsToShow }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-5" data-motion="fade-up">
+          <div key={i} className="flex flex-col gap-5">
             <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
               <Image
                 data={{ url: IMAGES_PLACEHOLDERS.image }}
