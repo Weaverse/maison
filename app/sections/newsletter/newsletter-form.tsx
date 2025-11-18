@@ -35,7 +35,6 @@ interface NewsLetterInputProps
   buttonText: string;
   helpText: string;
   successText?: string;
-  inputBorderColor?: string;
   inputBackgroundColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -47,7 +46,6 @@ function NewsLetterForm(props: NewsLetterInputProps) {
     placeholder,
     helpText,
     successText,
-    inputBorderColor,
     inputBackgroundColor,
     borderRadius,
     ref,
@@ -67,9 +65,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
         data-motion="fade-up"
       >
         <div
-          className={inputVariants({ borderRadius })}
+          className={clsx(inputVariants({ borderRadius }), "border-(--color-line)")}
           style={{
-            borderColor: inputBorderColor,
             backgroundColor: inputBackgroundColor,
           }}
         >
@@ -162,11 +159,6 @@ export const schema = createSchema({
             step: 2,
             unit: "px",
           },
-        },
-        {
-          type: "color",
-          name: "inputBorderColor",
-          label: "Border color",
         },
         {
           type: "color",
