@@ -3,14 +3,38 @@ import clsx from "clsx";
 import { useFetcher } from "react-router";
 import { Button } from "~/components/button";
 import type { CustomerApiPlayLoad } from "~/routes/($locale).api.customer";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
-interface NewsLetterInputProps extends HydrogenComponentProps {
+const inputVariants = cva("border max-w-full", {
+  variants: {
+    borderRadius: {
+      0: "rounded-none",
+      2: "rounded-xs",
+      4: "rounded-sm",
+      6: "rounded-md",
+      8: "rounded-lg",
+      10: "rounded-[10px]",
+      12: "rounded-xl",
+      14: "rounded-[14px]",
+      16: "rounded-2xl",
+      18: "rounded-[18px]",
+      20: "rounded-[20px]",
+    },
+  },
+  defaultVariants: {
+    borderRadius: 8,
+  },
+});
+
+interface NewsLetterInputProps
+  extends VariantProps<typeof inputVariants>,
+    HydrogenComponentProps {
   width: number;
   placeholder: string;
   buttonText: string;
   helpText: string;
   successText?: string;
-  inputBorderColor?: string;
   inputBackgroundColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -22,8 +46,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
     placeholder,
     helpText,
     successText,
-    inputBorderColor,
     inputBackgroundColor,
+    borderRadius,
     ref,
     ...rest
   } = props;
@@ -41,9 +65,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
         data-motion="fade-up"
       >
         <div
-          className="border rounded-sm max-w-full"
+          className={clsx(inputVariants({ borderRadius }), "border-(--color-line)")}
           style={{
-            borderColor: inputBorderColor,
             backgroundColor: inputBackgroundColor,
           }}
         >
@@ -52,7 +75,7 @@ function NewsLetterForm(props: NewsLetterInputProps) {
             type="email"
             required
             placeholder={placeholder}
-            className="p-3 leading-tight focus:outline-hidden"
+            className="p-3 leading-tight focus:outline-hidden placeholder:text-sm"
             style={{ width }}
           />
         </div>
@@ -126,9 +149,16 @@ export const schema = createSchema({
       group: "Input styling",
       inputs: [
         {
-          type: "color",
-          name: "inputBorderColor",
-          label: "Border color",
+          type: "range",
+          name: "borderRadius",
+          label: "Border radius",
+          defaultValue: 4,
+          configs: {
+            min: 0,
+            max: 20,
+            step: 2,
+            unit: "px",
+          },
         },
         {
           type: "color",

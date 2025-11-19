@@ -34,8 +34,6 @@ const variants = cva("grid gap-x-4 gap-y-10", {
 interface BlogsData {
   layout: "blog" | "default";
   cardGap: number;
-  titleColor: string;
-  metaColor: string;
   imageBorderRadius: number;
   showLoadMore: boolean;
   loadMoreText: string;
@@ -63,8 +61,6 @@ export default function Blogs(props: BlogsProps) {
     cardGap,
     mobileGridSize,
     desktopGridSize,
-    titleColor,
-    metaColor,
     imageBorderRadius,
     showLoadMore,
     loadMoreText,
@@ -100,8 +96,6 @@ export default function Blogs(props: BlogsProps) {
               showDate={showDate}
               showReadmore={showReadmore}
               imageAspectRatio={imageAspectRatio}
-              titleColor={titleColor}
-              metaColor={metaColor}
               imageBorderRadius={imageBorderRadius}
               cardGap={cardGap}
             />
@@ -130,8 +124,6 @@ export interface ArticleCardProps {
   showAuthor: boolean;
   showReadmore: boolean;
   imageAspectRatio: ImageAspectRatio;
-  titleColor: string;
-  metaColor: string;
   imageBorderRadius: number;
   cardGap: number;
   className?: string;
@@ -146,8 +138,6 @@ export function ArticleCard({
   showDate,
   showReadmore,
   imageAspectRatio,
-  titleColor,
-  metaColor,
   imageBorderRadius,
   cardGap,
   className,
@@ -176,20 +166,14 @@ export function ArticleCard({
         to={`/blogs/${blogHandle}/${article.handle}`}
         className="inline-block"
       >
-        <h6
-          className="text-2xl leading-8 font-normal hover:underline line-clamp-2"
-          style={{ color: titleColor }}
-        >
+        <h6 className="text-2xl leading-8 font-normal hover:underline line-clamp-2">
           {article.title}
         </h6>
       </Link>
       {(showDate || showAuthor) && (
-        <div
-          className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
-          style={{ color: metaColor }}
-        >
+        <div className="flex flex-wrap text-sm gap-1 text-body-subtle">
           {showDate && (
-            <span className="text-sm">
+            <span>
               {new Date(article.publishedAt).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
@@ -198,27 +182,23 @@ export function ArticleCard({
               {showAuthor && " —"}
             </span>
           )}
-          {showAuthor && (
-            <span className="text-sm">{article.author?.name}</span>
-          )}
+          {showAuthor && <span>{article.author?.name}</span>}
         </div>
       )}
       {showExcerpt && (
-        <div
-          className="line-clamp-2 lg:line-clamp-4"
-          style={{ color: metaColor }}
-        >
+        <div className="line-clamp-2 lg:line-clamp-4 text-body-subtle">
           {article.excerpt}
         </div>
       )}
       {showReadmore && (
-        <Link
-          to={`/blogs/${blogHandle}/${article.handle}`}
-          variant="underline"
-          style={{ color: metaColor }}
-        >
-          Read more →
-        </Link>
+        <div>
+          <Link
+            to={`/blogs/${blogHandle}/${article.handle}`}
+            variant="underline"
+          >
+            Read more →
+          </Link>
+        </div>
       )}
     </div>
   );
@@ -256,7 +236,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "mobileGridSize",
-          label: "Columns (mobile)",
+          label: "Mobile columns",
           defaultValue: "2",
           configs: {
             options: [
@@ -269,7 +249,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "desktopGridSize",
-          label: "Columns (desktop)",
+          label: "Desktop columns",
           defaultValue: "4",
           configs: {
             options: [
@@ -319,16 +299,6 @@ export const schema = createSchema({
     {
       group: "Article card",
       inputs: [
-        {
-          type: "color",
-          name: "titleColor",
-          label: "Title color",
-        },
-        {
-          type: "color",
-          name: "metaColor",
-          label: "Meta color",
-        },
         {
           type: "select",
           name: "imageAspectRatio",
