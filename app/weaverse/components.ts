@@ -75,6 +75,7 @@ import * as RelatedArticles from "~/sections/related-articles";
 import * as RelatedArticlesHeader from "~/sections/related-articles/related-articles-header";
 import * as RelatedArticlesItems from "~/sections/related-articles/related-articles-items";
 import * as RelatedProducts from "~/sections/related-products";
+import * as RelatedProductsHeader from "~/sections/related-products/related-products-header";
 import * as SingleProduct from "~/sections/single-product";
 import * as SlideShow from "~/sections/slideshow";
 import * as SlideShowSlide from "~/sections/slideshow/slide";
@@ -149,6 +150,7 @@ export const components: HydrogenComponent[] = [
   ProductATCButtons,
   ProductCollapsibleDetails,
   RelatedProducts,
+  RelatedProductsHeader,
   RelatedArticles,
   RelatedArticlesHeader,
   RelatedArticlesItems,

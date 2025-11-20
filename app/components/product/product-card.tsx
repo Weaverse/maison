@@ -202,7 +202,7 @@ export function ProductCard({
             prefetch="intent"
             className="font-semibold"
           >
-            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal">
+            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal line-clamp-1">
               {product.title}
             </RevealUnderline>
           </Link>
@@ -243,11 +243,13 @@ export function ProductCard({
           )}
         /> */}
         {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes
-          ?.length > 0 && (
+          ?.length > 0 ? (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1">
             <span className="block size-1.5 bg-line rounded-full"/>
             <span>Volume pricing available</span>
           </div>
+        ) : (
+          <div className="h-3" />
         )}
       </div>
       {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (

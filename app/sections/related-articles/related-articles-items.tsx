@@ -40,8 +40,6 @@ interface RelatedArticlesItemsData {
   showExcerpt: boolean;
   showReadmore: boolean;
   imageBorderRadius: number;
-  titleColor: string;
-  metaColor: string;
   articlesToShow: number;
 }
 
@@ -62,8 +60,6 @@ function RelatedArticlesItems(props: RelatedArticlesItemsProps) {
     showExcerpt,
     showReadmore,
     imageBorderRadius,
-    titleColor,
-    metaColor,
     mobileGridSize,
     desktopGridSize,
     articlesToShow,
@@ -95,16 +91,8 @@ function RelatedArticlesItems(props: RelatedArticlesItemsProps) {
               />
             </div>
             <div className="flex flex-col gap-4">
-              <h6
-                className="text-2xl leading-8 font-normal"
-                style={{ color: titleColor }}
-              >
-                Title here
-              </h6>
-              <div
-                className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
-                style={{ color: metaColor }}
-              >
+              <h6 className="text-2xl leading-8 font-normal">Title here</h6>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm text-body-subtle">
                 <span className="text-sm">Date here —</span>
                 <span className="text-sm">Author here</span>
               </div>
@@ -132,8 +120,6 @@ function RelatedArticlesItems(props: RelatedArticlesItemsProps) {
           showDate={showDate}
           showReadmore={showReadmore}
           imageAspectRatio={imageAspectRatio}
-          titleColor={titleColor}
-          metaColor={metaColor}
           imageBorderRadius={imageBorderRadius}
           cardGap={16}
         />
@@ -166,7 +152,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "mobileGridSize",
-          label: "Columns (mobile)",
+          label: "Items per row (mobile)",
           defaultValue: "2",
           configs: {
             options: [
@@ -179,7 +165,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "desktopGridSize",
-          label: "Columns (desktop)",
+          label: "Items per row (desktop)",
           defaultValue: "4",
           configs: {
             options: [
@@ -205,16 +191,6 @@ export const schema = createSchema({
             max: 10,
             step: 1,
           },
-        },
-        {
-          type: "color",
-          name: "titleColor",
-          label: "Title color",
-        },
-        {
-          type: "color",
-          name: "metaColor",
-          label: "Meta color",
         },
         {
           type: "select",
