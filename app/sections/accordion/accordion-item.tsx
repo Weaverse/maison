@@ -53,10 +53,7 @@ const AccordionItem = (props: AccordionItemProps) => {
       ref={ref}
       {...rest}
       value={title}
-      className={cn(
-        "w-full max-w-[628px] mx-auto",
-        "focus-within:relative focus-within:z-10",
-      )}
+      className="w-full focus-within:relative focus-within:z-10"
     >
       <Accordion.Header>
         <Accordion.Trigger
@@ -64,7 +61,7 @@ const AccordionItem = (props: AccordionItemProps) => {
           className="group mb-1 flex w-full gap-3 p-4 text-left"
         >
           {renderIcon()}
-          <span className="font-medium text-base">{title}</span>
+          <span className="text-base">{title}</span>
           <div className="relative ml-auto h-5 w-5">
             <PlusCircleIcon className="absolute inset-0 h-full w-full transition-opacity duration-200 group-data-[state=open]:opacity-0" />
             <MinusCircleIcon className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-200 group-data-[state=open]:opacity-100" />
@@ -87,7 +84,7 @@ const AccordionItem = (props: AccordionItemProps) => {
           "data-[state=open]:animate-expand",
         )}
       >
-        <div className="p-4" style={{ color: textColor }}>
+        <div className="p-4 text-sm" style={{ color: textColor }}>
           {content}
         </div>
       </Accordion.Content>

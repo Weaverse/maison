@@ -40,6 +40,11 @@ const gridVariants = cva("grid", {
       40: "gap-10",
     },
   },
+  defaultVariants: {
+    mobileGridSize: "2",
+    desktopGridSize: "5",
+    gap: 16,
+  },
 });
 
 interface CollectionItemsData
@@ -54,8 +59,6 @@ interface CollectionItemsData
   cardBackgroundColor?: string;
   cardPadding?: number;
   cardBorderRadius?: number;
-  mobileGridSize: "1" | "2" | "3";
-  desktopGridSize: "3" | "4" | "5" | "6";
 }
 
 function CollectionItems(props: CollectionItemsData) {
@@ -83,63 +86,63 @@ function CollectionItems(props: CollectionItemsData) {
     : new Array(itemsToShow).fill(COLLECTION_PLACEHOLDER);
 
   return (
-    <div ref={ref} {...rest}>
-      <div
-        className={cn(gridVariants({ mobileGridSize, desktopGridSize, gap }))}
-      >
-        {(collections as any[])
-          .slice(0, collections ? itemsToShow : 0)
-          .map((collection, ind) => (
-            <Link
-              key={collection.id + ind}
-              to={`/collections/${collection.handle}`}
-              className="flex flex-col gap-5"
-              style={{
-                background: cardBackgroundColor,
-                padding: `${cardPadding}px`,
-                borderRadius: `${cardBorderRadius}px`,
-              }}
-            >
-              {collection.image ? (
-                <Image
-                  data={collection.image}
-                  aspectRatio={calculateAspectRatio(
-                    collection.image,
-                    imageAspectRatio,
-                  )}
-                  sizes="auto"
-                  style={{ borderRadius: `${imageBorderRadius}px` }}
-                />
-              ) : (
-                <div
-                  className="w-full overflow-hidden bg-gray-100"
-                  style={{ borderRadius: `${imageBorderRadius}px` }}
-                >
-                  <Image
-                    data={{ url: IMAGES_PLACEHOLDERS.image }}
-                    aspectRatio={imageAspectRatio}
-                    sizes="auto"
-                  />
-                </div>
-              )}
-              <div className="flex flex-col gap-1">
-                <h6
-                  className="font-normal text-[26px] line-clamp-1"
-                  style={{ color: titleColor }}
-                >
-                  {collection.title ?? "Title here"}
-                </h6>
-                {showProductCount && (
-                  <span className="text-sm" style={{ color: countColor }}>
-                    {collection?.products?.nodes?.length !== undefined
-                      ? `${collection.products?.nodes?.length} products`
-                      : "No products available"}
-                  </span>
+    <div
+      ref={ref}
+      {...rest}
+      className={cn(gridVariants({ mobileGridSize, desktopGridSize, gap }))}
+    >
+      {(collections as any[])
+        .slice(0, collections ? itemsToShow : 0)
+        .map((collection, ind) => (
+          <Link
+            key={collection.id + ind}
+            to={`/collections/${collection.handle}`}
+            className="flex flex-col gap-5"
+            style={{
+              background: cardBackgroundColor,
+              padding: `${cardPadding}px`,
+              borderRadius: `${cardBorderRadius}px`,
+            }}
+          >
+            {collection.image ? (
+              <Image
+                data={collection.image}
+                aspectRatio={calculateAspectRatio(
+                  collection.image,
+                  imageAspectRatio,
                 )}
+                sizes="auto"
+                style={{ borderRadius: `${imageBorderRadius}px` }}
+              />
+            ) : (
+              <div
+                className="w-full overflow-hidden bg-gray-100"
+                style={{ borderRadius: `${imageBorderRadius}px` }}
+              >
+                <Image
+                  data={{ url: IMAGES_PLACEHOLDERS.image }}
+                  aspectRatio={imageAspectRatio}
+                  sizes="auto"
+                />
               </div>
-            </Link>
-          ))}
-      </div>
+            )}
+            <div className="flex flex-col gap-1">
+              <h6
+                className="font-normal text-[26px] line-clamp-1"
+                style={{ color: titleColor }}
+              >
+                {collection.title ?? "Title here"}
+              </h6>
+              {showProductCount && (
+                <span className="text-sm" style={{ color: countColor }}>
+                  {collection?.products?.nodes?.length !== undefined
+                    ? `${collection.products?.nodes?.length} products`
+                    : "No products available"}
+                </span>
+              )}
+            </div>
+          </Link>
+        ))}
     </div>
   );
 }
@@ -173,7 +176,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "mobileGridSize",
-          label: "Mobile grid layout",
+          label: "Mobile columns",
           defaultValue: "2",
           configs: {
             options: [
@@ -185,7 +188,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "desktopGridSize",
-          label: "Desktop grid layout",
+          label: "Desktop columns",
           defaultValue: "5",
           configs: {
             options: [

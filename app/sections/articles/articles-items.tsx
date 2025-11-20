@@ -27,10 +27,24 @@ const variants = cva("grid", {
       "5": "md:grid-cols-5",
       "6": "md:grid-cols-6",
     },
+    gap: {
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
+    },
   },
   defaultVariants: {
     mobileGridSize: "2",
     desktopGridSize: "4",
+    gap: 16,
   },
 });
 
@@ -38,13 +52,10 @@ interface ArticlesItemsProps
   extends VariantProps<typeof variants>,
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
-  gap?: number;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;
   showDate: boolean;
   imageBorderRadius: number;
-  titleColor: string;
-  metaColor: string;
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
@@ -55,8 +66,6 @@ function ArticlesItems(props: ArticlesItemsProps) {
     showAuthor,
     showDate,
     imageBorderRadius,
-    titleColor,
-    metaColor,
     mobileGridSize,
     desktopGridSize,
     ...rest
@@ -73,8 +82,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
       <div
         ref={scope}
         {...rest}
-        className={cn(variants({ mobileGridSize, desktopGridSize }))}
-        style={{ gap: `${gap}px` }}
+        className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
       >
         {Array.from({ length: itemsToShow }).map((_, i) => (
           <div key={i} className="flex flex-col gap-5">
@@ -86,18 +94,10 @@ function ArticlesItems(props: ArticlesItemsProps) {
               />
             </div>
             <div className="flex flex-col gap-4">
-              <h6
-                className="text-2xl leading-8 font-normal"
-                style={{ color: titleColor }}
-              >
-                Title here
-              </h6>
-              <div
-                className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
-                style={{ color: metaColor }}
-              >
-                <span className="text-sm">Date here —</span>
-                <span className="text-sm">Author here</span>
+              <h6 className="text-2xl leading-8 font-normal">Title here</h6>
+              <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
+                <span>Date here —</span>
+                <span>Author here</span>
               </div>
             </div>
           </div>
@@ -109,25 +109,22 @@ function ArticlesItems(props: ArticlesItemsProps) {
   const { articles, blogHandle } = data;
 
   return (
-    <div ref={scope} {...rest}>
-      <div
-        className={cn(variants({ mobileGridSize, desktopGridSize }))}
-        style={{ gap: `${gap}px` }}
-      >
-        {articles.slice(0, itemsToShow).map((article) => (
-          <ArticleCard
-            key={article.id}
-            article={article}
-            blogHandle={blogHandle}
-            imageAspectRatio={imageAspectRatio}
-            showAuthor={showAuthor}
-            showDate={showDate}
-            imageBorderRadius={imageBorderRadius}
-            titleColor={titleColor}
-            metaColor={metaColor}
-          />
-        ))}
-      </div>
+    <div
+      ref={scope}
+      {...rest}
+      className={cn(variants({ mobileGridSize, desktopGridSize, gap }))}
+    >
+      {articles.slice(0, itemsToShow).map((article) => (
+        <ArticleCard
+          key={article.id}
+          article={article}
+          blogHandle={blogHandle}
+          imageAspectRatio={imageAspectRatio}
+          showAuthor={showAuthor}
+          showDate={showDate}
+          imageBorderRadius={imageBorderRadius}
+        />
+      ))}
     </div>
   );
 }
@@ -139,8 +136,6 @@ function ArticleCard({
   showAuthor,
   showDate,
   imageBorderRadius,
-  titleColor,
-  metaColor,
 }: {
   article: ArticleFragment;
   blogHandle?: string;
@@ -148,8 +143,6 @@ function ArticleCard({
   showAuthor: boolean;
   showDate: boolean;
   imageBorderRadius: number;
-  titleColor: string;
-  metaColor: string;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -172,22 +165,14 @@ function ArticleCard({
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
           className="inline-block"
         >
-          <h6
-            className="text-2xl leading-8 font-normal hover:underline line-clamp-2"
-            style={{
-              color: titleColor,
-            }}
-          >
+          <h6 className="text-2xl leading-8 font-normal hover:underline line-clamp-2">
             {article.title}
           </h6>
         </Link>
         {(showDate || showAuthor) && (
-          <div
-            className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm"
-            style={{ color: metaColor }}
-          >
+          <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
             {showDate && (
-              <span className="text-sm">
+              <span>
                 {new Date(article.publishedAt).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -196,9 +181,7 @@ function ArticleCard({
                 {showAuthor && " —"}
               </span>
             )}
-            {showAuthor && (
-              <span className="text-sm">{article.author?.name}</span>
-            )}
+            {showAuthor && <span>{article.author?.name}</span>}
           </div>
         )}
       </div>
@@ -230,7 +213,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "mobileGridSize",
-          label: "Mobile grid layout",
+          label: "Mobile columns",
           defaultValue: "2",
           configs: {
             options: [
@@ -243,7 +226,7 @@ export const schema = createSchema({
         {
           type: "toggle-group",
           name: "desktopGridSize",
-          label: "Desktop grid layout",
+          label: "Desktop columns",
           defaultValue: "4",
           configs: {
             options: [
@@ -259,16 +242,6 @@ export const schema = createSchema({
     {
       group: "Article card",
       inputs: [
-        {
-          type: "color",
-          name: "titleColor",
-          label: "Title color",
-        },
-        {
-          type: "color",
-          name: "metaColor",
-          label: "Meta color (date/author)",
-        },
         {
           type: "select",
           name: "imageAspectRatio",

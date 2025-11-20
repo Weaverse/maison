@@ -43,51 +43,70 @@ export default function BlogPost(props: BlogPostProps) {
     return (
       <Section ref={ref} {...rest}>
         {image && (
-          <div className="h-[520px]">
-            <Image data={image} sizes="90vw" />
+          <div className="w-full h-[600px]">
+            <Image
+              data={image}
+              sizes="100vw"
+              width={1920}
+              className="w-full h-full object-cover"
+            />
           </div>
         )}
-        <div className="space-y-5 py-4 text-center lg:py-16">
-          <div className="text-body-subtle">{formattedDate}</div>
+
+        <div className="px-5 py-20 md:px-20 lg:px-0 lg:max-w-[728px] mx-auto">
           <h1 className="h3 leading-tight!">{title}</h1>
-          {author?.name && (
-            <div className="font-medium uppercase">
-              by <span>{author.name}</span>
-            </div>
-          )}
-        </div>
-        <div className="mx-auto w-1/3 border-line-subtle border-t" />
-        <article className="prose mx-auto py-4 lg:max-w-4xl lg:py-10">
-          <div className="mx-auto space-y-8 md:space-y-16">
-            <div
-              suppressHydrationWarning
-              dangerouslySetInnerHTML={{ __html: contentHtml }}
-            />
-            <div className="mx-auto w-1/3 border-line-subtle border-t" />
-            <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-              {showTags && (
-                <div>
-                  <strong>Tags:</strong>
-                  <span className="ml-2">{tags.join(", ")}</span>
-                </div>
-              )}
-              {showShareButtons && (
-                <div className="flex items-center gap-2">
-                  <strong>Share:</strong>
-                  <FacebookShareButton url={articleUrl}>
-                    <FacebookLogoIcon size={24} />
-                  </FacebookShareButton>
-                  <PinterestShareButton url={articleUrl} media={image?.url}>
-                    <PinterestLogoIcon size={24} />
-                  </PinterestShareButton>
-                  <TwitterShareButton url={articleUrl} title={title}>
-                    <XLogoIcon size={24} />
-                  </TwitterShareButton>
-                </div>
-              )}
-            </div>
+
+          <div className="text-sm flex flex-wrap gap-1 pt-4 text-body-subtle">
+            {formattedDate && (
+              <span>
+                {formattedDate}
+                {author?.name && " —"}
+              </span>
+            )}
+            {author?.name && <span>{author.name}</span>}
           </div>
-        </article>
+
+          <article className="prose max-w-full">
+            <div className="mx-auto space-y-8 md:space-y-16">
+              <div
+                suppressHydrationWarning
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
+              />
+
+              {(showTags || showShareButtons) && (
+                <>
+                  <div className="mx-auto w-1/3 border-line-subtle border-t" />
+
+                  <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                    {showTags && (
+                      <div>
+                        <strong>Tags:</strong>
+                        <span className="ml-2">{tags.join(", ")}</span>
+                      </div>
+                    )}
+                    {showShareButtons && (
+                      <div className="flex items-center gap-2">
+                        <strong>Share:</strong>
+                        <FacebookShareButton url={articleUrl}>
+                          <FacebookLogoIcon size={24} />
+                        </FacebookShareButton>
+                        <PinterestShareButton
+                          url={articleUrl}
+                          media={image?.url}
+                        >
+                          <PinterestLogoIcon size={24} />
+                        </PinterestShareButton>
+                        <TwitterShareButton url={articleUrl} title={title}>
+                          <XLogoIcon size={24} />
+                        </TwitterShareButton>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </article>
+        </div>
       </Section>
     );
   }

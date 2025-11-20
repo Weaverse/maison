@@ -17,7 +17,7 @@ const AccordionGroup = (props: AccordionGroupProps) => {
     <div ref={ref} {...rest}>
       <RadixAccordion.Root
         type="multiple"
-        className="accordion--group grid w-full"
+        className="accordion--items grid w-full"
         style={{ gap: `${gap}px` }}
       >
         {children}

@@ -43,7 +43,7 @@ const variants = cva("relative", {
       full: "h-full w-full",
       stretch: "h-full w-full",
       fixed: "mx-auto h-full w-full max-w-(--page-width)",
-      custom: "mx-auto size-full md:w-[var(--custom-width)]",
+      custom: "mx-auto size-full lg:w-[var(--custom-width)]",
     },
     padding: {
       full: "",
