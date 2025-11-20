@@ -367,15 +367,13 @@ function CartLineItem({
   }
 
   // Format variant options with pipe separator
-  const formattedVariant = !isDefaultVariant
-    ? selectedOptions?.map((opt) => opt.value).join(" | ")
-    : null;
+  const formattedVariant = isDefaultVariant
+    ? null
+    : selectedOptions?.map((opt) => opt.value).join(" | ");
 
   return (
     <li
-      className={clsx("flex gap-4",
-        layout === "page" && "not-last:pb-6"        
-      )}
+      className={clsx("flex gap-4", layout === "page" && "not-last:pb-6")}
       style={{
         // Hide the line item if the optimistic data action is remove
         // Do not remove the form from the DOM
@@ -397,9 +395,12 @@ function CartLineItem({
           />
         )}
       </div>
-      <div className={clsx("flex grow flex-col gap-3",
-        layout === "page" && "h-full justify-between py-6"
-      )}>
+      <div
+        className={clsx(
+          "flex grow flex-col gap-3",
+          layout === "page" && "h-full justify-between py-6",
+        )}
+      >
         <div className="flex justify-between gap-6">
           <div className="space-y-1">
             <div className="font-semibold">

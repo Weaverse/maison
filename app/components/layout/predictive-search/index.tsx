@@ -397,10 +397,10 @@ function KeywordsDisplay({
   const keywords =
     suggestions.length > 0
       ? suggestions
-      : popularKeywords.map(keyword => ({
-        title: keyword,
-        styledTitle: keyword,
-      }));
+      : popularKeywords.map((keyword) => ({
+          title: keyword,
+          styledTitle: keyword,
+        }));
 
   if (keywords.length === 0) {
     return null;
@@ -416,7 +416,11 @@ function KeywordsDisplay({
           className="text-sm"
         >
           <RevealUnderline>
-            <span dangerouslySetInnerHTML={{ __html: item.styledTitle || item.title }} />
+            <span
+              dangerouslySetInnerHTML={{
+                __html: item.styledTitle || item.title,
+              }}
+            />
           </RevealUnderline>
         </button>
       ))}
