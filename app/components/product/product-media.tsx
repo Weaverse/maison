@@ -3,6 +3,7 @@ import {
   ArrowRightIcon,
   VideoCameraIcon,
 } from "@phosphor-icons/react";
+import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
@@ -67,6 +68,8 @@ export function ProductMedia(props: ProductMediaProps) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [zoomMediaId, setZoomMediaId] = useState<string | null>(null);
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
+  const { pcardBorderRadius } = useThemeSettings();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
   useEffect(() => {
@@ -77,6 +80,24 @@ export function ProductMedia(props: ProductMediaProps) {
       }
     }
   }, [selectedVariant]);
+
+  useEffect(() => {
+    if (!swiper) {
+      return;
+    }
+
+    const handleSlideChange = () => {
+      const slideIndex = swiper.realIndex ?? swiper.activeIndex;
+      setActiveIndex(slideIndex);
+    };
+
+    swiper.on("slideChange", handleSlideChange);
+    handleSlideChange();
+
+    return () => {
+      swiper.off("slideChange", handleSlideChange);
+    };
+  }, [swiper]);
 
   let mediaLayout = initialMediaLayout;
   let gridSize = initialGridSize;
@@ -93,7 +114,14 @@ export function ProductMedia(props: ProductMediaProps) {
   if (mediaLayout === "grid") {
     return (
       <>
-        <div className={variants({ gridSize })}>
+        <div
+          className={variants({ gridSize })}
+          style={
+            {
+              "--pcard-radius": `${pcardBorderRadius}px`,
+            } as React.CSSProperties
+          }
+        >
           {media.map((med, idx) => {
             return (
               <div
@@ -119,7 +147,7 @@ export function ProductMedia(props: ProductMediaProps) {
                     imageAspectRatio={imageAspectRatio}
                     index={idx}
                     className={cn(
-                      "w-[80vw] max-w-none object-cover lg:h-full lg:w-full",
+                      "w-[80vw] max-w-none object-cover lg:h-full lg:w-full rounded-(--pcard-radius)",
                       idx === 0 &&
                         "[&_img]:[view-transition-name:image-expand]",
                     )}
@@ -156,67 +184,15 @@ export function ProductMedia(props: ProductMediaProps) {
   }
 
   return (
-    <div className="product-media-slider overflow-hidden">
-      <div
-        className={clsx(
-          "flex items-start gap-4 overflow-hidden [--thumbs-width:0px]",
-          showThumbnails && "md:[--thumbs-width:8rem]",
-        )}
-      >
-        {showThumbnails && (
-          <div
-            className={clsx(
-              "hidden shrink-0 md:block",
-              "h-[450px] w-[calc(var(--thumbs-width,0px)-1rem)]",
-              "opacity-0 transition-opacity duration-300",
-            )}
-          >
-            <Swiper
-              onSwiper={setThumbsSwiper}
-              direction="vertical"
-              spaceBetween={8}
-              slidesPerView={5}
-              watchSlidesProgress
-              rewind
-              freeMode
-              className="h-full w-full overflow-visible"
-              onInit={(sw) => {
-                sw.el.parentElement.style.opacity = "1";
-              }}
-              modules={[Navigation, Thumbs, FreeMode]}
-            >
-              {media.map(({ id, previewImage, alt, mediaContentType }) => {
-                return (
-                  <SwiperSlide
-                    key={id}
-                    className={cn(
-                      "relative",
-                      "h-auto! cursor-pointer border border-transparent p-1 transition-colors",
-                      "[&.swiper-slide-thumb-active]:border-line",
-                    )}
-                  >
-                    <Image
-                      data={{
-                        ...previewImage,
-                        altText: alt || "Product image",
-                      }}
-                      loading="lazy"
-                      width={200}
-                      aspectRatio="1/1"
-                      className="h-auto w-full object-cover"
-                      sizes="auto"
-                    />
-                    {mediaContentType === "VIDEO" && (
-                      <div className="absolute right-2 bottom-2 bg-gray-900 p-0.5 text-white">
-                        <VideoCameraIcon className="h-4 w-4" />
-                      </div>
-                    )}
-                  </SwiperSlide>
-                );
-              })}
-            </Swiper>
-          </div>
-        )}
+    <div
+      className="product-media-slider"
+      style={
+        {
+          "--pcard-radius": `${pcardBorderRadius}px`,
+        } as React.CSSProperties
+      }
+    >
+      <div className="flex flex-col gap-3">
         <div className="relative w-[calc(100%-var(--thumbs-width,0px))]">
           <Swiper
             onSwiper={setSwiper}
@@ -235,7 +211,10 @@ export function ProductMedia(props: ProductMediaProps) {
           >
             {media.map((med, idx) => {
               return (
-                <SwiperSlide key={med.id} className="group bg-gray-100">
+                <SwiperSlide
+                  key={med.id}
+                  className="group bg-gray-100 rounded-(--pcard-radius) overflow-hidden"
+                >
                   <div
                     onClick={
                       canClickImage
@@ -274,22 +253,87 @@ export function ProductMedia(props: ProductMediaProps) {
               );
             })}
           </Swiper>
-          <div className="absolute right-6 bottom-6 z-10 hidden items-center gap-2 md:flex">
+
+          {/* progress bar */}
+          {media.length > 1 && (
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-[1] flex items-center justify-center pb-10">
+              <div className="w-[160px] h-[2px] bg-(--color-line-subtle) relative">
+                <div
+                  className="absolute left-0 top-0 h-full bg-(--color-line) transition-all duration-300"
+                  style={{
+                    width: `${((activeIndex + 1) / media.length) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="absolute -left-2 -right-2 md:-left-3 md:-right-3 lg:-left-7 lg:-right-7 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[1]">
             <button
               type="button"
-              className="media_slider__prev left-6 border border-transparent bg-white p-2 text-center text-gray-900 transition-all duration-200 hover:bg-gray-800 hover:text-white disabled:cursor-not-allowed disabled:text-body-subtle"
+              className="media_slider__prev p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
             >
               <ArrowLeftIcon className="h-4.5 w-4.5" />
             </button>
             <button
               type="button"
-              className="media_slider__next right-6 border border-transparent bg-white p-2 text-center text-gray-900 transition-all duration-200 hover:bg-gray-800 hover:text-white disabled:cursor-not-allowed disabled:text-body-subtle"
+              className="media_slider__next p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
             >
               <ArrowRightIcon className="h-4.5 w-4.5" />
             </button>
           </div>
         </div>
+
+        {showThumbnails && (
+          <div className="w-full opacity-0 transition-opacity duration-300">
+            <Swiper
+              onSwiper={setThumbsSwiper}
+              direction="horizontal"
+              spaceBetween={12}
+              slidesPerView={5}
+              watchSlidesProgress
+              rewind
+              freeMode
+              className="w-full overflow-visible"
+              onInit={(sw) => {
+                sw.el.parentElement.style.opacity = "1";
+              }}
+              modules={[Navigation, Thumbs, FreeMode]}
+            >
+              {media.map(({ id, previewImage, alt, mediaContentType }) => {
+                return (
+                  <SwiperSlide
+                    key={id}
+                    className={cn(
+                      "relative",
+                      "h-auto! cursor-pointer rounded-(--pcard-radius) overflow-hidden",
+                      "[&.swiper-slide-thumb-active]:border-2 [&.swiper-slide-thumb-active]:border-(--color-line) [&.swiper-slide-thumb-active]:p-0",
+                    )}
+                  >
+                    <Image
+                      data={{
+                        ...previewImage,
+                        altText: alt || "Product image",
+                      }}
+                      loading="lazy"
+                      width={200}
+                      aspectRatio="1/1"
+                      className="h-auto w-full object-cover"
+                      sizes="auto"
+                    />
+                    {mediaContentType === "VIDEO" && (
+                      <div className="absolute right-2 bottom-2 bg-gray-900 p-0.5 text-white">
+                        <VideoCameraIcon className="h-4 w-4" />
+                      </div>
+                    )}
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
+          </div>
+        )}
       </div>
+
       {enableZoom && (
         <ZoomModal
           media={media}
