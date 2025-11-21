@@ -1,3 +1,11 @@
+import {
+  MinusCircleIcon,
+  PackageIcon,
+  PaintBrushHouseholdIcon,
+  PlusCircleIcon,
+  RulerIcon,
+  TruckIcon,
+} from "@phosphor-icons/react";
 import * as Accordion from "@radix-ui/react-accordion";
 import type {
   HydrogenComponentProps,
@@ -5,14 +13,6 @@ import type {
 } from "@weaverse/hydrogen";
 import type React from "react";
 import { cn } from "~/utils/cn";
-import {
-  PlusCircleIcon,
-  MinusCircleIcon,
-  TruckIcon,
-  PaintBrushHouseholdIcon,
-  RulerIcon,
-  PackageIcon,
-} from "@phosphor-icons/react";
 
 interface AccordionItemProps extends HydrogenComponentProps {
   title: string;

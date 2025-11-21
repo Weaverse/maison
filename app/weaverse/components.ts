@@ -12,6 +12,7 @@ import * as AllProducts from "~/sections/all-products";
 import * as Articles from "~/sections/articles";
 import * as ArticlesHeaderContainer from "~/sections/articles/articles-header";
 import * as ArticlesItems from "~/sections/articles/articles-items";
+import * as B2BSignup from "~/sections/b2b-signup";
 import * as BlogPost from "~/sections/blog-post";
 import * as Blogs from "~/sections/blogs";
 import * as CollectionFilters from "~/sections/collection-filters";
@@ -20,6 +21,11 @@ import * as CollectionListItems from "~/sections/collection-list/collections-ite
 import * as ColumnsWithImages from "~/sections/columns-with-images";
 import * as ColumnWithImageItem from "~/sections/columns-with-images/column";
 import * as ColumnsWithImagesItems from "~/sections/columns-with-images/items";
+import * as CompanyStory from "~/sections/company-story";
+import * as CompanyStoryContact from "~/sections/company-story/contact";
+import * as CompanyStoryContent from "~/sections/company-story/content";
+import * as CompanyStoryImage from "~/sections/company-story/image";
+import * as CompanyStorySeparator from "~/sections/company-story/separator";
 import * as ContactForm from "~/sections/contact-form";
 import * as ContactFormForm from "~/sections/contact-form/form";
 import * as Countdown from "~/sections/countdown";
@@ -86,11 +92,6 @@ import * as TestimonialItems from "~/sections/testimonials/items";
 import * as VariantList from "~/sections/variant-list";
 import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
-import * as CompanyStory from "~/sections/company-story";
-import * as CompanyStoryImage from "~/sections/company-story/image";
-import * as CompanyStoryContent from "~/sections/company-story/content";
-import * as CompanyStorySeparator from "~/sections/company-story/separator";
-import * as CompanyStoryContact from "~/sections/company-story/contact";
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -190,4 +191,5 @@ export const components: HydrogenComponent[] = [
   CompanyStoryContent,
   CompanyStorySeparator,
   CompanyStoryContact,
+  B2BSignup,
 ];

@@ -41,9 +41,9 @@ export function CartDrawer() {
               {cart?.totalQuantity > 0 && (
                 <div
                   className={clsx(
-                    "cart-count",
+                    "cart-count aspect-square",
                     "-right-1.5 absolute top-0",
-                    "flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-center",
+                    "flex w-5 items-center justify-center rounded-full px-1 text-center",
                     "text-center font-medium text-[13px] leading-none",
                     "transition-colors duration-300",
                     "group-hover/header:bg-(--color-header-text)",
