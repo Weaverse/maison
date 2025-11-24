@@ -68,10 +68,25 @@ const variants = cva("grid", {
   },
 });
 
+const arrowButtonVariants = cva("p-4 pointer-events-auto", {
+  variants: {
+    arrowsShape: {
+      square: "",
+      rounded: "rounded-md",
+      circle: "rounded-full",
+    },
+  },
+  defaultVariants: {
+    arrowsShape: "circle",
+  },
+});
+
 interface ProductItemsData {
   layout?: "grid" | "carousel";
   slidesPerView?: number;
   productsToShow?: number;
+  arrowsBgColor?: string;
+  arrowsShape?: "square" | "rounded" | "circle";
 }
 
 interface ProductItemsProps
@@ -89,6 +104,8 @@ function ProductItems(props: ProductItemsProps) {
     mobileGridSize,
     desktopGridSize,
     productsToShow,
+    arrowsBgColor,
+    arrowsShape,
     ...rest
   } = props;
 
@@ -154,7 +171,8 @@ function ProductItems(props: ProductItemsProps) {
         <button
           type="button"
           onClick={() => swiperRef?.slidePrev()}
-          className="featured-products-prev p-4 pointer-events-auto bg-[#EDEAE6] rounded-full"
+          className={arrowButtonVariants({ arrowsShape })}
+          style={{ backgroundColor: arrowsBgColor }}
           aria-label="Previous product"
         >
           <ArrowLeft />
@@ -163,7 +181,8 @@ function ProductItems(props: ProductItemsProps) {
         <button
           type="button"
           onClick={() => swiperRef?.slideNext()}
-          className="featured-products-next p-4 pointer-events-auto bg-[#EDEAE6] rounded-full"
+          className={arrowButtonVariants({ arrowsShape })}
+          style={{ backgroundColor: arrowsBgColor }}
           aria-label="Next product"
         >
           <ArrowRight />
@@ -254,6 +273,32 @@ export const schema = createSchema({
             step: 1,
           },
           condition: (data: ProductItemsData) => data.layout === "grid",
+        },
+      ],
+    },
+    {
+      group: "Navigation",
+      inputs: [
+        {
+          type: "toggle-group",
+          name: "arrowsShape",
+          label: "Arrows shape",
+          defaultValue: "circle",
+          configs: {
+            options: [
+              { value: "square", label: "Square", icon: "square" },
+              { value: "rounded", label: "Rounded", icon: "squircle" },
+              { value: "circle", label: "Circle", icon: "circle" },
+            ],
+          },
+          condition: (data: ProductItemsData) => data.layout === "carousel",
+        },
+        {
+          type: "color",
+          name: "arrowsBgColor",
+          label: "Arrows background color",
+          defaultValue: "#EDEAE6",
+          condition: (data: ProductItemsData) => data.layout === "carousel",
         },
       ],
     },
