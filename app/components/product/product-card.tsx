@@ -245,7 +245,7 @@ export function ProductCard({
         {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes
           ?.length > 0 ? (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1">
-            <span className="block size-1.5 bg-line rounded-full"/>
+            <span className="block size-1.5 bg-line rounded-full" />
             <span>Volume pricing available</span>
           </div>
         ) : (

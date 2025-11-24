@@ -39,7 +39,7 @@ export function DesktopMenu() {
                   className={clsx([
                     "flex h-full cursor-pointer items-center gap-1.5 px-3 py-2",
                     'data-[state="open"]:[&>svg]:rotate-180',
-                    "uppercase focus:outline-hidden",
+                    "focus:outline-hidden",
                   ])}
                   onMouseEnter={() => {
                     if (openMenuBy === "hover" && value !== id) {

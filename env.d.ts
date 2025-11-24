@@ -24,6 +24,8 @@ declare global {
     KLAVIYO_PRIVATE_API_TOKEN: string;
     PUBLIC_SHOPIFY_INBOX_SHOP_ID: string;
     WEAVERSE_HOST?: string;
+    HEADLESS_B2B_HOST: string;
+    HEADLESS_B2B_TOKEN: string;
   }
 }
 
