@@ -86,11 +86,11 @@ interface ProductItemsData {
   slidesPerView?: number;
   productsToShow?: number;
   arrowsBgColor?: string;
-  arrowsShape?: "square" | "rounded" | "circle";
 }
 
 interface ProductItemsProps
   extends VariantProps<typeof variants>,
+    VariantProps<typeof arrowButtonVariants>,
     ProductItemsData {
   ref?: React.Ref<HTMLDivElement>;
 }
