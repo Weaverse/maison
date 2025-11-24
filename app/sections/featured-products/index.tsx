@@ -29,7 +29,7 @@ interface FeaturedProductsProps
 export default function FeaturedProducts(props: FeaturedProductsProps) {
   const { ref, loaderData, children, ...rest } = props;
   return (
-    <Section ref={ref} {...rest}>
+    <Section ref={ref} {...rest} overflow="unset">
       {children}
     </Section>
   );
@@ -143,7 +143,13 @@ export const loader = async (
 export const schema = createSchema({
   type: "featured-products",
   title: "Featured products",
-  childTypes: ["featured-products-items", "heading", "subheading", "paragraph"],
+  childTypes: [
+    "featured-products--header",
+    "featured-products-items",
+    "heading",
+    "subheading",
+    "paragraph",
+  ],
   settings: [
     {
       group: "Product selection",
@@ -186,7 +192,25 @@ export const schema = createSchema({
     gap: 32,
     selectionMethod: "auto",
     children: [
-      { type: "heading", content: "Featured products" },
+      {
+        type: "featured-products--header",
+        gap: 16,
+        children: [
+          {
+            type: "heading",
+            content: "Featured products",
+            as: "h4",
+            weight: 400,
+            alignment: "left",
+          },
+          {
+            type: "view-all-button",
+            text: "View all",
+            link: "/products",
+            showButton: true,
+          },
+        ],
+      },
       { type: "featured-products-items" },
     ],
   },
