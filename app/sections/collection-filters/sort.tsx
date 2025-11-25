@@ -39,7 +39,7 @@ export function Sort() {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 border px-4 py-2.5 focus-visible:outline-hidden">
+      <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 py-3 focus-visible:outline-hidden">
         <span className="hidden lg:inline">
           Sort by: <span className="font-semibold">{currentSort.label}</span>
         </span>
@@ -50,7 +50,7 @@ export function Sort() {
         <DropdownMenu.Content
           sideOffset={8}
           align="end"
-          className="flex h-fit w-44 flex-col gap-2 border border-line-subtle bg-background p-5"
+          className="flex h-fit w-52 flex-col gap-2 border border-line-subtle bg-background p-5"
         >
           {SORT_LIST.map(({ key, label }) => {
             params.set("sort", key);

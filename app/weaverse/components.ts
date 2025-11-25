@@ -34,6 +34,7 @@ import * as FeaturedCollections from "~/sections/featured-collections";
 import * as FeaturedCollectionHeader from "~/sections/featured-collections/collection-header";
 import * as FeaturedCollectionItems from "~/sections/featured-collections/collection-items";
 import * as FeaturedProducts from "~/sections/featured-products";
+import * as FeaturedProductHeader from "~/sections/featured-products/product-header";
 import * as FeaturedProductItems from "~/sections/featured-products/product-items";
 import * as HeroImage from "~/sections/hero-image";
 import * as HeroVideo from "~/sections/hero-video";
@@ -131,6 +132,7 @@ export const components: HydrogenComponent[] = [
   BlogPost,
   AllProducts,
   FeaturedProducts,
+  FeaturedProductHeader,
   FeaturedProductItems,
   Testimonial,
   TestimonialItems,
