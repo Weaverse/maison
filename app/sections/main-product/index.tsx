@@ -1,5 +1,4 @@
 import { createSchema } from "@weaverse/hydrogen";
-import clsx from "clsx";
 import { useLoaderData } from "react-router";
 import {
   ProductMedia,
@@ -38,40 +37,36 @@ export default function ProductInformation(
 
     return (
       <Section ref={ref} {...rest} overflow="unset">
-        <div
-          className={clsx([
-            "space-y-5 lg:grid lg:space-y-0",
-            "lg:gap-[clamp(30px,5%,60px)]",
-            "lg:grid-cols-[1fr_clamp(360px,45%,480px)]",
-          ])}
-        >
-          <ProductMedia
-            key={handle}
-            mediaLayout={mediaLayout}
-            gridSize={gridSize}
-            imageAspectRatio={imageAspectRatio}
-            media={
-              combinedListing && product?.featuredImage
-                ? [
-                    {
-                      __typename: "MediaImage",
-                      id: product.featuredImage.id,
-                      mediaContentType: "IMAGE",
-                      alt: product.featuredImage.altText,
-                      previewImage: product.featuredImage,
-                      image: product.featuredImage,
-                    },
-                    ...(product?.media?.nodes || []),
-                  ]
-                : product?.media?.nodes || []
-            }
-            selectedVariant={product?.selectedOrFirstAvailableVariant}
-            showThumbnails={showThumbnails}
-            enableZoom={enableZoom}
-            zoomTrigger={zoomTrigger}
-            zoomButtonVisibility={zoomButtonVisibility}
-          />
-          <div>
+        <div className="space-y-5 md:flex md:space-y-0 md:gap-[clamp(30px,5%,60px)]">
+          <div className="md:w-1/2 lg:w-2/3">
+            <ProductMedia
+              key={handle}
+              mediaLayout={mediaLayout}
+              gridSize={gridSize}
+              imageAspectRatio={imageAspectRatio}
+              media={
+                combinedListing && product?.featuredImage
+                  ? [
+                      {
+                        __typename: "MediaImage",
+                        id: product.featuredImage.id,
+                        mediaContentType: "IMAGE",
+                        alt: product.featuredImage.altText,
+                        previewImage: product.featuredImage,
+                        image: product.featuredImage,
+                      },
+                      ...(product?.media?.nodes || []),
+                    ]
+                  : product?.media?.nodes || []
+              }
+              selectedVariant={product?.selectedOrFirstAvailableVariant}
+              showThumbnails={showThumbnails}
+              enableZoom={enableZoom}
+              zoomTrigger={zoomTrigger}
+              zoomButtonVisibility={zoomButtonVisibility}
+            />
+          </div>
+          <div className="md:w-1/2 lg:w-1/3">
             <div
               className="sticky flex flex-col justify-start gap-5"
               style={{ top: "calc(var(--height-nav) + 20px)" }}
@@ -99,6 +94,7 @@ export const schema = createSchema({
     "mp--vendor",
     "mp--title",
     "mp--prices",
+    "mp--stock",
     "judgeme-stars-rating",
     "mp--summary",
     "mp--bundled-variants",
@@ -232,6 +228,9 @@ export const schema = createSchema({
       {
         type: "mp--prices",
         showCompareAtPrice: true,
+      },
+      {
+        type: "mp--stock",
       },
       {
         type: "judgeme-stars-rating",

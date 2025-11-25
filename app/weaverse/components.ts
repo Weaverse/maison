@@ -61,6 +61,7 @@ import * as ProductBundledVariants from "~/sections/main-product/product-bundled
 import * as ProductCollapsibleDetails from "~/sections/main-product/product-collapsible-details";
 import * as ProductPrices from "~/sections/main-product/product-prices";
 import * as ProductQuantitySelector from "~/sections/main-product/product-quantity-selector";
+import * as ProductStock from "~/sections/main-product/product-stock";
 import * as ProductSummary from "~/sections/main-product/product-summary";
 import * as ProductTitle from "~/sections/main-product/product-title";
 import * as ProductVariantSelector from "~/sections/main-product/product-variant-selector";
@@ -146,6 +147,7 @@ export const components: HydrogenComponent[] = [
   ProductVendor,
   ProductTitle,
   ProductPrices,
+  ProductStock,
   ProductSummary,
   ProductBundledVariants,
   ProductVariantSelector,
