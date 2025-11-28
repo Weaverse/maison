@@ -6,9 +6,9 @@ interface B2BSignupData {
   name: string;
   company: string;
   email: string;
-  website: string;
-  message: string;
-  submittedAt: string;
+  website?: string;
+  message?: string;
+  submittedAt?: string;
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
