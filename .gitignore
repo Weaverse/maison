@@ -22,3 +22,5 @@ memory/
 scripts/
 templates/
 specs/
+.wrangler/
+wrangler.json
