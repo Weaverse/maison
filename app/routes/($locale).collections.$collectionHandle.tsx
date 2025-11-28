@@ -32,11 +32,13 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     pageBy: PAGINATION_SIZE,
   });
   const { collectionHandle } = params;
-  const { storefront, env } = context;
+  const { storefront, env, customerAccount } = context;
   const locale = storefront.i18n;
 
   invariant(collectionHandle, "Missing collectionHandle param");
-
+  const buyer = await customerAccount.getBuyer();
+  const buyerVariables =
+    buyer?.companyLocationId && buyer?.customerAccessToken ? { buyer } : {};
   const searchParams = new URL(request.url).searchParams;
   const { sortKey, reverse } = getSortValuesFromParam(
     searchParams.get("sort") as SortParam,
@@ -61,6 +63,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
       .query<CollectionQuery>(COLLECTION_QUERY, {
         variables: {
           ...paginationVariables,
+          ...buyerVariables,
           handle: collectionHandle,
           filters,
           sortKey,
@@ -225,6 +228,7 @@ function parseAsCurrency(value: number, locale: I18nLocale) {
 
 const COLLECTION_QUERY = `#graphql
   query collection(
+    $buyer: BuyerInput
     $handle: String!
     $country: CountryCode
     $language: LanguageCode
@@ -237,7 +241,7 @@ const COLLECTION_QUERY = `#graphql
     $endCursor: String
     $customBannerNamespace: String!
     $customBannerKey: String!
-  ) @inContext(country: $country, language: $language) {
+  ) @inContext(buyer: $buyer, country: $country, language: $language) {
     collection(handle: $handle) {
       id
       handle

@@ -16,7 +16,7 @@ export default function ProductSummary(props: ProductSummaryProps) {
 
   return (
     <div ref={ref} {...rest} className="empty:hidden">
-      <p className="leading-relaxed">{product.summary}</p>
+      <p className="leading-relaxed text-body-subtle">{product.summary}</p>
     </div>
   );
 }

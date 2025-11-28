@@ -3,7 +3,16 @@ import * as Heading from "~/components/heading";
 import * as Link from "~/components/link";
 import * as Paragraph from "~/components/paragraph";
 import * as SubHeading from "~/components/subheading";
+import * as ViewAllButton from "~/components/view-all-button";
+import * as AccordionItem from "~/sections/accordion/accordion-item";
+import * as AccordionItems from "~/sections/accordion/accordion-items";
+import * as AccordionSection from "~/sections/accordion/index";
+import * as AccordionInfoGroup from "~/sections/accordion/info-group";
 import * as AllProducts from "~/sections/all-products";
+import * as Articles from "~/sections/articles";
+import * as ArticlesHeaderContainer from "~/sections/articles/articles-header";
+import * as ArticlesItems from "~/sections/articles/articles-items";
+import * as B2BSignup from "~/sections/b2b-signup";
 import * as BlogPost from "~/sections/blog-post";
 import * as Blogs from "~/sections/blogs";
 import * as CollectionFilters from "~/sections/collection-filters";
@@ -12,11 +21,20 @@ import * as CollectionListItems from "~/sections/collection-list/collections-ite
 import * as ColumnsWithImages from "~/sections/columns-with-images";
 import * as ColumnWithImageItem from "~/sections/columns-with-images/column";
 import * as ColumnsWithImagesItems from "~/sections/columns-with-images/items";
+import * as CompanyStory from "~/sections/company-story";
+import * as CompanyStoryContact from "~/sections/company-story/contact";
+import * as CompanyStoryContent from "~/sections/company-story/content";
+import * as CompanyStoryImage from "~/sections/company-story/image";
+import * as CompanyStorySeparator from "~/sections/company-story/separator";
+import * as ContactForm from "~/sections/contact-form";
+import * as ContactFormForm from "~/sections/contact-form/form";
 import * as Countdown from "~/sections/countdown";
 import * as CountDownTimer from "~/sections/countdown/timer";
 import * as FeaturedCollections from "~/sections/featured-collections";
+import * as FeaturedCollectionHeader from "~/sections/featured-collections/collection-header";
 import * as FeaturedCollectionItems from "~/sections/featured-collections/collection-items";
 import * as FeaturedProducts from "~/sections/featured-products";
+import * as FeaturedProductHeader from "~/sections/featured-products/product-header";
 import * as FeaturedProductItems from "~/sections/featured-products/product-items";
 import * as HeroImage from "~/sections/hero-image";
 import * as HeroVideo from "~/sections/hero-video";
@@ -31,6 +49,9 @@ import * as ImageWithTextImage from "~/sections/image-with-text/image";
 import * as JudgemeReview from "~/sections/judgeme-reviews";
 import * as JudgemeReviewList from "~/sections/judgeme-reviews/review-list";
 import * as JudgemeReviewSummary from "~/sections/judgeme-reviews/review-summary";
+import * as LogoList from "~/sections/logo-list";
+import * as LogoListItem from "~/sections/logo-list/item";
+import * as LogoListItems from "~/sections/logo-list/items";
 import * as MainProduct from "~/sections/main-product";
 import * as JudgemeStarsRating from "~/sections/main-product/judgeme-stars-rating";
 import * as ProductATCButtons from "~/sections/main-product/product-atc-buttons";
@@ -40,11 +61,16 @@ import * as ProductBundledVariants from "~/sections/main-product/product-bundled
 import * as ProductCollapsibleDetails from "~/sections/main-product/product-collapsible-details";
 import * as ProductPrices from "~/sections/main-product/product-prices";
 import * as ProductQuantitySelector from "~/sections/main-product/product-quantity-selector";
+import * as ProductStock from "~/sections/main-product/product-stock";
 import * as ProductSummary from "~/sections/main-product/product-summary";
 import * as ProductTitle from "~/sections/main-product/product-title";
 import * as ProductVariantSelector from "~/sections/main-product/product-variant-selector";
 import * as ProductVendor from "~/sections/main-product/product-vendor";
 import * as MapSection from "~/sections/map";
+import * as Multicolumn from "~/sections/multicolumn";
+import * as MulticolumnItem from "~/sections/multicolumn/item";
+import * as MulticolumnItems from "~/sections/multicolumn/items";
+import * as MulticolumnHeader from "~/sections/multicolumn/multicolumn-header";
 import * as NewsLetter from "~/sections/newsletter";
 import * as NewsLetterForm from "~/sections/newsletter/newsletter-form";
 import * as OurTeam from "~/sections/our-team";
@@ -54,7 +80,10 @@ import * as PromotionGrid from "~/sections/promotion-grid";
 import * as PromotionGridButtons from "~/sections/promotion-grid/buttons";
 import * as PromotionGridItem from "~/sections/promotion-grid/item";
 import * as RelatedArticles from "~/sections/related-articles";
+import * as RelatedArticlesHeader from "~/sections/related-articles/related-articles-header";
+import * as RelatedArticlesItems from "~/sections/related-articles/related-articles-items";
 import * as RelatedProducts from "~/sections/related-products";
+import * as RelatedProductsHeader from "~/sections/related-products/related-products-header";
 import * as SingleProduct from "~/sections/single-product";
 import * as SlideShow from "~/sections/slideshow";
 import * as SlideShowSlide from "~/sections/slideshow/slide";
@@ -62,6 +91,7 @@ import * as Spacer from "~/sections/spacer";
 import * as Testimonial from "~/sections/testimonials";
 import * as TestimonialItem from "~/sections/testimonials/item";
 import * as TestimonialItems from "~/sections/testimonials/items";
+import * as VariantList from "~/sections/variant-list";
 import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
 
@@ -75,6 +105,7 @@ export const components: HydrogenComponent[] = [
   AllProducts,
   FeaturedCollections,
   FeaturedCollectionItems,
+  FeaturedCollectionHeader,
   BlogPost,
   Blogs,
   Page,
@@ -102,6 +133,7 @@ export const components: HydrogenComponent[] = [
   BlogPost,
   AllProducts,
   FeaturedProducts,
+  FeaturedProductHeader,
   FeaturedProductItems,
   Testimonial,
   TestimonialItems,
@@ -115,6 +147,7 @@ export const components: HydrogenComponent[] = [
   ProductVendor,
   ProductTitle,
   ProductPrices,
+  ProductStock,
   ProductSummary,
   ProductBundledVariants,
   ProductVariantSelector,
@@ -122,7 +155,10 @@ export const components: HydrogenComponent[] = [
   ProductATCButtons,
   ProductCollapsibleDetails,
   RelatedProducts,
+  RelatedProductsHeader,
   RelatedArticles,
+  RelatedArticlesHeader,
+  RelatedArticlesItems,
   CollectionFilters,
   CollectionList,
   CollectionListItems,
@@ -136,4 +172,28 @@ export const components: HydrogenComponent[] = [
   SlideShow,
   SlideShowSlide,
   Spacer,
+  VariantList,
+  Articles,
+  ArticlesItems,
+  ArticlesHeaderContainer,
+  ViewAllButton,
+  AccordionSection,
+  AccordionItems,
+  AccordionItem,
+  AccordionInfoGroup,
+  Multicolumn,
+  MulticolumnHeader,
+  MulticolumnItems,
+  MulticolumnItem,
+  ContactForm,
+  ContactFormForm,
+  LogoList,
+  LogoListItems,
+  LogoListItem,
+  CompanyStory,
+  CompanyStoryImage,
+  CompanyStoryContent,
+  CompanyStorySeparator,
+  CompanyStoryContact,
+  B2BSignup,
 ];

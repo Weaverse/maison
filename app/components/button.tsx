@@ -37,7 +37,7 @@ export const variants = cva(
           "border px-4 py-3",
           "text-(--btn-outline-text)",
           "bg-transparent",
-          "border-(--btn-outline-text)",
+          "border-(--color-line)",
           "hover:bg-(--btn-outline-text)",
           "hover:text-background",
           "hover:border-(--btn-outline-text)",

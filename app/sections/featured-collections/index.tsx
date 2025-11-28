@@ -4,11 +4,13 @@ import {
   type WeaverseCollection,
 } from "@weaverse/hydrogen";
 import type { CollectionsByIdsQuery } from "storefront-api.generated";
+import { backgroundInputs } from "~/components/background-image";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
 
 interface FeaturedCollectionsData {
   collections: WeaverseCollection[];
+  collectionsToShow: number;
 }
 
 interface FeaturedCollectionsProps
@@ -18,7 +20,7 @@ interface FeaturedCollectionsProps
 }
 
 export default function FeaturedCollections(props: FeaturedCollectionsProps) {
-  const { ref, loaderData, children, ...rest } = props;
+  const { ref, children, ...rest } = props;
   return (
     <Section ref={ref} {...rest}>
       {children}
@@ -43,6 +45,7 @@ const COLLECTIONS_QUERY = `#graphql
           height
           url
         }
+        products(first: 250) { nodes { id } }
       }
     }
   }
@@ -77,12 +80,7 @@ export const loader = async ({
 export const schema = createSchema({
   type: "featured-collections",
   title: "Featured collections",
-  childTypes: [
-    "featured-collections-items",
-    "heading",
-    "subheading",
-    "paragraph",
-  ],
+  childTypes: ["featured-collections--header", "featured-collections--items"],
   settings: [
     {
       group: "Featured collections",
@@ -90,35 +88,67 @@ export const schema = createSchema({
         {
           type: "collection-list",
           name: "collections",
-          label: "Collections",
+          label: "Select collections",
+          shouldRevalidate: true,
+        },
+        {
+          type: "range",
+          name: "collectionsToShow",
+          label: "Collections to show",
+          defaultValue: 10,
+          configs: { min: 1, max: 12, step: 1 },
         },
       ],
     },
     {
       group: "Layout",
-      inputs: layoutInputs.filter((i) => i.name !== "borderRadius"),
+      inputs: [...layoutInputs.filter((i) => i.name !== "borderRadius")],
+    },
+    {
+      group: "Background",
+      inputs: [
+        ...backgroundInputs.filter(
+          (inp) =>
+            inp.name !== "backgroundImage" &&
+            inp.name !== "backgroundFit" &&
+            inp.name !== "backgroundPosition",
+        ),
+      ],
     },
   ],
   presets: {
-    gap: 32,
+    gap: 60,
     children: [
-      { type: "heading", content: "Shop our collections" },
       {
-        type: "featured-collections-items",
-        imageAspectRatio: "3/4",
-        gridSize: "3",
-        contentPosition: "over",
-        collectionNameColor: "#fff",
-        buttonText: "Shop now",
-        enableOverlay: true,
-        overlayColor: "#000",
-        overlayOpacity: 30,
-        backgroundColor: "#fff",
-        textColor: "#000",
-        borderColor: "#fff",
-        backgroundColorHover: "#ffeded",
-        textColorHover: "#000",
-        borderColorHover: "#ffeded",
+        type: "featured-collections--header",
+        gap: 16,
+        children: [
+          {
+            type: "heading",
+            content: "Collections",
+            as: "h4",
+            weight: 400,
+            alignment: "left",
+          },
+          {
+            type: "view-all-button",
+            text: "VIEW ALL",
+            link: "/collections",
+            showButton: true,
+          },
+        ],
+      },
+      {
+        type: "featured-collections--items",
+        mobileGridSize: "2",
+        desktopGridSize: "5",
+        gap: 16,
+        imageAspectRatio: "1/1",
+        imageBorderRadius: 4,
+        showProductCount: true,
+        cardBackgroundColor: "#DCDCDC",
+        cardPadding: 12,
+        cardBorderRadius: 4,
       },
     ],
   },

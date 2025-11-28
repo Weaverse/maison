@@ -18,6 +18,11 @@ export type BackgroundProps = BackgroundImageProps & {
   backgroundColor: string;
 };
 
+export interface LayoutData {
+  width: "full" | "stretch" | "fixed" | "custom";
+  customWidth?: number;
+}
+
 export interface SectionProps<T = any>
   extends Omit<VariantProps<typeof variants>, "padding">,
     Partial<Omit<HydrogenComponentProps<T>, "children">>,
@@ -29,6 +34,7 @@ export interface SectionProps<T = any>
   borderRadius?: number;
   containerClassName?: string;
   children?: React.ReactNode;
+  customWidth?: number;
 }
 
 const variants = cva("relative", {
@@ -37,11 +43,13 @@ const variants = cva("relative", {
       full: "h-full w-full",
       stretch: "h-full w-full",
       fixed: "mx-auto h-full w-full max-w-(--page-width)",
+      custom: "mx-auto size-full lg:w-[var(--custom-width)]",
     },
     padding: {
       full: "",
       stretch: "px-3 md:px-10 lg:px-16",
       fixed: "mx-auto px-3 md:px-4 lg:px-6",
+      custom: "px-3 md:px-4 lg:px-0",
     },
     verticalPadding: {
       none: "",
@@ -82,6 +90,7 @@ export function Section(props: SectionProps) {
     ref,
     as: Component = "section",
     width,
+    customWidth,
     gap,
     overflow,
     verticalPadding,
@@ -92,9 +101,14 @@ export function Section(props: SectionProps) {
     backgroundFit,
     backgroundPosition,
     enableOverlay,
+    overlayType,
     overlayColor,
     overlayColorHover,
     overlayOpacity,
+    gradientDirection,
+    gradientFrom,
+    gradientTo,
+    gradientToOpacity,
     className,
     children,
     containerClassName,
@@ -107,6 +121,13 @@ export function Section(props: SectionProps) {
     "--section-bg-color": backgroundColor,
     "--section-radius": `${borderRadius || 0}px`,
   } as React.CSSProperties;
+
+  if (width === "custom") {
+    style = {
+      ...style,
+      "--custom-width": `${customWidth}px`,
+    } as React.CSSProperties;
+  }
 
   const isBgForContent = backgroundFor === "content";
   const hasBackground = backgroundColor || backgroundImage || borderRadius > 0;
@@ -152,9 +173,23 @@ export const layoutInputs: InspectorGroup["inputs"] = [
         { value: "full", label: "Full page" },
         { value: "stretch", label: "Stretch" },
         { value: "fixed", label: "Fixed" },
+        { value: "custom", label: "Custom" },
       ],
     },
     defaultValue: "fixed",
+  },
+  {
+    type: "range",
+    name: "customWidth",
+    label: "Custom width",
+    configs: {
+      min: 400,
+      max: 1920,
+      step: 4,
+      unit: "px",
+    },
+    defaultValue: 900,
+    condition: (data: LayoutData) => data.width === "custom",
   },
   {
     type: "range",

@@ -6,179 +6,143 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import clsx from "clsx";
-import type { CSSProperties } from "react";
 import { Image } from "~/components/image";
-import Link, { type LinkStyles, linkStylesInputs } from "~/components/link";
-import type { OverlayProps } from "~/components/overlay";
-import { Overlay, overlayInputs } from "~/components/overlay";
-import { useAnimation } from "~/hooks/use-animation";
+import Link from "~/components/link";
 import type { ImageAspectRatio } from "~/types/image";
+import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
 import type { FeaturedCollectionsLoaderData } from ".";
 
-const variants = cva("", {
+const gridVariants = cva("grid", {
   variants: {
-    gridSize: {
-      3: "md:grid-cols-3",
-      4: "md:grid-cols-3 lg:grid-cols-4",
-      5: "md:grid-cols-3 xl:grid-cols-5",
-      6: "md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6",
+    mobileGridSize: {
+      "1": "grid-cols-1",
+      "2": "grid-cols-2",
+      "3": "grid-cols-3",
+    },
+    desktopGridSize: {
+      "3": "md:grid-cols-3",
+      "4": "md:grid-cols-4",
+      "5": "md:grid-cols-5",
+      "6": "md:grid-cols-6",
     },
     gap: {
-      8: "md:gap-2",
-      12: "md:gap-3",
-      16: "md:gap-4",
-      20: "md:gap-5",
-      24: "md:gap-6",
-      28: "md:gap-7",
-      32: "md:gap-8",
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
     },
-    borderRadius: {
-      0: "",
-      2: "rounded-xs",
-      4: "rounded-sm",
-      6: "rounded-md",
-      8: "rounded-lg",
-      10: "rounded-[10px]",
-      12: "rounded-xl",
-      14: "rounded-[14px]",
-      16: "rounded-2xl",
-      18: "rounded-[18px]",
-      20: "rounded-[20px]",
-      22: "rounded-[22px]",
-      24: "rounded-3xl",
-    },
-    contentPosition: {
-      over: "absolute inset-0 z-1 flex flex-col justify-center",
-      below: "",
-    },
+  },
+  defaultVariants: {
+    mobileGridSize: "2",
+    desktopGridSize: "5",
+    gap: 16,
   },
 });
 
 interface CollectionItemsData
-  extends VariantProps<typeof variants>,
-    OverlayProps,
-    LinkStyles {
-  imageAspectRatio: ImageAspectRatio;
-  collectionNameColor: string;
-  buttonText: string;
+  extends VariantProps<typeof gridVariants>,
+    HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
+  imageAspectRatio: ImageAspectRatio;
+  imageBorderRadius: number;
+  titleColor?: string;
+  countColor?: string;
+  showProductCount?: boolean;
+  cardBackgroundColor?: string;
+  cardPadding?: number;
+  cardBorderRadius?: number;
 }
 
-function CollectionItems(props: CollectionItemsData & HydrogenComponentProps) {
+function CollectionItems(props: CollectionItemsData) {
   const {
     ref,
-    gridSize,
     gap,
     imageAspectRatio,
-    borderRadius,
-    contentPosition,
-    collectionNameColor,
-    enableOverlay,
-    overlayColor,
-    overlayColorHover,
-    overlayOpacity,
-    buttonText,
-    backgroundColor,
-    textColor,
-    borderColor,
-    backgroundColorHover,
-    textColorHover,
-    borderColorHover,
+    imageBorderRadius,
+    titleColor,
+    countColor,
+    showProductCount = true,
+    cardBackgroundColor,
+    cardPadding,
+    cardBorderRadius,
+    mobileGridSize,
+    desktopGridSize,
     ...rest
   } = props;
-  const [scope] = useAnimation(ref);
 
   const parent = useParentInstance();
-  let collections: FeaturedCollectionsLoaderData = parent.data?.loaderData;
-  if (!collections?.length) {
-    collections = new Array(Number(gridSize)).fill(COLLECTION_PLACEHOLDER);
-  }
+  const itemsToShow = Number(parent.data?.data?.collectionsToShow ?? 10);
+  const collections: FeaturedCollectionsLoaderData = parent.data?.loaderData
+    ?.length
+    ? parent.data.loaderData
+    : new Array(itemsToShow).fill(COLLECTION_PLACEHOLDER);
+
   return (
     <div
-      ref={scope}
+      ref={ref}
       {...rest}
-      className={clsx(
-        [
-          "snap-x snap-mandatory",
-          "hidden-scroll scroll-px-6 overflow-x-scroll md:overflow-x-hidden",
-          "grid w-full grid-flow-col justify-start gap-2 md:grid-flow-row",
-        ],
-        variants({ gridSize, gap }),
-      )}
+      className={cn(gridVariants({ mobileGridSize, desktopGridSize, gap }))}
     >
-      {collections.map((collection, ind) => (
-        <div
-          key={collection.id + ind}
-          className="group group/overlay relative w-[67vw] md:w-auto"
-          data-motion="slide-in"
-        >
-          {collection?.image && (
-            <div
-              className={clsx("overflow-hidden", variants({ borderRadius }))}
-              style={{
-                aspectRatio: calculateAspectRatio(
-                  collection?.image || {},
-                  imageAspectRatio,
-                ),
-              }}
-            >
+      {(collections as any[])
+        .slice(0, collections ? itemsToShow : 0)
+        .map((collection, ind) => (
+          <Link
+            key={collection.id + ind}
+            to={`/collections/${collection.handle}`}
+            className="flex flex-col gap-5"
+            style={{
+              background: cardBackgroundColor,
+              padding: `${cardPadding}px`,
+              borderRadius: `${cardBorderRadius}px`,
+            }}
+          >
+            {collection.image ? (
               <Image
                 data={collection.image}
-                width={collection.image.width || 600}
-                height={collection.image.height || 400}
-                sizes="(max-width: 32em) 100vw, 45vw"
-                className={clsx([
-                  "transition-all duration-300",
-                  "scale-100 will-change-transform group-hover:scale-[1.05]",
-                ])}
+                aspectRatio={calculateAspectRatio(
+                  collection.image,
+                  imageAspectRatio,
+                )}
+                sizes="auto"
+                style={{ borderRadius: `${imageBorderRadius}px` }}
               />
-            </div>
-          )}
-          {contentPosition === "over" && (
-            <Overlay
-              enableOverlay={enableOverlay}
-              overlayColor={overlayColor}
-              overlayColorHover={overlayColorHover}
-              overlayOpacity={overlayOpacity}
-              className={clsx("z-0", variants({ borderRadius }))}
-            />
-          )}
-          <div className={clsx("items-center", variants({ contentPosition }))}>
-            <div
-              style={
-                { "--col-name-color": collectionNameColor } as CSSProperties
-              }
-              className={clsx(
-                contentPosition === "over"
-                  ? "space-y-4 px-4 py-16 text-center text-(--col-name-color) xl:space-y-7"
-                  : "py-4",
-              )}
-            >
-              {contentPosition === "over" ? (
-                <h5>{collection.title}</h5>
-              ) : (
-                <h6>{collection.title}</h6>
-              )}
-              {contentPosition === "over" && buttonText && (
-                <Link
-                  to={`/collections/${collection.handle}`}
-                  variant="custom"
-                  backgroundColor={backgroundColor}
-                  textColor={textColor}
-                  borderColor={borderColor}
-                  backgroundColorHover={backgroundColorHover}
-                  textColorHover={textColorHover}
-                  borderColorHover={borderColorHover}
-                >
-                  {buttonText}
-                </Link>
+            ) : (
+              <div
+                className="w-full overflow-hidden bg-gray-100"
+                style={{ borderRadius: `${imageBorderRadius}px` }}
+              >
+                <Image
+                  data={{ url: IMAGES_PLACEHOLDERS.image }}
+                  aspectRatio={imageAspectRatio}
+                  sizes="auto"
+                />
+              </div>
+            )}
+            <div className="flex flex-col gap-1">
+              <h6
+                className="font-normal text-[26px] line-clamp-1"
+                style={{ color: titleColor }}
+              >
+                {collection.title ?? "Title here"}
+              </h6>
+              {showProductCount && (
+                <span className="text-sm" style={{ color: countColor }}>
+                  {collection?.products?.nodes?.length !== undefined
+                    ? `${collection.products?.nodes?.length} products`
+                    : "No products available"}
+                </span>
               )}
             </div>
-          </div>
-        </div>
-      ))}
+          </Link>
+        ))}
     </div>
   );
 }
@@ -195,12 +159,15 @@ const COLLECTION_PLACEHOLDER: FeaturedCollectionsLoaderData[0] = {
     height: 1000,
     url: IMAGES_PLACEHOLDERS.collection_1,
   },
+  products: {
+    nodes: [],
+  },
 };
 
 export default CollectionItems;
 
 export const schema = createSchema({
-  type: "featured-collections-items",
+  type: "featured-collections--items",
   title: "Collection items",
   settings: [
     {
@@ -208,8 +175,21 @@ export const schema = createSchema({
       inputs: [
         {
           type: "toggle-group",
-          name: "gridSize",
-          label: "Grid size (desktop)",
+          name: "mobileGridSize",
+          label: "Items per row (mobile)",
+          defaultValue: "2",
+          configs: {
+            options: [
+              { value: "1", label: "1" },
+              { value: "2", label: "2" },
+            ],
+          },
+        },
+        {
+          type: "toggle-group",
+          name: "desktopGridSize",
+          label: "Items per row (desktop)",
+          defaultValue: "5",
           configs: {
             options: [
               { value: "3", label: "3" },
@@ -218,16 +198,16 @@ export const schema = createSchema({
               { value: "6", label: "6" },
             ],
           },
-          defaultValue: "5",
         },
         {
           type: "range",
           name: "gap",
           label: "Items gap",
           configs: {
-            min: 8,
-            max: 32,
+            min: 0,
+            max: 40,
             step: 4,
+            unit: "px",
           },
           defaultValue: 16,
         },
@@ -237,14 +217,30 @@ export const schema = createSchema({
       group: "Collection card",
       inputs: [
         {
-          type: "heading",
-          label: "Image",
+          type: "color",
+          name: "cardBackgroundColor",
+          label: "Card background",
+          defaultValue: "#DCDCDC",
+        },
+        {
+          type: "range",
+          name: "cardPadding",
+          label: "Card padding",
+          defaultValue: 12,
+          configs: { min: 0, max: 32, step: 1, unit: "px" },
+        },
+        {
+          type: "range",
+          name: "cardBorderRadius",
+          label: "Card border radius",
+          defaultValue: 4,
+          configs: { min: 0, max: 50, step: 1, unit: "px" },
         },
         {
           type: "select",
           name: "imageAspectRatio",
           label: "Image aspect ratio",
-          defaultValue: "adapt",
+          defaultValue: "1/1",
           configs: {
             options: [
               { value: "adapt", label: "Adapt to image" },
@@ -259,71 +255,24 @@ export const schema = createSchema({
         },
         {
           type: "range",
-          label: "Border radius",
-          name: "borderRadius",
+          label: "Image border radius",
+          name: "imageBorderRadius",
+          defaultValue: 4,
           configs: {
             min: 0,
             max: 24,
             step: 2,
             unit: "px",
           },
-          defaultValue: 0,
         },
+        { type: "color", name: "titleColor", label: "Title color" },
+        { type: "color", name: "countColor", label: "Count color" },
         {
-          type: "heading",
-          label: "Content",
+          type: "switch",
+          name: "showProductCount",
+          label: "Show product count",
+          defaultValue: true,
         },
-        {
-          type: "select",
-          name: "contentPosition",
-          label: "Content position",
-          configs: {
-            options: [
-              { value: "over", label: "Over image" },
-              { value: "below", label: "Below image" },
-            ],
-          },
-          defaultValue: "over",
-        },
-        {
-          type: "color",
-          name: "collectionNameColor",
-          label: "Collection name color",
-          defaultValue: "#fff",
-          condition: (data: CollectionItemsData) =>
-            data.contentPosition === "over",
-        },
-        {
-          type: "heading",
-          label: "Overlay",
-          condition: (data: CollectionItemsData) =>
-            data.contentPosition === "over",
-        },
-        ...overlayInputs.map((inp) => ({
-          ...inp,
-          condition: (data: CollectionItemsData) =>
-            data.contentPosition === "over",
-        })),
-        {
-          type: "heading",
-          label: "Button (optional)",
-          condition: (data: CollectionItemsData) =>
-            data.contentPosition === "over",
-        },
-        {
-          type: "text",
-          name: "buttonText",
-          label: "Button text",
-          defaultValue: "Shop now",
-          placeholder: "Shop now",
-          condition: (data: CollectionItemsData) =>
-            data.contentPosition === "over",
-        },
-        ...linkStylesInputs.map((inp) => ({
-          ...inp,
-          condition: (data: CollectionItemsData) =>
-            data.contentPosition === "over",
-        })),
       ],
     },
   ],

@@ -1,6 +1,5 @@
 import { createSchema } from "@weaverse/hydrogen";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router";
 import type { CollectionQuery } from "storefront-api.generated";
 import { BreadCrumb } from "~/components/breadcrumb";
@@ -65,17 +64,8 @@ export default function CollectionFilters(props: CollectionFiltersProps) {
     }
   >();
 
-  const [gridSizeDesktop, setGridSizeDesktop] = useState(
-    Number(productsPerRowDesktop) || 3,
-  );
-  const [gridSizeMobile, setGridSizeMobile] = useState(
-    Number(productsPerRowMobile) || 1,
-  );
-
-  useEffect(() => {
-    setGridSizeDesktop(Number(productsPerRowDesktop) || 3);
-    setGridSizeMobile(Number(productsPerRowMobile) || 1);
-  }, [productsPerRowDesktop, productsPerRowMobile]);
+  const gridSizeDesktop = Number(productsPerRowDesktop) || 3;
+  const gridSizeMobile = Number(productsPerRowMobile) || 1;
 
   if (collection?.products && collections) {
     const banner = collection.metafield
@@ -83,46 +73,31 @@ export default function CollectionFilters(props: CollectionFiltersProps) {
       : collection.image;
     return (
       <Section ref={ref} {...rest} overflow="unset">
-        <div className="py-10">
-          {showBreadcrumb && (
-            <BreadCrumb page={collection.title} className="mb-2.5" />
-          )}
-          <h3>{collection.title}</h3>
-          {showDescription && collection.description && (
-            <p className="mt-2.5 text-body-subtle">{collection.description}</p>
-          )}
-          {showBanner && banner && (
-            <div
-              className={clsx([
-                "mt-6 overflow-hidden bg-gray-100",
-                "rounded-(--banner-border-radius)",
-                "h-(--banner-height-mobile) lg:h-(--banner-height-desktop)",
-              ])}
-              style={
-                {
-                  "--banner-height-desktop": `${bannerHeightDesktop}px`,
-                  "--banner-height-mobile": `${bannerHeightMobile}px`,
-                  "--banner-border-radius": `${bannerBorderRadius}px`,
-                } as React.CSSProperties
-              }
-            >
-              <Image data={banner} sizes="auto" width={2000} />
-            </div>
-          )}
-        </div>
-        <ToolsBar
-          width={rest.width}
-          gridSizeDesktop={gridSizeDesktop}
-          gridSizeMobile={gridSizeMobile}
-          onGridSizeChange={(v) => {
-            if (v > 2) {
-              setGridSizeDesktop(v);
-            } else {
-              setGridSizeMobile(v);
+        {showBreadcrumb && (
+          <BreadCrumb page={collection.title} className="mb-2.5" />
+        )}
+        {showDescription && collection.description && (
+          <p className="mt-2.5 text-body-subtle">{collection.description}</p>
+        )}
+        {showBanner && banner && (
+          <div
+            className={clsx([
+              "mt-6 overflow-hidden bg-gray-100",
+              "rounded-(--banner-border-radius)",
+              "h-(--banner-height-mobile) lg:h-(--banner-height-desktop)",
+            ])}
+            style={
+              {
+                "--banner-height-desktop": `${bannerHeightDesktop}px`,
+                "--banner-height-mobile": `${bannerHeightMobile}px`,
+                "--banner-border-radius": `${bannerBorderRadius}px`,
+              } as React.CSSProperties
             }
-          }}
-          {...props}
-        />
+          >
+            <Image data={banner} sizes="auto" width={2000} />
+          </div>
+        )}
+        <ToolsBar {...props} />
         <div className="flex gap-5 pt-6 pb-8 lg:pt-12 lg:pb-20">
           {enableFilter && filtersPosition === "sidebar" && (
             <div className="hidden w-72 shrink-0 lg:block">
@@ -292,7 +267,7 @@ export const schema = createSchema({
       group: "Products grid",
       inputs: [
         {
-          type: "select",
+          type: "toggle-group",
           name: "productsPerRowDesktop",
           label: "Default products per row (desktop)",
           configs: {
@@ -305,7 +280,7 @@ export const schema = createSchema({
           defaultValue: "3",
         },
         {
-          type: "select",
+          type: "toggle-group",
           name: "productsPerRowMobile",
           label: "Default products per row (mobile)",
           configs: {

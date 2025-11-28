@@ -1,5 +1,8 @@
 // Supports weights 400-700
-import "@fontsource/poppins";
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import type { SeoConfig } from "@shopify/hydrogen";
 import { Analytics, getSeoMeta, useNonce } from "@shopify/hydrogen";
@@ -20,6 +23,8 @@ import {
   useRouteError,
   useRouteLoaderData,
 } from "react-router";
+import { B2BLocationProvider } from "./components/b2b/b2b-location-provider";
+import { B2BLocationSelector } from "./components/b2b/b2b-location-selector";
 import { Footer } from "./components/layout/footer";
 import { Header } from "./components/layout/header";
 import { ScrollingAnnouncement } from "./components/layout/scrolling-announcement";
@@ -70,7 +75,12 @@ export const meta = ({ data }: MetaArgs<typeof loader>) => {
 };
 
 function App() {
-  return <Outlet />;
+  return (
+    <B2BLocationProvider>
+      <Outlet />
+      <B2BLocationSelector />
+    </B2BLocationProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {

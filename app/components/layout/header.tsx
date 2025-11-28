@@ -12,9 +12,11 @@ import {
 import useWindowScroll from "react-use/esm/useWindowScroll";
 import Link from "~/components/link";
 import { Logo } from "~/components/logo";
+import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query.account";
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
+import { useB2BLocation } from "../b2b/b2b-location-provider";
 import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
@@ -100,6 +102,7 @@ export function Header() {
         <Logo />
         <DesktopMenu />
         <div className="z-1 flex items-center gap-1">
+          <ChangeLocation />
           <PredictiveSearchButton />
           <AccountLink className="relative flex h-8 w-8 items-center justify-center" />
           <CartDrawer />
@@ -130,5 +133,26 @@ function AccountLink({ className }: { className?: string }) {
         </Await>
       </Suspense>
     </Link>
+  );
+}
+
+function ChangeLocation() {
+  const { company, companyLocationId, setModalOpen } = useB2BLocation();
+
+  const locations = company?.locations?.edges
+    ? company.locations.edges.map(
+        (location: CustomerCompanyLocationConnection) => {
+          return { ...location.node };
+        },
+      )
+    : [];
+
+  if (locations.length <= 1 || !company) return null;
+  return (
+    <button onClick={() => setModalOpen(true)}>
+      {locations.find(
+        (companyLocation) => companyLocation.id == companyLocationId,
+      )?.name || "Select Location"}
+    </button>
   );
 }

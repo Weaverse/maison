@@ -7,10 +7,9 @@ import { Button } from "~/components/button";
 import { ScrollArea } from "~/components/scroll-area";
 import { cn } from "~/utils/cn";
 import { Filters } from "./filters";
-import { LayoutSwitcher, type LayoutSwitcherProps } from "./layout-switcher";
 import { Sort } from "./sort";
 
-interface ToolsBarProps extends LayoutSwitcherProps {
+interface ToolsBarProps {
   enableSort: boolean;
   showProductsCount: boolean;
   enableFilter: boolean;
@@ -24,32 +23,30 @@ export function ToolsBar({
   enableFilter,
   filtersPosition,
   showProductsCount,
-  gridSizeDesktop,
-  gridSizeMobile,
-  onGridSizeChange,
 }: ToolsBarProps) {
   const { collection } = useLoaderData<CollectionQuery>();
   return (
-    <div className="border-line-subtle border-y py-4">
-      <div className="flex w-full items-center justify-between gap-4 md:gap-8">
-        <LayoutSwitcher
-          gridSizeDesktop={gridSizeDesktop}
-          gridSizeMobile={gridSizeMobile}
-          onGridSizeChange={onGridSizeChange}
-        />
-        {showProductsCount && (
-          <span className="hidden text-center md:inline">
-            {collection?.products.nodes.length} products
-          </span>
-        )}
-        {(enableSort || (enableFilter && filtersPosition === "drawer")) && (
-          <div className="flex gap-2">
-            {enableSort && <Sort />}
-            {enableFilter && (
-              <FiltersDrawer filtersPosition={filtersPosition} />
-            )}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-[37px]">{collection?.title}</h4>
+        {enableFilter && (
+          <div className="hidden md:block">
+            <FiltersDrawer filtersPosition={filtersPosition} />
           </div>
         )}
+      </div>
+      <div className="flex items-center justify-between gap-2 text-sm">
+        {enableFilter && (
+          <div className="md:hidden">
+            <FiltersDrawer filtersPosition={filtersPosition} />
+          </div>
+        )}
+        {showProductsCount && (
+          <span className="hidden md:block">
+            Products ({collection?.products.nodes.length})
+          </span>
+        )}
+        {enableSort && <Sort />}
       </div>
     </div>
   );

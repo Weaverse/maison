@@ -1,23 +1,29 @@
-import {
-  ArrowRightIcon,
-  MagnifyingGlassIcon,
-  XIcon,
-} from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { type RefObject, useEffect, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
+import { useThemeSettings } from "@weaverse/hydrogen";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import { Image } from "~/components/image";
 import Link from "~/components/link";
+import { RevealUnderline } from "~/components/reveal-underline";
+import { ScrollArea } from "~/components/scroll-area";
 import { usePredictiveSearch } from "~/hooks/use-predictive-search";
+import type { NormalizedPredictiveSearchResultItem } from "~/types/predictive-search";
 import { cn } from "~/utils/cn";
-import { PopularKeywords } from "./popular-keywords";
-import { PredictiveSearchResult } from "./predictive-search-result";
 import { PredictiveSearchForm } from "./search-form";
+
+export let toggleSearchDrawer = (_open: boolean) => {
+  /* */
+};
 
 export function PredictiveSearchButton() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const params = useParams();
+
+  toggleSearchDrawer = setOpen;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: close the dialog when the location changes, aka when the user navigates to a search result page
   useEffect(() => {
@@ -34,140 +40,390 @@ export function PredictiveSearchButton() {
           <MagnifyingGlassIcon className="h-5 w-5" />
         </button>
       </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in"
-          style={{ "--fade-in-duration": "100ms" } as React.CSSProperties}
-        />
-        <Dialog.Content
-          className={cn([
-            "fixed inset-x-0 top-0 z-10 bg-(--color-header-bg)",
-            "-translate-y-full data-[state=open]:translate-y-0",
-            "data-[state=open]:animate-enter-from-top",
-            "focus-visible:outline-hidden",
-          ])}
-          style={
-            { "--enter-from-top-duration": "200ms" } as React.CSSProperties
-          }
-          aria-describedby={undefined}
-        >
-          <VisuallyHidden.Root asChild>
-            <Dialog.Title>Predictive search</Dialog.Title>
-          </VisuallyHidden.Root>
-          <div className="relative pt-(--topbar-height)">
+      <AnimatedSearchDrawer open={open}>
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between gap-2 px-5 pb-6">
+            <Dialog.Title asChild className="text-base">
+              <span className="font-medium">Search</span>
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="p-2"
+                aria-label="Close search drawer"
+              >
+                <XIcon className="h-5 w-5" />
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="flex-1 overflow-hidden">
             <PredictiveSearchForm>
               {({ fetchResults, inputRef }) => (
-                <div className="mx-auto w-[560px] max-w-[90vw] py-6 space-y-2">
-                  <div className="flex items-center gap-3 border border-line-subtle px-3">
-                    <MagnifyingGlassIcon className="h-5 w-5 shrink-0 text-gray-500" />
-                    <input
-                      name="q"
-                      type="search"
-                      onChange={(e) => fetchResults(e.target.value)}
-                      onFocus={(e) => fetchResults(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const query = e.currentTarget.value.trim();
-                          if (query) {
-                            const locale = params.locale
-                              ? `/${params.locale}`
-                              : "";
-                            window.location.href = `${locale}/search?q=${encodeURIComponent(query)}`;
-                          }
-                        }
-                      }}
-                      placeholder="Enter a keyword"
-                      ref={inputRef}
-                      autoComplete="off"
-                      className="h-full w-full py-4 focus-visible:outline-hidden"
-                    />
-                    <button
-                      type="button"
-                      className="shrink-0 p-1 text-gray-500"
-                      onClick={() => {
-                        if (inputRef.current) {
-                          inputRef.current.value = "";
-                          fetchResults("");
-                        }
-                      }}
-                    >
-                      <XIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <PopularKeywords
-                    onKeywordClick={(keyword) => {
-                      if (inputRef.current) {
-                        inputRef.current.value = keyword;
-                        fetchResults(keyword);
-                      }
-                    }}
-                  />
-                </div>
+                <SearchContent
+                  fetchResults={fetchResults}
+                  inputRef={inputRef}
+                  params={params}
+                />
               )}
             </PredictiveSearchForm>
-            <PredictiveSearchResults />
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
+        </div>
+      </AnimatedSearchDrawer>
     </Dialog.Root>
   );
 }
 
-function PredictiveSearchResults() {
-  const { results, totalResults, searchTerm } = usePredictiveSearch();
-  const queries = results?.find(({ type }) => type === "queries");
-  const articles = results?.find(({ type }) => type === "articles");
-  const products = results?.find(({ type }) => type === "products");
-
-  if (!totalResults) {
-    return (
-      <div className="absolute top-full z-10 flex w-full items-center justify-center">
-        <NoResults searchTerm={searchTerm} />
-      </div>
-    );
-  }
+function AnimatedSearchDrawer({ open, children }) {
   return (
-    <div className="-translate-x-1/2 absolute top-full left-1/2 z-10 flex w-fit items-center justify-center">
-      <div className="grid max-h-[80vh] w-screen min-w-[430px] max-w-[720px] grid-cols-1 gap-6 overflow-y-auto bg-(--color-header-bg) p-6 lg:grid-cols-[1fr_2fr]">
-        <div className="space-y-8">
-          <div className="flex flex-col gap-4 divide-y divide-line">
-            <PredictiveSearchResult type="queries" items={queries?.items} />
-          </div>
-          <div className="flex flex-col gap-4">
-            <PredictiveSearchResult type="articles" items={articles?.items} />
-          </div>
-        </div>
-        <div className="space-y-6">
-          <PredictiveSearchResult
-            type="products"
-            items={products?.items?.slice(0, 5)}
-          />
-          {searchTerm.current && (
-            <div>
-              <Link
-                to={`/search?q=${searchTerm.current}`}
-                variant="underline"
-                className="flex w-fit items-center gap-2"
+    <Dialog.Portal forceMount>
+      <AnimatePresence>
+        {open && (
+          <>
+            <Dialog.Overlay forceMount>
+              <motion.div
+                className="fixed inset-0 z-10 bg-black/50 backdrop-blur-xs"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            </Dialog.Overlay>
+            <Dialog.Content
+              forceMount
+              onCloseAutoFocus={(e) => e.preventDefault()}
+              className="fixed inset-y-0 right-0 z-10"
+              aria-describedby={undefined}
+            >
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{
+                  type: "spring",
+                  damping: 25,
+                  stiffness: 150,
+                }}
+                className="w-screen max-w-[384px] bg-background py-4 h-full"
               >
-                <span>View all results</span>
-                <ArrowRightIcon className="h-4 w-4" />
-              </Link>
-            </div>
+                {children}
+              </motion.div>
+            </Dialog.Content>
+          </>
+        )}
+      </AnimatePresence>
+    </Dialog.Portal>
+  );
+}
+
+function SearchContent({ fetchResults, inputRef, params }) {
+  const { results } = usePredictiveSearch();
+  const queries = results?.find(({ type }) => type === "queries");
+  const suggestions = queries?.items || [];
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="px-5 pb-4">
+        <div className="flex items-center gap-3 rounded-lg border border-line-subtle bg-gray-50 px-4">
+          <MagnifyingGlassIcon className="h-5 w-5 shrink-0 text-gray-400" />
+          <input
+            name="q"
+            type="search"
+            onChange={(e) => fetchResults(e.target.value)}
+            onFocus={(e) => fetchResults(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                const query = e.currentTarget.value.trim();
+                if (query) {
+                  const locale = params.locale ? `/${params.locale}` : "";
+                  window.location.href = `${locale}/search?q=${encodeURIComponent(query)}`;
+                }
+              }
+            }}
+            placeholder="Search"
+            ref={inputRef}
+            autoComplete="off"
+            className="h-full w-full bg-transparent py-3 text-sm focus-visible:outline-hidden"
+          />
+          {inputRef.current?.value && (
+            <button
+              type="button"
+              className="shrink-0 p-1 text-gray-400 hover:text-gray-600"
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                  fetchResults("");
+                }
+              }}
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
           )}
         </div>
+        <KeywordsDisplay
+          suggestions={suggestions}
+          onKeywordClick={(keyword) => {
+            if (inputRef.current) {
+              inputRef.current.value = keyword;
+              fetchResults(keyword);
+            }
+          }}
+        />
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <PredictiveSearchResults />
       </div>
     </div>
   );
 }
 
-function NoResults({ searchTerm }: { searchTerm: RefObject<string> }) {
+function PredictiveSearchResults() {
+  const { results, totalResults, searchTerm } = usePredictiveSearch();
+  const [activeTab, setActiveTab] = useState("products");
+  const params = useParams();
+
+  const products = results?.find(({ type }) => type === "products");
+  // const collections = results?.find(({ type }) => type === "collections");
+  const pages = results?.find(({ type }) => type === "articles");
+  console.log("🚀 ~ PredictiveSearchResults ~ pages:", pages);
+
   if (!searchTerm.current) {
     return null;
   }
+
+  if (!totalResults) {
+    return (
+      <div className="flex items-center justify-center px-5 py-8">
+        <p className="text-sm text-gray-500">
+          No results found for <q>{searchTerm.current}</q>
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <p className="w-[640px] bg-background p-6 shadow-header">
-      No results found for <q>{searchTerm.current}</q>
-    </p>
+    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+      <Tabs.List className="flex gap-8 border-b border-line-subtle px-5">
+        <Tabs.Trigger
+          value="products"
+          className={cn(
+            "pb-3 text-sm font-medium transition-colors",
+            activeTab === "products"
+              ? "shadow-[0_1px_0_var(--color-line)]"
+              : "text-body-subtle/70 hover:text-body-subtle",
+          )}
+        >
+          Products
+        </Tabs.Trigger>
+        {/* <Tabs.Trigger
+          value="collections"
+          className={cn(
+            "pb-3 text-sm font-medium transition-colors shadow-[0_-1px_0_0]",
+            activeTab === "collections"
+              ? "shadow-[0_1px_0_var(--color-line)]"
+              : "text-body-subtle/70 hover:text-body-subtle",
+          )}
+        >
+          Collections
+        </Tabs.Trigger> */}
+        <Tabs.Trigger
+          value="pages"
+          className={cn(
+            "pb-3 text-sm font-medium transition-colors shadow-[0_-1px_0_0]",
+            activeTab === "pages"
+              ? "shadow-[0_1px_0_var(--color-line)]"
+              : "text-body-subtle/70 hover:text-body-subtle",
+          )}
+        >
+          Page
+        </Tabs.Trigger>
+      </Tabs.List>
+
+      <ScrollArea className="h-full">
+        <Tabs.Content value="products" className="p-5">
+          {products?.items && products.items.length > 0 ? (
+            <div className="space-y-2.5">
+              {products.items.map((item) => (
+                <ProductResultItem key={item.id} item={item} />
+              ))}
+              <Link
+                to={`${params.locale ? `/${params.locale}` : ""}/search?q=${searchTerm.current}`}
+                className="mt-6 block w-full rounded-lg bg-gray-100 py-3 text-center text-sm font-medium transition-colors hover:bg-gray-200"
+              >
+                See All Results
+              </Link>
+            </div>
+          ) : (
+            <p className="py-8 text-center text-sm text-gray-500">
+              No products found
+            </p>
+          )}
+        </Tabs.Content>
+
+        {/* <Tabs.Content value="collections" className="px-5 py-4">
+          {collections?.items && collections.items.length > 0 ? (
+            <div className="space-y-4">
+              {collections.items.map((item) => (
+                <CollectionResultItem key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <p className="py-8 text-center text-sm text-gray-500">
+              No collections found
+            </p>
+          )}
+        </Tabs.Content> */}
+
+        <Tabs.Content value="pages" className="p-5">
+          {pages?.items && pages.items.length > 0 ? (
+            <div className="space-y-4">
+              {pages.items.map((item) => (
+                <PageResultItem key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <p className="py-8 text-center text-sm text-gray-500">
+              No pages found
+            </p>
+          )}
+        </Tabs.Content>
+      </ScrollArea>
+    </Tabs.Root>
+  );
+}
+
+function ProductResultItem({
+  item,
+}: {
+  item: NormalizedPredictiveSearchResultItem;
+}) {
+  if (item.__typename !== "Product") {
+    return null;
+  }
+
+  return (
+    <Link
+      to={item.url}
+      className="flex gap-4 rounded-lg transition-colors hover:bg-gray-50"
+    >
+      {item.image && (
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+          <Image
+            src={item.image.url}
+            alt={item.image.altText || item.title}
+            width={96}
+            height={96}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col justify-center gap-2">
+        <h3 className="text-sm font-semibold">{item.title}</h3>
+        {item.price && <p className="text-sm">${item.price.amount}</p>}
+        {item.compareAtPrice && (
+          <p className="text-xs text-gray-500 line-through">
+            ${item.compareAtPrice.amount}
+          </p>
+        )}
+        <p className="flex items-center gap-1 text-xs text-green-600">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
+          In Stock
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function CollectionResultItem({
+  item,
+}: {
+  item: NormalizedPredictiveSearchResultItem;
+}) {
+  if (item.__typename !== "Collection") {
+    return null;
+  }
+
+  return (
+    <Link
+      to={item.url}
+      className="flex gap-4 rounded-lg transition-colors hover:bg-gray-50"
+    >
+      {item.image && (
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+          <Image
+            src={item.image.url}
+            alt={item.image.altText || item.title}
+            width={96}
+            height={96}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col justify-center">
+        <h3 className="text-sm font-medium">{item.title}</h3>
+      </div>
+    </Link>
+  );
+}
+
+function PageResultItem({
+  item,
+}: {
+  item: NormalizedPredictiveSearchResultItem;
+}) {
+  if (item.__typename !== "Article") {
+    return null;
+  }
+
+  return (
+    <Link to={item.url} className="block rounded-lg py-2 transition-colors">
+      <RevealUnderline className="text-sm">{item.title}</RevealUnderline>
+    </Link>
+  );
+}
+
+function KeywordsDisplay({
+  suggestions,
+  onKeywordClick,
+}: {
+  suggestions: NormalizedPredictiveSearchResultItem[];
+  onKeywordClick: (keyword: string) => void;
+}) {
+  const { popularSearchKeywords } = useThemeSettings();
+  const popularKeywords: string[] =
+    popularSearchKeywords
+      ?.split(",")
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0) || [];
+  const keywords =
+    suggestions.length > 0
+      ? suggestions
+      : popularKeywords.map((keyword) => ({
+          title: keyword,
+          styledTitle: keyword,
+        }));
+
+  if (keywords.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {keywords.map((item) => (
+        <button
+          key={item.title}
+          type="button"
+          onClick={() => onKeywordClick(item.title)}
+          className="text-sm"
+        >
+          <RevealUnderline>
+            <span
+              dangerouslySetInnerHTML={{
+                __html: item.styledTitle || item.title,
+              }}
+            />
+          </RevealUnderline>
+        </button>
+      ))}
+    </div>
   );
 }

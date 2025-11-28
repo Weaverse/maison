@@ -23,6 +23,7 @@ export function isDiscounted(price: MoneyV2, compareAtPrice: MoneyV2) {
 export async function getRecommendedProducts(
   storefront: Storefront<I18nLocale>,
   productId: string,
+  buyerVariables: { buyer?: any } = {},
 ) {
   const products = await storefront.query<ProductRecommendationsQuery>(
     RECOMMENDED_PRODUCTS_QUERY,
@@ -31,6 +32,7 @@ export async function getRecommendedProducts(
         productId,
         count: 12,
         query: maybeFilterOutCombinedListingsQuery,
+        ...buyerVariables,
       },
     },
   );
@@ -54,12 +56,13 @@ export async function getRecommendedProducts(
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   query productRecommendations(
+    $buyer: BuyerInput
     $productId: ID!
     $count: Int
     $country: CountryCode
     $language: LanguageCode
     $query: String
-  ) @inContext(country: $country, language: $language) {
+  ) @inContext(buyer: $buyer, country: $country, language: $language) {
     recommended: productRecommendations(productId: $productId) {
       ...ProductCard
     }

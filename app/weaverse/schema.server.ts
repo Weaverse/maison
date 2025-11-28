@@ -262,13 +262,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Announcement text",
           name: "topbarTextColor",
-          defaultValue: "#ffffff",
+          defaultValue: "#F1EAE5",
         },
         {
           type: "color",
           label: "Announcement background",
           name: "topbarBgColor",
-          defaultValue: "#000000",
+          defaultValue: "#615E58",
         },
         {
           type: "heading",
@@ -278,13 +278,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Header background",
           name: "headerBgColor",
-          defaultValue: "#ffffff",
+          defaultValue: "#ebeae5",
         },
         {
           type: "color",
           label: "Header text",
           name: "headerText",
-          defaultValue: "#000000",
+          defaultValue: "#3C3428",
         },
         {
           type: "color",
@@ -300,13 +300,13 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Footer background",
           name: "footerBgColor",
-          defaultValue: "#000000",
+          defaultValue: "#4E4C47",
         },
         {
           type: "color",
           label: "Footer text",
           name: "footerText",
-          defaultValue: "#ffffff",
+          defaultValue: "#F1F1E6",
         },
         {
           type: "heading",
@@ -418,6 +418,7 @@ export const themeSchema: HydrogenThemeSchema = {
               { label: "-75", value: "-0.075em" },
               { label: "-50", value: "-0.05em" },
               { label: "-25", value: "-0.025em" },
+              { label: "-12.5", value: "-0.0125em" },
               { label: "0", value: "0em" },
               { label: "25", value: "0.025em" },
               { label: "50", value: "0.05em" },
@@ -428,7 +429,7 @@ export const themeSchema: HydrogenThemeSchema = {
               { label: "250", value: "0.25em" },
             ],
           },
-          defaultValue: "0.025em",
+          defaultValue: "-0.025em",
         },
         {
           type: "range",
@@ -466,6 +467,7 @@ export const themeSchema: HydrogenThemeSchema = {
               { label: "-75", value: "-0.075em" },
               { label: "-50", value: "-0.05em" },
               { label: "-25", value: "-0.025em" },
+              { label: "-12.5", value: "-0.0125em" },
               { label: "0", value: "0em" },
               { label: "25", value: "0.025em" },
               { label: "50", value: "0.05em" },
@@ -476,7 +478,7 @@ export const themeSchema: HydrogenThemeSchema = {
               { label: "250", value: "0.25em" },
             ],
           },
-          defaultValue: "0.025em",
+          defaultValue: "-0.0125em",
         },
         {
           type: "range",
@@ -514,11 +516,11 @@ export const themeSchema: HydrogenThemeSchema = {
             min: 0,
             max: 100,
             step: 1,
-            unit: "px"
+            unit: "px",
           },
-          defaultValue: 4
-        }
-      ]
+          defaultValue: 4,
+        },
+      ],
     },
     {
       group: "Product badges",
@@ -751,6 +753,19 @@ export const themeSchema: HydrogenThemeSchema = {
           label: "Show when hovering product card",
           name: "pcardShowQuickShopOnHover",
           defaultValue: true,
+          condition: (theme) => theme.pcardEnableQuickShop === true,
+        },
+        {
+          type: "select",
+          label: "Quick shop button placement",
+          name: "pcardQuickShopButtonPlacement",
+          configs: {
+            options: [
+              { value: "image", label: "On product image" },
+              { value: "bottom", label: "At card bottom" },
+            ],
+          },
+          defaultValue: "image",
           condition: (theme) => theme.pcardEnableQuickShop === true,
         },
         {

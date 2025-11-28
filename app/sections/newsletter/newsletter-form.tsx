@@ -1,16 +1,41 @@
-import { EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useFetcher } from "react-router";
 import { Button } from "~/components/button";
 import type { CustomerApiPlayLoad } from "~/routes/($locale).api.customer";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
-interface NewsLetterInputProps extends HydrogenComponentProps {
+const inputVariants = cva("border max-w-full", {
+  variants: {
+    borderRadius: {
+      0: "rounded-none",
+      2: "rounded-xs",
+      4: "rounded-sm",
+      6: "rounded-md",
+      8: "rounded-lg",
+      10: "rounded-[10px]",
+      12: "rounded-xl",
+      14: "rounded-[14px]",
+      16: "rounded-2xl",
+      18: "rounded-[18px]",
+      20: "rounded-[20px]",
+    },
+  },
+  defaultVariants: {
+    borderRadius: 8,
+  },
+});
+
+interface NewsLetterInputProps
+  extends VariantProps<typeof inputVariants>,
+    HydrogenComponentProps {
   width: number;
   placeholder: string;
   buttonText: string;
   helpText: string;
   successText?: string;
+  inputBackgroundColor?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -21,6 +46,8 @@ function NewsLetterForm(props: NewsLetterInputProps) {
     placeholder,
     helpText,
     successText,
+    inputBackgroundColor,
+    borderRadius,
     ref,
     ...rest
   } = props;
@@ -30,21 +57,26 @@ function NewsLetterForm(props: NewsLetterInputProps) {
   const { ok, errorMessage } = data || {};
 
   return (
-    <div ref={ref} {...rest} className="mx-auto max-w-full" style={{ width }}>
+    <div ref={ref} {...rest} className="mx-auto max-w-full">
       <Form
         method="POST"
         action="/api/customer"
-        className="flex w-full items-center"
+        className="flex flex-col md:flex-row w-full items-center justify-center gap-[17px]"
         data-motion="fade-up"
       >
-        <div className="flex grow items-center border-y border-r-0 border-l">
-          <EnvelopeSimpleIcon className="mr-1.5 ml-3 h-5 w-5 shrink-0" />
+        <div
+          className={clsx(inputVariants({ borderRadius }), "border-(--color-line)")}
+          style={{
+            backgroundColor: inputBackgroundColor,
+          }}
+        >
           <input
             name="email"
             type="email"
             required
             placeholder={placeholder}
-            className="w-full bg-transparent py-3 pr-3 pl-1.5 leading-tight focus:outline-hidden"
+            className="p-3 leading-tight focus:outline-hidden placeholder:text-sm"
+            style={{ width }}
           />
         </div>
         <Button
@@ -55,16 +87,10 @@ function NewsLetterForm(props: NewsLetterInputProps) {
           {buttonText}
         </Button>
       </Form>
-      {helpText && (
-        <div
-          className="mt-2 text-body-subtle"
-          data-motion="fade-up"
-          dangerouslySetInnerHTML={{ __html: helpText }}
-        />
-      )}
+
       <div
         className={clsx(
-          "mx-auto mt-4 text-center font-medium",
+          "mx-auto mt-4 text-center font-medium text-sm",
           state === "idle" && data ? "visible" : "invisible",
           ok ? "text-green-700" : "text-red-700",
         )}
@@ -78,7 +104,7 @@ function NewsLetterForm(props: NewsLetterInputProps) {
 export default NewsLetterForm;
 
 export const schema = createSchema({
-  type: "newsletter-form",
+  type: "newsletter--form",
   title: "Form",
   settings: [
     {
@@ -104,13 +130,6 @@ export const schema = createSchema({
           placeholder: "Enter your email",
         },
         {
-          type: "richtext",
-          name: "helpText",
-          label: "Help text",
-          defaultValue:
-            '<div>We care about the protection of your data. Read our <a href="/policies/privacy-policy" style="color: #007AFF; text-decoration: underline;">Privacy Policy</a>.</div>',
-        },
-        {
           type: "text",
           name: "successText",
           label: "Success message",
@@ -123,6 +142,28 @@ export const schema = createSchema({
           label: "Button text",
           placeholder: "Subscribe",
           defaultValue: "Subscribe",
+        },
+      ],
+    },
+    {
+      group: "Input styling",
+      inputs: [
+        {
+          type: "range",
+          name: "borderRadius",
+          label: "Border radius",
+          defaultValue: 4,
+          configs: {
+            min: 0,
+            max: 20,
+            step: 2,
+            unit: "px",
+          },
+        },
+        {
+          type: "color",
+          name: "inputBackgroundColor",
+          label: "Background color",
         },
       ],
     },

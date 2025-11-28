@@ -16,14 +16,40 @@ const JUDGEME_BADGE_API = "https://api.judge.me/api/v1/widgets/preview_badge";
 const JUDGEME_WIDGET_API = "https://api.judge.me/api/v1/widgets/product_review";
 const JUDGEME_REVIEWS_API = "https://api.judge.me/api/v1/reviews";
 
+/**
+ * Product API Loader
+ *
+ * This loader handles two main endpoints:
+ * 1. `/api/product/{handle}` - Returns product data with B2B pricing
+ * 2. `/api/product/{handle}/reviews` - Returns Judge.me reviews
+ *
+ * B2B Features:
+ * - Includes buyer context for company-specific pricing
+ * - Supports volume pricing and quantity rules
+ * - Handles company location context for pricing
+ */
 export const loader: LoaderFunction = async ({ request, context, params }) => {
   try {
-    const { storefront, weaverse, env } = context;
+    const { storefront, weaverse, env, customerAccount } = context;
     const url = new URL(request.url);
     const { searchParams, pathname } = url;
     const { productHandle } = params;
 
     invariant(productHandle, "Missing product handle.");
+
+    // Get B2B buyer context if available
+    // This enables company-specific pricing, volume pricing, and quantity rules
+    let buyer: Awaited<ReturnType<typeof customerAccount.getBuyer>> | null =
+      null;
+    try {
+      buyer = await customerAccount.getBuyer();
+    } catch (err) {
+      // If buyer context fails, continue without it (for non-B2B customers)
+      console.warn("[B2B] Failed to get buyer context:", err?.message);
+    }
+
+    const buyerVariables =
+      buyer?.companyLocationId && buyer?.customerAccessToken ? { buyer } : {};
 
     // Handle reviews endpoint
     if (pathname.endsWith("/reviews")) {
@@ -119,13 +145,19 @@ export const loader: LoaderFunction = async ({ request, context, params }) => {
       {
         variables: {
           handle: productHandle,
+          ...buyerVariables,
           selectedOptions: [],
           language: storefront.i18n.language,
           country: storefront.i18n.country,
         },
       },
     );
-    return data({ shop, product, storeDomain: shop.primaryDomain.url });
+    return data({
+      shop,
+      product,
+      storeDomain: shop.primaryDomain.url,
+      buyer,
+    });
   } catch (err) {
     console.error("[Error in product API loader]", err);
     return data(

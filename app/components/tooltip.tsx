@@ -29,8 +29,9 @@ export function TooltipContent({
   className,
   sideOffset = 4,
   style,
+  arrow = true,
   ...rest
-}: TooltipContentProps & { ref?: React.Ref<HTMLDivElement> }) {
+}: TooltipContentProps & { ref?: React.Ref<HTMLDivElement>; arrow?: boolean }) {
   return (
     <Portal>
       <Content
@@ -53,9 +54,11 @@ export function TooltipContent({
         }
         {...rest}
       >
-        <Arrow asChild>
-          <span className="border-x-6 border-x-transparent border-t-6 border-t-body" />
-        </Arrow>
+        {arrow && (
+          <Arrow asChild>
+            <span className="border-x-6 border-x-transparent border-t-6 border-t-body" />
+          </Arrow>
+        )}
         {children}
       </Content>
     </Portal>

@@ -15,7 +15,7 @@ export function RevealUnderline({
       className={cn(
         [
           "[--underline-color:var(--color-text)]",
-          "pb-[3px]",
+          // "pb-[3px]",
           "bg-size-[0%_1px]",
           "inline bg-no-repeat",
           "bg-position-[left_calc(1em+4px)]",

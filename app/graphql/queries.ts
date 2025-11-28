@@ -2,11 +2,12 @@ import { MEDIA_FRAGMENT, PRODUCT_OPTION_FRAGMENT } from "~/graphql/fragments";
 
 export const PRODUCT_QUERY = `#graphql
   query product(
+    $buyer: BuyerInput
     $country: CountryCode
     $language: LanguageCode
     $handle: String!
     $selectedOptions: [SelectedOptionInput!]!
-  ) @inContext(country: $country, language: $language) {
+  ) @inContext(buyer: $buyer, country: $country, language: $language) {
     product(handle: $handle) {
       id
       title
@@ -49,6 +50,11 @@ export const PRODUCT_QUERY = `#graphql
       }
       adjacentVariants(selectedOptions: $selectedOptions) {
         ...ProductVariant
+      }
+      variants(first: 250) {
+        nodes {
+          ...ProductVariant
+        }
       }
       # Check if the product is a bundle
       isBundle: selectedOrFirstAvailableVariant(ignoreUnknownOptions: true, selectedOptions: { name: "", value: ""}) {

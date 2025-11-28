@@ -1,4 +1,3 @@
-import { MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import * as Accordion from "@radix-ui/react-accordion";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import clsx from "clsx";
@@ -45,15 +44,15 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
           <Accordion.Item key={title} value={title}>
             <Accordion.Trigger
               className={clsx([
-                "flex w-full justify-between py-4 font-bold",
-                "border-line-subtle border-b",
-                "data-[state=open]:[&>.minus]:inline-block",
-                "data-[state=open]:[&>.plus]:hidden",
+                "group flex w-full justify-between py-4 font-bold",
+                "border-line-subtle border-t",
               ])}
             >
               <span>{title}</span>
-              <MinusIcon className="minus hidden h-4 w-4" />
-              <PlusIcon className="plus h-4 w-4" />
+              <div className="relative size-3 flex items-center justify-center">
+                <span className="absolute h-[1px] w-full bg-current" />
+                <span className="absolute h-[1px] w-full bg-current rotate-90 group-data-[state=open]:rotate-0 transition-transform duration-200" />
+              </div>
             </Accordion.Trigger>
             <Accordion.Content
               style={
@@ -72,7 +71,7 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
             >
               <div
                 suppressHydrationWarning
-                className="prose dark:prose-invert py-2.5"
+                className="prose dark:prose-invert py-2.5 text-body-subtle"
                 dangerouslySetInnerHTML={{ __html: content }}
               />
               {learnMore && (
