@@ -1,8 +1,8 @@
+import { VideoCameraIcon } from "@phosphor-icons/react";
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  VideoCameraIcon,
-} from "@phosphor-icons/react";
+  ArrowLeft,
+  ArrowRight,
+} from "~/components/icons";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
@@ -273,13 +273,13 @@ export function ProductMedia(props: ProductMediaProps) {
               type="button"
               className="media_slider__prev p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
             >
-              <ArrowLeftIcon className="h-4.5 w-4.5" />
+              <ArrowLeft />
             </button>
             <button
               type="button"
               className="media_slider__next p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
             >
-              <ArrowRightIcon className="h-4.5 w-4.5" />
+              <ArrowRight />
             </button>
           </div>
         </div>
@@ -307,7 +307,7 @@ export function ProductMedia(props: ProductMediaProps) {
                     className={cn(
                       "relative",
                       "h-auto! cursor-pointer rounded-(--pcard-radius) overflow-hidden",
-                      "[&.swiper-slide-thumb-active]:border-2 [&.swiper-slide-thumb-active]:border-(--color-line) [&.swiper-slide-thumb-active]:p-0",
+                      "[&.swiper-slide-thumb-active]:border-[3px] [&.swiper-slide-thumb-active]:border-(--color-line) [&.swiper-slide-thumb-active]:p-0",
                     )}
                   >
                     <Image

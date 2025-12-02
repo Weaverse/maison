@@ -1,8 +1,6 @@
 import {
-  MinusCircleIcon,
   PackageIcon,
   PaintBrushHouseholdIcon,
-  PlusCircleIcon,
   RulerIcon,
   TruckIcon,
 } from "@phosphor-icons/react";
@@ -54,6 +52,7 @@ const AccordionItem = (props: AccordionItemProps) => {
       {...rest}
       value={title}
       className="w-full focus-within:relative focus-within:z-10"
+      data-motion="fade-up"
     >
       <Accordion.Header>
         <Accordion.Trigger
@@ -62,9 +61,9 @@ const AccordionItem = (props: AccordionItemProps) => {
         >
           {renderIcon()}
           <span className="text-base">{title}</span>
-          <div className="relative ml-auto h-5 w-5">
-            <PlusCircleIcon className="absolute inset-0 h-full w-full transition-opacity duration-200 group-data-[state=open]:opacity-0" />
-            <MinusCircleIcon className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-200 group-data-[state=open]:opacity-100" />
+          <div className="relative ml-auto size-5 flex items-center justify-center rounded-full border-[2.5px] border-line">
+            <span className="absolute h-[2px] w-2.5 bg-line" />
+            <span className="absolute h-[2px] w-2.5 bg-line rotate-90 group-data-[state=open]:rotate-0 transition-transform duration-200" />
           </div>
         </Accordion.Trigger>
       </Accordion.Header>
