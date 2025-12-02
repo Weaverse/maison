@@ -3,6 +3,7 @@ import type {
   HydrogenComponentProps,
   HydrogenComponentSchema,
 } from "@weaverse/hydrogen";
+import { useAnimation } from "~/hooks/use-animation";
 
 interface AccordionGroupProps extends HydrogenComponentProps {
   allowMultiple: boolean;
@@ -12,9 +13,10 @@ interface AccordionGroupProps extends HydrogenComponentProps {
 
 const AccordionGroup = (props: AccordionGroupProps) => {
   const { ref, children, gap, ...rest } = props;
+  const [scope] = useAnimation(ref);
 
   return (
-    <div ref={ref} {...rest}>
+    <div ref={scope} {...rest}>
       <RadixAccordion.Root
         type="multiple"
         className="accordion--items grid w-full"

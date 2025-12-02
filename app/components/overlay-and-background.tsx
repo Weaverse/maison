@@ -12,6 +12,7 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
     backgroundImage,
     backgroundFit,
     backgroundPosition,
+    enableImageHover,
     enableOverlay,
     overlayType,
     overlayColor,
@@ -28,6 +29,7 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
         backgroundImage={backgroundImage}
         backgroundFit={backgroundFit}
         backgroundPosition={backgroundPosition}
+        enableImageHover={enableImageHover}
       />
       <Overlay
         enableOverlay={enableOverlay}

@@ -7,6 +7,7 @@ import type { CollectionsByIdsQuery } from "storefront-api.generated";
 import { backgroundInputs } from "~/components/background-image";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
+import { useAnimation } from "~/hooks/use-animation";
 
 interface FeaturedCollectionsData {
   collections: WeaverseCollection[];
@@ -21,8 +22,9 @@ interface FeaturedCollectionsProps
 
 export default function FeaturedCollections(props: FeaturedCollectionsProps) {
   const { ref, children, ...rest } = props;
+  const [scope] = useAnimation(ref);
   return (
-    <Section ref={ref} {...rest}>
+    <Section ref={scope} {...rest}>
       {children}
     </Section>
   );

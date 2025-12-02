@@ -57,6 +57,7 @@ interface CollectionItemsData
   countColor?: string;
   showProductCount?: boolean;
   cardBackgroundColor?: string;
+  cardHoverBackgroundColor?: string;
   cardPadding?: number;
   cardBorderRadius?: number;
 }
@@ -71,6 +72,7 @@ function CollectionItems(props: CollectionItemsData) {
     countColor,
     showProductCount = true,
     cardBackgroundColor,
+    cardHoverBackgroundColor,
     cardPadding,
     cardBorderRadius,
     mobileGridSize,
@@ -97,23 +99,38 @@ function CollectionItems(props: CollectionItemsData) {
           <Link
             key={collection.id + ind}
             to={`/collections/${collection.handle}`}
-            className="flex flex-col gap-5"
-            style={{
-              background: cardBackgroundColor,
-              padding: `${cardPadding}px`,
-              borderRadius: `${cardBorderRadius}px`,
-            }}
+            className={cn(
+              "group flex flex-col gap-5 transition-colors duration-300",
+              "bg-(--card-bg)",
+              cardHoverBackgroundColor && "hover:bg-(--hover-bg)",
+            )}
+            style={
+              {
+                "--card-bg": cardBackgroundColor,
+                ...(cardHoverBackgroundColor && {
+                  "--hover-bg": cardHoverBackgroundColor,
+                }),
+                padding: `${cardPadding}px`,
+                borderRadius: `${cardBorderRadius}px`,
+              } as React.CSSProperties
+            }
+            data-motion="fade-up"
           >
             {collection.image ? (
-              <Image
-                data={collection.image}
-                aspectRatio={calculateAspectRatio(
-                  collection.image,
-                  imageAspectRatio,
-                )}
-                sizes="auto"
+              <div
+                className="overflow-hidden"
                 style={{ borderRadius: `${imageBorderRadius}px` }}
-              />
+              >
+                <Image
+                  data={collection.image}
+                  aspectRatio={calculateAspectRatio(
+                    collection.image,
+                    imageAspectRatio,
+                  )}
+                  sizes="auto"
+                  className="transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
             ) : (
               <div
                 className="w-full overflow-hidden bg-gray-100"
@@ -123,16 +140,23 @@ function CollectionItems(props: CollectionItemsData) {
                   data={{ url: IMAGES_PLACEHOLDERS.image }}
                   aspectRatio={imageAspectRatio}
                   sizes="auto"
+                  className="transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
             )}
             <div className="flex flex-col gap-1">
-              <h6
-                className="font-normal text-[26px] line-clamp-1"
-                style={{ color: titleColor }}
-              >
-                {collection.title ?? "Title here"}
-              </h6>
+              <div className="w-fit">
+                <h6
+                  className="font-normal text-[26px] line-clamp-1 leading-6"
+                  style={{ color: titleColor }}
+                >
+                  {collection.title ?? "Title here"}
+                </h6>
+                <div
+                  className="h-[1px] w-0 transition-all duration-500 group-hover:w-full"
+                  style={{ backgroundColor: titleColor || "currentColor" }}
+                />
+              </div>
               {showProductCount && (
                 <span className="text-sm" style={{ color: countColor }}>
                   {collection?.products?.nodes?.length !== undefined
@@ -221,6 +245,11 @@ export const schema = createSchema({
           name: "cardBackgroundColor",
           label: "Card background",
           defaultValue: "#DCDCDC",
+        },
+        {
+          type: "color",
+          name: "cardHoverBackgroundColor",
+          label: "Card hover background",
         },
         {
           type: "range",
