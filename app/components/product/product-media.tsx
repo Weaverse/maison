@@ -2,7 +2,7 @@ import { VideoCameraIcon } from "@phosphor-icons/react";
 import {
   ArrowLeft,
   ArrowRight,
-} from "~/sections/featured-products/product-items";
+} from "~/components/icons";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
