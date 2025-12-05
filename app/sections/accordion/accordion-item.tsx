@@ -17,13 +17,11 @@ interface AccordionItemProps extends HydrogenComponentProps {
   content: string;
   icon: string;
   backgroundColor: string;
-  textColor: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
 const AccordionItem = (props: AccordionItemProps) => {
-  const { ref, title, content, icon, backgroundColor, textColor, ...rest } =
-    props;
+  const { ref, title, content, icon, backgroundColor, ...rest } = props;
 
   const renderIcon = () => {
     if (!icon) {
@@ -56,7 +54,7 @@ const AccordionItem = (props: AccordionItemProps) => {
     >
       <Accordion.Header>
         <Accordion.Trigger
-          style={{ backgroundColor, color: textColor } as React.CSSProperties}
+          style={{ backgroundColor }}
           className="group mb-1 flex w-full gap-3 p-4 text-left"
         >
           {renderIcon()}
@@ -83,9 +81,7 @@ const AccordionItem = (props: AccordionItemProps) => {
           "data-[state=open]:animate-expand",
         )}
       >
-        <div className="p-4 text-sm" style={{ color: textColor }}>
-          {content}
-        </div>
+        <div className="p-4 text-sm">{content}</div>
       </Accordion.Content>
     </Accordion.Item>
   );
@@ -133,12 +129,6 @@ export const schema: HydrogenComponentSchema = {
           name: "backgroundColor",
           label: "Background Color",
           defaultValue: "#efefef",
-        },
-        {
-          type: "color",
-          name: "textColor",
-          label: "Text Color",
-          defaultValue: "#000000",
         },
       ],
     },
