@@ -44,8 +44,8 @@ export function QuickShop({
 
   return (
     <div className="bg-background p-6">
-      <div className="mb-6 flex gap-6">
-        <div className="h-60 w-60 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+      <div className="mb-6 flex flex-col gap-6 md:flex-row">
+        <div className="mt-4 md:mt-0 aspect-square w-full md:w-60 flex-shrink-0 overflow-hidden rounded bg-gray-100">
           {firstImage && (
             <ProductMedia
               mediaLayout="slider"
@@ -55,25 +55,29 @@ export function QuickShop({
             />
           )}
         </div>
-        <div className="flex flex-col gap-3">
-          <h3 className="text-2xl font-normal">{product.title}</h3>
-          <div className="flex items-center gap-3">
-            <span className="text-body-subtle">From</span>
-            <span className="text-xl">
-              {minPrice === maxPrice
-                ? formatPrice(minPrice)
-                : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-sm text-body-subtle">In Stock</span>
+        <div className="flex flex-col justify-between max-h-full">
+          <div className="space-y-2.5">
+            <h3 className="text-3xl font-normal leading-tight">
+              {product.title}
+            </h3>
+            <div className="flex items-center gap-2 text-body-subtle">
+              <span className="text-sm">From</span>
+              <span>
+                {minPrice === maxPrice
+                  ? formatPrice(minPrice)
+                  : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span className="text-xs text-body-subtle">In Stock</span>
+            </div>
           </div>
           <Link
             to={`/products/${product.handle}`}
             prefetch="intent"
             variant="underline"
-            className="w-fit text-sm"
+            className="w-fit text-sm text-body-subtle"
           >
             View full details
           </Link>
@@ -82,7 +86,12 @@ export function QuickShop({
 
       <div className="space-y-6">
         <div className="space-y-4">
-          <div className="grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 border-b border-line-subtle pb-3">
+          {/* mobile header */}
+          <div className="border-b border-line-subtle pb-3 md:hidden">
+            <div className="text-sm font-bold uppercase">Products</div>
+          </div>
+          {/* tablet/desktop header */}
+          <div className="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 border-b border-line-subtle pb-3 lg:grid-cols-[3fr_1fr_1fr_1fr]">
             <div className="text-sm font-bold uppercase">Variant</div>
             <div className="text-center text-sm font-bold uppercase">
               Quantity
@@ -92,18 +101,23 @@ export function QuickShop({
               Variant Price
             </div>
           </div>
-          <div className="space-y-6">
-            {variants.map((variant) => (
-              <VariantRow key={variant.id} variant={variant} />
-            ))}
-          </div>
+          <Await resolve={rootData?.cart}>
+            {(resolvedCart) => (
+              <>
+                <div className="space-y-6">
+                  {variants.map((variant) => (
+                    <VariantRow
+                      key={variant.id}
+                      variant={variant}
+                      cart={resolvedCart}
+                    />
+                  ))}
+                </div>
+                <Subtotal cart={resolvedCart} variants={variants} />
+              </>
+            )}
+          </Await>
         </div>
-
-        <Await resolve={rootData?.cart}>
-          {(resolvedCart) => (
-            <Subtotal cart={resolvedCart} variants={variants} />
-          )}
-        </Await>
       </div>
     </div>
   );
@@ -185,14 +199,6 @@ export function QuickShopTrigger({
           }
           aria-describedby={undefined}
         >
-          <Dialog.Close asChild>
-            <Button
-              className="absolute top-3 right-3 rounded-full p-2"
-              variant="secondary"
-            >
-              <XIcon size={18} />
-            </Button>
-          </Dialog.Close>
           <div
             style={{ maxHeight: "90vh" }}
             className={clsx(
@@ -201,6 +207,9 @@ export function QuickShopTrigger({
               "max-w-7xl",
             )}
           >
+            <Dialog.Close asChild>
+              <XIcon className="absolute top-3 right-3 z-10 h-5 w-5 cursor-pointer" />
+            </Dialog.Close>
             <VisuallyHidden.Root asChild>
               <Dialog.Title>Quick shop modal</Dialog.Title>
             </VisuallyHidden.Root>
@@ -208,8 +217,8 @@ export function QuickShopTrigger({
               <QuickShop data={data as QuickViewData} />
             ) : (
               <div className="p-6">
-                <div className="mb-6 flex gap-6">
-                  <Skeleton className="flex h-60 w-60 flex-shrink-0 items-center justify-center">
+                <div className="mb-6 flex flex-col gap-6 md:flex-row">
+                  <Skeleton className="flex aspect-square w-full md:w-60 flex-shrink-0 items-center justify-center">
                     <ImageIcon className="h-16 w-16 text-body-subtle" />
                   </Skeleton>
                   <div className="flex flex-col gap-3">
