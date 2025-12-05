@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority";
 import clsx from "clsx";
 
 const variants = cva(
-  "flex grow flex-col justify-center gap-6 px-5 py-10 md:px-10 [&_.paragraph]:mx-[unset] [&_.paragraph]:w-auto",
+  "flex flex-1 flex-col justify-center gap-6 px-5 py-10 md:px-10 [&_.paragraph]:mx-[unset] [&_.paragraph]:w-auto [&_.heading]:max-w-[660px]",
   {
     variants: {
       alignment: {
