@@ -247,7 +247,7 @@ function PredictiveSearchResults() {
               ))}
               <Link
                 to={`${params.locale ? `/${params.locale}` : ""}/search?q=${searchTerm.current}`}
-                className="mt-6 block w-full rounded-lg bg-gray-100 py-3 text-center text-sm font-medium transition-colors hover:bg-gray-200"
+                className="mt-6 block w-full rounded-sm bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
               >
                 See All Results
               </Link>
