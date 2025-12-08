@@ -122,8 +122,8 @@ function SearchContent({ fetchResults, inputRef, params }) {
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pb-4">
-        <div className="flex items-center gap-3 rounded-lg border border-line-subtle bg-gray-50 px-4">
-          <MagnifyingGlassIcon className="h-5 w-5 shrink-0 text-gray-400" />
+        <div className="flex items-center gap-3 rounded-lg border border-line-subtle bg-[#F2F0EE] px-4">
+          <MagnifyingGlassIcon className="h-4 w-4 shrink-0" />
           <input
             name="q"
             type="search"
@@ -182,9 +182,11 @@ function PredictiveSearchResults() {
   const params = useParams();
 
   const products = results?.find(({ type }) => type === "products");
-  // const collections = results?.find(({ type }) => type === "collections");
+  const collections = results?.find(({ type }) => type === "collections");
   const pages = results?.find(({ type }) => type === "articles");
-  console.log("🚀 ~ PredictiveSearchResults ~ pages:", pages);
+  // console.log("🚀 ~ PredictiveSearchResults ~ results:", results);
+  // console.log("🚀 ~ PredictiveSearchResults ~ collections:", collections);
+  // console.log("🚀 ~ PredictiveSearchResults ~ pages:", pages);
 
   if (!searchTerm.current) {
     return null;
@@ -214,7 +216,7 @@ function PredictiveSearchResults() {
         >
           Products
         </Tabs.Trigger>
-        {/* <Tabs.Trigger
+        <Tabs.Trigger
           value="collections"
           className={cn(
             "pb-3 text-sm font-medium transition-colors shadow-[0_-1px_0_0]",
@@ -224,7 +226,7 @@ function PredictiveSearchResults() {
           )}
         >
           Collections
-        </Tabs.Trigger> */}
+        </Tabs.Trigger>
         <Tabs.Trigger
           value="pages"
           className={cn(
@@ -247,7 +249,7 @@ function PredictiveSearchResults() {
               ))}
               <Link
                 to={`${params.locale ? `/${params.locale}` : ""}/search?q=${searchTerm.current}`}
-                className="mt-6 block w-full rounded-lg bg-gray-100 py-3 text-center text-sm font-medium transition-colors hover:bg-gray-200"
+                className="mt-6 block w-full rounded-sm bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
               >
                 See All Results
               </Link>
@@ -259,7 +261,7 @@ function PredictiveSearchResults() {
           )}
         </Tabs.Content>
 
-        {/* <Tabs.Content value="collections" className="px-5 py-4">
+        <Tabs.Content value="collections" className="px-5 py-4">
           {collections?.items && collections.items.length > 0 ? (
             <div className="space-y-4">
               {collections.items.map((item) => (
@@ -271,7 +273,7 @@ function PredictiveSearchResults() {
               No collections found
             </p>
           )}
-        </Tabs.Content> */}
+        </Tabs.Content>
 
         <Tabs.Content value="pages" className="p-5">
           {pages?.items && pages.items.length > 0 ? (
@@ -306,7 +308,7 @@ function ProductResultItem({
       className="flex gap-4 rounded-lg transition-colors hover:bg-gray-50"
     >
       {item.image && (
-        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-gray-100">
           <Image
             src={item.image.url}
             alt={item.image.altText || item.title}
@@ -345,22 +347,20 @@ function CollectionResultItem({
   return (
     <Link
       to={item.url}
-      className="flex gap-4 rounded-lg transition-colors hover:bg-gray-50"
+      className="flex flex-col gap-3 transition-colors hover:bg-gray-50"
     >
       {item.image && (
-        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+        <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-gray-100">
           <Image
             src={item.image.url}
             alt={item.image.altText || item.title}
-            width={96}
-            height={96}
+            width={400}
+            height={225}
             className="h-full w-full object-cover"
           />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center">
-        <h3 className="text-sm font-medium">{item.title}</h3>
-      </div>
+      <h3 className="text-sm">{item.title}</h3>
     </Link>
   );
 }

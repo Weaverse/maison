@@ -1,8 +1,5 @@
 import { VideoCameraIcon } from "@phosphor-icons/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-} from "~/components/icons";
+import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
@@ -147,7 +144,7 @@ export function ProductMedia(props: ProductMediaProps) {
                     imageAspectRatio={imageAspectRatio}
                     index={idx}
                     className={cn(
-                      "w-[80vw] max-w-none object-cover lg:h-full lg:w-full rounded-(--pcard-radius)",
+                      "w-full max-w-none object-cover lg:h-full lg:w-full rounded-(--pcard-radius)",
                       idx === 0 &&
                         "[&_img]:[view-transition-name:image-expand]",
                     )}
