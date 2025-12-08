@@ -55,7 +55,7 @@ export function QuickShop({
             />
           )}
         </div>
-        <div className="flex flex-col justify-between max-h-full">
+        <div className="flex flex-col gap-3 justify-between max-h-full">
           <div className="space-y-2.5">
             <h3 className="text-3xl font-normal leading-tight">
               {product.title}
