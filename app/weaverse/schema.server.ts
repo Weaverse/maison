@@ -380,6 +380,12 @@ export const themeSchema: HydrogenThemeSchema = {
         },
         {
           type: "color",
+          label: "Collection",
+          name: "collectionBadgeColor",
+          defaultValue: "#F2EDE1",
+        },
+        {
+          type: "color",
           label: "Sold out / unavailable",
           name: "soldOutBadgeColor",
           defaultValue: "#d4d4d4",
