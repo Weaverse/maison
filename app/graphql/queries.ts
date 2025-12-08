@@ -25,6 +25,11 @@ export const PRODUCT_QUERY = `#graphql
         url
         altText
       }
+      collections(first: 1) {
+        nodes {
+          title
+        }
+      }
       priceRange {
         minVariantPrice {
           amount

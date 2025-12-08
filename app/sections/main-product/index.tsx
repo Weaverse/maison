@@ -26,6 +26,8 @@ export default function ProductInformation(
     enableZoom,
     zoomTrigger,
     zoomButtonVisibility,
+    showCollectionBadge,
+    showSaleBadge,
     ...rest
   } = props;
   const { product } = useLoaderData<typeof productRouteLoader>();
@@ -64,6 +66,10 @@ export default function ProductInformation(
               enableZoom={enableZoom}
               zoomTrigger={zoomTrigger}
               zoomButtonVisibility={zoomButtonVisibility}
+              collectionTitle={product?.collections?.nodes?.[0]?.title}
+              priceRange={product?.priceRange}
+              showCollectionBadge={showCollectionBadge}
+              showSaleBadge={showSaleBadge}
             />
           </div>
           <div className="md:w-1/2 lg:w-1/3">
@@ -203,6 +209,23 @@ export const schema = createSchema({
           condition: (data: ProductInformationData) =>
             data.enableZoom === true &&
             (data.zoomTrigger === "button" || data.zoomTrigger === "both"),
+        },
+      ],
+    },
+    {
+      group: "Badges",
+      inputs: [
+        {
+          label: "Show collection badge",
+          name: "showCollectionBadge",
+          type: "switch",
+          defaultValue: true,
+        },
+        {
+          label: "Show sale badge",
+          name: "showSaleBadge",
+          type: "switch",
+          defaultValue: true,
         },
       ],
     },
