@@ -20,12 +20,17 @@ type PredictiveSearchResultItem =
   | PredictivePageFragment
   | PredictiveProductFragment;
 
-type PredictiveSearchTypes = "ARTICLE" | "PAGE" | "PRODUCT" | "QUERY";
+type PredictiveSearchTypes =
+  | "ARTICLE"
+  | "COLLECTION"
+  | "PAGE"
+  | "PRODUCT"
+  | "QUERY";
 
 const DEFAULT_SEARCH_TYPES: PredictiveSearchTypes[] = [
   "ARTICLE",
-  // 'COLLECTION',
-  // 'PAGE',
+  "COLLECTION",
+  "PAGE",
   "PRODUCT",
   "QUERY",
 ];
