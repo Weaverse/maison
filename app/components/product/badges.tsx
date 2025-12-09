@@ -28,7 +28,7 @@ function Badge({
         borderRadius: `${badgeBorderRadius}px`,
         textTransform: badgeTextTransform,
       }}
-      className={cn("px-1.5 py-1 text-sm uppercase", className)}
+      className={cn("px-2 py-1 text-sm uppercase text-body-subtle", className)}
     >
       {text}
     </span>
@@ -84,6 +84,26 @@ export function BundleBadge({ className }: { className?: string }) {
       text={bundleBadgeText}
       backgroundColor={bundleBadgeColor}
       className={clsx("bundle-badge", className)}
+    />
+  );
+}
+
+export function CollectionBadge({
+  collectionTitle,
+  className,
+}: {
+  collectionTitle: string;
+  className?: string;
+}) {
+  const { collectionBadgeColor } = useThemeSettings();
+  if (!collectionTitle) {
+    return null;
+  }
+  return (
+    <Badge
+      text={collectionTitle}
+      backgroundColor={collectionBadgeColor}
+      className={clsx("collection-badge", className)}
     />
   );
 }
