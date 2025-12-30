@@ -7,24 +7,22 @@ import {
   useOptimisticCart,
   useOptimisticData,
 } from "@shopify/hydrogen";
-import type {
-  CartLineUpdateInput,
-  Cart as CartType,
-} from "@shopify/hydrogen/storefront-api-types";
+import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
 import { useRef } from "react";
 import { useFetcher } from "react-router";
 import useScroll from "react-use/esm/useScroll";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
+import { SubscriptionIcon } from "~/components/icons";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
-import { RevealUnderline } from "~/components/reveal-underline";
 import { ScrollArea } from "~/components/scroll-area";
 import { Section } from "~/components/section";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
 import { CartBestSellers } from "./cart-best-sellers";
+import { CartSummary } from "./cart-summary";
 
 type CartLine = OptimisticCart<CartApiQueryFragment>["lines"]["nodes"][0];
 type Layouts = "page" | "drawer";
@@ -55,11 +53,10 @@ function CartDetails({
   layout: Layouts;
   cart: OptimisticCart<CartApiQueryFragment>;
 }) {
-  return (
+  const content = (
     <div
       className={clsx(
-        layout === "drawer" &&
-          "grid grow grid-cols-1 grid-rows-[1fr_auto] px-4",
+        layout === "drawer" && "flex h-full flex-col px-4",
         layout === "page" && [
           "mx-auto w-full max-w-(--page-width) pb-12",
           "grid md:grid-cols-[1fr_auto] md:items-start",
@@ -68,111 +65,24 @@ function CartDetails({
       )}
     >
       <CartLines lines={cart?.lines?.nodes} layout={layout} />
-      <div className="space-y-4">
-        <CartSummary cost={cart.cost} layout={layout}>
+      <div
+        className={clsx(
+          "space-y-4",
+          layout === "drawer" ? "flex-shrink-0" : "self-start",
+        )}
+      >
+        <CartSummary cart={cart} layout={layout}>
           <CartCheckoutActions checkoutUrl={cart.checkoutUrl} layout={layout} />
         </CartSummary>
-        <CartDiscounts discountCodes={cart.discountCodes} cost={cart.cost} />
       </div>
     </div>
   );
-}
 
-/**
- * Temporary discount UI
- * @param discountCodes the current discount codes applied to the cart
- * @todo rework when a design is ready
- */
-function CartDiscounts({
-  discountCodes,
-  cost,
-}: {
-  discountCodes: CartType["discountCodes"];
-  cost: CartApiQueryFragment["cost"];
-}) {
-  const codes: string[] =
-    discountCodes
-      ?.filter((discount) => discount.applicable)
-      ?.map(({ code }) => code) || [];
+  if (layout === "drawer") {
+    return <div className="flex-1 min-h-0">{content}</div>;
+  }
 
-  // Calculate the discount amount
-  const discountAmount =
-    cost?.subtotalAmount && cost?.totalAmount
-      ? Number(cost.subtotalAmount.amount) - Number(cost.totalAmount.amount)
-      : 0;
-
-  return (
-    <div className="grid gap-3 bg-white p-6 rounded-sm">
-      {/* Show an input to apply a discount */}
-      <UpdateDiscountForm discountCodes={codes}>
-        <div className="flex items-center gap-3">
-          <input
-            className="grow rounded-none border border-line px-3 py-3 text-sm leading-tight!"
-            type="text"
-            name="discountCode"
-            placeholder="Promo code"
-          />
-          <Button
-            type="submit"
-            variant="outline"
-            className="px-6 leading-tight!"
-          >
-            Apply
-          </Button>
-        </div>
-      </UpdateDiscountForm>
-
-      {/* Have existing discount, display it with a remove option */}
-      {codes && codes.length > 0 && discountAmount > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          {codes.map((code) => (
-            <UpdateDiscountForm key={code}>
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 rounded-full border border-line-subtle bg-background px-3 py-1.5 text-sm transition-colors hover:bg-background-subtle"
-              >
-                <span className="text-body-subtle">🏷️</span>
-                <span className="font-medium">{code}</span>
-                <span className="text-body-subtle">
-                  (-
-                  <Money
-                    data={{
-                      amount: String(discountAmount),
-                      currencyCode: cost.subtotalAmount?.currencyCode || "USD",
-                    }}
-                  />
-                  )
-                </span>
-                <span className="ml-0.5 text-body-subtle hover:text-body">
-                  ✕
-                </span>
-              </button>
-            </UpdateDiscountForm>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function UpdateDiscountForm({
-  discountCodes,
-  children,
-}: {
-  discountCodes?: string[];
-  children: React.ReactNode;
-}) {
-  return (
-    <CartForm
-      route="/cart"
-      action={CartForm.ACTIONS.DiscountCodesUpdate}
-      inputs={{
-        discountCodes: discountCodes || [],
-      }}
-    >
-      {children}
-    </CartForm>
-  );
+  return content;
 }
 
 function CartLines({
@@ -192,13 +102,11 @@ function CartLines({
       className={clsx([
         y > 0 ? "border-line-subtle border-t" : "",
         layout === "page" && "grow bg-white p-6 rounded-sm",
-        layout === "drawer" && "transition -mx-4 pb-4",
+        layout === "drawer" &&
+          "flex-1 min-h-0 overflow-auto transition -mx-4 pb-4",
       ])}
     >
-      <ScrollArea
-        className={clsx(layout === "drawer" && "max-h-[calc(100vh-312px)]")}
-        size="sm"
-      >
+      <ScrollArea className={clsx(layout === "drawer" && "h-full")} size="sm">
         <ul
           className={clsx(
             "grid",
@@ -232,95 +140,21 @@ function CartCheckoutActions({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <a href={checkoutUrl} target="_self">
-        <Button className="w-full bg-[#8B8270] hover:bg-[#7A7263] text-white border-0">
+    <div className="flex flex-col gap-2.5">
+      {layout === "drawer" && (
+        <Link
+          to="/cart"
+          className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm font-normal"
+        >
+          View Cart
+        </Link>
+      )}
+      <a href={checkoutUrl} target="_self" className="w-full">
+        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 rounded text-sm font-normal">
           Checkout
         </Button>
       </a>
       {/* @todo: <CartShopPayButton cart={cart} /> */}
-      {layout === "drawer" && (
-        <Link variant="underline" to="/cart" className="mx-auto w-fit">
-          View cart
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function CartSummary({
-  cost,
-  layout,
-  children = null,
-}: {
-  children?: React.ReactNode;
-  cost: CartApiQueryFragment["cost"];
-  layout: Layouts;
-}) {
-  return (
-    <div
-      className={clsx(
-        layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
-        layout === "page" &&
-          "sticky top-(--height-nav) grid h-fit w-full gap-6 bg-background-subtle/50 p-6 md:min-w-[380px] md:max-w-[420px] bg-white rounded-sm",
-      )}
-    >
-      <h2
-        className={clsx(
-          layout === "page" ? "font-semibold text-base" : "sr-only",
-        )}
-      >
-        Order Summary
-      </h2>
-      <div className="grid gap-6 border-t border-line-subtle pt-6">
-        <dl className="grid gap-2.5 text-sm">
-          <div className="flex items-center justify-between">
-            <dt className="text-body">Subtotal</dt>
-            <dd className="font-medium">
-              {cost?.subtotalAmount?.amount ? (
-                <Money data={cost?.subtotalAmount} />
-              ) : (
-                "-"
-              )}
-            </dd>
-          </div>
-          {cost?.totalAmount &&
-            cost?.subtotalAmount &&
-            cost.totalAmount.amount < cost.subtotalAmount.amount && (
-              <div className="flex items-center justify-between">
-                <dt className="text-body">Discount</dt>
-                <dd className="font-medium text-red-600">
-                  -
-                  <Money
-                    data={{
-                      amount: String(
-                        Number(cost.subtotalAmount.amount) -
-                          Number(cost.totalAmount.amount),
-                      ),
-                      currencyCode: cost.subtotalAmount.currencyCode,
-                    }}
-                  />
-                </dd>
-              </div>
-            )}
-        </dl>
-        <p className="text-body-subtle text-xs">
-          Shipping & taxes calculated at checkout
-        </p>
-        <dl className="border-line-subtle border-t pt-6">
-          <div className="flex items-center justify-between font-semibold text-base">
-            <dt>Total</dt>
-            <dd>
-              {cost?.totalAmount?.amount ? (
-                <Money data={cost?.totalAmount} />
-              ) : (
-                "-"
-              )}
-            </dd>
-          </div>
-        </dl>
-      </div>
-      {children}
     </div>
   );
 }
@@ -388,20 +222,15 @@ function CartLineItem({
             data={image}
             className={clsx(
               "h-auto object-cover aspect-square rounded-sm",
-              layout === "page" ? "w-32 md:w-36" : "w-24",
+              layout === "page" ? "w-[160px]" : "w-[140px]",
             )}
             alt={title}
             aspectRatio={calculateAspectRatio(image, "adapt")}
           />
         )}
       </div>
-      <div
-        className={clsx(
-          "flex grow flex-col gap-3",
-          layout === "page" && "h-full justify-between py-6",
-        )}
-      >
-        <div className="flex justify-between gap-6">
+      <div className="flex grow flex-col justify-between gap-3">
+        <div className="flex items-start justify-between gap-6">
           <div className="space-y-1">
             <div className="font-semibold">
               {product?.handle ? (
@@ -419,6 +248,12 @@ function CartLineItem({
             {formattedVariant && (
               <div className="text-body-subtle text-sm">{formattedVariant}</div>
             )}
+            {line.sellingPlanAllocation?.sellingPlan?.name && (
+              <div className="mt-3 inline-flex items-center gap-1 rounded bg-[#EBE8E5] px-2.5 py-1 text-xs text-body-subtle">
+                <SubscriptionIcon className="h-3 w-3" />
+                <span>{line.sellingPlanAllocation.sellingPlan.name}</span>
+              </div>
+            )}
           </div>
           {layout === "page" && (
             <ItemRemoveButton lineId={id} className="-mt-1" />
@@ -427,14 +262,17 @@ function CartLineItem({
             <ItemRemoveButton lineId={id} className="-mt-1.5 -mr-2" />
           )}
         </div>
-        <div
-          className={clsx(
-            "flex items-center",
-            layout === "page" && "justify-between",
-            layout === "drawer" && "justify-between gap-2",
-          )}
-        >
-          <CartLineQuantityAdjust line={line} />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <CartLineQuantityAdjust line={line} />
+            {layout === "page" &&
+              line.sellingPlanAllocation?.sellingPlan?.name && (
+                <div className="inline-flex items-center gap-1 rounded bg-[#EBE8E5] px-2.5 py-1 text-xs text-body-subtle">
+                  <SubscriptionIcon className="h-3 w-3" />
+                  <span>{line.sellingPlanAllocation.sellingPlan.name}</span>
+                </div>
+              )}
+          </div>
           <CartLinePrice line={line} as="span" />
         </div>
       </div>
@@ -502,13 +340,13 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
       <label htmlFor={`quantity-${lineId}`} className="sr-only">
         Quantity, {optimisticQuantity}
       </label>
-      <div className="flex items-center border border-line-subtle text-sm">
+      <div className="flex items-center border-2 border-(--color-line) divide-x divide-(--color-line) rounded-(--btn-border-radius) text-sm">
         <UpdateCartButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             type="submit"
             name="decrease-quantity"
             aria-label={`Decrease quantity by ${increment}`}
-            className="flex h-10 w-10 items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+            className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
             value={prevQuantity}
             disabled={optimisticQuantity <= minimum || isOptimistic}
             title={
@@ -526,7 +364,7 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
         </UpdateCartButton>
 
         <div
-          className="min-w-[3rem] px-3 text-center"
+          className="min-w-[4rem] px-3 text-center h-9 flex items-center justify-center"
           data-test="item-quantity"
         >
           {optimisticQuantity}
@@ -535,7 +373,7 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
         <UpdateCartButton lines={[{ id: lineId, quantity: nextQuantity }]}>
           <button
             type="submit"
-            className="flex h-10 w-10 items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+            className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
             name="increase-quantity"
             value={nextQuantity}
             aria-label={`Increase quantity by ${increment}`}
@@ -630,7 +468,7 @@ function CartEmpty({
       ref={scrollRef}
       className={clsx(
         layout === "drawer" && [
-          "h-screen-dynamic w-[400px] content-start space-y-12 overflow-y-scroll px-5 pb-5 transition",
+          "h-screen-dynamic w-full content-start space-y-12 overflow-y-scroll px-4 pb-5 transition",
           y > 0 && "border-t",
         ],
         layout === "page" && [
