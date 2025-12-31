@@ -48,7 +48,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
     <section
       ref={ref}
       {...rest}
-      className={cn("py-16 px-4 bg-")}
+      className={cn("py-16 px-4 bg-white")}
       style={{ color: textColor, backgroundColor }}
     >
       <div className="mx-auto max-w-2xl bg-white p-8 space-y-6 rounded-lg">
