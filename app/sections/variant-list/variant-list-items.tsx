@@ -9,11 +9,10 @@ import {
   getClientBrowserParameters,
   sendShopifyAnalytics,
 } from "@shopify/hydrogen";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import type { FetcherWithComponents } from "react-router";
 import { Await, useMatches, useRouteLoaderData } from "react-router";
 import type {
-  CartApiQueryFragment,
   ProductQuery,
   ProductVariantFragment,
 } from "storefront-api.generated";
@@ -21,8 +20,8 @@ import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 import type { RootLoader } from "~/root";
 import { DEFAULT_LOCALE } from "~/utils/const";
-import { VariantRow } from "./variant-row";
 import { Subtotal } from "./subtotal";
+import { VariantRow } from "./variant-row";
 
 type Product = NonNullable<ProductQuery["product"]>;
 
@@ -35,33 +34,115 @@ interface VariantQuantity {
   [variantId: string]: number;
 }
 
-export function VariantListItems({ variants }: VariantListItemsProps) {
+export function VariantListItems({ variants, product }: VariantListItemsProps) {
   const rootData = useRouteLoaderData<RootLoader>("root");
+  const sellingPlanGroups = product.sellingPlanGroups || { nodes: [] };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 border-b border-line-subtle pb-3">
-          <div className="text-sm font-bold uppercase">Variant</div>
-          <div className="text-sm font-bold uppercase text-center ">
-            Quantity
+    <Await resolve={rootData.cart}>
+      {(resolvedCart) => (
+        <div>
+          {/* mobile layout */}
+          <div className="space-y-6 md:hidden">
+            <div className="border-b border-line-subtle py-3">
+              <p className="font-semibold text-sm">PRODUCTS</p>
+            </div>
+            <div className="space-y-6">
+              {variants.map((variant) => (
+                <VariantRow
+                  key={variant.id}
+                  variant={variant}
+                  cart={resolvedCart}
+                  sellingPlanGroups={sellingPlanGroups}
+                />
+              ))}
+            </div>
           </div>
-          <div className="text-sm font-bold uppercase text-center">Price</div>
-          <div className="text-sm font-bold uppercase text-right ">
-            Variant Price
-          </div>
-        </div>
-        <div className="space-y-6">
-          {variants.map((variant) => (
-            <VariantRow key={variant.id} variant={variant} />
-          ))}
-        </div>
-      </div>
 
-      <Await resolve={rootData.cart}>
-        {(resolvedCart) => <Subtotal cart={resolvedCart} variants={variants} />}
-      </Await>
-    </div>
+          <div className="md:hidden">
+            <Subtotal cart={resolvedCart} variants={variants} />
+          </div>
+
+          {/* tablet layout */}
+          <div className="hidden md:block lg:hidden space-y-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-[3fr_2fr_1fr_1fr] gap-6 border-b border-line-subtle py-3">
+                <div className="text-sm font-bold uppercase">Variant</div>
+                <div className="text-sm font-bold uppercase">
+                  Purchase Method
+                </div>
+                <div className="text-sm font-bold uppercase text-center">
+                  Price
+                </div>
+                <div className="text-sm font-bold uppercase text-right ">
+                  Variant Price
+                </div>
+              </div>
+              <div className="space-y-6">
+                {variants.map((variant) => (
+                  <VariantRow
+                    key={variant.id}
+                    variant={variant}
+                    cart={resolvedCart}
+                    sellingPlanGroups={sellingPlanGroups}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <Subtotal cart={resolvedCart} variants={variants} />
+          </div>
+
+          {/* desktop layout */}
+          <div className="hidden lg:block space-y-6">
+            <div className="space-y-6">
+              {sellingPlanGroups?.nodes?.length > 0 ? (
+                <div className="grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+                  <div className="text-sm font-semibold uppercase">Variant</div>
+                  <div className="text-sm font-semibold uppercase text-center">
+                    Purchase Method
+                  </div>
+                  <div className="text-sm font-semibold uppercase text-center">
+                    Quantity
+                  </div>
+                  <div className="text-sm font-semibold uppercase text-center">
+                    Price
+                  </div>
+                  <div className="text-sm font-semibold uppercase text-right ">
+                    Variant Price
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+                  <div className="text-sm font-semibold uppercase">Variant</div>
+                  <div className="text-sm font-semibold uppercase text-center">
+                    Quantity
+                  </div>
+                  <div className="text-sm font-semibold uppercase text-center">
+                    Price
+                  </div>
+                  <div className="text-sm font-semibold uppercase text-right ">
+                    Variant Price
+                  </div>
+                </div>
+              )}
+              <div className="space-y-6">
+                {variants.map((variant) => (
+                  <VariantRow
+                    key={variant.id}
+                    variant={variant}
+                    cart={resolvedCart}
+                    sellingPlanGroups={sellingPlanGroups}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <Subtotal cart={resolvedCart} variants={variants} />
+          </div>
+        </div>
+      )}
+    </Await>
   );
 }
 
