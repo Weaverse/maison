@@ -39,6 +39,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
     case CartForm.ACTIONS.LinesRemove:
       result = await cart.removeLines(inputs.lineIds as string[]);
       break;
+    case CartForm.ACTIONS.NoteUpdate: {
+      const cartNote = inputs.cartNote as string;
+      if (cartNote) {
+        result = await cart.updateNote(cartNote);
+      }
+      break;
+    }
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
 
@@ -51,6 +58,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
       discountCodes.push(...(inputs.discountCodes as string[]));
 
       result = await cart.updateDiscountCodes(discountCodes);
+      break;
+    }
+    case CartForm.ACTIONS.GiftCardCodesUpdate: {
+      const formGiftCardCode = inputs.giftCardCode;
+      const giftCardCodes = (
+        formGiftCardCode ? [formGiftCardCode] : []
+      ) as string[];
+      giftCardCodes.push(...(inputs.giftCardCodes as string[]));
+      result = await cart.updateGiftCardCodes(giftCardCodes);
+      break;
+    }
+    case CartForm.ACTIONS.GiftCardCodesRemove: {
+      const giftCardIds = inputs.giftCardCodes as string[];
+      result = await cart.removeGiftCardCodes(giftCardIds);
       break;
     }
     case CartForm.ACTIONS.BuyerIdentityUpdate:
@@ -100,7 +121,7 @@ export default function CartRoute() {
   return (
     <>
       <div className="px-3 py-6 md:px-10 md:py-12 lg:px-16 bg-[#F2F0EE]">
-        <div className="mx-auto w-full max-w-[66em]">
+        <div className="mx-auto w-full max-w-(--page-width)">
           <h1 className="mb-8 text-2xl font-normal md:text-3xl leading-normal">
             Cart
           </h1>
