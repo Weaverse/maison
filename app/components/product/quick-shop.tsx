@@ -29,6 +29,7 @@ export function QuickShop({
 
   const variants = product?.variants?.nodes || [];
   const firstImage = product?.media?.nodes?.[0];
+  const sellingPlanGroups = product?.sellingPlanGroups || { nodes: [] };
 
   const priceRange = product?.priceRange;
   const minPrice = priceRange?.minVariantPrice?.amount;
@@ -44,7 +45,7 @@ export function QuickShop({
 
   return (
     <div className="bg-background p-6">
-      <div className="mb-6 flex flex-col gap-6 md:flex-row">
+      <div className="mb-6 flex flex-col gap-12 md:flex-row">
         <div className="mt-4 md:mt-0 aspect-square w-full md:w-60 flex-shrink-0 overflow-hidden rounded bg-gray-100">
           {firstImage && (
             <ProductMedia
@@ -85,22 +86,42 @@ export function QuickShop({
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* mobile header */}
-          <div className="border-b border-line-subtle pb-3 md:hidden">
-            <div className="text-sm font-bold uppercase">Products</div>
+          <div className="border-b border-line-subtle py-3 md:hidden">
+            <div className="text-sm font-semibold uppercase">Products</div>
           </div>
           {/* tablet/desktop header */}
-          <div className="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 border-b border-line-subtle pb-3 lg:grid-cols-[3fr_1fr_1fr_1fr]">
-            <div className="text-sm font-bold uppercase">Variant</div>
-            <div className="text-center text-sm font-bold uppercase">
-              Quantity
+          {sellingPlanGroups?.nodes?.length > 0 ? (
+            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+              <div className="text-sm font-semibold uppercase">Variant</div>
+              <div className="text-sm font-semibold uppercase text-center">
+                Purchase Method
+              </div>
+              <div className="text-sm font-semibold uppercase text-center">
+                Quantity
+              </div>
+              <div className="text-sm font-semibold uppercase text-center">
+                Price
+              </div>
+              <div className="text-sm font-semibold uppercase text-right">
+                Variant Price
+              </div>
             </div>
-            <div className="text-center text-sm font-bold uppercase">Price</div>
-            <div className="text-right text-sm font-bold uppercase">
-              Variant Price
+          ) : (
+            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+              <div className="text-sm font-semibold uppercase">Variant</div>
+              <div className="text-sm font-semibold uppercase text-center">
+                Quantity
+              </div>
+              <div className="text-sm font-semibold uppercase text-center">
+                Price
+              </div>
+              <div className="text-sm font-semibold uppercase text-right">
+                Variant Price
+              </div>
             </div>
-          </div>
+          )}
           <Await resolve={rootData?.cart}>
             {(resolvedCart) => (
               <>
@@ -110,6 +131,7 @@ export function QuickShop({
                       key={variant.id}
                       variant={variant}
                       cart={resolvedCart}
+                      sellingPlanGroups={sellingPlanGroups}
                     />
                   ))}
                 </div>
@@ -199,17 +221,22 @@ export function QuickShopTrigger({
           }
           aria-describedby={undefined}
         >
+          <Dialog.Close asChild>
+            <Button
+              className="absolute top-3 right-3 rounded-full p-2"
+              variant="secondary"
+            >
+              <XIcon size={18} />
+            </Button>
+          </Dialog.Close>
           <div
             style={{ maxHeight: "90vh" }}
             className={clsx(
               "relative mx-auto h-auto w-full overflow-y-auto",
-              "animate-slide-up bg-white shadow-sm",
+              "animate-slide-up bg-white shadow-sm rounded-[4px]",
               "max-w-7xl",
             )}
           >
-            <Dialog.Close asChild>
-              <XIcon className="absolute top-3 right-3 z-10 h-5 w-5 cursor-pointer" />
-            </Dialog.Close>
             <VisuallyHidden.Root asChild>
               <Dialog.Title>Quick shop modal</Dialog.Title>
             </VisuallyHidden.Root>

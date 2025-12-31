@@ -210,6 +210,7 @@ const CART_QUERY_FRAGMENT = `#graphql
     }
     sellingPlanAllocation {
       sellingPlan {
+        id
         name
       }
     }
@@ -267,6 +268,12 @@ const CART_QUERY_FRAGMENT = `#graphql
       }
       compareAtAmountPerQuantity {
         ...Money
+      }
+    }
+    sellingPlanAllocation {
+      sellingPlan {
+        id
+        name
       }
     }
     merchandise {
