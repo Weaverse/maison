@@ -63,6 +63,15 @@ export function CustomAnalytics() {
     subscribe(AnalyticsEvent.PRODUCT_ADD_TO_CART, (data) => {
       console.log("CustomAnalytics - Product added to cart:", data);
     });
+    subscribe("subscription_added_to_cart" as any, (data: any) => {
+      console.log("CustomAnalytics - Subscription added to cart:", data);
+      dataToSentToGTM = {
+        event: "subscription_added_to_cart",
+        cart_id: data.cartId,
+        ...data,
+      };
+      window.dataLayer?.push(dataToSentToGTM);
+    });
     subscribe(AnalyticsEvent.PRODUCT_REMOVED_FROM_CART, (data) => {
       console.log("CustomAnalytics - Product removed from cart:", data);
     });

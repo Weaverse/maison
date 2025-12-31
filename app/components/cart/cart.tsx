@@ -207,7 +207,11 @@ function CartLineItem({
 
   return (
     <li
-      className={clsx("flex gap-4", layout === "page" && "not-last:pb-6")}
+      className={clsx(
+        "flex gap-4",
+        layout === "page" && "not-last:pb-6",
+        className,
+      )}
       style={{
         // Hide the line item if the optimistic data action is remove
         // Do not remove the form from the DOM
@@ -248,12 +252,13 @@ function CartLineItem({
             {formattedVariant && (
               <div className="text-body-subtle text-sm">{formattedVariant}</div>
             )}
-            {line.sellingPlanAllocation?.sellingPlan?.name && (
-              <div className="mt-3 inline-flex items-center gap-1 rounded bg-[#EBE8E5] px-2.5 py-1 text-xs text-body-subtle">
-                <SubscriptionIcon className="h-3 w-3" />
-                <span>{line.sellingPlanAllocation.sellingPlan.name}</span>
-              </div>
-            )}
+            {layout === "drawer" &&
+              line.sellingPlanAllocation?.sellingPlan?.name && (
+                <div className="mt-3 inline-flex items-center gap-1 rounded bg-[#EBE8E5] px-2.5 py-1 text-xs text-body-subtle">
+                  <SubscriptionIcon className="h-3 w-3" />
+                  <span>{line.sellingPlanAllocation.sellingPlan.name}</span>
+                </div>
+              )}
           </div>
           {layout === "page" && (
             <ItemRemoveButton lineId={id} className="-mt-1" />
