@@ -1,5 +1,4 @@
 import {
-  CaretRightIcon,
   FacebookLogoIcon,
   InstagramLogoIcon,
   LinkedinLogoIcon,
@@ -42,7 +41,7 @@ const variants = cva("", {
 });
 
 export function Footer() {
-  const { shopName, paymentSettings } = useShopMenu();
+  const { shopName } = useShopMenu();
   const {
     footerWidth,
     socialFacebook,
@@ -93,32 +92,24 @@ export function Footer() {
       return [];
     }
 
-    if (paymentIconsMode === "manual") {
-      const manualIcons: string[] = [];
-      if (showVisaIcon) {
-        manualIcons.push("VISA");
-      }
-      if (showMastercardIcon) {
-        manualIcons.push("MASTERCARD");
-      }
-      if (showAmexIcon) {
-        manualIcons.push("AMEX");
-      }
-      if (showPaypalIcon) {
-        manualIcons.push("PAYPAL");
-      }
-      if (showDinersClubIcon) {
-        manualIcons.push("DINERS_CLUB");
-      }
-      return manualIcons;
+    // Manual mode
+    const manualIcons: string[] = [];
+    if (showVisaIcon) {
+      manualIcons.push("VISA");
     }
-
-    // Auto mode: from payment settings
-    const autoIcons = [
-      ...(paymentSettings?.acceptedCardBrands || []),
-      ...(paymentSettings?.supportedDigitalWallets || []),
-    ];
-    return autoIcons.filter((method) => PAYMENT_ICON_MAP[method]);
+    if (showMastercardIcon) {
+      manualIcons.push("MASTERCARD");
+    }
+    if (showAmexIcon) {
+      manualIcons.push("AMEX");
+    }
+    if (showPaypalIcon) {
+      manualIcons.push("PAYPAL");
+    }
+    if (showDinersClubIcon) {
+      manualIcons.push("DINERS_CLUB");
+    }
+    return manualIcons;
   };
 
   const paymentIconKeys = getPaymentIcons();
