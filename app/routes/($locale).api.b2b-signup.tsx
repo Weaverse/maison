@@ -72,7 +72,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       },
     });
 
-    const companyErrors = companyResponse.data?.companyCreate?.userErrors;
+    const companyErrors = companyResponse?.companyCreate?.userErrors;
     if (companyErrors?.length > 0) {
       return data(
         { error: `Company creation failed: ${companyErrors[0].message}` },
@@ -80,7 +80,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    const companyId = companyResponse.data?.companyCreate?.company?.id;
+    const companyId = companyResponse.companyCreate?.company?.id;
     if (!companyId) {
       return data({ error: "Failed to create company" }, { status: 500 });
     }
@@ -97,7 +97,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       },
     });
 
-    const customerErrors = customerResponse.data?.customerCreate?.userErrors;
+    const customerErrors = customerResponse?.customerCreate?.userErrors;
     if (customerErrors?.length > 0) {
       // If customer already exists, we might want to proceed or handle it.
       // For now, fail as per requirement to report errors.
@@ -109,7 +109,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    const customerId = customerResponse.data?.customerCreate?.customer?.id;
+    const customerId = customerResponse?.customerCreate?.customer?.id;
     if (!customerId) {
       return data({ error: "Failed to create customer" }, { status: 500 });
     }
@@ -124,7 +124,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
 
     const assignErrors =
-      assignResponse.data?.companyAssignCustomerAsContact?.userErrors;
+      assignResponse?.companyAssignCustomerAsContact?.userErrors;
     if (assignErrors?.length > 0) {
       return data(
         {
