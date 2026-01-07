@@ -58,7 +58,7 @@ export function Filters({ className }: { className?: string }) {
               className="w-full pt-7 pb-6"
             >
               <Accordion.Trigger className="flex w-full items-center justify-between data-[state=open]:[&>svg]:rotate-90">
-                <span>{filter.label}</span>
+                <span className="text-sm font-semibold">{filter.label}</span>
                 <CaretRightIcon className="h-4 w-4 rotate-0 transition-transform" />
               </Accordion.Trigger>
               <Accordion.Content
