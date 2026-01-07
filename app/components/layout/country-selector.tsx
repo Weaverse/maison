@@ -71,21 +71,18 @@ export function CountrySelector() {
   }
 
   return (
-    <div ref={observerRef} className="grid w-80 gap-4">
+    <div ref={observerRef} className="grid w-fit gap-4">
       <Popover.Root>
         <Popover.Trigger asChild>
           <button
             type="button"
-            className="flex w-full cursor-pointer items-center gap-2 overflow-clip border border-line-subtle px-4 py-3 text-left outline-hidden"
+            className="flex cursor-pointer items-center gap-2 text-sm outline-hidden"
             aria-label="Select country"
           >
-            <ReactCountryFlag
-              svg
-              countryCode={selectedLocale.country}
-              style={{ width: "24px", height: "14px" }}
-            />
-            <span>{selectedLocale.label}</span>
-            <CaretDownIcon className="ml-auto h-4 w-4" />
+            <span>
+              {selectedLocale.country} - {selectedLocale.currency}
+            </span>
+            <CaretDownIcon className="h-4 w-4" />
           </button>
         </Popover.Trigger>
         <Popover.Portal>

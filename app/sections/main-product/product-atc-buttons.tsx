@@ -4,8 +4,9 @@ import {
   useOptimisticVariant,
 } from "@shopify/hydrogen";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
-import { useLoaderData } from "react-router";
-import { AddToCartButton } from "~/components/product/add-to-cart-button";
+import { useLoaderData, useSearchParams } from "react-router";
+// import { AddToCartButton } from "~/components/product/add-to-cart-button";
+import { SellingPlanSelector } from "~/components/product/selling-plan-selector";
 import type { loader as productRouteLoader } from "~/routes/($locale).products.$productHandle";
 import { isCombinedListing } from "~/utils/combined-listings";
 import { useProductQtyStore } from "./product-quantity-selector";
@@ -29,6 +30,8 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
   } = props;
   const { product, storeDomain } = useLoaderData<typeof productRouteLoader>();
   const { quantity } = useProductQtyStore();
+  const [searchParams] = useSearchParams();
+  const sellingPlanId = searchParams.get("selling_plan");
 
   const selectedVariant = useOptimisticVariant(
     product?.selectedOrFirstAvailableVariant,
@@ -51,6 +54,13 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
 
   return (
     <div ref={ref} {...rest} className="space-y-2 empty:hidden">
+      {!!product.sellingPlanGroups?.nodes?.length && (
+        <SellingPlanSelector
+          sellingPlanGroups={product.sellingPlanGroups}
+          selectedSellingPlanId={sellingPlanId}
+        />
+      )}
+      {/* TODO: Uncomment when not using Variant List
       <AddToCartButton
         disabled={!selectedVariant?.availableForSale}
         lines={[
@@ -58,6 +68,7 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
             merchandiseId: selectedVariant?.id,
             quantity,
             selectedVariant,
+            sellingPlanId: sellingPlanId || undefined,
           },
         ]}
         data-test="add-to-cart"
@@ -65,6 +76,7 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
       >
         {atcButtonText}
       </AddToCartButton>
+      */}
       {showShopPayButton && selectedVariant?.availableForSale && (
         <ShopPayButton
           width="100%"
@@ -119,7 +131,7 @@ export const schema = createSchema({
           type: "switch",
           label: "Show Shop Pay button",
           name: "showShopPayButton",
-          defaultValue: true,
+          defaultValue: false,
         },
       ],
     },

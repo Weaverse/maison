@@ -109,7 +109,7 @@ export function FilterItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-2.5",
+        "flex items-center gap-4",
         option.count === 0 && "text-body-subtle",
       )}
     >
@@ -118,7 +118,7 @@ export function FilterItem({
         onCheckedChange={handleCheckedChange}
         disabled={option.count === 0}
         className={cn(
-          "h-5 w-5 shrink-0",
+          "h-5 w-5 shrink-0 rounded",
           "border border-line focus-visible:outline-hidden",
           "disabled:cursor-not-allowed disabled:opacity-50",
         )}
@@ -140,10 +140,10 @@ function FilterLabel({
 }) {
   if (showFiltersCount) {
     return (
-      <span>
+      <span className="text-sm">
         {option.label} <span>({option.count})</span>
       </span>
     );
   }
-  return option.label;
+  return <span className="text-sm">{option.label}</span>;
 }

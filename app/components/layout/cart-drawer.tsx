@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { Await, useRouteLoaderData } from "react-router";
 import { Cart } from "~/components/cart/cart";
+import { FreeShippingProgressBar } from "~/components/cart/free-shipping-progress-bar";
 import Link from "~/components/link";
 import type { RootLoader } from "~/root";
 
@@ -41,13 +42,10 @@ export function CartDrawer() {
               {cart?.totalQuantity > 0 && (
                 <div
                   className={clsx(
-                    "cart-count aspect-square",
-                    "-right-1.5 absolute top-0",
-                    "flex w-5 items-center justify-center rounded-full px-1 text-center",
-                    "text-center font-medium text-[13px] leading-none",
-                    "transition-colors duration-300",
-                    "group-hover/header:bg-(--color-header-text)",
-                    "group-hover/header:text-(--color-header-bg)",
+                    "cart-count",
+                    "-right-px absolute top-0.5",
+                    "flex items-center justify-center",
+                    "text-xs leading-none font-medium",
                   )}
                 >
                   <span className="-mr-px">{cart?.totalQuantity}</span>
@@ -70,6 +68,9 @@ export function CartDrawer() {
                     </button>
                   </Dialog.Close>
                 </div>
+                {cart?.totalQuantity > 0 && (
+                  <FreeShippingProgressBar cost={cart?.cost} className="px-4" />
+                )}
                 <Cart layout="drawer" cart={cart as CartReturn} />
               </div>
             </AnimatedDrawer>
@@ -109,7 +110,7 @@ function AnimatedDrawer({ open, children }) {
                   damping: 25,
                   stiffness: 150,
                 }}
-                className="w-screen max-w-[400px] bg-background py-4 h-full"
+                className="w-screen max-w-[461px] bg-background py-4 h-full relative"
               >
                 {children}
               </motion.div>

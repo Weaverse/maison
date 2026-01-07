@@ -21,19 +21,30 @@ const variants = cva("absolute inset-0 z-[-1] h-full w-full", {
       "bottom center": "object-[bottom_center]",
       "bottom right": "object-[bottom_right]",
     },
+    enableImageHover: {
+      true: "transition-transform duration-300 ease-out group-hover:scale-105",
+      false: "",
+    },
   },
   defaultVariants: {
     backgroundFit: "cover",
     backgroundPosition: "center center",
+    enableImageHover: false,
   },
 });
 
 export type BackgroundImageProps = VariantProps<typeof variants> & {
   backgroundImage?: WeaverseImage | string;
+  enableImageHover?: boolean;
 };
 
 export function BackgroundImage(props: BackgroundImageProps) {
-  const { backgroundImage, backgroundFit, backgroundPosition } = props;
+  const {
+    backgroundImage,
+    backgroundFit,
+    backgroundPosition,
+    enableImageHover,
+  } = props;
   if (backgroundImage) {
     const data =
       typeof backgroundImage === "string"
@@ -41,7 +52,11 @@ export function BackgroundImage(props: BackgroundImageProps) {
         : backgroundImage;
     return (
       <Image
-        className={variants({ backgroundFit, backgroundPosition })}
+        className={variants({
+          backgroundFit,
+          backgroundPosition,
+          enableImageHover,
+        })}
         data={data}
         sizes="auto"
       />
@@ -93,6 +108,13 @@ export const backgroundInputs: InspectorGroup["inputs"] = [
     name: "backgroundPosition",
     label: "Background position",
     defaultValue: "center center",
+    condition: (data: BackgroundImageProps) => Boolean(data.backgroundImage),
+  },
+  {
+    type: "switch",
+    name: "enableImageHover",
+    label: "Enable image hover effect",
+    defaultValue: false,
     condition: (data: BackgroundImageProps) => Boolean(data.backgroundImage),
   },
 ];

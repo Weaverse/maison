@@ -176,13 +176,13 @@ function getLocaleFromRequest(request: Request): I18nLocale {
 
   return COUNTRIES[firstPathPart]
     ? {
-        ...COUNTRIES[firstPathPart],
-        pathPrefix: firstPathPart,
-      }
+      ...COUNTRIES[firstPathPart],
+      pathPrefix: firstPathPart,
+    }
     : {
-        ...COUNTRIES.default,
-        pathPrefix: "",
-      };
+      ...COUNTRIES.default,
+      pathPrefix: "",
+    };
 }
 
 const CART_QUERY_FRAGMENT = `#graphql
@@ -210,6 +210,7 @@ const CART_QUERY_FRAGMENT = `#graphql
     }
     sellingPlanAllocation {
       sellingPlan {
+        id
         name
       }
     }
@@ -267,6 +268,12 @@ const CART_QUERY_FRAGMENT = `#graphql
       }
       compareAtAmountPerQuantity {
         ...Money
+      }
+    }
+    sellingPlanAllocation {
+      sellingPlan {
+        id
+        name
       }
     }
     merchandise {
@@ -366,6 +373,13 @@ const CART_QUERY_FRAGMENT = `#graphql
     discountCodes {
       code
       applicable
+    }
+    appliedGiftCards {
+      id
+      amountUsed {
+        ...Money
+      }
+      lastCharacters
     }
   }
 ` as const;

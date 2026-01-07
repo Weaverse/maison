@@ -1,15 +1,11 @@
 import type { ActionFunctionArgs } from "react-router";
 import { data } from "react-router";
 import invariant from "tiny-invariant";
-
-interface B2BSignupData {
-  name: string;
-  company: string;
-  email: string;
-  website?: string;
-  message?: string;
-  submittedAt?: string;
-}
+import {
+  assignCustomerToCompanyMutation,
+  companyCreateMutation,
+  customerCreateMutation,
+} from "~/graphql/customer.admin";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
@@ -18,11 +14,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     const { env } = context;
-    const { HEADLESS_B2B_HOST, HEADLESS_B2B_TOKEN } = env;
+    const { WEAVERSE_HOST, WEAVERSE_API_KEY } = env;
 
     invariant(
-      HEADLESS_B2B_HOST && HEADLESS_B2B_TOKEN,
-      "HEADLESS_B2B_HOST or HEADLESS_B2B_TOKEN is not configured.",
+      WEAVERSE_HOST && WEAVERSE_API_KEY,
+      "WEAVERSE_HOST or WEAVERSE_API_KEY is not configured.",
     );
 
     const formData = await request.formData();
@@ -48,31 +44,100 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    const signupData: B2BSignupData = {
-      name, 
-      company,
-      email,
+    const graphqlRequest = async (query: string, variables: any) => {
+      const response = await fetch(`${WEAVERSE_HOST}/api/admin-graphql`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${WEAVERSE_API_KEY}`,
+        },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`GraphQL request failed: ${response.status} ${errorText}`);
+      }
+
+      return response.json() as Promise<any>;
     };
 
-    const response = await fetch(`${HEADLESS_B2B_HOST}/api/submit-form`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${HEADLESS_B2B_TOKEN}`,
+    // Step 1: Create Company
+    const companyResponse = await graphqlRequest(companyCreateMutation, {
+      input: {
+        company: {
+          name: company,
+          note: `Contact: ${name} (${email})\nWebsite: ${website}\nMessage: ${message}\nSubmitted at: ${new Date().toISOString()}`,
+        },
       },
-      body: JSON.stringify(signupData),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    const companyErrors = companyResponse?.companyCreate?.userErrors;
+    if (companyErrors?.length > 0) {
       return data(
-        { error: "Failed to submit signup request", details: errorData },
-        { status: response.status },
+        { error: `Company creation failed: ${companyErrors[0].message}` },
+        { status: 400 },
       );
     }
 
-    const responseData = await response.json().catch(() => ({}));
-    return data({ success: true, data: responseData }, { status: response.status });
+    const companyId = companyResponse.companyCreate?.company?.id;
+    if (!companyId) {
+      return data({ error: "Failed to create company" }, { status: 500 });
+    }
+
+    // Step 2: Create Customer
+    const [firstName, ...lastNameParts] = name.split(" ");
+    const lastName = lastNameParts.join(" ");
+
+    const customerResponse = await graphqlRequest(customerCreateMutation, {
+      input: {
+        email,
+        firstName: firstName || name,
+        lastName: lastName || "",
+      },
+    });
+
+    const customerErrors = customerResponse?.customerCreate?.userErrors;
+    if (customerErrors?.length > 0) {
+      // If customer already exists, we might want to proceed or handle it.
+      // For now, fail as per requirement to report errors.
+      // But typically check if error is "Email has already been taken" and query customer instead.
+      // Given the prompt examples don't handle that complexity, I'll stick to error reporting.
+      return data(
+        { error: `Customer creation failed: ${customerErrors[0].message}` },
+        { status: 400 },
+      );
+    }
+
+    const customerId = customerResponse?.customerCreate?.customer?.id;
+    if (!customerId) {
+      return data({ error: "Failed to create customer" }, { status: 500 });
+    }
+
+    // Step 3: Assign Customer to Company
+    const assignResponse = await graphqlRequest(
+      assignCustomerToCompanyMutation,
+      {
+        companyId,
+        customerId,
+      },
+    );
+
+    const assignErrors =
+      assignResponse?.companyAssignCustomerAsContact?.userErrors;
+    if (assignErrors?.length > 0) {
+      return data(
+        {
+          error: `Failed to assign customer to company: ${assignErrors[0].message}`,
+        },
+        { status: 400 },
+      );
+    }
+
+    return data(
+      { success: true, companyId, customerId },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("B2B signup error:", error);
     return data(

@@ -1,9 +1,5 @@
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  VideoCameraIcon,
-} from "@phosphor-icons/react";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { VideoCameraIcon } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
@@ -20,6 +16,8 @@ import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
 import { ZoomButton, ZoomModal } from "./media-zoom";
+import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
+import { CollectionBadge, SaleBadge } from "./badges";
 
 const variants = cva(
   [
@@ -49,6 +47,13 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
   enableZoom?: boolean;
   zoomTrigger?: "image" | "button" | "both";
   zoomButtonVisibility?: "always" | "hover";
+  collectionTitle?: string;
+  showCollectionBadge?: boolean;
+  showSaleBadge?: boolean;
+  priceRange?: {
+    minVariantPrice: MoneyV2;
+    maxVariantPrice: MoneyV2;
+  };
 }
 
 export function ProductMedia(props: ProductMediaProps) {
@@ -62,13 +67,18 @@ export function ProductMedia(props: ProductMediaProps) {
     enableZoom,
     zoomTrigger = "button",
     zoomButtonVisibility = "hover",
+    collectionTitle,
+    showCollectionBadge,
+    showSaleBadge,
+    priceRange,
   } = props;
+
+  const { minVariantPrice, maxVariantPrice } = priceRange || {};
 
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [zoomMediaId, setZoomMediaId] = useState<string | null>(null);
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
-  const { pcardBorderRadius } = useThemeSettings();
   const [activeIndex, setActiveIndex] = useState(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
@@ -114,61 +124,69 @@ export function ProductMedia(props: ProductMediaProps) {
   if (mediaLayout === "grid") {
     return (
       <>
-        <div
-          className={variants({ gridSize })}
-          style={
-            {
-              "--pcard-radius": `${pcardBorderRadius}px`,
-            } as React.CSSProperties
-          }
-        >
-          {media.map((med, idx) => {
-            return (
-              <div
-                key={med.id}
-                className={clsx(
-                  "group relative",
-                  gridSize === "mix" && idx % 3 === 0 && "lg:col-span-2",
-                )}
-              >
+        <div className="relative">
+          {(showCollectionBadge || showSaleBadge) && (
+            <div className="absolute top-3 left-3 md:top-5 md:left-5 flex items-center gap-2 z-[2]">
+              {showCollectionBadge && (
+                <CollectionBadge collectionTitle={collectionTitle || ""} />
+              )}
+              {showSaleBadge && (
+                <SaleBadge
+                  price={minVariantPrice as MoneyV2}
+                  compareAtPrice={maxVariantPrice as MoneyV2}
+                />
+              )}
+            </div>
+          )}
+          <div className={variants({ gridSize })}>
+            {media.map((med, idx) => {
+              return (
                 <div
-                  onClick={
-                    canClickImage
-                      ? () => {
-                          setZoomMediaId(med.id);
-                          setZoomModalOpen(true);
-                        }
-                      : undefined
-                  }
-                  className={canClickImage ? "cursor-zoom-in" : ""}
+                  key={med.id}
+                  className={clsx(
+                    "group relative",
+                    gridSize === "mix" && idx % 3 === 0 && "lg:col-span-2",
+                  )}
                 >
-                  <Media
-                    media={med}
-                    imageAspectRatio={imageAspectRatio}
-                    index={idx}
-                    className={cn(
-                      "w-[80vw] max-w-none object-cover lg:h-full lg:w-full rounded-(--pcard-radius)",
-                      idx === 0 &&
-                        "[&_img]:[view-transition-name:image-expand]",
-                    )}
-                  />
+                  <div
+                    onClick={
+                      canClickImage
+                        ? () => {
+                            setZoomMediaId(med.id);
+                            setZoomModalOpen(true);
+                          }
+                        : undefined
+                    }
+                    className={canClickImage ? "cursor-zoom-in" : ""}
+                  >
+                    <Media
+                      media={med}
+                      imageAspectRatio={imageAspectRatio}
+                      index={idx}
+                      className={cn(
+                        "w-full max-w-none object-cover lg:h-full lg:w-full rounded",
+                        idx === 0 &&
+                          "[&_img]:[view-transition-name:image-expand]",
+                      )}
+                    />
+                  </div>
+                  {shouldShowButton && (
+                    <ZoomButton
+                      className={clsx(
+                        "absolute top-2 right-2 md:top-4 md:right-4",
+                        zoomButtonVisibility === "hover" &&
+                          "opacity-0 group-hover:opacity-100",
+                      )}
+                      onClick={() => {
+                        setZoomMediaId(med.id);
+                        setZoomModalOpen(true);
+                      }}
+                    />
+                  )}
                 </div>
-                {shouldShowButton && (
-                  <ZoomButton
-                    className={clsx(
-                      "absolute top-2 right-2 md:top-4 md:right-4",
-                      zoomButtonVisibility === "hover" &&
-                        "opacity-0 group-hover:opacity-100",
-                    )}
-                    onClick={() => {
-                      setZoomMediaId(med.id);
-                      setZoomModalOpen(true);
-                    }}
-                  />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
         {enableZoom && (
           <ZoomModal
@@ -184,14 +202,7 @@ export function ProductMedia(props: ProductMediaProps) {
   }
 
   return (
-    <div
-      className="product-media-slider"
-      style={
-        {
-          "--pcard-radius": `${pcardBorderRadius}px`,
-        } as React.CSSProperties
-      }
-    >
+    <div className="product-media-slider">
       <div className="flex flex-col gap-3">
         <div className="relative w-[calc(100%-var(--thumbs-width,0px))]">
           <Swiper
@@ -213,7 +224,7 @@ export function ProductMedia(props: ProductMediaProps) {
               return (
                 <SwiperSlide
                   key={med.id}
-                  className="group bg-gray-100 rounded-(--pcard-radius) overflow-hidden"
+                  className="group bg-gray-100 rounded overflow-hidden"
                 >
                   <div
                     onClick={
@@ -268,18 +279,32 @@ export function ProductMedia(props: ProductMediaProps) {
             </div>
           )}
 
-          <div className="absolute -left-2 -right-2 md:-left-3 md:-right-3 lg:-left-7 lg:-right-7 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[1]">
+          {(showCollectionBadge || showSaleBadge) && (
+            <div className="absolute top-3 left-3 md:top-5 md:left-5 flex items-center gap-2 z-[2]">
+              {showCollectionBadge && (
+                <CollectionBadge collectionTitle={collectionTitle || ""} />
+              )}
+              {showSaleBadge && (
+                <SaleBadge
+                  price={minVariantPrice as MoneyV2}
+                  compareAtPrice={maxVariantPrice as MoneyV2}
+                />
+              )}
+            </div>
+          )}
+
+          <div className="absolute -left-2 -right-2 md:-left-3 md:-right-3 lg:-left-7 lg:-right-7 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[3]">
             <button
               type="button"
               className="media_slider__prev p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
             >
-              <ArrowLeftIcon className="h-4.5 w-4.5" />
+              <ArrowLeft />
             </button>
             <button
               type="button"
               className="media_slider__next p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
             >
-              <ArrowRightIcon className="h-4.5 w-4.5" />
+              <ArrowRight />
             </button>
           </div>
         </div>
@@ -306,8 +331,8 @@ export function ProductMedia(props: ProductMediaProps) {
                     key={id}
                     className={cn(
                       "relative",
-                      "h-auto! cursor-pointer rounded-(--pcard-radius) overflow-hidden",
-                      "[&.swiper-slide-thumb-active]:border-2 [&.swiper-slide-thumb-active]:border-(--color-line) [&.swiper-slide-thumb-active]:p-0",
+                      "h-auto! cursor-pointer rounded overflow-hidden",
+                      "[&.swiper-slide-thumb-active]:border-[3px] [&.swiper-slide-thumb-active]:border-(--color-line) [&.swiper-slide-thumb-active]:p-0",
                     )}
                   >
                     <Image

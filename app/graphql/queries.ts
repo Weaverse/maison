@@ -1,4 +1,8 @@
-import { MEDIA_FRAGMENT, PRODUCT_OPTION_FRAGMENT } from "~/graphql/fragments";
+import {
+  MEDIA_FRAGMENT,
+  PRODUCT_OPTION_FRAGMENT,
+  SELLING_PLAN_GROUP_FRAGMENT,
+} from "~/graphql/fragments";
 
 export const PRODUCT_QUERY = `#graphql
   query product(
@@ -24,6 +28,11 @@ export const PRODUCT_QUERY = `#graphql
         id
         url
         altText
+      }
+      collections(first: 1) {
+        nodes {
+          title
+        }
       }
       priceRange {
         minVariantPrice {
@@ -80,6 +89,11 @@ export const PRODUCT_QUERY = `#graphql
           ...Media
         }
       }
+      sellingPlanGroups(first: 5) {
+        nodes {
+          ...SellingPlanGroup
+        }
+      }
       seo {
         description
         title
@@ -102,4 +116,5 @@ export const PRODUCT_QUERY = `#graphql
   }
   ${MEDIA_FRAGMENT}
   ${PRODUCT_OPTION_FRAGMENT}
+  ${SELLING_PLAN_GROUP_FRAGMENT}
 ` as const;

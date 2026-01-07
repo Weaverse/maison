@@ -35,6 +35,7 @@ export interface SectionProps<T = any>
   containerClassName?: string;
   children?: React.ReactNode;
   customWidth?: number;
+  enableImageHover?: boolean;
 }
 
 const variants = cva("relative", {
@@ -100,6 +101,7 @@ export function Section(props: SectionProps) {
     backgroundImage,
     backgroundFit,
     backgroundPosition,
+    enableImageHover,
     enableOverlay,
     overlayType,
     overlayColor,
@@ -142,6 +144,7 @@ export function Section(props: SectionProps) {
         hasBackground &&
           !isBgForContent &&
           "rounded-(--section-radius) bg-(--section-bg-color)",
+        enableImageHover && "group overflow-hidden",
       )}
     >
       {!isBgForContent && <OverlayAndBackground {...props} />}
