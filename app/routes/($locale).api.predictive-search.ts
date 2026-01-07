@@ -20,12 +20,17 @@ type PredictiveSearchResultItem =
   | PredictivePageFragment
   | PredictiveProductFragment;
 
-type PredictiveSearchTypes = "ARTICLE" | "PAGE" | "PRODUCT" | "QUERY";
+type PredictiveSearchTypes =
+  | "ARTICLE"
+  | "COLLECTION"
+  | "PAGE"
+  | "PRODUCT"
+  | "QUERY";
 
 const DEFAULT_SEARCH_TYPES: PredictiveSearchTypes[] = [
   "ARTICLE",
-  // 'COLLECTION',
-  // 'PAGE',
+  "COLLECTION",
+  "PAGE",
   "PRODUCT",
   "QUERY",
 ];
@@ -71,9 +76,9 @@ async function fetchPredictiveSearchResults({
     rawTypes === "ANY"
       ? DEFAULT_SEARCH_TYPES
       : rawTypes
-          .split(",")
-          .map((t) => t.toUpperCase() as PredictiveSearchTypes)
-          .filter((t) => DEFAULT_SEARCH_TYPES.includes(t));
+        .split(",")
+        .map((t) => t.toUpperCase() as PredictiveSearchTypes)
+        .filter((t) => DEFAULT_SEARCH_TYPES.includes(t));
 
   if (!searchTerm) {
     return {
@@ -190,7 +195,6 @@ function normalizePredictiveSearchResults(
   if (predictiveSearch.collections.length) {
     results.push({
       type: "collections",
-      // @ts-expect-error
       items: predictiveSearch.collections.map(
         (collection: PredictiveCollectionFragment) => {
           totalResults++;
@@ -211,7 +215,6 @@ function normalizePredictiveSearchResults(
   if (predictiveSearch.pages.length) {
     results.push({
       type: "pages",
-      // @ts-expect-error
       items: predictiveSearch.pages.map((page: PredictivePageFragment) => {
         totalResults++;
         const trackingParams = applyTrackingParams(page);
@@ -230,7 +233,6 @@ function normalizePredictiveSearchResults(
   if (predictiveSearch.articles.length) {
     results.push({
       type: "articles",
-      // @ts-expect-error
       items: predictiveSearch.articles.map(
         (article: PredictiveArticleFragment) => {
           totalResults++;

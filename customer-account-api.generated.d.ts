@@ -3,6 +3,133 @@
 /* eslint-disable */
 import type * as CustomerAccountAPI from '@shopify/hydrogen/customer-account-api-types';
 
+export type SubscriptionContractCancelMutationVariables =
+  CustomerAccountAPI.Exact<{
+    subscriptionContractId: CustomerAccountAPI.Scalars['ID']['input'];
+  }>;
+
+export type SubscriptionContractCancelMutation = {
+  subscriptionContractCancel?: CustomerAccountAPI.Maybe<{
+    contract?: CustomerAccountAPI.Maybe<
+      Pick<CustomerAccountAPI.SubscriptionContract, 'id'>
+    >;
+    userErrors: Array<
+      Pick<
+        CustomerAccountAPI.SubscriptionContractStatusUpdateUserError,
+        'field' | 'message'
+      >
+    >;
+  }>;
+};
+
+export type SubscriptionContractFragment = Pick<
+  CustomerAccountAPI.SubscriptionContract,
+  'id' | 'status' | 'createdAt' | 'nextBillingDate'
+> & {
+  billingPolicy: Pick<
+    CustomerAccountAPI.SubscriptionBillingPolicy,
+    'interval'
+  > & {
+    intervalCount?: CustomerAccountAPI.Maybe<
+      Pick<CustomerAccountAPI.Count, 'count' | 'precision'>
+    >;
+  };
+  discounts?: CustomerAccountAPI.Maybe<{
+    nodes: Array<
+      Pick<
+        CustomerAccountAPI.SubscriptionDiscount,
+        'id' | 'title' | 'recurringCycleLimit'
+      > & {
+        value:
+          | ({__typename: 'SubscriptionDiscountFixedAmountValue'} & {
+              amount: Pick<CustomerAccountAPI.MoneyV2, 'amount'>;
+            })
+          | ({__typename: 'SubscriptionDiscountPercentageValue'} & Pick<
+              CustomerAccountAPI.SubscriptionDiscountPercentageValue,
+              'percentage'
+            >);
+      }
+    >;
+  }>;
+};
+
+export type SubscriptionBillingPolicyFragment = Pick<
+  CustomerAccountAPI.SubscriptionBillingPolicy,
+  'interval'
+> & {
+  intervalCount?: CustomerAccountAPI.Maybe<
+    Pick<CustomerAccountAPI.Count, 'count' | 'precision'>
+  >;
+};
+
+export type SubscriptionDiscountFragmentFragment = Pick<
+  CustomerAccountAPI.SubscriptionDiscount,
+  'id' | 'title' | 'recurringCycleLimit'
+> & {
+  value:
+    | ({__typename: 'SubscriptionDiscountFixedAmountValue'} & {
+        amount: Pick<CustomerAccountAPI.MoneyV2, 'amount'>;
+      })
+    | ({__typename: 'SubscriptionDiscountPercentageValue'} & Pick<
+        CustomerAccountAPI.SubscriptionDiscountPercentageValue,
+        'percentage'
+      >);
+};
+
+export type SubscriptionsContractsQueryQueryVariables =
+  CustomerAccountAPI.Exact<{[key: string]: never}>;
+
+export type SubscriptionsContractsQueryQuery = {
+  customer: {
+    subscriptionContracts: {
+      nodes: Array<
+        Pick<
+          CustomerAccountAPI.SubscriptionContract,
+          'id' | 'status' | 'createdAt' | 'nextBillingDate'
+        > & {
+          lines: {
+            nodes: Array<
+              Pick<CustomerAccountAPI.SubscriptionLine, 'name' | 'id'> & {
+                image?: CustomerAccountAPI.Maybe<
+                  Pick<
+                    CustomerAccountAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+              }
+            >;
+          };
+          billingPolicy: Pick<
+            CustomerAccountAPI.SubscriptionBillingPolicy,
+            'interval'
+          > & {
+            intervalCount?: CustomerAccountAPI.Maybe<
+              Pick<CustomerAccountAPI.Count, 'count' | 'precision'>
+            >;
+          };
+          discounts?: CustomerAccountAPI.Maybe<{
+            nodes: Array<
+              Pick<
+                CustomerAccountAPI.SubscriptionDiscount,
+                'id' | 'title' | 'recurringCycleLimit'
+              > & {
+                value:
+                  | ({__typename: 'SubscriptionDiscountFixedAmountValue'} & {
+                      amount: Pick<CustomerAccountAPI.MoneyV2, 'amount'>;
+                    })
+                  | ({__typename: 'SubscriptionDiscountPercentageValue'} & Pick<
+                      CustomerAccountAPI.SubscriptionDiscountPercentageValue,
+                      'percentage'
+                    >);
+              }
+            >;
+          }>;
+        }
+      >;
+    };
+  };
+};
+
 export type CustomerLocationsQueryVariables = CustomerAccountAPI.Exact<{
   [key: string]: never;
 }>;
@@ -765,6 +892,10 @@ export type CustomerDetailsFragment = Pick<
 };
 
 interface GeneratedQueryTypes {
+  '#graphql\n  query SubscriptionsContractsQuery {\n    customer {\n      subscriptionContracts(first: 100) {\n        nodes {\n          ...SubscriptionContract\n          lines(first: 100) {\n            nodes {\n              name\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment SubscriptionContract on SubscriptionContract {\n    id\n    status\n    createdAt\n    nextBillingDate\n    billingPolicy {\n      ...SubscriptionBillingPolicy\n    }\n    discounts(first: 20) {\n      nodes {\n        ...SubscriptionDiscountFragment\n      }\n    }\n  }\n  fragment SubscriptionBillingPolicy on SubscriptionBillingPolicy {\n    interval\n    intervalCount {\n      count\n      precision\n    }\n  }\n  fragment SubscriptionDiscountFragment on SubscriptionDiscount {\n    id\n    title\n    recurringCycleLimit\n    value {\n      __typename\n      ... on SubscriptionDiscountFixedAmountValue {\n        amount {\n          amount\n        }\n      }\n      ... on SubscriptionDiscountPercentageValue {\n        percentage\n      }\n    }\n  }\n\n': {
+    return: SubscriptionsContractsQueryQuery;
+    variables: SubscriptionsContractsQueryQueryVariables;
+  };
   '#graphql\n  query CustomerLocations {\n    customer {\n      id\n      emailAddress {\n        emailAddress\n      }\n      companyContacts(first: 1){\n        edges{\n          node{\n            company{\n              id\n              name\n              locations(first: 10){\n                edges{\n                  node{\n                    id\n                    name\n                    shippingAddress {\n                      countryCode\n                      formattedAddress\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CustomerLocationsQuery;
     variables: CustomerLocationsQueryVariables;
@@ -784,6 +915,10 @@ interface GeneratedQueryTypes {
 }
 
 interface GeneratedMutationTypes {
+  '#graphql\n  mutation subscriptionContractCancel($subscriptionContractId: ID!) {\n    subscriptionContractCancel(subscriptionContractId: $subscriptionContractId) {\n      contract {\n        id\n      }\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n': {
+    return: SubscriptionContractCancelMutation;
+    variables: SubscriptionContractCancelMutationVariables;
+  };
   '#graphql\n  mutation customerAddressUpdate(\n    $address: CustomerAddressInput!\n    $addressId: ID!\n    $defaultAddress: Boolean\n ) {\n    customerAddressUpdate(\n      address: $address\n      addressId: $addressId\n      defaultAddress: $defaultAddress\n    ) {\n      userErrors {\n        code\n        field\n        message\n      }\n    }\n  }\n': {
     return: CustomerAddressUpdateMutation;
     variables: CustomerAddressUpdateMutationVariables;

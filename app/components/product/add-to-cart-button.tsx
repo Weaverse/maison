@@ -92,7 +92,7 @@ function usePageAnalytics({ hasUserConsent }: { hasUserConsent: boolean }) {
   }, [matches, hasUserConsent]);
 }
 
-function AddToCartAnalytics({
+export function AddToCartAnalytics({
   fetcher,
   children,
 }: {
@@ -127,10 +127,21 @@ function AddToCartAnalytics({
           cartId: fetcherData.cart.id,
         };
 
-        sendShopifyAnalytics({
-          eventName: AnalyticsEventName.ADD_TO_CART,
-          payload: addToCartPayload,
-        });
+        const hasSubscription =
+          Array.isArray(cartInputs.inputs.lines) &&
+          cartInputs.inputs.lines.some((line: any) => line.sellingPlanId);
+
+        if (hasSubscription) {
+          sendShopifyAnalytics({
+            eventName: "subscription_added_to_cart" as any,
+            payload: addToCartPayload,
+          });
+        } else {
+          sendShopifyAnalytics({
+            eventName: AnalyticsEventName.ADD_TO_CART,
+            payload: addToCartPayload,
+          });
+        }
       }
     }
   }, [fetcherData, formData, pageAnalytics]);

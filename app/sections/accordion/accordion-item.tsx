@@ -1,8 +1,6 @@
 import {
-  MinusCircleIcon,
   PackageIcon,
   PaintBrushHouseholdIcon,
-  PlusCircleIcon,
   RulerIcon,
   TruckIcon,
 } from "@phosphor-icons/react";
@@ -19,13 +17,11 @@ interface AccordionItemProps extends HydrogenComponentProps {
   content: string;
   icon: string;
   backgroundColor: string;
-  textColor: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
 const AccordionItem = (props: AccordionItemProps) => {
-  const { ref, title, content, icon, backgroundColor, textColor, ...rest } =
-    props;
+  const { ref, title, content, icon, backgroundColor, ...rest } = props;
 
   const renderIcon = () => {
     if (!icon) {
@@ -54,17 +50,18 @@ const AccordionItem = (props: AccordionItemProps) => {
       {...rest}
       value={title}
       className="w-full focus-within:relative focus-within:z-10"
+      data-motion="fade-up"
     >
       <Accordion.Header>
         <Accordion.Trigger
-          style={{ backgroundColor, color: textColor } as React.CSSProperties}
+          style={{ backgroundColor }}
           className="group mb-1 flex w-full gap-3 p-4 text-left"
         >
           {renderIcon()}
           <span className="text-base">{title}</span>
-          <div className="relative ml-auto h-5 w-5">
-            <PlusCircleIcon className="absolute inset-0 h-full w-full transition-opacity duration-200 group-data-[state=open]:opacity-0" />
-            <MinusCircleIcon className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-200 group-data-[state=open]:opacity-100" />
+          <div className="relative ml-auto size-5 flex items-center justify-center rounded-full border-[2.5px] border-line">
+            <span className="absolute h-[2px] w-2.5 bg-line" />
+            <span className="absolute h-[2px] w-2.5 bg-line rotate-90 group-data-[state=open]:rotate-0 transition-transform duration-200" />
           </div>
         </Accordion.Trigger>
       </Accordion.Header>
@@ -84,9 +81,7 @@ const AccordionItem = (props: AccordionItemProps) => {
           "data-[state=open]:animate-expand",
         )}
       >
-        <div className="p-4 text-sm" style={{ color: textColor }}>
-          {content}
-        </div>
+        <div className="p-4 text-sm">{content}</div>
       </Accordion.Content>
     </Accordion.Item>
   );
@@ -134,12 +129,6 @@ export const schema: HydrogenComponentSchema = {
           name: "backgroundColor",
           label: "Background Color",
           defaultValue: "#efefef",
-        },
-        {
-          type: "color",
-          name: "textColor",
-          label: "Text Color",
-          defaultValue: "#000000",
         },
       ],
     },

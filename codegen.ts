@@ -13,6 +13,7 @@ export default {
         "./app/**/*.{ts,tsx,js,jsx}",
         "!./app/routes/*.account*.{ts,tsx,js,jsx}",
         "!./app/**/*.account.{ts,tsx,js,jsx}",
+        "!./app/**/*.admin.{ts,tsx,js,jsx}",
       ],
     },
     "customer-account-api.generated.d.ts": {
@@ -21,6 +22,7 @@ export default {
       documents: [
         "./app/routes/*.account*.{ts,tsx,js,jsx}",
         "./app/**/*.account.{ts,tsx,js,jsx}",
+        "!./app/**/*.admin.{ts,tsx,js,jsx}",
       ],
     },
   },

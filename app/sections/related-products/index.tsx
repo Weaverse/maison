@@ -27,15 +27,15 @@ export default function RelatedProducts(props: RelatedProductsProps) {
           >
             {(products) => {
               return (
-                <Swimlane>
-                  {products.nodes.slice(0, 12).map((product) => (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                  {products.nodes.slice(0, 4).map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
-                      className="w-80 snap-start"
+                      className="w-full"
                     />
                   ))}
-                </Swimlane>
+                </div>
               );
             }}
           </Await>

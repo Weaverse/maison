@@ -3,6 +3,7 @@ import {
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
   type WeaverseImage,
+  useParentInstance,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
@@ -65,6 +66,9 @@ function ImageWithTextImage(props: ImageWithTextImageProps) {
     ref,
     ...rest
   } = props;
+
+  const parent = useParentInstance();
+  const enableImageHover = Boolean(parent?.data?.data?.enableImageHover);
   const imageData: Partial<WeaverseImage> =
     typeof image === "string" ? { url: image, altText: "Placeholder" } : image;
   let aspRt: string | undefined;
@@ -78,13 +82,25 @@ function ImageWithTextImage(props: ImageWithTextImageProps) {
 
   return (
     <div ref={ref} {...rest} className={cn(variants({ width }))}>
-      <Image
-        data={imageData}
-        data-motion="slide-in"
-        sizes="auto"
-        aspectRatio={aspRt}
-        className={cn("h-auto w-full", variants({ objectFit, borderRadius }))}
-      />
+      <div
+        className={cn(
+          enableImageHover && "overflow-hidden",
+          variants({ borderRadius }),
+        )}
+      >
+        <Image
+          data={imageData}
+          data-motion="slide-in"
+          sizes="auto"
+          aspectRatio={aspRt}
+          className={cn(
+            "h-auto w-full",
+            variants({ objectFit }),
+            enableImageHover &&
+              "transition-transform duration-300 ease-out group-hover:scale-105",
+          )}
+        />
+      </div>
     </div>
   );
 }

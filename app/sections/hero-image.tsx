@@ -5,13 +5,17 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
+import clsx from "clsx";
 import { backgroundInputs } from "~/components/background-image";
 import { overlayInputs } from "~/components/overlay";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
+import { useAnimation } from "~/hooks/use-animation";
 
 export interface HeroImageProps extends VariantProps<typeof variants> {
   ref: React.Ref<HTMLElement>;
+  heightForMobile?: number;
+  heightForDesktop?: number;
 }
 
 const variants = cva(
@@ -23,6 +27,7 @@ const variants = cva(
         medium: "min-h-[50vh] lg:min-h-[60vh]",
         large: "min-h-[70vh] lg:min-h-[80vh]",
         full: "",
+        custom: "",
       },
       enableTransparentHeader: {
         true: "",
@@ -61,17 +66,35 @@ const variants = cva(
 );
 
 export default function HeroImage(props: HeroImageProps & SectionProps) {
-  const { ref, children, height, contentPosition, ...rest } = props;
+  const {
+    ref,
+    children,
+    height,
+    contentPosition,
+    heightForMobile,
+    heightForDesktop,
+    ...rest
+  } = props;
   const { enableTransparentHeader } = useThemeSettings();
+  const [scope] = useAnimation(ref);
+
   return (
     <Section
-      ref={ref}
+      ref={scope}
       {...rest}
-      containerClassName={variants({
-        contentPosition,
-        height,
-        enableTransparentHeader,
-      })}
+      containerClassName={clsx(
+        variants({ contentPosition, height, enableTransparentHeader }),
+        height === "custom" &&
+          "min-h-[var(--custom-height-mobile)] lg:min-h-[var(--custom-height-desktop)]",
+      )}
+      style={
+        height === "custom"
+          ? ({
+              "--custom-height-mobile": `${heightForMobile}px`,
+              "--custom-height-desktop": `${heightForDesktop}px`,
+            } as React.CSSProperties)
+          : undefined
+      }
     >
       {children}
     </Section>
@@ -95,8 +118,35 @@ export const schema = createSchema({
               { value: "medium", label: "Medium" },
               { value: "large", label: "Large" },
               { value: "full", label: "Fullscreen" },
+              { value: "custom", label: "Custom" },
             ],
           },
+        },
+        {
+          type: "range",
+          name: "heightForMobile",
+          label: "Height for mobile (px)",
+          configs: {
+            min: 100,
+            max: 1000,
+            step: 10,
+            unit: "px",
+          },
+          defaultValue: 500,
+          condition: (section) => section.height === "custom",
+        },
+        {
+          type: "range",
+          name: "heightForDesktop",
+          label: "Height for desktop (px)",
+          configs: {
+            min: 100,
+            max: 1200,
+            step: 10,
+            unit: "px",
+          },
+          defaultValue: 700,
+          condition: (section) => section.height === "custom",
         },
         {
           type: "position",
@@ -109,15 +159,7 @@ export const schema = createSchema({
         ),
       ],
     },
-    {
-      group: "Background",
-      inputs: [
-        ...backgroundInputs.filter(
-          (inp) =>
-            inp.name !== "backgroundFor" && inp.name !== "backgroundColor",
-        ),
-      ],
-    },
+    { group: "Background", inputs: backgroundInputs },
     { group: "Overlay", inputs: overlayInputs },
   ],
   childTypes: ["subheading", "heading", "paragraph", "button"],
