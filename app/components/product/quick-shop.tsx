@@ -45,7 +45,7 @@ export function QuickShop({
 
   return (
     <div className="bg-background p-6">
-      <div className="mb-6 flex flex-col gap-12 md:flex-row">
+      <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
         <div className="mt-4 md:mt-0 aspect-square w-full md:w-60 flex-shrink-0 overflow-hidden rounded bg-gray-100">
           {firstImage && (
             <ProductMedia
@@ -125,7 +125,7 @@ export function QuickShop({
           <Await resolve={rootData?.cart}>
             {(resolvedCart) => (
               <>
-                <div className="space-y-6">
+                <div className="space-y-10 md:space-y-6">
                   {variants.map((variant) => (
                     <VariantRow
                       key={variant.id}
