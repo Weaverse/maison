@@ -15,7 +15,7 @@ interface CompanyStoryImageData extends OverlayProps {
 
 interface CompanyStoryImageProps
   extends HydrogenComponentProps,
-    CompanyStoryImageData {
+  CompanyStoryImageData {
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -40,7 +40,7 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
     <div
       ref={ref}
       {...rest}
-      className="relative h-[280px] w-full overflow-hidden"
+      className="relative h-[280px] w-full overflow-hidden rounded-t-[4px]"
     >
       {heroImage ? (
         <>
