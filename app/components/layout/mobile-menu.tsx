@@ -29,7 +29,7 @@ export function MobileMenu() {
         />
         <Dialog.Content
           className={cn([
-            "fixed inset-0 z-10 h-screen-no-topbar bg-(--color-header-bg) pt-3 pb-3",
+            "fixed inset-0 z-10 h-(--screen-height) bg-(--color-header-bg) pt-3 pb-3",
             "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
             "focus-visible:outline-hidden",
             "uppercase",
@@ -47,7 +47,7 @@ export function MobileMenu() {
           </Dialog.Close>
 
           <div className="py-2">
-            <ScrollArea className="h-[calc(100vh-5rem)]">
+            <ScrollArea className="h-[calc(var(--screen-height)-5rem)]">
               <div className="space-y-1 px-4">
                 {headerMenu.items.map((item) => (
                   <CollapsibleMenuItem
