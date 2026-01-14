@@ -29,7 +29,7 @@ export function MobileMenu() {
         />
         <Dialog.Content
           className={cn([
-            "fixed inset-0 z-10 h-screen-no-topbar bg-(--color-header-bg) pt-4 pb-2",
+            "fixed inset-0 z-10 h-screen-no-topbar bg-(--color-header-bg) pt-3 pb-3",
             "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
             "focus-visible:outline-hidden",
             "uppercase",
@@ -40,12 +40,12 @@ export function MobileMenu() {
           aria-describedby={undefined}
         >
           <Dialog.Title asChild>
-            <div className="px-4">Menu</div>
+            <div className="px-4 py-4 font-semibold text-sm">MENU</div>
           </Dialog.Title>
           <Dialog.Close asChild>
-            <XIcon className="fixed top-4 right-4 h-5 w-5" />
+            <XIcon className="fixed top-[26px] right-4 h-5 w-5" />
           </Dialog.Close>
-          <div className="mt-4 border-line-subtle border-t" />
+
           <div className="py-2">
             <ScrollArea className="h-[calc(100vh-5rem)]">
               <div className="space-y-1 px-4">
@@ -53,6 +53,7 @@ export function MobileMenu() {
                   <CollapsibleMenuItem
                     key={item.id}
                     item={item as unknown as SingleMenuItem}
+                    level={0}
                   />
                 ))}
               </div>
@@ -64,13 +65,26 @@ export function MobileMenu() {
   );
 }
 
-function CollapsibleMenuItem({ item }: { item: SingleMenuItem }) {
+function CollapsibleMenuItem({
+  item,
+  level = 0,
+}: {
+  item: SingleMenuItem;
+  level?: number;
+}) {
   const { title, to, items } = item;
+  const isTopLevel = level === 0;
 
   if (!items?.length) {
     return (
       <Dialog.Close asChild>
-        <Link to={to} className="py-3">
+        <Link
+          to={to}
+          className={cn(
+            "block py-3 text-sm",
+            isTopLevel ? "font-semibold" : "font-medium",
+          )}
+        >
           {title}
         </Link>
       </Dialog.Close>
@@ -84,13 +98,24 @@ function CollapsibleMenuItem({ item }: { item: SingleMenuItem }) {
           type="button"
           className='flex w-full items-center justify-between gap-4 py-3 data-[state="open"]:[&>svg]:rotate-90'
         >
-          <span className="uppercase">{title}</span>
+          <span
+            className={cn(
+              "uppercase text-sm text-left",
+              isTopLevel ? "font-semibold" : "font-medium",
+            )}
+          >
+            {title}
+          </span>
           <CaretRightIcon className="h-4 w-4" />
         </button>
       </Collapsible.Trigger>
-      <Collapsible.Content className="border-gray-300 border-l pl-4">
+      <Collapsible.Content className="flex flex-col border-line-subtle border-l pl-4">
         {items.map((childItem) => (
-          <CollapsibleMenuItem key={childItem.id} item={childItem} />
+          <CollapsibleMenuItem
+            key={childItem.id}
+            item={childItem}
+            level={level + 1}
+          />
         ))}
       </Collapsible.Content>
     </Collapsible.Root>
