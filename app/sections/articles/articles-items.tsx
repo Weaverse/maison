@@ -8,6 +8,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { ArticleFragment } from "storefront-api.generated";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
+import { RevealUnderline } from "~/components/reveal-underline";
 import { useAnimation } from "~/hooks/use-animation";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
@@ -145,7 +146,7 @@ function ArticleCard({
   imageBorderRadius: number;
 }) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="group flex flex-col gap-5">
       {article.image && (
         <Link
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
@@ -165,8 +166,10 @@ function ArticleCard({
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
           className="inline-block"
         >
-          <h6 className="text-2xl leading-8 font-normal hover:underline line-clamp-2">
-            {article.title}
+          <h6 className="text-2xl leading-8 font-normal line-clamp-2">
+            <RevealUnderline className="group-hover:bg-size-[100%_1px]">
+              {article.title}
+            </RevealUnderline>
           </h6>
         </Link>
         {(showDate || showAuthor) && (
