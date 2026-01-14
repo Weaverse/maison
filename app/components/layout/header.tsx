@@ -69,28 +69,29 @@ export function Header() {
         scrolled ? "shadow-header" : "shadow-none",
         enableTransparent
           ? [
-            "group/header fixed w-screen",
-            "top-(--topbar-height,var(--initial-topbar-height))",
-          ]
+              "group/header fixed w-screen",
+              "top-(--topbar-height,var(--initial-topbar-height))",
+            ]
           : "sticky top-0",
         isTransparent
           ? [
-            "border-transparent bg-transparent",
-            "text-(--color-transparent-header-text)",
-            "[&_.cart-count]:text-(--color-header-text)",
-            "[&_.main-logo]:opacity-0 hover:[&_.main-logo]:opacity-100",
-            "[&_.transparent-logo]:opacity-100 hover:[&_.transparent-logo]:opacity-0",
-          ]
+              "border-transparent bg-transparent",
+              "text-(--color-transparent-header-text)",
+              "[&_.cart-count]:text-(--color-header-text)",
+              "[&_.main-logo]:opacity-0 hover:[&_.main-logo]:opacity-100",
+              "[&_.transparent-logo]:opacity-100 hover:[&_.transparent-logo]:opacity-0",
+            ]
           : [
-            "[&_.cart-count]:text-(--color-header-text)",
-            "[&_.main-logo]:opacity-100",
-            "[&_.transparent-logo]:opacity-0",
-          ],
+              "[&_.cart-count]:text-(--color-header-text)",
+              "[&_.main-logo]:opacity-100",
+              "[&_.transparent-logo]:opacity-0",
+            ],
       )}
     >
       <div
+        style={{ height: "var(--height-nav)" }}
         className={cn(
-          "flex h-(--height-nav) items-center justify-between gap-2 py-1.5 lg:gap-8 lg:py-3",
+          "flex items-center justify-between gap-2 py-1.5 lg:gap-8 lg:py-3",
           variants({ width: headerWidth }),
         )}
       >
@@ -144,10 +145,10 @@ function ChangeLocation() {
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
-      (location: CustomerCompanyLocationConnection) => {
-        return { ...location.node };
-      },
-    )
+        (location: CustomerCompanyLocationConnection) => {
+          return { ...location.node };
+        },
+      )
     : [];
 
   if (locations.length <= 1 || !company) {
