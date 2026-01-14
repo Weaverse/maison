@@ -20,7 +20,10 @@ import { useB2BLocation } from "../b2b/b2b-location-provider";
 import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
-import { PredictiveSearchButton } from "./predictive-search";
+import {
+  PredictiveSearchButton,
+  toggleSearchDrawer,
+} from "./predictive-search";
 
 const variants = cva("", {
   variants: {
@@ -66,23 +69,23 @@ export function Header() {
         scrolled ? "shadow-header" : "shadow-none",
         enableTransparent
           ? [
-              "group/header fixed w-screen",
-              "top-(--topbar-height,var(--initial-topbar-height))",
-            ]
+            "group/header fixed w-screen",
+            "top-(--topbar-height,var(--initial-topbar-height))",
+          ]
           : "sticky top-0",
         isTransparent
           ? [
-              "border-transparent bg-transparent",
-              "text-(--color-transparent-header-text)",
-              "[&_.cart-count]:text-(--color-header-text)",
-              "[&_.main-logo]:opacity-0 hover:[&_.main-logo]:opacity-100",
-              "[&_.transparent-logo]:opacity-100 hover:[&_.transparent-logo]:opacity-0",
-            ]
+            "border-transparent bg-transparent",
+            "text-(--color-transparent-header-text)",
+            "[&_.cart-count]:text-(--color-header-text)",
+            "[&_.main-logo]:opacity-0 hover:[&_.main-logo]:opacity-100",
+            "[&_.transparent-logo]:opacity-100 hover:[&_.transparent-logo]:opacity-0",
+          ]
           : [
-              "[&_.cart-count]:text-(--color-header-text)",
-              "[&_.main-logo]:opacity-100",
-              "[&_.transparent-logo]:opacity-0",
-            ],
+            "[&_.cart-count]:text-(--color-header-text)",
+            "[&_.main-logo]:opacity-100",
+            "[&_.transparent-logo]:opacity-0",
+          ],
       )}
     >
       <div
@@ -92,9 +95,13 @@ export function Header() {
         )}
       >
         <MobileMenu />
-        <Link to="/search" className="p-1.5 lg:hidden">
+        <button
+          type="button"
+          className="p-1.5 lg:hidden outline-hidden"
+          onClick={() => toggleSearchDrawer(true)}
+        >
           <MagnifyingGlassIcon className="h-5 w-5" />
-        </Link>
+        </button>
         <Logo />
         <DesktopMenu />
         <div className="z-1 flex items-center gap-1">
@@ -137,17 +144,19 @@ function ChangeLocation() {
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
-        (location: CustomerCompanyLocationConnection) => {
-          return { ...location.node };
-        },
-      )
+      (location: CustomerCompanyLocationConnection) => {
+        return { ...location.node };
+      },
+    )
     : [];
 
-  if (locations.length <= 1 || !company) return null;
+  if (locations.length <= 1 || !company) {
+    return null;
+  }
   return (
-    <button onClick={() => setModalOpen(true)}>
+    <button type="button" onClick={() => setModalOpen(true)}>
       {locations.find(
-        (companyLocation) => companyLocation.id == companyLocationId,
+        (companyLocation) => companyLocation.id === companyLocationId,
       )?.name || "Select Location"}
     </button>
   );
