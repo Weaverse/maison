@@ -135,7 +135,9 @@ export function QuickShop({
                     />
                   ))}
                 </div>
-                <Subtotal cart={resolvedCart} variants={variants} />
+                <div className="sticky bottom-0 bg-background pb-6 px-6 -mx-6 -mb-6">
+                  <Subtotal cart={resolvedCart} variants={variants} />
+                </div>
               </>
             )}
           </Await>
@@ -182,7 +184,7 @@ export function QuickShopTrigger({
                 ? "right-4 rounded-full shadow-xl"
                 : "inset-x-4 shadow-xs",
               showOnHover &&
-                "opacity-0 transition-opacity group-hover:opacity-100",
+              "opacity-0 transition-opacity group-hover:opacity-100",
             ],
             placement === "bottom" && ["w-full shadow-xs"],
           )}
