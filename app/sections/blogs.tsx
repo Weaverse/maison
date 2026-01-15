@@ -1,12 +1,12 @@
 import { createSchema } from "@weaverse/hydrogen";
-import { useLoaderData } from "react-router";
-import { useState } from "react";
-import type { ArticleFragment, BlogQuery } from "storefront-api.generated";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useState } from "react";
+import { useLoaderData } from "react-router";
+import type { ArticleFragment, BlogQuery } from "storefront-api.generated";
+import { Button } from "~/components/button";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import { layoutInputs, Section, type SectionProps } from "~/components/section";
-import { Button } from "~/components/button";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio, getImageLoadingPriority } from "~/utils/image";
@@ -43,9 +43,9 @@ interface BlogsData {
 
 interface BlogsProps
   extends Omit<ArticleCardProps, "article" | "blogHandle" | "loading">,
-    SectionProps,
-    VariantProps<typeof variants>,
-    BlogsData {
+  SectionProps,
+  VariantProps<typeof variants>,
+  BlogsData {
   ref: React.Ref<HTMLElement>;
 }
 
@@ -166,7 +166,7 @@ export function ArticleCard({
         to={`/blogs/${blogHandle}/${article.handle}`}
         className="inline-block"
       >
-        <h6 className="text-2xl leading-8 font-normal hover:underline line-clamp-2">
+        <h6 className="text-2xl leading-8 font-normal hover:underline line-clamp-5 lg:line-clamp-2">
           {article.title}
         </h6>
       </Link>

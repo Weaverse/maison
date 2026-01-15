@@ -53,7 +53,7 @@ export default function BlogPost(props: BlogPostProps) {
           </div>
         )}
 
-        <div className="px-5 py-20 md:px-20 lg:px-0 lg:max-w-[728px] mx-auto">
+        <div className="px-5 py-6 md:px-20 md:py-20 lg:px-0 lg:max-w-[728px] mx-auto">
           <h1 className="h3 leading-tight!">{title}</h1>
 
           <div className="text-sm flex flex-wrap gap-1 pt-4 text-body-subtle">

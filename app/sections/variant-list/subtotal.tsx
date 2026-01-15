@@ -112,7 +112,9 @@ export function Subtotal({ cart: originalCart, variants }: SubtotalProps) {
           <div className="col-span-2">
             <div className="text-right space-y-1">
               <div className="text-sm">Subtotal:</div>
-              <div className="font-semibold text-sm">${subtotal.toFixed(2)}</div>
+              <div className="font-semibold text-sm">
+                ${subtotal.toFixed(2)}
+              </div>
               <div className="text-xs text-body-subtle">
                 Taxes, discounts and shipping calculated at checkout.
               </div>

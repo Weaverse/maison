@@ -24,36 +24,38 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
   const details = [
     { title: "Description", content: description },
     showShippingPolicy &&
-      shippingPolicy?.body && {
-        title: "Shipping",
-        content: getExcerpt(shippingPolicy.body),
-        learnMore: `/policies/${shippingPolicy.handle}`,
-      },
+    shippingPolicy?.body && {
+      title: "Shipping",
+      content: getExcerpt(shippingPolicy.body),
+      learnMore: `/policies/${shippingPolicy.handle}`,
+    },
     showRefundPolicy &&
-      refundPolicy?.body && {
-        title: "Returns",
-        content: getExcerpt(refundPolicy.body),
-        learnMore: `/policies/${refundPolicy.handle}`,
-      },
+    refundPolicy?.body && {
+      title: "Returns",
+      content: getExcerpt(refundPolicy.body),
+      learnMore: `/policies/${refundPolicy.handle}`,
+    },
   ].filter(Boolean);
 
   return (
     <div ref={ref} {...rest}>
-      <Accordion.Root type="multiple">
+      <Accordion.Root type="multiple" className="border-b border-line-subtle">
         {details.map(({ title, content, learnMore }) => (
           <Accordion.Item key={title} value={title}>
-            <Accordion.Trigger
-              className={clsx([
-                "group flex w-full justify-between py-4 font-bold",
-                "border-line-subtle border-t",
-              ])}
-            >
-              <span>{title}</span>
-              <div className="relative size-3 flex items-center justify-center">
-                <span className="absolute h-[1px] w-full bg-current" />
-                <span className="absolute h-[1px] w-full bg-current rotate-90 group-data-[state=open]:rotate-0 transition-transform duration-200" />
-              </div>
-            </Accordion.Trigger>
+            <Accordion.Header>
+              <Accordion.Trigger
+                className={clsx([
+                  "group flex w-full justify-between font-bold py-[24px]",
+                  "border-line-subtle border-t",
+                ])}
+              >
+                <span>{title}</span>
+                <div className="relative size-3 flex items-center justify-center">
+                  <span className="absolute h-[1px] w-full bg-current" />
+                  <span className="absolute h-[1px] w-full bg-current rotate-90 group-data-[state=open]:rotate-0 transition-transform duration-200" />
+                </div>
+              </Accordion.Trigger>
+            </Accordion.Header>
             <Accordion.Content
               style={
                 {
