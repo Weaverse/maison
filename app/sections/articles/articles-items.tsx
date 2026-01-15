@@ -51,7 +51,7 @@ const variants = cva("grid", {
 
 interface ArticlesItemsProps
   extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;
@@ -166,7 +166,7 @@ function ArticleCard({
           to={blogHandle ? `/blogs/${blogHandle}/${article.handle}` : "#"}
           className="inline-block"
         >
-          <h6 className="text-2xl leading-8 font-normal line-clamp-2">
+          <h6 className="text-2xl leading-8 font-normal line-clamp-5 lg:line-clamp-2">
             <RevealUnderline className="group-hover:bg-size-[100%_1px]">
               {article.title}
             </RevealUnderline>
