@@ -1,4 +1,4 @@
-import { HandbagSimpleIcon, ImageIcon, XIcon } from "@phosphor-icons/react";
+import { HandbagSimpleIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import clsx from "clsx";
@@ -8,7 +8,6 @@ import type { ProductQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
-import { Skeleton } from "~/components/skeleton";
 import type { RootLoader } from "~/root";
 import { Subtotal } from "~/sections/variant-list/subtotal";
 import { VariantRow } from "~/sections/variant-list/variant-row";
@@ -161,46 +160,60 @@ export function QuickShopTrigger({
   placement?: "image" | "bottom";
 }) {
   const [open, setOpen] = useState(false);
-  const { load, data } = useFetcher<{ product: ProductQuery["product"] }>();
+  const { load, data, state } = useFetcher<{
+    product: ProductQuery["product"];
+  }>();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: open and state are intentionally excluded
+  const [isFetching, setIsFetching] = useState(false);
+  const isLoading = state === "loading" || isFetching;
+
   useEffect(() => {
-    if (open && !data) {
+    if (isFetching && data?.product) {
+      setIsFetching(false);
+      setOpen(true);
+    }
+  }, [data, isFetching]);
+
+  const handleOpen = () => {
+    if (data?.product) {
+      setOpen(true);
+    } else {
+      setIsFetching(true);
       load(`/api/product/${productHandle}`);
     }
-  }, [open]);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <Button
-          animate={false}
-          variant={placement === "image" ? "secondary" : "outline"}
-          className={clsx(
-            "group/quick-shop h-10.5 p-3 leading-4",
-            placement === "image" && [
-              "absolute bottom-4",
-              buttonType === "icon"
-                ? "right-4 rounded-full shadow-xl"
-                : "inset-x-4 shadow-xs",
-              showOnHover &&
-              "opacity-0 transition-opacity group-hover:opacity-100",
-            ],
-            placement === "bottom" && ["w-full shadow-xs"],
-          )}
-        >
-          {buttonType === "icon" && placement === "image" ? (
-            <>
-              <HandbagSimpleIcon size={16} className="h-4 w-4" />
-              <span className="w-0 overflow-hidden pl-0 text-base transition-all group-hover/quick-shop:w-9.5 group-hover/quick-shop:pl-2">
-                Add
-              </span>
-            </>
-          ) : (
-            <span className="px-2">{buttonText}</span>
-          )}
-        </Button>
-      </Dialog.Trigger>
+      <Button
+        animate={false}
+        variant={placement === "image" ? "secondary" : "outline"}
+        onClick={handleOpen}
+        loading={isLoading}
+        className={clsx(
+          "group/quick-shop h-10.5 p-3 leading-4",
+          placement === "image" && [
+            "absolute bottom-4",
+            buttonType === "icon"
+              ? "right-4 rounded-full shadow-xl"
+              : "inset-x-4 shadow-xs",
+            showOnHover &&
+            "opacity-0 transition-opacity group-hover:opacity-100",
+          ],
+          placement === "bottom" && ["w-full shadow-xs"],
+        )}
+      >
+        {buttonType === "icon" && placement === "image" ? (
+          <>
+            <HandbagSimpleIcon size={16} className="h-4 w-4" />
+            <span className="w-0 overflow-hidden pl-0 text-base transition-all group-hover/quick-shop:w-9.5 group-hover/quick-shop:pl-2">
+              Add
+            </span>
+          </>
+        ) : (
+          <span className="px-2">{buttonText}</span>
+        )}
+      </Button>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-10 bg-gray-900/50 [--fade-in-duration:150ms] data-[state=open]:animate-fade-in" />
         <Dialog.Content
@@ -242,36 +255,7 @@ export function QuickShopTrigger({
             <VisuallyHidden.Root asChild>
               <Dialog.Title>Quick shop modal</Dialog.Title>
             </VisuallyHidden.Root>
-            {data?.product ? (
-              <QuickShop data={data as QuickViewData} />
-            ) : (
-              <div className="p-6">
-                <div className="mb-6 flex flex-col gap-6 md:flex-row">
-                  <Skeleton className="flex aspect-square w-full md:w-60 flex-shrink-0 items-center justify-center">
-                    <ImageIcon className="h-16 w-16 text-body-subtle" />
-                  </Skeleton>
-                  <div className="flex flex-col gap-3">
-                    <Skeleton className="h-8 w-64" />
-                    <Skeleton className="h-6 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <Skeleton className="mb-3 h-10 w-full" />
-                  <Skeleton className="mb-4 h-24 w-full" />
-                  <Skeleton className="mb-4 h-24 w-full" />
-                  <Skeleton className="h-24 w-full" />
-                </div>
-                <div className="flex items-center justify-between border-t border-border pt-4">
-                  <div className="flex gap-3">
-                    <Skeleton className="h-10 w-32" />
-                    <Skeleton className="h-10 w-32" />
-                  </div>
-                  <Skeleton className="h-16 w-48" />
-                </div>
-              </div>
-            )}
+            {data?.product && <QuickShop data={data as QuickViewData} />}
           </div>
         </Dialog.Content>
       </Dialog.Portal>
