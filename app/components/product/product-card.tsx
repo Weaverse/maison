@@ -88,7 +88,7 @@ export function ProductCard({
   return (
     <div
       className={clsx(
-        "group rounded-(--pcard-radius) flex flex-col",
+        "group rounded-(--pcard-radius) flex flex-col h-full",
         className,
       )}
       style={
@@ -165,7 +165,6 @@ export function ProductCard({
       </div>
       <div
         className={clsx(
-          "h-full",
           "flex flex-col gap-3 py-5 text-sm",
           pcardBackgroundColor && "px-2",
           isVertical && [
@@ -205,7 +204,7 @@ export function ProductCard({
             prefetch="intent"
             className="font-semibold"
           >
-            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal line-clamp-1 group-hover:bg-size-[100%_1px]">
+            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal line-clamp-2 group-hover:bg-size-[100%_1px]">
               {product.title}
             </RevealUnderline>
           </Link>
@@ -256,13 +255,15 @@ export function ProductCard({
         )}
       </div>
       {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (
-        <QuickShopTrigger
-          productHandle={product.handle}
-          showOnHover={pcardShowQuickShopOnHover}
-          buttonType={pcardQuickShopButtonType}
-          buttonText={pcardQuickShopButtonText}
-          placement="bottom"
-        />
+        <div className="mt-auto w-full">
+          <QuickShopTrigger
+            productHandle={product.handle}
+            showOnHover={pcardShowQuickShopOnHover}
+            buttonType={pcardQuickShopButtonType}
+            buttonText={pcardQuickShopButtonText}
+            placement="bottom"
+          />
+        </div>
       )}
     </div>
   );

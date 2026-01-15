@@ -5,9 +5,9 @@ import { useState } from "react";
 import { Swiper, type SwiperClass, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import type { ProductCardFragment } from "storefront-api.generated";
+import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { ProductCard } from "~/components/product/product-card";
 import { cn } from "~/utils/cn";
-import { ArrowLeft, ArrowRight } from "~/components/icons";
 
 const variants = cva("grid", {
   variants: {
@@ -129,7 +129,7 @@ function ProductItems(props: ProductItemsProps) {
         className="mb-6 w-full py-4"
       >
         {products.nodes.map((product: ProductCardFragment) => (
-          <SwiperSlide key={product.id}>
+          <SwiperSlide key={product.id} className="!h-auto">
             <div className="relative h-full">
               <ProductCard product={product} />
             </div>
