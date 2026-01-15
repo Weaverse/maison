@@ -2,24 +2,14 @@ import { createSchema, useParentInstance } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { useState } from "react";
-import { Swiper, type SwiperClass, SwiperSlide } from "swiper/react";
-import "swiper/css";
 import type { ProductCardFragment } from "storefront-api.generated";
 import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { ProductCard } from "~/components/product/product-card";
+import { Swimlane } from "~/components/swimlane";
 import { cn } from "~/utils/cn";
 
 const variants = cva("grid", {
   variants: {
-    gap: {
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-    },
     mobileGridSize: {
       "1": "grid-cols-1",
       "2": "grid-cols-2",
@@ -33,7 +23,6 @@ const variants = cva("grid", {
     },
   },
   defaultVariants: {
-    gap: 16,
     mobileGridSize: "2",
     desktopGridSize: "4",
   },
@@ -54,7 +43,8 @@ const arrowButtonVariants = cva("p-4 pointer-events-auto", {
 
 interface ProductItemsData {
   layout?: "grid" | "carousel";
-  slidesPerView?: number;
+  gap?: number;
+  itemsPerView?: number;
   productsToShow?: number;
   arrowsBgColor?: string;
 }
@@ -71,7 +61,7 @@ function ProductItems(props: ProductItemsProps) {
     gap,
     ref,
     layout,
-    slidesPerView,
+    itemsPerView,
     mobileGridSize,
     desktopGridSize,
     productsToShow,
@@ -82,8 +72,7 @@ function ProductItems(props: ProductItemsProps) {
 
   const parent = useParentInstance();
   const products = parent.data?.loaderData?.products;
-  const itemsToShow = Number(productsToShow ?? 8);
-  const [swiperRef, setSwiperRef] = useState<SwiperClass | null>(null);
+  const swimlaneRef = useState<HTMLDivElement | null>(null);
 
   if (!products?.nodes?.length) {
     return null;
@@ -91,6 +80,7 @@ function ProductItems(props: ProductItemsProps) {
 
   // grid layout
   if (layout === "grid") {
+    const itemsToShow = Number(productsToShow ?? 8);
     return (
       <div ref={ref} {...rest}>
         <div
@@ -108,40 +98,61 @@ function ProductItems(props: ProductItemsProps) {
   }
 
   // carousel layout
+  const handleScroll = (direction: number) => {
+    const container = swimlaneRef[0];
+    if (!container) {
+      return;
+    }
+
+    const items = Array.from(container.children) as HTMLElement[];
+    if (items.length === 0) {
+      return;
+    }
+
+    const containerScrollLeft = container.scrollLeft;
+    const itemWidth = items[0].offsetWidth + (gap || 16);
+
+    const currentIndex = Math.round(containerScrollLeft / itemWidth);
+    const targetIndex = Math.max(
+      0,
+      Math.min(items.length - 1, currentIndex + direction),
+    );
+
+    container.scrollTo({
+      left: targetIndex * itemWidth,
+      behavior: "smooth",
+    });
+  };
+
+  const handlePrev = () => handleScroll(-1);
+  const handleNext = () => handleScroll(1);
+
   return (
     <div ref={ref} {...rest} className="relative">
-      <Swiper
-        key={`swiper-carousel-${slidesPerView}-${gap}`}
-        slidesPerView={1}
-        spaceBetween={gap}
-        onSwiper={setSwiperRef}
-        loop={true}
-        breakpoints={{
-          0: {
-            slidesPerView: 2,
-            spaceBetween: gap,
-          },
-          768: {
-            slidesPerView: slidesPerView || 4,
-            spaceBetween: gap,
-          },
+      <Swimlane
+        ref={(el) => {
+          swimlaneRef[1](el);
         }}
-        className="mb-6 w-full py-4"
+        className="mb-6"
+        style={
+          {
+            gap: `${gap}px`,
+            gridAutoColumns: `calc((100% - ${(itemsPerView || 4) - 1} * ${gap || 16}px) / ${itemsPerView || 4})`,
+          } as React.CSSProperties
+        }
       >
         {products.nodes.map((product: ProductCardFragment) => (
-          <SwiperSlide key={product.id} className="!h-auto">
-            <div className="relative h-full">
-              <ProductCard product={product} />
-            </div>
-          </SwiperSlide>
+          <div key={product.id} className="snap-start">
+            <ProductCard product={product} />
+          </div>
         ))}
-      </Swiper>
+      </Swimlane>
 
       {/* navi arrows */}
       <div className="absolute -left-2 -right-2 md:-left-5 md:-right-5 lg:-left-7 lg:-right-7 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[1]">
         <button
           type="button"
-          onClick={() => swiperRef?.slidePrev()}
+          onClick={handlePrev}
           className={arrowButtonVariants({ arrowsShape })}
           style={{ backgroundColor: arrowsBgColor }}
           aria-label="Previous product"
@@ -151,7 +162,7 @@ function ProductItems(props: ProductItemsProps) {
 
         <button
           type="button"
-          onClick={() => swiperRef?.slideNext()}
+          onClick={handleNext}
           className={arrowButtonVariants({ arrowsShape })}
           style={{ backgroundColor: arrowsBgColor }}
           aria-label="Next product"
@@ -186,8 +197,8 @@ export const schema = createSchema({
         },
         {
           type: "range",
-          name: "slidesPerView",
-          label: "Slides per view (desktop)",
+          name: "itemsPerView",
+          label: "Items per view (desktop)",
           defaultValue: 4,
           configs: { min: 1, max: 6, step: 1 },
           condition: (data: ProductItemsData) => data.layout === "carousel",
@@ -276,7 +287,7 @@ export const schema = createSchema({
   ],
   presets: {
     layout: "carousel",
-    slidesPerView: 4,
+    itemsPerView: 4,
     mobileGridSize: "2",
     desktopGridSize: "4",
     gap: 16,
