@@ -10,12 +10,12 @@ import { cn } from "~/utils/cn";
 
 const variants = cva("grid", {
   variants: {
-    mobileGridSize: {
+    mobileGridItems: {
       "1": "grid-cols-1",
       "2": "grid-cols-2",
       "3": "grid-cols-3",
     },
-    desktopGridSize: {
+    desktopGridItems: {
       "3": "md:grid-cols-3",
       "4": "md:grid-cols-4",
       "5": "md:grid-cols-5",
@@ -23,8 +23,8 @@ const variants = cva("grid", {
     },
   },
   defaultVariants: {
-    mobileGridSize: "2",
-    desktopGridSize: "4",
+    mobileGridItems: "2",
+    desktopGridItems: "4",
   },
 });
 
@@ -44,15 +44,18 @@ const arrowButtonVariants = cva("p-4 pointer-events-auto", {
 interface ProductItemsData {
   layout?: "grid" | "carousel";
   gap?: number;
-  itemsPerView?: number;
+  mobileCarouselItems?: number;
+  desktopCarouselItems?: number;
+  mobileGridItems?: "1" | "2" | "3";
+  desktopGridItems?: "3" | "4" | "5" | "6";
   productsToShow?: number;
   arrowsBgColor?: string;
 }
 
 interface ProductItemsProps
   extends VariantProps<typeof variants>,
-    VariantProps<typeof arrowButtonVariants>,
-    ProductItemsData {
+  VariantProps<typeof arrowButtonVariants>,
+  ProductItemsData {
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -61,9 +64,10 @@ function ProductItems(props: ProductItemsProps) {
     gap,
     ref,
     layout,
-    itemsPerView,
-    mobileGridSize,
-    desktopGridSize,
+    mobileCarouselItems,
+    desktopCarouselItems,
+    mobileGridItems,
+    desktopGridItems,
     productsToShow,
     arrowsBgColor,
     arrowsShape,
@@ -84,7 +88,7 @@ function ProductItems(props: ProductItemsProps) {
     return (
       <div ref={ref} {...rest}>
         <div
-          className={cn(variants({ mobileGridSize, desktopGridSize }))}
+          className={cn(variants({ mobileGridItems, desktopGridItems }))}
           style={{ gap: `40px ${gap}px` }}
         >
           {products.nodes
@@ -110,7 +114,7 @@ function ProductItems(props: ProductItemsProps) {
     }
 
     const containerScrollLeft = container.scrollLeft;
-    const itemWidth = items[0].offsetWidth + (gap || 16);
+    const itemWidth = items[0].offsetWidth + gap;
 
     const currentIndex = Math.round(containerScrollLeft / itemWidth);
     const targetIndex = Math.max(
@@ -133,11 +137,12 @@ function ProductItems(props: ProductItemsProps) {
         ref={(el) => {
           swimlaneRef[1](el);
         }}
-        className="mb-6"
+        className="mb-6 [grid-auto-columns:var(--mobile-cols)] md:[grid-auto-columns:var(--desktop-cols)]"
         style={
           {
             gap: `${gap}px`,
-            gridAutoColumns: `calc((100% - ${(itemsPerView || 4) - 1} * ${gap || 16}px) / ${itemsPerView || 4})`,
+            "--mobile-cols": `calc((100% - ${mobileCarouselItems - 1} * ${gap}px) / ${mobileCarouselItems})`,
+            "--desktop-cols": `calc((100% - ${desktopCarouselItems - 1} * ${gap}px) / ${desktopCarouselItems})`,
           } as React.CSSProperties
         }
       >
@@ -197,16 +202,24 @@ export const schema = createSchema({
         },
         {
           type: "range",
-          name: "itemsPerView",
-          label: "Items per view (desktop)",
+          name: "mobileCarouselItems",
+          label: "Carousel items (mobile)",
+          defaultValue: 2,
+          configs: { min: 1, max: 4, step: 1 },
+          condition: (data: ProductItemsData) => data.layout === "carousel",
+        },
+        {
+          type: "range",
+          name: "desktopCarouselItems",
+          label: "Carousel items (desktop)",
           defaultValue: 4,
           configs: { min: 1, max: 6, step: 1 },
           condition: (data: ProductItemsData) => data.layout === "carousel",
         },
         {
           type: "toggle-group",
-          name: "mobileGridSize",
-          label: "Items per row (mobile)",
+          name: "mobileGridItems",
+          label: "Grid items (mobile)",
           defaultValue: "2",
           configs: {
             options: [
@@ -219,8 +232,8 @@ export const schema = createSchema({
         },
         {
           type: "toggle-group",
-          name: "desktopGridSize",
-          label: "Items per row (desktop)",
+          name: "desktopGridItems",
+          label: "Grid items (desktop)",
           defaultValue: "4",
           configs: {
             options: [
@@ -287,9 +300,10 @@ export const schema = createSchema({
   ],
   presets: {
     layout: "carousel",
-    itemsPerView: 4,
-    mobileGridSize: "2",
-    desktopGridSize: "4",
+    mobileCarouselItems: 2,
+    desktopCarouselItems: 4,
+    mobileGridItems: "2",
+    desktopGridItems: "4",
     gap: 16,
     productsToShow: 4,
   },
