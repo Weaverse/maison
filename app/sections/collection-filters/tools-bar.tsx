@@ -79,29 +79,35 @@ function FiltersDrawer({
         />
         <Dialog.Content
           className={clsx([
-            "fixed inset-y-0 z-10 w-full bg-(--color-background) py-4 md:w-[360px]",
+            "fixed inset-y-0 z-10 w-full bg-(--color-background) md:w-[360px]",
             "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
+            "flex flex-col",
           ])}
           aria-describedby={undefined}
         >
-          <div className="space-y-1">
-            <div className="flex items-center justify-between gap-2 px-4">
-              <Dialog.Title asChild className="py-2.5 font-bold">
-                <span>Filters</span>
-              </Dialog.Title>
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  className="translate-x-2 p-2"
-                  aria-label="Close filters drawer"
-                >
-                  <XIcon className="h-4 w-4" />
-                </button>
-              </Dialog.Close>
-            </div>
-            <ScrollArea className="max-h-[calc(100vh-4.5rem)]" size="sm">
-              <Filters className="px-4" />
-            </ScrollArea>
+          <div className="flex items-center justify-between gap-2 px-4 py-4">
+            <Dialog.Title asChild className="py-2.5 font-bold">
+              <span>Filters</span>
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="translate-x-2 p-2"
+                aria-label="Close filters drawer"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </Dialog.Close>
+          </div>
+          <ScrollArea className="flex-1" size="sm">
+            <Filters className="px-4" />
+          </ScrollArea>
+          <div className="border-line-subtle border-t px-4 py-4 md:hidden">
+            <Dialog.Close asChild>
+              <Button className="w-full" variant="primary">
+                Apply Filters
+              </Button>
+            </Dialog.Close>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

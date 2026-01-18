@@ -20,7 +20,10 @@ import { useB2BLocation } from "../b2b/b2b-location-provider";
 import { CartDrawer } from "./cart-drawer";
 import { DesktopMenu } from "./desktop-menu";
 import { MobileMenu } from "./mobile-menu";
-import { PredictiveSearchButton } from "./predictive-search";
+import {
+  PredictiveSearchButton,
+  toggleSearchDrawer,
+} from "./predictive-search";
 
 const variants = cva("", {
   variants: {
@@ -32,7 +35,7 @@ const variants = cva("", {
     padding: {
       full: "",
       stretch: "px-3 md:px-10 lg:px-16",
-      fixed: "mx-auto px-3 md:px-4 lg:px-6",
+      fixed: "mx-auto px-5 md:px-6 lg:px-6",
     },
   },
 });
@@ -86,15 +89,20 @@ export function Header() {
       )}
     >
       <div
+        style={{ height: "var(--height-nav)" }}
         className={cn(
-          "flex h-(--height-nav) items-center justify-between gap-2 py-1.5 lg:gap-8 lg:py-3",
+          "flex items-center justify-between gap-2 py-1.5 lg:gap-8 lg:py-3",
           variants({ width: headerWidth }),
         )}
       >
         <MobileMenu />
-        <Link to="/search" className="p-1.5 lg:hidden">
+        <button
+          type="button"
+          className="p-1.5 lg:hidden outline-hidden"
+          onClick={() => toggleSearchDrawer(true)}
+        >
           <MagnifyingGlassIcon className="h-5 w-5" />
-        </Link>
+        </button>
         <Logo />
         <DesktopMenu />
         <div className="z-1 flex items-center gap-1">
@@ -143,11 +151,13 @@ function ChangeLocation() {
       )
     : [];
 
-  if (locations.length <= 1 || !company) return null;
+  if (locations.length <= 1 || !company) {
+    return null;
+  }
   return (
-    <button onClick={() => setModalOpen(true)}>
+    <button type="button" onClick={() => setModalOpen(true)}>
       {locations.find(
-        (companyLocation) => companyLocation.id == companyLocationId,
+        (companyLocation) => companyLocation.id === companyLocationId,
       )?.name || "Select Location"}
     </button>
   );

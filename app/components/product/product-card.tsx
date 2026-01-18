@@ -87,7 +87,10 @@ export function ProductCard({
 
   return (
     <div
-      className={clsx("rounded-(--pcard-radius) flex flex-col", className)}
+      className={clsx(
+        "group rounded-(--pcard-radius) flex flex-col h-full",
+        className,
+      )}
       style={
         {
           backgroundColor: pcardBackgroundColor,
@@ -96,12 +99,12 @@ export function ProductCard({
         } as React.CSSProperties
       }
     >
-      <div className="group relative">
+      <div className="relative">
         {image && (
           <Link
             to={`/products/${product.handle}?${params.toString()}`}
             prefetch="intent"
-            className="group relative block aspect-(--pcard-image-ratio) overflow-hidden rounded-t-(--pcard-radius) bg-gray-100"
+            className="relative block aspect-(--pcard-image-ratio) overflow-hidden rounded-t-(--pcard-radius) bg-gray-100"
           >
             {/* Loading skeleton overlay */}
             {isImageLoading && <Spinner />}
@@ -162,7 +165,6 @@ export function ProductCard({
       </div>
       <div
         className={clsx(
-          "h-full",
           "flex flex-col gap-3 py-5 text-sm",
           pcardBackgroundColor && "px-2",
           isVertical && [
@@ -202,7 +204,7 @@ export function ProductCard({
             prefetch="intent"
             className="font-semibold"
           >
-            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal line-clamp-1">
+            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal line-clamp-2 group-hover:bg-size-[100%_1px]">
               {product.title}
             </RevealUnderline>
           </Link>
@@ -242,8 +244,8 @@ export function ProductCard({
             ],
           )}
         /> */}
-        {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes
-          ?.length > 0 ? (
+        {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes?.length >
+        0 ? (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1">
             <span className="block size-1.5 bg-line rounded-full" />
             <span>Volume pricing available</span>
@@ -253,13 +255,15 @@ export function ProductCard({
         )}
       </div>
       {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (
-        <QuickShopTrigger
-          productHandle={product.handle}
-          showOnHover={pcardShowQuickShopOnHover}
-          buttonType={pcardQuickShopButtonType}
-          buttonText={pcardQuickShopButtonText}
-          placement="bottom"
-        />
+        <div className="mt-auto w-full">
+          <QuickShopTrigger
+            productHandle={product.handle}
+            showOnHover={pcardShowQuickShopOnHover}
+            buttonType={pcardQuickShopButtonType}
+            buttonText={pcardQuickShopButtonText}
+            placement="bottom"
+          />
+        </div>
       )}
     </div>
   );
