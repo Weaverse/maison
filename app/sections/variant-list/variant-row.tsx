@@ -79,7 +79,7 @@ export function VariantRow({
   };
 
   return (
-    <>
+    <div className={cn(isOutOfStock && "opacity-50")}>
       {/* mobile layout */}
       <div className="space-y-6 md:hidden">
         <div className="flex gap-[14px]">
@@ -143,7 +143,6 @@ export function VariantRow({
       <div
         className={cn(
           "hidden md:grid lg:hidden grid-cols-[3fr_2fr_1fr_1fr] gap-6 items-center",
-          isOutOfStock && "opacity-50",
         )}
       >
         <div className="flex items-start gap-3">
@@ -210,7 +209,6 @@ export function VariantRow({
           sellingPlanGroups.nodes.length > 0
             ? "grid-cols-[1fr_280px_270px_160px_153px]"
             : "grid-cols-[1fr_270px_160px_153px]",
-          isOutOfStock && "opacity-50",
         )}
       >
         <div className="flex items-center gap-3.5">
@@ -269,7 +267,7 @@ export function VariantRow({
           <Money data={totalPrice} as="span" withoutTrailingZeros />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

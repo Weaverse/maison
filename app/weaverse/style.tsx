@@ -35,6 +35,7 @@ export function GlobalStyle() {
       h1BaseSize,
       headingBaseSpacing,
       headingBaseLineHeight,
+      navHeightMobile,
       navHeightDesktop,
       navHeightTablet,
       pageWidth,
@@ -49,7 +50,6 @@ export function GlobalStyle() {
           __html: `
             :root {
               /* Layout */
-              --height-nav: ${settings.navHeightMobile}rem;
               --page-width: ${pageWidth}px;
 
               /* Colors (general) */
@@ -112,6 +112,11 @@ export function GlobalStyle() {
 
               --heading-base-spacing: ${headingBaseSpacing};
               --heading-base-line-height: ${headingBaseLineHeight};
+            }
+
+            body {
+              --height-nav: ${navHeightMobile}rem;
+            }
 
             @media (min-width: 32em) {
               body {
