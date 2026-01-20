@@ -7,7 +7,6 @@ export type B2BLocationContextValue = {
   companyLocationId?: string;
   modalOpen?: boolean;
   setModalOpen: (b: boolean) => void;
-  revalidate: () => void;
 };
 
 const defaultB2BLocationContextValue = {
@@ -15,9 +14,6 @@ const defaultB2BLocationContextValue = {
   companyLocationId: undefined,
   modalOpen: undefined,
   setModalOpen: () => {
-    // Default implementation
-  },
-  revalidate: () => {
     // Default implementation
   },
 };
@@ -36,6 +32,7 @@ export function B2BLocationProvider({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetcher.load is stable but fetcher is not
   useEffect(() => {
+  console.log("🚀 ~ B2BLocationProvider ~ fetcher:", fetcher.data, fetcher.state)
     if (fetcher.data || fetcher.state === "loading") {
       return;
     }
@@ -49,7 +46,6 @@ export function B2BLocationProvider({
       ...fetcher.data,
       modalOpen: modalOpen ?? fetcher?.data?.modalOpen,
       setModalOpen,
-      revalidate: () => fetcher.load("/b2blocations"),
     };
   }, [fetcher, modalOpen]);
   return (

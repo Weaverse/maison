@@ -356,6 +356,7 @@ function CompanyLocationSelector() {
         },
       )
     : [];
+  console.log("🚀 ~ CompanyLocationSelector ~ locations:", company, locations.length)
 
   if (locations.length <= 1 || !company) {
     return null;
@@ -368,7 +369,7 @@ function CompanyLocationSelector() {
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-body-subtle">Company location:</span>
+      <span className="text-xs ml-2">Company location:</span>
       <button
         type="button"
         onClick={() => setModalOpen(true)}
