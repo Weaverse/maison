@@ -1,8 +1,8 @@
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { CartForm } from "@shopify/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
-import { useFetcher } from "react-router";
 import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
@@ -10,10 +10,19 @@ import type {
 import { useB2BLocation } from "./b2b-location-provider";
 
 export function B2BLocationSelector() {
-  const { company, modalOpen, setModalOpen, companyLocationId, revalidate } =
+  const { company, modalOpen, setModalOpen, companyLocationId } =
     useB2BLocation();
-  const [selectedLocationId, setSelectedLocationId] = useState<string>("");
-  const fetcher = useFetcher();
+  const [selectedLocationId, setSelectedLocationId] =
+    useState<string>(companyLocationId);
+  console.log(
+    "🚀 ~ B2BLocationSelector ~ selectedLocationId:",
+    selectedLocationId,
+  );
+
+  let onCheckedChange = (value: string) => {
+    console.log("🚀 ~ onCheckedChange ~ value:", value, selectedLocationId);
+    setSelectedLocationId(value);
+  };
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
@@ -24,19 +33,14 @@ export function B2BLocationSelector() {
     : [];
 
   useEffect(() => {
-    if (companyLocationId) {
-      setSelectedLocationId(companyLocationId);
-    } else if (locations.length > 0 && !selectedLocationId) {
-      setSelectedLocationId(locations[0].id);
+    if (!selectedLocationId) {
+      if (companyLocationId) {
+        setSelectedLocationId(companyLocationId);
+      } else if (locations.length > 0 && !selectedLocationId) {
+        setSelectedLocationId(locations[0].id);
+      }
     }
-  }, [companyLocationId, locations, selectedLocationId]);
-
-  useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data) {
-      setModalOpen(false);
-      revalidate();
-    }
-  }, [fetcher.state, fetcher.data, setModalOpen, revalidate]);
+  }, [companyLocationId, locations]);
 
   const open = Boolean(company && modalOpen);
 
@@ -94,7 +98,7 @@ export function B2BLocationSelector() {
                         name="location"
                         value={location.id}
                         checked={selectedLocationId === location.id}
-                        onChange={() => setSelectedLocationId(location.id)}
+                        onChange={() => onCheckedChange(location.id)}
                         className="peer h-5 w-5 appearance-none rounded-full border border-[#8B8071] bg-transparent checked:border-[#8B8071]"
                       />
                       <div className="pointer-events-none absolute h-2.5 w-2.5 rounded-full bg-[#8B8071] opacity-0 transition-opacity peer-checked:opacity-100" />
@@ -107,25 +111,30 @@ export function B2BLocationSelector() {
               </div>
 
               {/* Confirm Button */}
-              <fetcher.Form method="POST" action="/cart">
-                <input
-                  type="hidden"
-                  name="cartFormInput"
-                  value={JSON.stringify({
-                    action: "BuyerIdentityUpdate",
-                    inputs: {
-                      buyerIdentity: { companyLocationId: selectedLocationId },
-                    },
-                  })}
-                />
-                <button
-                  type="submit"
-                  disabled={!selectedLocationId || fetcher.state !== "idle"}
-                  className="w-full rounded-sm bg-[#8B8071] py-3 text-lg font-medium text-white transition-colors hover:bg-[#756a5b] disabled:opacity-50"
-                >
-                  {fetcher.state !== "idle" ? "Confirming..." : "Confirm"}
-                </button>
-              </fetcher.Form>
+              <CartForm
+                key={selectedLocationId}
+                route="/cart"
+                action={CartForm.ACTIONS.BuyerIdentityUpdate}
+                inputs={{
+                  buyerIdentity: { companyLocationId: selectedLocationId },
+                }}
+              >
+                {(fetcher) => (
+                  <button
+                    type="submit"
+                    disabled={!selectedLocationId || fetcher.state !== "idle"}
+                    className="w-full rounded-sm bg-[#8B8071] py-3 text-lg font-medium text-white transition-colors hover:bg-[#756a5b] disabled:opacity-50"
+                    onClick={(event) => {
+                      setModalOpen(false);
+                      fetcher.submit(event.currentTarget.form, {
+                        method: 'POST',
+                      });
+                    }}
+                  >
+                    {fetcher.state !== "idle" ? "Confirming..." : "Confirm"}
+                  </button>
+                )}
+              </CartForm>
             </div>
           </div>
         </Dialog.Content>
