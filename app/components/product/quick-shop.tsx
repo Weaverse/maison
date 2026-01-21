@@ -43,7 +43,7 @@ export function QuickShop({
   };
 
   return (
-    <div className="bg-background p-6">
+    <div className="bg-background p-6 md:p-10">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
         <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded bg-gray-100">
           {firstImage && (
@@ -134,7 +134,7 @@ export function QuickShop({
                     />
                   ))}
                 </div>
-                <div className="sticky bottom-0 bg-background pb-6 px-6 -mx-6 -mb-6">
+                <div className="sticky bottom-0 bg-background pb-6 px-6 md:pb-10 md:px-10 -mx-6 md:-mx-10 -mb-6 md:-mb-10">
                   <Subtotal cart={resolvedCart} variants={variants} />
                 </div>
               </>
