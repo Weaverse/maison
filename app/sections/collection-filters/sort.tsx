@@ -50,7 +50,17 @@ export function Sort() {
         <DropdownMenu.Content
           sideOffset={8}
           align="end"
-          className="flex h-fit w-52 flex-col gap-2 border border-line-subtle bg-background p-5"
+          className={cn(
+            "flex h-fit w-52 flex-col gap-2 border border-line-subtle bg-background p-5 z-50",
+            "data-[state=open]:animate-scale-in",
+            "data-[state=closed]:animate-scale-out",
+          )}
+          style={
+            {
+              transformOrigin:
+                "var(--radix-dropdown-menu-content-transform-origin)",
+            } as React.CSSProperties
+          }
         >
           {SORT_LIST.map(({ key, label }) => {
             params.set("sort", key);

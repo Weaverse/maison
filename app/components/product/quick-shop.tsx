@@ -43,9 +43,9 @@ export function QuickShop({
   };
 
   return (
-    <div className="bg-background p-6">
+    <div className="bg-background p-6 md:p-10">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
-        <div className="mt-4 md:mt-0 aspect-square w-full md:w-60 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+        <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded bg-gray-100">
           {firstImage && (
             <ProductMedia
               mediaLayout="slider"
@@ -88,11 +88,13 @@ export function QuickShop({
         <div className="space-y-6">
           {/* mobile header */}
           <div className="border-b border-line-subtle py-3 md:hidden">
-            <div className="text-sm font-semibold uppercase">Products</div>
+            <div className="text-sm font-semibold uppercase text-body-subtle">
+              Products
+            </div>
           </div>
           {/* tablet/desktop header */}
           {sellingPlanGroups?.nodes?.length > 0 ? (
-            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
               <div className="text-sm font-semibold uppercase">Variant</div>
               <div className="text-sm font-semibold uppercase text-center">
                 Purchase Method
@@ -108,7 +110,7 @@ export function QuickShop({
               </div>
             </div>
           ) : (
-            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
               <div className="text-sm font-semibold uppercase">Variant</div>
               <div className="text-sm font-semibold uppercase text-center">
                 Quantity
@@ -134,7 +136,7 @@ export function QuickShop({
                     />
                   ))}
                 </div>
-                <div className="sticky bottom-0 bg-background pb-6 px-6 -mx-6 -mb-6">
+                <div className="sticky bottom-0 bg-background pb-6 px-6 md:pb-10 md:px-10 -mx-6 md:-mx-10 -mb-6 md:-mb-10">
                   <Subtotal cart={resolvedCart} variants={variants} />
                 </div>
               </>
@@ -198,7 +200,7 @@ export function QuickShopTrigger({
               ? "right-4 rounded-full shadow-xl"
               : "inset-x-4 shadow-xs",
             showOnHover &&
-            "opacity-0 transition-opacity group-hover:opacity-100",
+              "opacity-0 transition-opacity group-hover:opacity-100",
           ],
           placement === "bottom" && ["w-full shadow-xs"],
         )}

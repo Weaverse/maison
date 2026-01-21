@@ -51,8 +51,8 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
       className={cn("py-16 px-4 bg-white")}
       style={{ color: textColor, backgroundColor }}
     >
-      <div className="mx-auto max-w-2xl bg-white p-8 space-y-6 rounded-lg">
-        <div className="text-center space-y-2">
+      <div className="mx-auto max-w-[480px] bg-white p-8 space-y-6 rounded-lg">
+        <div className="text-center space-y-[9px]">
           <h2 className="text-[32px] font-normal leading-tight">{heading}</h2>
           {description && (
             <p className="text-sm opacity-80 text-body-subtle">{description}</p>
@@ -72,7 +72,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
             action="/api/b2b-signup"
             navigate={false}
             fetcherKey={formKey}
-            className="space-y-4"
+            className="space-y-[17px]"
           >
             {error && (
               <div className="rounded-lg border border-red-600 bg-red-50 p-4 text-red-800">
@@ -88,7 +88,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 required
                 value={formState.name}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-base focus:outline-none"
+                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
               />
             </div>
 
@@ -99,7 +99,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 placeholder="Company name"
                 value={formState.company}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-base focus:outline-none"
+                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
               />
             </div>
 
@@ -111,7 +111,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 required
                 value={formState.email}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-base focus:outline-none"
+                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
               />
             </div>
 
@@ -122,7 +122,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 placeholder="Website"
                 value={formState.website}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-base focus:outline-none"
+                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
               />
             </div>
 
@@ -133,7 +133,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 rows={5}
                 value={formState.message}
                 onChange={handleChange}
-                className="w-full resize-none rounded-lg border border-line px-4 py-3 text-base focus:outline-none"
+                className="w-full resize-none rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
               />
             </div>
 
