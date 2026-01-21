@@ -88,11 +88,13 @@ export function QuickShop({
         <div className="space-y-6">
           {/* mobile header */}
           <div className="border-b border-line-subtle py-3 md:hidden">
-            <div className="text-sm font-semibold uppercase">Products</div>
+            <div className="text-sm font-semibold uppercase text-body-subtle">
+              Products
+            </div>
           </div>
           {/* tablet/desktop header */}
           {sellingPlanGroups?.nodes?.length > 0 ? (
-            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
               <div className="text-sm font-semibold uppercase">Variant</div>
               <div className="text-sm font-semibold uppercase text-center">
                 Purchase Method
@@ -108,7 +110,7 @@ export function QuickShop({
               </div>
             </div>
           ) : (
-            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
+            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
               <div className="text-sm font-semibold uppercase">Variant</div>
               <div className="text-sm font-semibold uppercase text-center">
                 Quantity
