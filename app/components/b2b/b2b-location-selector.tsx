@@ -3,15 +3,27 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm } from "@shopify/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import { useFetcher } from "react-router";
 import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
 } from "~/graphql/customer-locations-query.account";
 import { useB2BLocation } from "./b2b-location-provider";
 
+const B2B_UPDATE_KEY = "b2b-location-update";
+
 export function B2BLocationSelector() {
   const { company, modalOpen, setModalOpen, companyLocationId } =
     useB2BLocation();
+  const fetcher = useFetcher({ key: B2B_UPDATE_KEY });
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data) {
+      setModalOpen(false);
+      window.location.reload();
+    }
+  }, [fetcher.state, fetcher.data, setModalOpen]);
+
   const [selectedLocationId, setSelectedLocationId] =
     useState<string>(companyLocationId);
   console.log(
@@ -26,10 +38,10 @@ export function B2BLocationSelector() {
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
-        (location: CustomerCompanyLocationConnection) => {
-          return { ...location.node };
-        },
-      )
+      (location: CustomerCompanyLocationConnection) => {
+        return { ...location.node };
+      },
+    )
     : [];
 
   useEffect(() => {
@@ -115,19 +127,19 @@ export function B2BLocationSelector() {
                 key={selectedLocationId}
                 route="/cart"
                 action={CartForm.ACTIONS.BuyerIdentityUpdate}
+                fetcherKey={B2B_UPDATE_KEY}
                 inputs={{
                   buyerIdentity: { companyLocationId: selectedLocationId },
                 }}
               >
-                {(fetcher) => (
+                {() => (
                   <button
                     type="submit"
                     disabled={!selectedLocationId || fetcher.state !== "idle"}
                     className="w-full rounded-sm bg-[#8B8071] py-3 text-lg font-medium text-white transition-colors hover:bg-[#756a5b] disabled:opacity-50"
                     onClick={(event) => {
-                      setModalOpen(false);
                       fetcher.submit(event.currentTarget.form, {
-                        method: 'POST',
+                        method: "POST",
                       });
                     }}
                   >
