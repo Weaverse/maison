@@ -80,7 +80,7 @@ function FiltersDrawer({
         <Dialog.Content
           className={clsx([
             "fixed inset-y-0 z-10 w-full bg-(--color-background) md:w-[360px]",
-            "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
+            "translate-x-full right-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-right",
             "flex flex-col",
           ])}
           aria-describedby={undefined}
