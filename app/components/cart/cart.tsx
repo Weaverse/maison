@@ -144,6 +144,7 @@ function CartCheckoutActions({
       {layout === "drawer" && (
         <Link
           to="/cart"
+          onClick={() => toggleCartDrawer(false)}
           className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm font-normal"
         >
           View Cart
