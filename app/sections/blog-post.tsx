@@ -53,20 +53,22 @@ export default function BlogPost(props: BlogPostProps) {
           </div>
         )}
 
-        <div className="px-5 py-6 md:px-20 md:py-20 lg:px-0 lg:max-w-[728px] mx-auto">
-          <h1 className="h3 leading-tight!">{title}</h1>
+        <div className="mx-auto px-5 py-6 md:px-20 md:py-20 lg:max-w-[728px] lg:px-0">
+          <div className="flex flex-col gap-4">
+            <h1 className="h3 leading-tight!">{title}</h1>
 
-          <div className="text-sm flex flex-wrap gap-1 pt-4 text-body-subtle">
-            {formattedDate && (
-              <span>
-                {formattedDate}
-                {author?.name && " —"}
-              </span>
-            )}
-            {author?.name && <span>{author.name}</span>}
+            <div className="flex flex-wrap gap-1 text-sm text-body-subtle py-4">
+              {formattedDate && (
+                <span>
+                  {formattedDate}
+                  {author?.name && " —"}
+                </span>
+              )}
+              {author?.name && <span>{author.name}</span>}
+            </div>
           </div>
 
-          <article className="prose max-w-full">
+          <article className="prose mt-4 max-w-full">
             <div className="mx-auto space-y-8 md:space-y-16">
               <div
                 suppressHydrationWarning

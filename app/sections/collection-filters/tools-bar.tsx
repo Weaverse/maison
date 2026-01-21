@@ -80,13 +80,13 @@ function FiltersDrawer({
         <Dialog.Content
           className={clsx([
             "fixed inset-y-0 z-10 w-full bg-(--color-background) md:w-[360px]",
-            "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
+            "translate-x-full right-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-right",
             "flex flex-col",
           ])}
           aria-describedby={undefined}
         >
-          <div className="flex items-center justify-between gap-2 px-4 py-4">
-            <Dialog.Title asChild className="py-2.5 font-bold">
+          <div className="flex items-center justify-between gap-2 px-5 py-3">
+            <Dialog.Title asChild className="pt-2.5 font-bold">
               <span>Filters</span>
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -100,9 +100,9 @@ function FiltersDrawer({
             </Dialog.Close>
           </div>
           <ScrollArea className="flex-1" size="sm">
-            <Filters className="px-4" />
+            <Filters className="px-5" />
           </ScrollArea>
-          <div className="border-line-subtle border-t px-4 py-4 md:hidden">
+          <div className="mt-auto border-line-subtle border-t px-5 py-4 md:hidden">
             <Dialog.Close asChild>
               <Button className="w-full" variant="primary">
                 Apply Filters

@@ -118,31 +118,41 @@ export function VariantRow({
         </div>
 
         {sellingPlanGroups.nodes.length > 0 ? (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 max-w-[230px]">
-              <PurchaseMethodDropdown
-                sellingPlanGroups={sellingPlanGroups}
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 max-w-[230px]">
+                <PurchaseMethodDropdown
+                  sellingPlanGroups={sellingPlanGroups}
+                  selectedPlanId={selectedPlanId}
+                  onPlanChange={setSelectedPlanId}
+                />
+              </div>
+              <div className="font-bold text-base">
+                <Money data={totalPrice} as="span" withoutTrailingZeros />
+              </div>
+            </div>
+            <div className="flex justify-start items-center">
+              <QuantityUpdateButtons
+                cart={resolvedCart}
+                variant={variant}
                 selectedPlanId={selectedPlanId}
-                onPlanChange={setSelectedPlanId}
               />
             </div>
-            <div className="font-bold text-base">
+          </>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex justify-start items-center">
+              <QuantityUpdateButtons
+                cart={resolvedCart}
+                variant={variant}
+                selectedPlanId={selectedPlanId}
+              />
+            </div>
+            <div className="font-bold text-base text-right">
               <Money data={totalPrice} as="span" withoutTrailingZeros />
             </div>
           </div>
-        ) : (
-          <div className="font-bold text-base text-right">
-            <Money data={totalPrice} as="span" withoutTrailingZeros />
-          </div>
         )}
-
-        <div className="flex justify-start items-center">
-          <QuantityUpdateButtons
-            cart={resolvedCart}
-            variant={variant}
-            selectedPlanId={selectedPlanId}
-          />
-        </div>
       </div>
 
       {/* tablet layout */}

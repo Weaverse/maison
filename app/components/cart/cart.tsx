@@ -40,10 +40,16 @@ export function Cart({
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const cartHasItems = Boolean(cart) && cart.totalQuantity > 0;
 
-  if (cartHasItems) {
-    return <CartDetails cart={cart} layout={layout} />;
-  }
-  return <CartEmpty hidden={linesCount} onClose={onClose} layout={layout} />;
+  return (
+    <>
+      {cartHasItems && <CartDetails cart={cart} layout={layout} />}
+      <CartEmpty
+        hidden={cartHasItems || linesCount}
+        onClose={onClose}
+        layout={layout}
+      />
+    </>
+  );
 }
 
 function CartDetails({
@@ -144,6 +150,7 @@ function CartCheckoutActions({
       {layout === "drawer" && (
         <Link
           to="/cart"
+          onClick={() => toggleCartDrawer(false)}
           className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm font-normal"
         >
           View Cart
