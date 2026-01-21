@@ -40,10 +40,16 @@ export function Cart({
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const cartHasItems = Boolean(cart) && cart.totalQuantity > 0;
 
-  if (cartHasItems) {
-    return <CartDetails cart={cart} layout={layout} />;
-  }
-  return <CartEmpty hidden={linesCount} onClose={onClose} layout={layout} />;
+  return (
+    <>
+      {cartHasItems && <CartDetails cart={cart} layout={layout} />}
+      <CartEmpty
+        hidden={cartHasItems || linesCount}
+        onClose={onClose}
+        layout={layout}
+      />
+    </>
+  );
 }
 
 function CartDetails({
