@@ -62,7 +62,7 @@ function CartDetails({
   const content = (
     <div
       className={clsx(
-        layout === "drawer" && "flex h-full flex-col px-4",
+        layout === "drawer" && "flex h-full flex-col px-5",
         layout === "page" && [
           "mx-auto w-full max-w-(--page-width) pb-12",
           "grid md:grid-cols-[1fr_auto] md:items-start",
@@ -109,7 +109,7 @@ function CartLines({
         y > 0 ? "border-line-subtle border-t" : "",
         layout === "page" && "grow bg-white p-6 rounded-sm",
         layout === "drawer" &&
-          "flex-1 min-h-0 overflow-auto transition -mx-4 pb-4",
+          "flex-1 min-h-0 overflow-auto transition -mx-5 pb-4",
       ])}
     >
       <ScrollArea className={clsx(layout === "drawer" && "h-full")} size="sm">
@@ -480,7 +480,7 @@ function CartEmpty({
       ref={scrollRef}
       className={clsx(
         layout === "drawer" && [
-          "h-screen-dynamic w-full content-start space-y-12 overflow-y-scroll px-4 pb-5 transition",
+          "h-full w-full content-start space-y-12 overflow-y-scroll px-5 pb-6 transition",
           y > 0 && "border-t",
         ],
         layout === "page" && [
