@@ -37,7 +37,7 @@ export function Filters({ className }: { className?: string }) {
   return (
     <Accordion.Root
       type="multiple"
-      className={cn("divide-y divide-line-subtle pr-3", className)}
+      className={cn("pr-3", className)}
       key={
         collection.id + appliedFiltersKeys + expandFilters + showFiltersCount
       }
@@ -53,7 +53,7 @@ export function Filters({ className }: { className?: string }) {
             key={filter.id}
             ref={ref}
             value={filter.id}
-            className="w-full pt-[22px] pb-6"
+            className="w-full border-b border-line-subtle pt-[22px] pb-6"
           >
             <Accordion.Trigger className="flex w-full items-center justify-between data-[state=open]:[&>svg]:rotate-90">
               <span className="text-sm font-semibold">{filter.label}</span>

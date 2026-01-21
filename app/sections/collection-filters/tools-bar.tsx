@@ -102,7 +102,7 @@ function FiltersDrawer({
           <ScrollArea className="flex-1" size="sm">
             <Filters className="px-5" />
           </ScrollArea>
-          <div className="border-line-subtle border-t px-4 py-4 md:hidden">
+          <div className="mt-auto border-line-subtle border-t px-5 py-4 md:hidden">
             <Dialog.Close asChild>
               <Button className="w-full" variant="primary">
                 Apply Filters
