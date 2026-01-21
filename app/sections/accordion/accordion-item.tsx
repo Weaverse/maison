@@ -49,13 +49,13 @@ const AccordionItem = (props: AccordionItemProps) => {
       ref={ref}
       {...rest}
       value={title}
-      className="w-full focus-within:relative focus-within:z-10"
+      className="w-full focus-within:relative focus-within:z-10 group"
       data-motion="fade-up"
     >
       <Accordion.Header>
         <Accordion.Trigger
           style={{ backgroundColor }}
-          className="group mb-1 flex w-full gap-3 p-4 text-left"
+          className="group mb-1 flex w-full gap-3 p-4 text-left rounded group-data-[state=open]:rounded-b-none"
         >
           {renderIcon()}
           <span className="text-base">{title}</span>
@@ -76,7 +76,7 @@ const AccordionItem = (props: AccordionItemProps) => {
           } as React.CSSProperties
         }
         className={cn(
-          "overflow-hidden",
+          "overflow-hidden rounded-b",
           "data-[state=closed]:animate-collapse",
           "data-[state=open]:animate-expand",
         )}
