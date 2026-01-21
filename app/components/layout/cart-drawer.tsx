@@ -54,7 +54,7 @@ export function CartDrawer() {
             </Dialog.Trigger>
             <AnimatedDrawer open={open}>
               <div className="flex h-full flex-col space-y-6">
-                <div className="flex items-center justify-between gap-2 px-4">
+                <div className="flex items-center justify-between gap-2 px-5">
                   <Dialog.Title asChild className="text-base">
                     <span className="font-bold">Cart</span>
                   </Dialog.Title>
@@ -69,7 +69,7 @@ export function CartDrawer() {
                   </Dialog.Close>
                 </div>
                 {cart?.totalQuantity > 0 && (
-                  <FreeShippingProgressBar cost={cart?.cost} className="px-4" />
+                  <FreeShippingProgressBar cost={cart?.cost} className="px-5" />
                 )}
                 <Cart layout="drawer" cart={cart as CartReturn} />
               </div>
@@ -110,7 +110,7 @@ function AnimatedDrawer({ open, children }) {
                   damping: 25,
                   stiffness: 150,
                 }}
-                className="w-screen max-w-[461px] bg-background py-4 h-full relative"
+                className="w-screen max-w-[461px] bg-background pt-3 h-full relative"
               >
                 {children}
               </motion.div>
