@@ -45,7 +45,7 @@ export function QuickShop({
   return (
     <div className="bg-background p-6">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
-        <div className="mt-4 md:mt-0 aspect-square w-full md:w-60 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+        <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded bg-gray-100">
           {firstImage && (
             <ProductMedia
               mediaLayout="slider"
@@ -198,7 +198,7 @@ export function QuickShopTrigger({
               ? "right-4 rounded-full shadow-xl"
               : "inset-x-4 shadow-xs",
             showOnHover &&
-            "opacity-0 transition-opacity group-hover:opacity-100",
+              "opacity-0 transition-opacity group-hover:opacity-100",
           ],
           placement === "bottom" && ["w-full shadow-xs"],
         )}
