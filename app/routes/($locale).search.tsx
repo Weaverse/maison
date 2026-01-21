@@ -328,7 +328,7 @@ function SearchFiltersDrawer() {
           ])}
           aria-describedby={undefined}
         >
-          <div className="flex items-center justify-between gap-2 px-4 py-4">
+          <div className="flex items-center justify-between gap-2 px-4 py-3">
             <Dialog.Title asChild className="py-2.5 font-bold">
               <span>Filters</span>
             </Dialog.Title>
