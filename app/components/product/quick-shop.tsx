@@ -200,7 +200,7 @@ export function QuickShopTrigger({
               ? "right-4 rounded-full shadow-xl"
               : "inset-x-4 shadow-xs",
             showOnHover &&
-              "opacity-0 transition-opacity group-hover:opacity-100",
+            "opacity-0 transition-opacity group-hover:opacity-100",
           ],
           placement === "bottom" && ["w-full shadow-xs"],
         )}
@@ -217,12 +217,12 @@ export function QuickShopTrigger({
         )}
       </Button>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-10 bg-gray-900/50 [--fade-in-duration:150ms] data-[state=open]:animate-fade-in" />
+        <Dialog.Overlay className="fixed inset-0 z-10 bg-gray-900/50 [--fade-in-duration:150ms] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <Dialog.Content
           className={clsx(
             "quick-shop-dialog-content",
             "fixed inset-0 z-10 flex items-center overflow-x-hidden px-4",
-            "backdrop-blur-xs data-[state=open]:animate-slide-up",
+            "backdrop-blur-xs data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           )}
           onClick={(e) => {
             const target = e.target as HTMLElement;
@@ -234,6 +234,7 @@ export function QuickShopTrigger({
             {
               "--slide-up-from": "20px",
               "--slide-up-duration": "300ms",
+              "--slide-down-to": "20px",
             } as React.CSSProperties
           }
           aria-describedby={undefined}

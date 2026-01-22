@@ -104,18 +104,19 @@ export function ZoomModal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay
-          className="fixed inset-0 z-10 bg-white data-[state=open]:animate-fade-in"
+          className="fixed inset-0 z-10 bg-white data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
           style={{ "--fade-in-duration": "100ms" } as React.CSSProperties}
         />
         <Dialog.Content
           className={clsx([
             "fixed inset-0 z-10 w-screen",
-            "data-[state=open]:animate-slide-up",
+            "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           ])}
           style={
             {
               "--slide-up-from": "20px",
               "--slide-up-duration": "300ms",
+              "--slide-down-to": "20px",
             } as React.CSSProperties
           }
           aria-describedby={undefined}
@@ -252,7 +253,7 @@ function isVisibleInParent(child: HTMLElement, parent: HTMLElement) {
 }
 
 export interface ZoomButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
 
 export function ZoomButton({ className, ...props }: ZoomButtonProps) {
   return (
