@@ -277,7 +277,7 @@ function PredictiveSearchResults() {
 
         <Tabs.Content value="pages" className="p-5">
           {pages?.items && pages.items.length > 0 ? (
-            <div className="space-y-4">
+            <div>
               {pages.items.map((item) => (
                 <PageResultItem key={item.id} item={item} />
               ))}
