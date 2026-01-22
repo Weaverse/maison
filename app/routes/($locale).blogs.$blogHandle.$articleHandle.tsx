@@ -37,7 +37,7 @@ export async function loader(args: RouteLoaderArgs) {
   ]);
 
   if (!blog?.articleByHandle) {
-    throw new Response(null, { status: 404 });
+    throw new Response("article", { status: 404 });
   }
   redirectIfHandleIsLocalized(
     request,
