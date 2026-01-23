@@ -204,14 +204,14 @@ function PredictiveSearchResults() {
 
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <Tabs.List className="flex gap-8 border-b border-line-subtle px-5">
+      <Tabs.List className="flex gap-10 border-b border-line-subtle mx-5">
         <Tabs.Trigger
           value="products"
           className={cn(
             "pb-3 text-sm font-medium transition-colors",
             activeTab === "products"
               ? "shadow-[0_1px_0_var(--color-line)]"
-              : "text-body-subtle/70 hover:text-body-subtle",
+              : "text-body-subtle/60 hover:text-body-subtle",
           )}
         >
           Products
@@ -222,7 +222,7 @@ function PredictiveSearchResults() {
             "pb-3 text-sm font-medium transition-colors",
             activeTab === "collections"
               ? "shadow-[0_1px_0_var(--color-line)]"
-              : "text-body-subtle/70 hover:text-body-subtle",
+              : "text-body-subtle/60 hover:text-body-subtle",
           )}
         >
           Collections
@@ -233,7 +233,7 @@ function PredictiveSearchResults() {
             "pb-3 text-sm font-medium transition-colors",
             activeTab === "pages"
               ? "shadow-[0_1px_0_var(--color-line)]"
-              : "text-body-subtle/70 hover:text-body-subtle",
+              : "text-body-subtle/60 hover:text-body-subtle",
           )}
         >
           Page
