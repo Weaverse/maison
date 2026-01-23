@@ -74,10 +74,10 @@ export function B2BLocationSelector() {
             } as React.CSSProperties
           }
         >
-          <div className="w-full max-w-[500px] overflow-hidden rounded-sm bg-white shadow-xl">
+          <div className="w-full max-w-[500px] overflow-hidden rounded-lg bg-white shadow-xl">
             {/* Header */}
-            <div className="flex items-center justify-between bg-[#F0EFEC] px-6 py-4">
-              <Dialog.Title className="text-lg font-semibold text-[#4A4A4A]">
+            <div className="flex items-center justify-between bg-[#F0EFEC] px-10 py-4">
+              <Dialog.Title className="text-sm font-semibold text-[#4A4A4A] py-2.5">
                 Select company location
               </Dialog.Title>
               <button
@@ -86,12 +86,12 @@ export function B2BLocationSelector() {
                 className="text-[#4A4A4A] transition-colors hover:text-black"
                 aria-label="Close"
               >
-                <XIcon className="h-5 w-5" />
+                <XIcon className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="p-6">
-              <Dialog.Description className="mb-6 text-base text-[#4A4A4A] leading-relaxed">
+            <div className="px-10 pt-8 pb-10">
+              <Dialog.Description className="mb-8 text-base text-[#4A4A4A] leading-relaxed">
                 Select your location to shop with your company&rsquo;s custom
                 pricing, specific product availability, and authorized checkout
                 settings.
@@ -136,7 +136,7 @@ export function B2BLocationSelector() {
                   <button
                     type="submit"
                     disabled={!selectedLocationId || fetcher.state !== "idle"}
-                    className="w-full rounded-sm bg-[#8B8071] py-3 text-lg font-medium text-white transition-colors hover:bg-[#756a5b] disabled:opacity-50"
+                    className="w-full rounded-sm bg-[#8B8071] py-[18px] text-sm leading-none font-medium text-white transition-colors hover:bg-[#756a5b] disabled:opacity-50"
                     onClick={(event) => {
                       fetcher.submit(event.currentTarget.form, {
                         method: "POST",
