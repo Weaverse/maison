@@ -101,21 +101,21 @@ export function NewsletterPopup() {
           className={cn(
             "fixed inset-0 z-50 flex p-4 backdrop-blur-xs",
             newsletterPopupPosition === "center" &&
-            "items-center justify-center",
+              "items-center justify-center",
             newsletterPopupPosition === "top-left" &&
-            "items-start justify-start",
+              "items-start justify-start",
             newsletterPopupPosition === "top-right" &&
-            "items-start justify-end",
+              "items-start justify-end",
             newsletterPopupPosition === "bottom-left" &&
-            "items-end justify-start",
+              "items-end justify-start",
             newsletterPopupPosition === "bottom-right" &&
-            "items-end justify-end",
+              "items-end justify-end",
           )}
           aria-describedby={undefined}
         >
           <div
             className={cn(
-              "relative w-full max-w-md overflow-hidden bg-white shadow-xl",
+              "relative w-full max-w-md overflow-hidden bg-white shadow-xl rounded",
               "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
               newsletterPopupImage && "lg:max-w-2xl",
             )}
@@ -148,7 +148,7 @@ export function NewsletterPopup() {
                   ? "flex-col"
                   : "flex-col md:flex-row",
                 newsletterPopupImagePosition === "right" &&
-                "md:flex-row-reverse",
+                  "md:flex-row-reverse",
               )}
             >
               {newsletterPopupImage && (
