@@ -19,9 +19,9 @@ import {
   useOutlet,
 } from "react-router";
 import { AccountDetails } from "~/components/customer/account-details";
+import { AccountSubscriptions } from "~/components/customer/account-subscriptions";
 import { AccountAddressBook } from "~/components/customer/address-book";
 import { AccountOrderHistory } from "~/components/customer/orders";
-import { AccountSubscriptions } from "~/components/customer/account-subscriptions";
 import { OutletModal } from "~/components/customer/outlet-modal";
 import { ProductCard } from "~/components/product/product-card";
 import { Section } from "~/components/section";
@@ -132,7 +132,7 @@ function Account({ customer, heading, featuredData }: AccountType) {
             {({ featuredProducts }) => (
               <div className="space-y-8 pt-20">
                 <h5>Featured products</h5>
-                <Swimlane>
+                <Swimlane className="gap-4">
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard
                       key={product.id}
