@@ -95,7 +95,7 @@ export function NoteDialog({
             type="submit"
             loading={fetcher.state !== "idle"}
             disabled={fetcher.state !== "idle"}
-            className="w-full border-0 leading-tight! [--spinner-duration:400ms]"
+            className="w-full border-0 py-[18px] leading-tight! [--spinner-duration:400ms]"
           >
             Add note
           </Button>
@@ -128,7 +128,7 @@ export function DiscountDialog({
       // Merge new code with existing codes
       const existingCodes = discountCodes.map((d) => d.code);
       const updatedCodes = [...existingCodes, discountCode];
-      
+
       fetcher.submit(
         {
           [CartForm.INPUT_NAME]: JSON.stringify({
@@ -195,7 +195,7 @@ export function DiscountDialog({
           {error && <Banner variant="error">Invalid discount code.</Banner>}
           <Button
             type="submit"
-            className="w-full border-0 leading-tight! [--spinner-duration:400ms]"
+            className="w-full border-0 py-[18px] leading-tight! [--spinner-duration:400ms]"
             loading={fetcher.state !== "idle"}
             disabled={fetcher.state !== "idle"}
           >
@@ -220,9 +220,9 @@ export function GiftCardDialog({
   const submitted = Boolean(code && fetcher.state === "idle" && fetcher.data);
   const success = Boolean(
     submitted &&
-      appliedGiftCards?.find((gc) =>
-        code.toLowerCase().endsWith(gc.lastCharacters),
-      ),
+    appliedGiftCards?.find((gc) =>
+      code.toLowerCase().endsWith(gc.lastCharacters),
+    ),
   );
   const error = submitted && !success;
 
@@ -306,7 +306,7 @@ export function GiftCardDialog({
           {error && <Banner variant="error">Invalid gift card code.</Banner>}
           <Button
             type="submit"
-            className="w-full leading-tight! [--spinner-duration:400ms]"
+            className="w-full py-[18px] leading-tight! [--spinner-duration:400ms]"
             loading={fetcher.state !== "idle"}
             disabled={fetcher.state !== "idle"}
           >

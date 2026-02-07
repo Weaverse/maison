@@ -81,7 +81,7 @@ export function VariantRow({
   return (
     <div className={cn(isOutOfStock && "opacity-50")}>
       {/* mobile layout */}
-      <div className="space-y-6 md:hidden">
+      <div className="space-y-4 md:hidden">
         <div className="flex gap-[14px]">
           {variant.image && (
             <Image
@@ -92,7 +92,7 @@ export function VariantRow({
               alt={variant.image.altText || variantTitle}
             />
           )}
-          <div className="flex flex-col justify-between">
+          <div className="flex flex-col justify-start gap-1">
             <div className="font-semibold text-sm">{variantTitle}</div>
             <div className="text-sm text-body/70">SKU: {variant.sku}</div>
             {isOutOfStock ? (
@@ -117,24 +117,40 @@ export function VariantRow({
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <QuantityUpdateButtons
-            cart={resolvedCart}
-            variant={variant}
-            selectedPlanId={selectedPlanId}
-          />
-          <div className="font-semibold text-sm">
-            <Money data={totalPrice} as="span" withoutTrailingZeros />
-          </div>
-        </div>
-
-        {sellingPlanGroups.nodes.length > 0 && (
-          <div className="mt-3">
-            <PurchaseMethodDropdown
-              sellingPlanGroups={sellingPlanGroups}
-              selectedPlanId={selectedPlanId}
-              onPlanChange={setSelectedPlanId}
-            />
+        {sellingPlanGroups.nodes.length > 0 ? (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 max-w-[230px]">
+                <PurchaseMethodDropdown
+                  sellingPlanGroups={sellingPlanGroups}
+                  selectedPlanId={selectedPlanId}
+                  onPlanChange={setSelectedPlanId}
+                />
+              </div>
+              <div className="font-bold text-base">
+                <Money data={totalPrice} as="span" withoutTrailingZeros />
+              </div>
+            </div>
+            <div className="flex justify-start items-center">
+              <QuantityUpdateButtons
+                cart={resolvedCart}
+                variant={variant}
+                selectedPlanId={selectedPlanId}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex justify-start items-center">
+              <QuantityUpdateButtons
+                cart={resolvedCart}
+                variant={variant}
+                selectedPlanId={selectedPlanId}
+              />
+            </div>
+            <div className="font-bold text-base text-right">
+              <Money data={totalPrice} as="span" withoutTrailingZeros />
+            </div>
           </div>
         )}
       </div>
@@ -142,7 +158,7 @@ export function VariantRow({
       {/* tablet layout */}
       <div
         className={cn(
-          "hidden md:grid lg:hidden grid-cols-[3fr_2fr_1fr_1fr] gap-6 items-center",
+          "hidden md:grid lg:hidden grid-cols-[6fr_1fr_1fr] gap-6 items-center",
         )}
       >
         <div className="flex items-start gap-3">
@@ -155,7 +171,7 @@ export function VariantRow({
               alt={variant.image.altText || variantTitle}
             />
           )}
-          <div className="flex-1 flex flex-col gap-[23px]">
+          <div className="flex-1 flex flex-col">
             <div className="space-y-1">
               <div className="font-medium">{variantTitle}</div>
               <div className="text-sm text-body/70">SKU: {variant.sku}</div>
@@ -175,23 +191,24 @@ export function VariantRow({
                 </div>
               )}
             </div>
-            <QuantityUpdateButtons
-              cart={resolvedCart}
-              variant={variant}
-              selectedPlanId={selectedPlanId}
-            />
+            {sellingPlanGroups.nodes.length > 0 && (
+              <div className="my-4 w-[230px]">
+                <PurchaseMethodDropdown
+                  sellingPlanGroups={sellingPlanGroups}
+                  selectedPlanId={selectedPlanId}
+                  onPlanChange={setSelectedPlanId}
+                />
+              </div>
+            )}
+            <div className={cn(!sellingPlanGroups.nodes.length && "mt-[23px]")}>
+              <QuantityUpdateButtons
+                cart={resolvedCart}
+                variant={variant}
+                selectedPlanId={selectedPlanId}
+              />
+            </div>
           </div>
         </div>
-
-        {sellingPlanGroups.nodes.length > 0 ? (
-          <PurchaseMethodDropdown
-            sellingPlanGroups={sellingPlanGroups}
-            selectedPlanId={selectedPlanId}
-            onPlanChange={setSelectedPlanId}
-          />
-        ) : (
-          <div />
-        )}
 
         <div className="text-center text-sm">
           <Money data={unitPrice} as="span" withoutTrailingZeros />

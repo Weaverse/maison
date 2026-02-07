@@ -152,9 +152,9 @@ export function ProductMedia(props: ProductMediaProps) {
                     onClick={
                       canClickImage
                         ? () => {
-                            setZoomMediaId(med.id);
-                            setZoomModalOpen(true);
-                          }
+                          setZoomMediaId(med.id);
+                          setZoomModalOpen(true);
+                        }
                         : undefined
                     }
                     className={canClickImage ? "cursor-zoom-in" : ""}
@@ -166,7 +166,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={cn(
                         "w-full max-w-none object-cover lg:h-full lg:w-full rounded",
                         idx === 0 &&
-                          "[&_img]:[view-transition-name:image-expand]",
+                        "[&_img]:[view-transition-name:image-expand]",
                       )}
                     />
                   </div>
@@ -175,7 +175,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={clsx(
                         "absolute top-2 right-2 md:top-4 md:right-4",
                         zoomButtonVisibility === "hover" &&
-                          "opacity-0 group-hover:opacity-100",
+                        "opacity-0 group-hover:opacity-100",
                       )}
                       onClick={() => {
                         setZoomMediaId(med.id);
@@ -218,7 +218,7 @@ export function ProductMedia(props: ProductMediaProps) {
             }}
             pagination={{ type: "fraction" }}
             modules={[Pagination, Navigation, Thumbs]}
-            className="overflow-visible pb-10 md:overflow-hidden md:pb-0 md:[&_.swiper-pagination]:hidden"
+            className="overflow-hidden pb-10 md:pb-0 md:[&_.swiper-pagination]:hidden"
           >
             {media.map((med, idx) => {
               return (
@@ -230,9 +230,9 @@ export function ProductMedia(props: ProductMediaProps) {
                     onClick={
                       canClickImage
                         ? () => {
-                            setZoomMediaId(med.id);
-                            setZoomModalOpen(true);
-                          }
+                          setZoomMediaId(med.id);
+                          setZoomModalOpen(true);
+                        }
                         : undefined
                     }
                     className={canClickImage ? "cursor-zoom-in" : ""}
@@ -252,7 +252,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={clsx(
                         "absolute top-2 right-2 md:top-6 md:right-6",
                         zoomButtonVisibility === "hover" &&
-                          "opacity-0 group-hover:opacity-100",
+                        "opacity-0 group-hover:opacity-100",
                       )}
                       onClick={() => {
                         setZoomMediaId(med.id);
@@ -319,8 +319,9 @@ export function ProductMedia(props: ProductMediaProps) {
               watchSlidesProgress
               rewind
               freeMode
-              className="w-full overflow-visible"
+              className="w-full overflow-hidden"
               onInit={(sw) => {
+                ``
                 sw.el.parentElement.style.opacity = "1";
               }}
               modules={[Navigation, Thumbs, FreeMode]}

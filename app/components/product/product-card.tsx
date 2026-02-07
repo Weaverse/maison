@@ -112,8 +112,8 @@ export function ProductCard({
               className={clsx([
                 "absolute inset-0 [&_img]:[view-transition-name:image-expand]",
                 pcardShowImageOnHover &&
-                  secondImage &&
-                  "transition-opacity duration-300 group-hover:opacity-50",
+                secondImage &&
+                "transition-opacity duration-300 group-hover:opacity-50",
               ])}
               sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
               data={image}
@@ -189,22 +189,22 @@ export function ProductCard({
             "flex",
             isVertical
               ? [
-                  "flex-col gap-1",
-                  [
-                    pcardAlignment === "left" && "items-start",
-                    pcardAlignment === "center" && "items-center",
-                    pcardAlignment === "right" && "items-end",
-                  ],
-                ]
+                "flex-col gap-1",
+                [
+                  pcardAlignment === "left" && "items-start",
+                  pcardAlignment === "center" && "items-center",
+                  pcardAlignment === "right" && "items-end",
+                ],
+              ]
               : "justify-between gap-4",
           )}
         >
           <Link
             to={`/products/${product.handle}?${params.toString()}`}
             prefetch="intent"
-            className="font-semibold"
+            className="font-semibold line-clamp-2"
           >
-            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal line-clamp-2 group-hover:bg-size-[100%_1px]">
+            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal group-hover:bg-size-[100%_1px]">
               {product.title}
             </RevealUnderline>
           </Link>
@@ -245,7 +245,7 @@ export function ProductCard({
           )}
         /> */}
         {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes?.length >
-        0 ? (
+          0 ? (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1">
             <span className="block size-1.5 bg-line rounded-full" />
             <span>Volume pricing available</span>

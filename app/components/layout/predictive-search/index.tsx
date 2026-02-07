@@ -219,7 +219,7 @@ function PredictiveSearchResults() {
         <Tabs.Trigger
           value="collections"
           className={cn(
-            "pb-3 text-sm font-medium transition-colors shadow-[0_-1px_0_0]",
+            "pb-3 text-sm font-medium transition-colors",
             activeTab === "collections"
               ? "shadow-[0_1px_0_var(--color-line)]"
               : "text-body-subtle/70 hover:text-body-subtle",
@@ -230,7 +230,7 @@ function PredictiveSearchResults() {
         <Tabs.Trigger
           value="pages"
           className={cn(
-            "pb-3 text-sm font-medium transition-colors shadow-[0_-1px_0_0]",
+            "pb-3 text-sm font-medium transition-colors",
             activeTab === "pages"
               ? "shadow-[0_1px_0_var(--color-line)]"
               : "text-body-subtle/70 hover:text-body-subtle",
@@ -398,9 +398,9 @@ function KeywordsDisplay({
     suggestions.length > 0
       ? suggestions
       : popularKeywords.map((keyword) => ({
-          title: keyword,
-          styledTitle: keyword,
-        }));
+        title: keyword,
+        styledTitle: keyword,
+      }));
 
   if (keywords.length === 0) {
     return null;

@@ -13,7 +13,9 @@ const defaultB2BLocationContextValue = {
   company: undefined,
   companyLocationId: undefined,
   modalOpen: undefined,
-  setModalOpen: () => {},
+  setModalOpen: () => {
+    // Default implementation
+  },
 };
 
 const B2BLocationContext = createContext<B2BLocationContextValue>(
@@ -28,11 +30,15 @@ export function B2BLocationProvider({
   const fetcher = useFetcher<B2BLocationContextValue>();
   const [modalOpen, setModalOpen] = useState(fetcher?.data?.modalOpen);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fetcher.load is stable but fetcher is not
   useEffect(() => {
-    if (fetcher.data || fetcher.state === "loading") return;
+  console.log("🚀 ~ B2BLocationProvider ~ fetcher:", fetcher.data, fetcher.state)
+    if (fetcher.data || fetcher.state === "loading") {
+      return;
+    }
 
-    void fetcher.load("/b2blocations");
-  }, [fetcher]);
+    fetcher.load("/b2blocations");
+  }, [fetcher.data, fetcher.state]);
 
   const value = useMemo<B2BLocationContextValue>(() => {
     return {
@@ -42,8 +48,6 @@ export function B2BLocationProvider({
       setModalOpen,
     };
   }, [fetcher, modalOpen]);
-  console.log("🚀 ~ B2BLocationProvider ~ value:", value);
-
   return (
     <B2BLocationContext.Provider value={value}>
       {children}

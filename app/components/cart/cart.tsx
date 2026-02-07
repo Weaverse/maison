@@ -40,10 +40,16 @@ export function Cart({
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const cartHasItems = Boolean(cart) && cart.totalQuantity > 0;
 
-  if (cartHasItems) {
-    return <CartDetails cart={cart} layout={layout} />;
-  }
-  return <CartEmpty hidden={linesCount} onClose={onClose} layout={layout} />;
+  return (
+    <>
+      {cartHasItems && <CartDetails cart={cart} layout={layout} />}
+      <CartEmpty
+        hidden={cartHasItems || linesCount}
+        onClose={onClose}
+        layout={layout}
+      />
+    </>
+  );
 }
 
 function CartDetails({
@@ -56,7 +62,7 @@ function CartDetails({
   const content = (
     <div
       className={clsx(
-        layout === "drawer" && "flex h-full flex-col px-4",
+        layout === "drawer" && "flex h-full flex-col px-5",
         layout === "page" && [
           "mx-auto w-full max-w-(--page-width) pb-12",
           "grid md:grid-cols-[1fr_auto] md:items-start",
@@ -103,7 +109,7 @@ function CartLines({
         y > 0 ? "border-line-subtle border-t" : "",
         layout === "page" && "grow bg-white p-6 rounded-sm",
         layout === "drawer" &&
-          "flex-1 min-h-0 overflow-auto transition -mx-4 pb-4",
+          "flex-1 min-h-0 overflow-auto transition -mx-5 pb-4",
       ])}
     >
       <ScrollArea className={clsx(layout === "drawer" && "h-full")} size="sm">
@@ -144,6 +150,7 @@ function CartCheckoutActions({
       {layout === "drawer" && (
         <Link
           to="/cart"
+          onClick={() => toggleCartDrawer(false)}
           className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm font-normal"
         >
           View Cart
@@ -473,7 +480,7 @@ function CartEmpty({
       ref={scrollRef}
       className={clsx(
         layout === "drawer" && [
-          "h-screen-dynamic w-full content-start space-y-12 overflow-y-scroll px-4 pb-5 transition",
+          "h-full w-full content-start space-y-12 overflow-y-scroll px-5 pb-6 transition",
           y > 0 && "border-t",
         ],
         layout === "page" && [

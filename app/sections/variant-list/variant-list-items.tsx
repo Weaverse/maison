@@ -59,18 +59,15 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
             </div>
           </div>
 
-          <div className="md:hidden">
+          <div className="md:hidden mt-6">
             <Subtotal cart={resolvedCart} variants={variants} />
           </div>
 
           {/* tablet layout */}
           <div className="hidden md:block lg:hidden space-y-6">
             <div className="space-y-4">
-              <div className="grid grid-cols-[3fr_2fr_1fr_1fr] gap-6 border-b border-line-subtle py-3">
+              <div className="grid grid-cols-[6fr_1fr_1fr] gap-6 border-b border-line-subtle py-3">
                 <div className="text-sm font-bold uppercase">Variant</div>
-                <div className="text-sm font-bold uppercase">
-                  Purchase Method
-                </div>
                 <div className="text-sm font-bold uppercase text-center">
                   Price
                 </div>

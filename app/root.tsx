@@ -74,15 +74,6 @@ export const meta = ({ data }: MetaArgs<typeof loader>) => {
   return getSeoMeta(data?.seo as SeoConfig);
 };
 
-function App() {
-  return (
-    <B2BLocationProvider>
-      <Outlet />
-      <B2BLocationSelector />
-    </B2BLocationProvider>
-  );
-}
-
 export function ErrorBoundary({ error }: { error: Error }) {
   const routeError: { status?: number; data?: any } = useRouteError();
   const isRouteError = isRouteErrorResponse(routeError);
@@ -138,25 +129,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
             shop={data.shop}
             consent={data.consent}
           >
-            <TooltipProvider disableHoverableContent>
-              <div
-                className="flex min-h-screen flex-col"
-                key={`${locale.language}-${locale.country}`}
-              >
-                <div className="">
-                  <a href="#mainContent" className="sr-only">
-                    Skip to content
-                  </a>
+            <B2BLocationProvider>
+              <TooltipProvider disableHoverableContent>
+                <div
+                  className="flex min-h-screen flex-col"
+                  key={`${locale.language}-${locale.country}`}
+                >
+                  <div className="">
+                    <a href="#mainContent" className="sr-only">
+                      Skip to content
+                    </a>
+                  </div>
+                  <ScrollingAnnouncement />
+                  <Header />
+                  <main id="mainContent" className="grow">
+                    {children}
+                  </main>
+                  <Footer />
                 </div>
-                <ScrollingAnnouncement />
-                <Header />
-                <main id="mainContent" className="grow">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-              {shouldShowNewsletterPopup && <NewsletterPopup />}
-            </TooltipProvider>
+                {shouldShowNewsletterPopup && <NewsletterPopup />}
+                <B2BLocationSelector />
+              </TooltipProvider>
+            </B2BLocationProvider>
             <CustomAnalytics />
           </Analytics.Provider>
         ) : (
@@ -168,6 +162,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   );
+}
+
+function App() {
+  return <Outlet />;
 }
 
 export default withWeaverse(App);

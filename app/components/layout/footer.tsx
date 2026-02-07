@@ -1,9 +1,12 @@
 import {
+  CaretRightIcon,
   FacebookLogoIcon,
   InstagramLogoIcon,
   LinkedinLogoIcon,
+  MapPinIcon,
   XLogoIcon,
 } from "@phosphor-icons/react";
+
 import * as Accordion from "@radix-ui/react-accordion";
 import { Image } from "@shopify/hydrogen";
 import { useThemeSettings } from "@weaverse/hydrogen";
@@ -12,9 +15,11 @@ import clsx from "clsx";
 import { useFetcher } from "react-router";
 import { Button } from "~/components/button";
 import { RevealUnderline } from "~/components/reveal-underline";
+import type { CustomerCompanyLocationConnection } from "~/graphql/customer-locations-query.account";
 import { useShopMenu } from "~/hooks/use-shop-menu";
 import type { SingleMenuItem } from "~/types/menu";
 import { cn } from "~/utils/cn";
+import { useB2BLocation } from "../b2b/b2b-location-provider";
 import {
   AmexIcon,
   DinersClubIcon,
@@ -253,7 +258,8 @@ export function Footer() {
         <div className="w-full border-t border-line-subtle" />
         <div className="flex flex-col gap-6 py-6 md:flex-row md:flex-wrap md:justify-between lg:flex-nowrap lg:items-center">
           {/* Country Selector - Order 1 on mobile/tablet, Order 2 on desktop */}
-          <div className="order-1 lg:order-2">
+          <div className="order-1 flex items-center gap-6 lg:order-2">
+            <CompanyLocationSelector />
             <CountrySelector />
           </div>
 
@@ -337,5 +343,42 @@ function FooterMenu() {
         </Accordion.Item>
       ))}
     </Accordion.Root>
+  );
+}
+
+function CompanyLocationSelector() {
+  const { company, companyLocationId, setModalOpen } = useB2BLocation();
+
+  const locations = company?.locations?.edges
+    ? company.locations.edges.map(
+        (location: CustomerCompanyLocationConnection) => {
+          return { ...location.node };
+        },
+      )
+    : [];
+  console.log("🚀 ~ CompanyLocationSelector ~ locations:", company, locations.length)
+
+  if (locations.length <= 1 || !company) {
+    return null;
+  }
+
+  const selectedLocation =
+    locations.find(
+      (companyLocation) => companyLocation.id === companyLocationId,
+    ) || locations[0];
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs ml-2">Company location:</span>
+      <button
+        type="button"
+        onClick={() => setModalOpen(true)}
+        className="flex w-fit items-center gap-2 rounded-full border border-line-subtle px-3 py-1.5 text-sm transition hover:border-body hover:bg-body hover:text-inverse"
+      >
+        <MapPinIcon className="h-4 w-4" />
+        <span>{selectedLocation?.name || "Select Location"}</span>
+        <CaretRightIcon className="h-3 w-3" />
+      </button>
+    </div>
   );
 }

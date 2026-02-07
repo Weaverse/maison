@@ -51,7 +51,7 @@ export function Subtotal({ cart: originalCart, variants }: SubtotalProps) {
             </Button>
             {<RemoveAllFromCartButton lineIds={existingLineIds} />}
           </div>
-          <div className="space-y-6">
+          <div className="space-y-6 text-body-subtle">
             <div className="text-sm">Total: {totalItems} items</div>
             <div className="space-y-1">
               <div className="">
@@ -81,7 +81,7 @@ export function Subtotal({ cart: originalCart, variants }: SubtotalProps) {
             </Button>
             {<RemoveAllFromCartButton lineIds={existingLineIds} />}
           </div>
-          <div className="space-y-1 col-span-2">
+          <div className="space-y-1 col-span-2 text-body-subtle">
             <div className="text-right">
               <div className="text-sm">Subtotal:</div>
               <div className="font-semibold">${subtotal.toFixed(2)}</div>
@@ -108,9 +108,11 @@ export function Subtotal({ cart: originalCart, variants }: SubtotalProps) {
             </Button>
             {<RemoveAllFromCartButton lineIds={existingLineIds} />}
           </div>
-          <div className="text-center text-sm">Total: {totalItems} items</div>
+          <div className="text-center text-sm text-body-subtle">
+            Total: {totalItems} items
+          </div>
           <div className="col-span-2">
-            <div className="text-right space-y-1">
+            <div className="text-right space-y-1 text-body-subtle">
               <div className="text-sm">Subtotal:</div>
               <div className="font-semibold text-sm">
                 ${subtotal.toFixed(2)}
