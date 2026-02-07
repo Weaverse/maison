@@ -1,194 +1,35 @@
 # @weaverse/maison
 
-## 6.0.3
-
-### Patch Changes
-
-- **Component refactoring**: Migrated from forwardRef pattern to ref as props for Weaverse sections and components, improving API consistency
-- **UI/UX improvements**:
-  - Enhanced ProductCard and ProductMedia components with view transition effects for smoother user experience
-  - Refactored PredictiveSearchButton layout and repositioned PopularKeywords component
-  - Updated JudgemeStarsRating component with improved loading state styling
-  - Added variant prices display in SingleProduct component
-- **Code cleanup**:
-  - Removed unused NavLink component
-  - Cleaned up SingleProduct component by removing unused children prop and childTypes from schema
-  - Updated default onClickEvent value to "scroll-to-section" in JudgemeStarsRating schema
-  - Removed unused imports across multiple components
-- **Developer experience**:
-  - Updated CLAUDE.md documentation with improved project guidance
-  - Added .github/copilot-instructions.md to .gitignore
-  - Updated GitHub workflow configuration
-
-## 6.0.2
-
-### Patch Changes
-
-- Updated dependencies [3720e74]
-- Updated dependencies [469f291]
-- Updated dependencies [9ee3be2]
-  - @weaverse/hydrogen@5.5.0
-
-## 6.0.2-beta.0
-
-### Patch Changes
-
-- @weaverse/hydrogen@5.5.1-beta.0
-
-## 6.0.1
-
-### Patch Changes
-
-- Updated dependencies [21ba4ed]
-- Updated dependencies [5c6060b]
-- Updated dependencies [2468404]
-  - @weaverse/hydrogen@5.5.0
-
-## 6.0.1-beta.0
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.5.0-beta.0
-
-## 6.0.0
-
-### Major Changes
-
-- **Refactored component architecture**: Removed forwardRef pattern from most components, simplifying props handling and improving maintainability
-- **Enhanced Judge.me integration**: Restructured API routes for better reviews handling with new endpoint structure
-- **Improved state management**: Replaced React context with Zustand store for product quantity management
-- **Code organization**: Moved RevealUnderline component to proper components directory for better structure
-
-### Features
-
-- **Featured Products enhancements**: Added collection and manual product selection options alongside auto (best selling) mode
-- **Enhanced product badges**: Added support for polymorphic components with `as` prop for flexible rendering
-- **Improved product quantity component**: Added customizable label prop for better flexibility
-
-### Bug Fixes
-
-- Fixed import paths for RevealUnderline component across multiple files
-- Removed unnecessary Biome ignore comments for console.error statements
-- Fixed spacing and formatting issues in various components
-- Updated API route structure for better organization
-
-### Dependencies
-
-- Updated @weaverse/hydrogen to latest version
-- Updated dependencies for better compatibility and performance
-
-## 5.6.0
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.4.1
-
-## 0.0.0-beta-20250825103739
-
-### Patch Changes
-
-- Updated dependencies
-- Updated dependencies [6642fc2]
-  - @weaverse/hydrogen@0.0.0-beta-20250825103739
-
-## 5.5.1-beta.0
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.4.1-beta.0
-
-## 5.1.8
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.3.1
-
-## 5.1.7
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.3.0
-
-## 5.1.6
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.2.5
-
-## 5.1.5
-
-### Patch Changes
-
-- Updated dependencies [43f3da3]
-  - @weaverse/hydrogen@5.2.4
-
-## 5.1.4
-
-### Patch Changes
-
-- @weaverse/hydrogen@5.2.3
-
-## 5.1.3
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.2.2
-
-## 5.1.2
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.2.1
-
-## 5.1.1
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.2.0
-  - @weaverse/schema@0.4.0
-
-## 5.0.0
-
-### Patch Changes
-
-- Updated dependencies
-- Updated dependencies
-- Updated dependencies [7164bdb]
-  - @weaverse/hydrogen@5.0.0
-
-## 5.0.0-next.1
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.0.0-next.1
-
-## 3.5.6-next.0
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@5.0.0-next.0
-
-## 3.5.3
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@4.2.1
-
-## 3.5.3
-
-### Patch Changes
-
-- Updated dependencies
-  - @weaverse/hydrogen@4.2.0
+## 1.0.0
+
+### Initial Independent Release
+
+Maison is now an independent Hydrogen theme, moving away from its original fork ancestry. This release marks a significant milestone with a completely modernized tech stack and refactored architecture.
+
+### Key Features
+
+- **Visual Building with Weaverse**: Full integration with the Weaverse visual page builder for Hydrogen.
+- **Modern Tech Stack**:
+  - **React Router 7**: Leveraging the latest features for routing and data loading.
+  - **Tailwind CSS v4**: Utilizing the newest utility-first CSS framework.
+  - **TypeScript**: Strict type safety throughout the project.
+  - **Biome**: Fast and efficient linting and formatting.
+- **Component Architecture**:
+  - **Ref-as-props Pattern**: Simplified component communication and improved API consistency.
+  - **Radix UI**: Accessible UI primitives for complex components.
+  - **Zustand**: Efficient state management for global UI state.
+- **Shopify Features**:
+  - **Customer Account API**: Support for the new OAuth-based customer accounts.
+  - **Storefront API**: Optimized queries and fragments for high-performance storefronts.
+  - **Combined Listings**: Intelligent product grouping and filtering logic.
+- **Performance**:
+  - **Parallel Data Loading**: Efficient server-side fetching in route loaders.
+  - **View Transitions**: Smooth animations using native browser APIs.
+- **Testing**: Comprehensive E2E coverage with Playwright.
+
+### Refactoring & Improvements
+
+- Migrated all components from `forwardRef` to standard functional components with `ref` props.
+- Enhanced search experience with faceted filtering and sorting.
+- Replaced third-party carousel libraries with native CSS scroll where appropriate for better performance.
+- Streamlined project structure and documentation.
