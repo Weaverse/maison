@@ -1,31 +1,30 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import type React from "react";
 
-interface HeaderContainerProps extends HydrogenComponentProps {
+interface TestimonialsHeaderProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   gap?: number;
 }
 
-const HeaderContainer = (props: HeaderContainerProps) => {
-  const { ref, children, gap, ...rest } = props;
-
+const TestimonialsHeader = ({ ref, children, gap, ...props }: TestimonialsHeaderProps) => {
   return (
     <div
       ref={ref}
-      {...rest}
-      className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      {...props}
       style={{ gap: `${gap}px` }}
+      className="flex flex-col"
     >
       {children}
     </div>
   );
 };
 
-export default HeaderContainer;
+export default TestimonialsHeader;
 
 export const schema = createSchema({
-  type: "related-products--header",
-  title: "Related products header",
-  childTypes: ["heading", "view-all-button"],
+  type: "testimonials--header",
+  title: "Testimonials header",
+  childTypes: ["heading", "subheading", "paragraph"],
   settings: [
     {
       group: "Header layout",
@@ -33,7 +32,7 @@ export const schema = createSchema({
         {
           type: "range",
           name: "gap",
-          label: "Item spacing (mobile)",
+          label: "Header spacing",
           defaultValue: 16,
           configs: {
             min: 0,

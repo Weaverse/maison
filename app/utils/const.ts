@@ -74,6 +74,12 @@ export const COUNTRIES: Localizations = {
     country: "VN",
     currency: "VND",
   },
+  "/vi-vn": {
+    label: "Việt Nam (VND ₫)",
+    language: "VI",
+    country: "VN",
+    currency: "VND",
+  },
 };
 
 export const PAGINATION_SIZE = 16;

@@ -51,6 +51,9 @@ export const PRODUCT_QUERY = `#graphql
         namespace
         value
       }
+      testMetafield: metafield(namespace: "custom", key: "test") {
+        value
+      }
       options {
         ...ProductOption
       }

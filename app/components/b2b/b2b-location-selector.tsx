@@ -2,46 +2,33 @@ import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm } from "@shopify/hydrogen";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
-import { useFetcher } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { useFetcher, useRevalidator } from "react-router";
 import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
 } from "~/graphql/customer-locations-query.account";
 import { useB2BLocation } from "./b2b-location-provider";
 
-const B2B_UPDATE_KEY = "b2b-location-update";
-
 export function B2BLocationSelector() {
   const { company, modalOpen, setModalOpen, companyLocationId } =
     useB2BLocation();
-  const fetcher = useFetcher({ key: B2B_UPDATE_KEY });
-
-  useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data) {
-      setModalOpen(false);
-      window.location.reload();
-    }
-  }, [fetcher.state, fetcher.data, setModalOpen]);
-
   const [selectedLocationId, setSelectedLocationId] =
     useState<string>(companyLocationId);
-  console.log(
-    "🚀 ~ B2BLocationSelector ~ selectedLocationId:",
-    selectedLocationId,
-  );
 
-  let onCheckedChange = (value: string) => {
-    console.log("🚀 ~ onCheckedChange ~ value:", value, selectedLocationId);
-    setSelectedLocationId(value);
-  };
+  const fetcher = useFetcher({ key: "b2b-location-update" });
+  const revalidator = useRevalidator();
+
+  // Track location changes for revalidation
+  const previousLocationIdRef = useRef(companyLocationId);
+  const pendingLocationIdRef = useRef<string | null>(null);
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
-      (location: CustomerCompanyLocationConnection) => {
-        return { ...location.node };
-      },
-    )
+        (location: CustomerCompanyLocationConnection) => {
+          return { ...location.node };
+        },
+      )
     : [];
 
   useEffect(() => {
@@ -52,7 +39,25 @@ export function B2BLocationSelector() {
         setSelectedLocationId(locations[0].id);
       }
     }
-  }, [companyLocationId, locations]);
+  }, [companyLocationId, locations, selectedLocationId]);
+
+  // Revalidate after successful buyer identity update
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data) {
+      setModalOpen(false);
+
+      // Only revalidate if location actually changed
+      if (
+        pendingLocationIdRef.current &&
+        pendingLocationIdRef.current !== previousLocationIdRef.current
+      ) {
+        previousLocationIdRef.current = pendingLocationIdRef.current;
+        pendingLocationIdRef.current = null;
+        // Revalidate all loaders to refetch with new buyer context
+        revalidator.revalidate();
+      }
+    }
+  }, [fetcher.state, fetcher.data, setModalOpen, revalidator]);
 
   const open = Boolean(company && modalOpen);
 
@@ -110,7 +115,7 @@ export function B2BLocationSelector() {
                         name="location"
                         value={location.id}
                         checked={selectedLocationId === location.id}
-                        onChange={() => onCheckedChange(location.id)}
+                        onChange={() => setSelectedLocationId(location.id)}
                         className="peer h-5 w-5 appearance-none rounded-full border border-[#8B8071] bg-transparent checked:border-[#8B8071]"
                       />
                       <div className="pointer-events-none absolute h-2.5 w-2.5 rounded-full bg-[#8B8071] opacity-0 transition-opacity peer-checked:opacity-100" />
@@ -127,7 +132,7 @@ export function B2BLocationSelector() {
                 key={selectedLocationId}
                 route="/cart"
                 action={CartForm.ACTIONS.BuyerIdentityUpdate}
-                fetcherKey={B2B_UPDATE_KEY}
+                fetcherKey="b2b-location-update"
                 inputs={{
                   buyerIdentity: { companyLocationId: selectedLocationId },
                 }}
@@ -138,6 +143,8 @@ export function B2BLocationSelector() {
                     disabled={!selectedLocationId || fetcher.state !== "idle"}
                     className="w-full rounded-sm bg-[#8B8071] py-[18px] text-sm leading-none font-medium text-white transition-colors hover:bg-[#756a5b] disabled:opacity-50"
                     onClick={(event) => {
+                      // Store pending location for revalidation trigger
+                      pendingLocationIdRef.current = selectedLocationId;
                       fetcher.submit(event.currentTarget.form, {
                         method: "POST",
                       });

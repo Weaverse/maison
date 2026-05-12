@@ -63,8 +63,8 @@ export async function loader(args: LoaderFunctionArgs) {
   let buyerVariables =
     buyer?.companyLocationId && buyer?.customerAccessToken
       ? {
-          buyer,
-        }
+        buyer,
+      }
       : {};
 
   const selectedOptions = getSelectedProductOptions(request);

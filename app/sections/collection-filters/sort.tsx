@@ -39,11 +39,10 @@ export function Sort() {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 py-3 focus-visible:outline-hidden">
-        <span className="hidden lg:inline">
+      <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 py-3 text-sm focus-visible:outline-hidden">
+        <span>
           Sort by: <span className="font-semibold">{currentSort.label}</span>
         </span>
-        <span className="lg:hidden">Sort</span>
         <CaretDownIcon />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

@@ -12,6 +12,7 @@ import { useAnimation } from "~/hooks/use-animation";
 interface FeaturedCollectionsData {
   collections: WeaverseCollection[];
   collectionsToShow: number;
+  displayType: "grid" | "carousel";
 }
 
 interface FeaturedCollectionsProps
@@ -20,12 +21,30 @@ interface FeaturedCollectionsProps
   ref: React.Ref<HTMLElement>;
 }
 
+import { createContext } from "react";
+
+export const FeaturedCollectionsContext = createContext<{
+  displayType?: "grid" | "carousel";
+  collectionsToShow?: number;
+} | null>(null);
+
 export default function FeaturedCollections(props: FeaturedCollectionsProps) {
-  const { ref, children, ...rest } = props;
+  const {
+    ref,
+    children,
+    displayType,
+    collectionsToShow,
+    collections,
+    ...rest
+  } = props;
   const [scope] = useAnimation(ref);
   return (
     <Section ref={scope} {...rest}>
-      {children}
+      <FeaturedCollectionsContext.Provider
+        value={{ displayType, collectionsToShow }}
+      >
+        {children}
+      </FeaturedCollectionsContext.Provider>
     </Section>
   );
 }
@@ -85,7 +104,7 @@ export const schema = createSchema({
   childTypes: ["featured-collections--header", "featured-collections--items"],
   settings: [
     {
-      group: "Featured collections",
+      group: "Collections",
       inputs: [
         {
           type: "collection-list",
@@ -93,18 +112,32 @@ export const schema = createSchema({
           label: "Select collections",
           shouldRevalidate: true,
         },
-        {
-          type: "range",
-          name: "collectionsToShow",
-          label: "Collections to show",
-          defaultValue: 10,
-          configs: { min: 1, max: 12, step: 1 },
-        },
       ],
     },
     {
       group: "Layout",
-      inputs: [...layoutInputs.filter((i) => i.name !== "borderRadius")],
+      inputs: [
+        {
+          type: "select",
+          name: "displayType",
+          label: "Display type",
+          defaultValue: "grid",
+          configs: {
+            options: [
+              { value: "grid", label: "List" },
+              { value: "carousel", label: "Slider" },
+            ],
+          },
+        },
+        {
+          type: "range",
+          name: "collectionsToShow",
+          label: "Number of items",
+          defaultValue: 10,
+          configs: { min: 1, max: 12, step: 1 },
+        },
+        ...layoutInputs.filter((i) => i.name !== "borderRadius"),
+      ],
     },
     {
       group: "Background",
@@ -120,6 +153,8 @@ export const schema = createSchema({
   ],
   presets: {
     gap: 60,
+    displayType: "grid",
+    collectionsToShow: 10,
     children: [
       {
         type: "featured-collections--header",

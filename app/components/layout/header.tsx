@@ -42,7 +42,7 @@ function useIsHomeCheck() {
   const { pathname } = useLocation();
   const rootData = useRouteLoaderData<RootLoader>("root");
   const selectedLocale = rootData?.selectedLocale ?? DEFAULT_LOCALE;
-  return pathname.replace(selectedLocale.pathPrefix, "") === "/";
+  return pathname.replace(selectedLocale.pathPrefix || "", "") === "/";
 }
 
 export function Header() {
@@ -67,23 +67,23 @@ export function Header() {
         scrolled ? "shadow-header" : "shadow-none",
         enableTransparent
           ? [
-              "group/header fixed w-screen",
-              "top-(--topbar-height,var(--initial-topbar-height))",
-            ]
+            "group/header fixed w-screen",
+            "top-(--topbar-height,var(--initial-topbar-height))",
+          ]
           : "sticky top-0",
         isTransparent
           ? [
-              "border-transparent bg-transparent",
-              "text-(--color-transparent-header-text)",
-              "[&_.cart-count]:text-(--color-header-text)",
-              "[&_.main-logo]:opacity-0 hover:[&_.main-logo]:opacity-100",
-              "[&_.transparent-logo]:opacity-100 hover:[&_.transparent-logo]:opacity-0",
-            ]
+            "border-transparent bg-transparent",
+            "text-(--color-transparent-header-text)",
+            "[&_.cart-count]:text-(--color-header-text)",
+            "[&_.main-logo]:opacity-0 hover:[&_.main-logo]:opacity-100",
+            "[&_.transparent-logo]:opacity-100 hover:[&_.transparent-logo]:opacity-0",
+          ]
           : [
-              "[&_.cart-count]:text-(--color-header-text)",
-              "[&_.main-logo]:opacity-100",
-              "[&_.transparent-logo]:opacity-0",
-            ],
+            "[&_.cart-count]:text-(--color-header-text)",
+            "[&_.main-logo]:opacity-100",
+            "[&_.transparent-logo]:opacity-0",
+          ],
       )}
     >
       <div

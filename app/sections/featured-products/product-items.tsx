@@ -54,27 +54,37 @@ interface ProductItemsData {
 
 interface ProductItemsProps
   extends VariantProps<typeof variants>,
-  VariantProps<typeof arrowButtonVariants>,
-  ProductItemsData {
+    VariantProps<typeof arrowButtonVariants>,
+    ProductItemsData {
   ref?: React.Ref<HTMLDivElement>;
 }
+
+import { useContext } from "react";
+import { FeaturedProductsContext } from "./index";
 
 function ProductItems(props: ProductItemsProps) {
   const {
     gap,
     ref,
-    layout,
     mobileCarouselItems,
     desktopCarouselItems,
     mobileGridItems,
     desktopGridItems,
-    productsToShow,
     arrowsBgColor,
     arrowsShape,
     ...rest
   } = props;
 
   const parent = useParentInstance();
+  const context = useContext(FeaturedProductsContext);
+  const layout =
+    context?.displayType ||
+    parent.data?.data?.displayType ||
+    (props as any).layout;
+  const itemsToShow =
+    context?.productsToShow ||
+    parent.data?.data?.productsToShow ||
+    (props as any).productsToShow;
   const products = parent.data?.loaderData?.products;
   const swimlaneRef = useState<HTMLDivElement | null>(null);
 
@@ -84,7 +94,7 @@ function ProductItems(props: ProductItemsProps) {
 
   // grid layout
   if (layout === "grid") {
-    const itemsToShow = Number(productsToShow ?? 8);
+    const limit = Number(itemsToShow ?? 8);
     return (
       <div ref={ref} {...rest}>
         <div
@@ -92,7 +102,7 @@ function ProductItems(props: ProductItemsProps) {
           style={{ gap: `40px ${gap}px` }}
         >
           {products.nodes
-            .slice(0, itemsToShow)
+            .slice(0, limit)
             .map((product: ProductCardFragment) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -146,11 +156,13 @@ function ProductItems(props: ProductItemsProps) {
           } as React.CSSProperties
         }
       >
-        {products.nodes.map((product: ProductCardFragment) => (
-          <div key={product.id} className="snap-start">
-            <ProductCard product={product} />
-          </div>
-        ))}
+        {products.nodes
+          .slice(0, Number(itemsToShow ?? 8))
+          .map((product: ProductCardFragment) => (
+            <div key={product.id} className="snap-start">
+              <ProductCard product={product} />
+            </div>
+          ))}
       </Swimlane>
 
       {/* navi arrows */}
@@ -189,61 +201,18 @@ export const schema = createSchema({
       group: "Layout",
       inputs: [
         {
-          type: "select",
-          name: "layout",
-          label: "Display mode",
-          defaultValue: "carousel",
-          configs: {
-            options: [
-              { value: "grid", label: "Grid" },
-              { value: "carousel", label: "Carousel" },
-            ],
-          },
-        },
-        {
           type: "range",
           name: "mobileCarouselItems",
-          label: "Carousel items (mobile)",
+          label: "Items per row (mobile)",
           defaultValue: 2,
           configs: { min: 1, max: 4, step: 1 },
-          condition: (data: ProductItemsData) => data.layout === "carousel",
         },
         {
           type: "range",
           name: "desktopCarouselItems",
-          label: "Carousel items (desktop)",
+          label: "Items per row (desktop)",
           defaultValue: 4,
           configs: { min: 1, max: 6, step: 1 },
-          condition: (data: ProductItemsData) => data.layout === "carousel",
-        },
-        {
-          type: "toggle-group",
-          name: "mobileGridItems",
-          label: "Grid items (mobile)",
-          defaultValue: "2",
-          configs: {
-            options: [
-              { value: "1", label: "1" },
-              { value: "2", label: "2" },
-              { value: "3", label: "3" },
-            ],
-          },
-          condition: (data: ProductItemsData) => data.layout === "grid",
-        },
-        {
-          type: "toggle-group",
-          name: "desktopGridItems",
-          label: "Grid items (desktop)",
-          defaultValue: "4",
-          configs: {
-            options: [
-              { value: "3", label: "3" },
-              { value: "4", label: "4" },
-              { value: "5", label: "5" },
-              { value: "6", label: "6" },
-            ],
-          },
-          condition: (data: ProductItemsData) => data.layout === "grid",
         },
         {
           type: "range",
@@ -256,18 +225,6 @@ export const schema = createSchema({
             step: 1,
             unit: "px",
           },
-        },
-        {
-          type: "range",
-          name: "productsToShow",
-          label: "Products to show",
-          defaultValue: 4,
-          configs: {
-            min: 1,
-            max: 12,
-            step: 1,
-          },
-          condition: (data: ProductItemsData) => data.layout === "grid",
         },
       ],
     },
@@ -286,14 +243,12 @@ export const schema = createSchema({
               { value: "circle", label: "Circle", icon: "circle" },
             ],
           },
-          condition: (data: ProductItemsData) => data.layout === "carousel",
         },
         {
           type: "color",
           name: "arrowsBgColor",
           label: "Arrows background color",
           defaultValue: "#EDEAE6",
-          condition: (data: ProductItemsData) => data.layout === "carousel",
         },
       ],
     },

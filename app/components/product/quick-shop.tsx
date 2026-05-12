@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Await, useFetcher, useRouteLoaderData } from "react-router";
 import type { ProductQuery } from "storefront-api.generated";
+import { useB2BLocation } from "~/components/b2b/b2b-location-provider";
 import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
@@ -60,8 +61,8 @@ export function QuickShop({
             <h3 className="text-3xl font-normal leading-tight">
               {product.title}
             </h3>
-            <div className="flex items-center gap-2 text-body-subtle">
-              <span className="text-sm">From</span>
+            <div className="flex items-center gap-1 text-body-subtle">
+              {minPrice !== maxPrice && <span className="text-sm">From</span>}
               <span>
                 {minPrice === maxPrice
                   ? formatPrice(minPrice)
@@ -69,7 +70,10 @@ export function QuickShop({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: "var(--color-new-badge)" }}
+              />
               <span className="text-xs text-body-subtle">In Stock</span>
             </div>
           </div>
@@ -162,11 +166,15 @@ export function QuickShopTrigger({
   placement?: "image" | "bottom";
 }) {
   const [open, setOpen] = useState(false);
-  const { load, data, state } = useFetcher<{
+  const { companyLocationId } = useB2BLocation();
+  const fetcher = useFetcher<{
     product: ProductQuery["product"];
   }>();
 
+  const { load, data, state } = fetcher;
+
   const [isFetching, setIsFetching] = useState(false);
+  const [lastLocationId, setLastLocationId] = useState(companyLocationId);
   const isLoading = state === "loading" || isFetching;
 
   useEffect(() => {
@@ -176,11 +184,21 @@ export function QuickShopTrigger({
     }
   }, [data, isFetching]);
 
+  // Refetch if location changed while we have data
+  useEffect(() => {
+    if (data?.product && companyLocationId !== lastLocationId) {
+      setLastLocationId(companyLocationId);
+      load(`/api/product/${productHandle}`);
+    }
+  }, [companyLocationId, lastLocationId, data, productHandle, load]);
+
   const handleOpen = () => {
-    if (data?.product) {
+    const isLocationChanged = companyLocationId !== lastLocationId;
+    if (data?.product && !isLocationChanged) {
       setOpen(true);
     } else {
       setIsFetching(true);
+      setLastLocationId(companyLocationId);
       load(`/api/product/${productHandle}`);
     }
   };
@@ -193,7 +211,7 @@ export function QuickShopTrigger({
         onClick={handleOpen}
         loading={isLoading}
         className={clsx(
-          "group/quick-shop h-10.5 p-3 leading-4",
+          "group/quick-shop h-10.5 p-3 text-sm tracking-[0.02em] leading-none",
           placement === "image" && [
             "absolute bottom-4",
             buttonType === "icon"
@@ -251,7 +269,7 @@ export function QuickShopTrigger({
             style={{ maxHeight: "90vh" }}
             className={clsx(
               "relative mx-auto h-auto w-full overflow-y-auto",
-              "animate-slide-up bg-white shadow-sm rounded-[4px]",
+              "animate-slide-up bg-white",
               "max-w-7xl",
             )}
           >

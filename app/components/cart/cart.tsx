@@ -9,7 +9,7 @@ import {
 } from "@shopify/hydrogen";
 import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import useScroll from "react-use/esm/useScroll";
 import type { CartApiQueryFragment } from "storefront-api.generated";
@@ -151,13 +151,13 @@ function CartCheckoutActions({
         <Link
           to="/cart"
           onClick={() => toggleCartDrawer(false)}
-          className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm font-normal"
+          className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm tracking-[0.02em] leading-none font-normal"
         >
           View Cart
         </Link>
       )}
       <a href={checkoutUrl} target="_self" className="w-full">
-        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 rounded text-sm font-normal">
+        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 rounded text-sm tracking-[0.02em] leading-none font-normal">
           Checkout
         </Button>
       </a>
@@ -323,12 +323,49 @@ function ItemRemoveButton({
 function CartLineQuantityAdjust({ line }: { line: CartLine }) {
   const optimisticId = line?.id;
   const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
+  const optimisticQuantity = optimisticData?.quantity || line?.quantity || 0;
+  const [inputValue, setInputValue] = useState(optimisticQuantity.toString());
+  const fetcher = useFetcher({ key: line?.id });
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setInputValue(optimisticQuantity.toString());
+  }, [optimisticQuantity]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const submitQuantity = useCallback(
+    (quantity: number) => {
+      if (!line?.id) {
+        return;
+      }
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        const formData = new FormData();
+        formData.append(
+          CartForm.INPUT_NAME,
+          JSON.stringify({
+            action: CartForm.ACTIONS.LinesUpdate,
+            inputs: { lines: [{ id: line.id, quantity }] },
+          }),
+        );
+        fetcher.submit(formData, { method: "POST", action: "/cart" });
+      }, 300);
+    },
+    [line?.id, fetcher.submit],
+  );
 
   if (!line || typeof line?.quantity === "undefined") {
     return null;
   }
-
-  const optimisticQuantity = optimisticData?.quantity || line.quantity;
 
   const { id: lineId, isOptimistic, merchandise } = line;
 
@@ -347,58 +384,69 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
   // Check if we've reached the maximum
   const isAtMaximum = maximum !== null && nextQuantity > maximum;
 
+  const handleBlur = () => {
+    const value = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(value) || value < minimum) {
+      setInputValue(optimisticQuantity.toString());
+    } else if (value !== optimisticQuantity) {
+      submitQuantity(value);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  };
+
   return (
     <>
       <label htmlFor={`quantity-${lineId}`} className="sr-only">
         Quantity, {optimisticQuantity}
       </label>
       <div className="flex items-center border-2 border-(--color-line) divide-x divide-(--color-line) rounded-(--btn-border-radius) text-sm">
-        <UpdateCartButton lines={[{ id: lineId, quantity: prevQuantity }]}>
-          <button
-            type="submit"
-            name="decrease-quantity"
-            aria-label={`Decrease quantity by ${increment}`}
-            className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-            value={prevQuantity}
-            disabled={optimisticQuantity <= minimum || isOptimistic}
-            title={
-              optimisticQuantity <= minimum
-                ? `Minimum quantity is ${minimum}`
-                : ""
-            }
-          >
-            <span>&#8722;</span>
-            <OptimisticInput
-              id={optimisticId}
-              data={{ quantity: prevQuantity }}
-            />
-          </button>
-        </UpdateCartButton>
-
-        <div
-          className="min-w-[4rem] px-3 text-center h-9 flex items-center justify-center"
-          data-test="item-quantity"
+        <button
+          type="button"
+          name="decrease-quantity"
+          aria-label={`Decrease quantity by ${increment}`}
+          className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          disabled={optimisticQuantity <= minimum || isOptimistic}
+          title={
+            optimisticQuantity <= minimum
+              ? `Minimum quantity is ${minimum}`
+              : ""
+          }
+          onClick={() => submitQuantity(prevQuantity)}
         >
-          {optimisticQuantity}
-        </div>
+          <span>&#8722;</span>
+        </button>
 
-        <UpdateCartButton lines={[{ id: lineId, quantity: nextQuantity }]}>
-          <button
-            type="submit"
-            className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-            name="increase-quantity"
-            value={nextQuantity}
-            aria-label={`Increase quantity by ${increment}`}
-            disabled={isOptimistic || isAtMaximum}
-            title={isAtMaximum ? `Maximum quantity is ${maximum}` : ""}
-          >
-            <span>&#43;</span>
-            <OptimisticInput
-              id={optimisticId}
-              data={{ quantity: nextQuantity }}
-            />
-          </button>
-        </UpdateCartButton>
+        <input
+          type="number"
+          id={`quantity-${lineId}`}
+          name="quantity"
+          value={inputValue}
+          min={minimum}
+          max={maximum || undefined}
+          step={increment}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          onChange={(e) => setInputValue(e.currentTarget.value)}
+          className="w-12 px-2 text-center h-9 focus:outline-none"
+          data-test="item-quantity"
+        />
+
+        <button
+          type="button"
+          className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          name="increase-quantity"
+          aria-label={`Increase quantity by ${increment}`}
+          disabled={isOptimistic || isAtMaximum}
+          title={isAtMaximum ? `Maximum quantity is ${maximum}` : ""}
+          onClick={() => submitQuantity(nextQuantity)}
+        >
+          <span>&#43;</span>
+        </button>
       </div>
     </>
   );

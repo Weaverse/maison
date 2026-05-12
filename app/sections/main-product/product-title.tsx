@@ -18,6 +18,11 @@ export default function ProductTitle(props: ProductTitleProps) {
   return (
     <div ref={ref} {...rest}>
       <Tag className="h3 tracking-tight!">{product.title}</Tag>
+      {product?.testMetafield?.value && (
+        <div className="mt-2 text-sm text-body-subtle px-2 py-1 bg-gray-50 rounded border border-dashed border-gray-200 inline-block font-medium italic">
+          {product.testMetafield.value}
+        </div>
+      )}
     </div>
   );
 }

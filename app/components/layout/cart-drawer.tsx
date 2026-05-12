@@ -43,12 +43,14 @@ export function CartDrawer() {
                 <div
                   className={clsx(
                     "cart-count",
-                    "-right-px absolute top-0.5",
+                    "-right-1.5 absolute top-0.5",
                     "flex items-center justify-center",
                     "text-xs leading-none font-medium",
                   )}
                 >
-                  <span className="-mr-px">{cart?.totalQuantity}</span>
+                  <span>
+                    {cart.totalQuantity > 99 ? "99+" : cart.totalQuantity}
+                  </span>
                 </div>
               )}
             </Dialog.Trigger>

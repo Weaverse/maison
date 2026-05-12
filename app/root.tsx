@@ -100,12 +100,13 @@ export function ErrorBoundary({ error }: { error: Error }) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>("root");
-  const locale = data?.selectedLocale ?? DEFAULT_LOCALE;
+  const locale = data?.locale ?? DEFAULT_LOCALE.language.toLowerCase();
   const { topbarHeight, topbarText } = useThemeSettings();
   const shouldShowNewsletterPopup = useShouldRenderNewsletterPopup();
 
+
   return (
-    <html lang={locale.language}>
+    <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -133,7 +134,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <TooltipProvider disableHoverableContent>
                 <div
                   className="flex min-h-screen flex-col"
-                  key={`${locale.language}-${locale.country}`}
+                  key={locale}
                 >
                   <div className="">
                     <a href="#mainContent" className="sr-only">

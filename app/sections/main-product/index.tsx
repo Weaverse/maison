@@ -49,16 +49,16 @@ export default function ProductInformation(
               media={
                 combinedListing && product?.featuredImage
                   ? [
-                      {
-                        __typename: "MediaImage",
-                        id: product.featuredImage.id,
-                        mediaContentType: "IMAGE",
-                        alt: product.featuredImage.altText,
-                        previewImage: product.featuredImage,
-                        image: product.featuredImage,
-                      },
-                      ...(product?.media?.nodes || []),
-                    ]
+                    {
+                      __typename: "MediaImage",
+                      id: product.featuredImage.id,
+                      mediaContentType: "IMAGE",
+                      alt: product.featuredImage.altText,
+                      previewImage: product.featuredImage,
+                      image: product.featuredImage,
+                    },
+                    ...(product?.media?.nodes || []),
+                  ]
                   : product?.media?.nodes || []
               }
               selectedVariant={product?.selectedOrFirstAvailableVariant}

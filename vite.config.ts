@@ -1,9 +1,9 @@
-import { reactRouter } from "@react-router/dev/vite";
-import { hydrogen } from "@shopify/hydrogen/vite";
-import { oxygen } from "@shopify/mini-oxygen/vite";
-import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+import {reactRouter} from '@react-router/dev/vite';
+import {hydrogen} from '@shopify/hydrogen/vite';
+import {oxygen} from '@shopify/mini-oxygen/vite';
+import tailwindcss from '@tailwindcss/vite';
+import {defineConfig} from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [
@@ -21,9 +21,9 @@ export default defineConfig({
   server: {
     warmup: {
       clientFiles: [
-        "./app/routes/**/*",
-        "./app/sections/**/*",
-        "./app/components/**/*",
+        './app/routes/**/*',
+        './app/sections/**/*',
+        './app/components/**/*',
       ],
     },
     allowedHosts: true,
@@ -31,23 +31,25 @@ export default defineConfig({
   ssr: {
     optimizeDeps: {
       include: [
-        "deepmerge",
-        "@radix-ui/react-primitive",
-        "jsonp",
-        "classnames",
-        "typographic-trademark",
-        "typographic-single-spaces",
-        "typographic-registered-trademark",
-        "typographic-math-symbols",
-        "typographic-en-dashes",
-        "typographic-em-dashes",
-        "typographic-ellipses",
-        "typographic-currency",
-        "typographic-copyright",
-        "typographic-apostrophes-for-possessive-plurals",
-        "typographic-quotes",
-        "typographic-apostrophes",
-        "textr",
+        'use-sync-external-store/shim',
+        'void-elements',
+        'deepmerge',
+        '@radix-ui/react-primitive',
+        'jsonp',
+        'classnames',
+        'typographic-trademark',
+        'typographic-single-spaces',
+        'typographic-registered-trademark',
+        'typographic-math-symbols',
+        'typographic-en-dashes',
+        'typographic-em-dashes',
+        'typographic-ellipses',
+        'typographic-currency',
+        'typographic-copyright',
+        'typographic-apostrophes-for-possessive-plurals',
+        'typographic-quotes',
+        'typographic-apostrophes',
+        'textr',
       ],
     },
   },

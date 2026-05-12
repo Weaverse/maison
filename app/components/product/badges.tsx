@@ -117,7 +117,8 @@ export function SaleBadge({
   compareAtPrice: MoneyV2;
   className?: string;
 }) {
-  const { saleBadgeText = "Sale", saleBadgeColor } = useThemeSettings();
+  const { saleBadgeText = "[percentage]% Off", saleBadgeColor } =
+    useThemeSettings();
   const { amount, percentage } = calculateDiscount(price, compareAtPrice);
   const discountAmount = useMoney({ amount, currencyCode: price.currencyCode });
   const text = saleBadgeText

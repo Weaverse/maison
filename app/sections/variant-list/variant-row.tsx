@@ -7,7 +7,8 @@ import {
   useOptimisticCart,
   useOptimisticData,
 } from "@shopify/hydrogen";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFetcher } from "react-router";
 import type {
   CartApiQueryFragment,
   ProductVariantFragment,
@@ -105,8 +106,14 @@ export function VariantRow({
                 <span>Low in Stock</span>
               </div>
             ) : (
-              <div className="text-sm text-green-600 flex gap-1 items-center">
-                <span className="bg-green-600 size-2 rounded-full" />
+              <div
+                className="text-sm flex gap-1 items-center"
+                style={{ color: "var(--color-new-badge)" }}
+              >
+                <span
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: "var(--color-new-badge)" }}
+                />
                 <span>In Stock</span>
               </div>
             )}
@@ -185,8 +192,14 @@ export function VariantRow({
                   <span>Low in Stock</span>
                 </div>
               ) : (
-                <div className="text-sm text-green-600 flex gap-1 items-center">
-                  <span className="bg-green-600 size-2 rounded-full" />
+                <div
+                  className="text-sm flex gap-1 items-center"
+                  style={{ color: "var(--color-new-badge)" }}
+                >
+                  <span
+                    className="size-2 rounded-full"
+                    style={{ backgroundColor: "var(--color-new-badge)" }}
+                  />
                   <span>In Stock</span>
                 </div>
               )}
@@ -251,8 +264,14 @@ export function VariantRow({
                 <span>Low in Stock</span>
               </div>
             ) : (
-              <div className="text-xs text-green-600 flex gap-1 items-center">
-                <span className="bg-green-600 size-2 rounded-full" />
+              <div
+                className="text-xs flex gap-1 items-center"
+                style={{ color: "var(--color-new-badge)" }}
+              >
+                <span
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: "var(--color-new-badge)" }}
+                />
                 <span>In Stock</span>
               </div>
             )}
@@ -305,8 +324,12 @@ function QuantityUpdateButtons({
   };
 
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
+  const fetcher = useFetcher({ key: `variant-list-manual-${variant.id}` });
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const increment = variant.quantityRule.increment || 1;
+  const minimum = variant.quantityRule.minimum || 0;
+  const maximum = variant.quantityRule.maximum || null;
 
   const activeLine = cart?.lines?.nodes?.find((line) => {
     const isVariantMatch = line.merchandise.id === variant.id;
@@ -318,77 +341,122 @@ function QuantityUpdateButtons({
   const optimisticId = activeLine?.id;
   const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
 
-  const currentQuantity = optimisticData?.quantity || activeLine?.quantity || 0;
+  const currentQuantity = optimisticData?.quantity ?? activeLine?.quantity ?? 0;
+  const [inputValue, setInputValue] = useState(currentQuantity.toString());
+
+  useEffect(() => {
+    setInputValue(currentQuantity.toString());
+  }, [currentQuantity]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   const prevQuantity = Number(Math.max(0, currentQuantity - increment));
   const nextQuantity = Number(currentQuantity + increment);
   const isOutOfStock = !variant.availableForSale;
 
   const showTrashButton = Boolean(activeLine);
-
   const shouldUpdateActiveLine = Boolean(activeLine);
+
+  const submitQuantity = useCallback(
+    (quantity: number) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        const formData = new FormData();
+        if (activeLine) {
+          formData.append(
+            CartForm.INPUT_NAME,
+            JSON.stringify({
+              action: CartForm.ACTIONS.LinesUpdate,
+              inputs: { lines: [{ id: activeLine.id, quantity }] },
+            }),
+          );
+        } else if (quantity > 0) {
+          formData.append(
+            CartForm.INPUT_NAME,
+            JSON.stringify({
+              action: CartForm.ACTIONS.LinesAdd,
+              inputs: {
+                lines: [
+                  {
+                    merchandiseId: variant.id,
+                    quantity,
+                    sellingPlanId: selectedPlanId || undefined,
+                  },
+                ],
+              },
+            }),
+          );
+        }
+        fetcher.submit(formData, { method: "POST", action: "/cart" });
+      }, 300);
+    },
+    [activeLine, variant.id, selectedPlanId, fetcher.submit],
+  );
+
+  const handleBlur = () => {
+    const value = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(value) || value < 0) {
+      setInputValue(currentQuantity.toString());
+      return;
+    }
+    if (value === currentQuantity) {
+      return;
+    }
+    submitQuantity(value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  };
 
   return (
     <div className="flex items-center gap-4">
       <VolumePricingInfo variant={variant} />
-      <div className="flex items-center border-2 border-(--color-line) divide-x divide-(--color-line) rounded-(--btn-border-radius)">
-        <CartForm
-          route="/cart"
-          fetcherKey="variant-list"
-          action={CartForm.ACTIONS.LinesUpdate}
-          inputs={{
-            lines: [{ id: activeLine?.id, quantity: prevQuantity }],
-          }}
+      <div className="flex items-center border-2 border-(--color-line) rounded-(--btn-border-radius)">
+        <button
+          type="button"
+          name="decrease-quantity"
+          aria-label="Decrease quantity"
+          className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          disabled={currentQuantity <= 0 || !activeLine}
+          onClick={() => submitQuantity(prevQuantity)}
         >
-          <button
-            type="submit"
-            name="decrease-quantity"
-            aria-label="Decrease quantity"
-            className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-            value={prevQuantity}
-            disabled={
-              currentQuantity <= 0 || activeLine?.isOptimistic || !activeLine
-            }
-          >
-            <Minus />
-            <OptimisticInput
-              id={activeLine?.id}
-              data={{ quantity: prevQuantity }}
-            />
-          </button>
-        </CartForm>
+          <Minus />
+        </button>
 
-        <div
-          className="px-2 w-[68px] h-11 flex items-center justify-center text-sm"
+        <input
+          type="number"
+          className="px-2 w-[68px] h-11 flex items-center justify-center text-sm text-center bg-transparent border-y-0 border-x-2 border-(--color-line) outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           data-test="item-quantity"
-        >
-          {currentQuantity}
-        </div>
+          value={inputValue}
+          min={minimum}
+          max={maximum ?? undefined}
+          disabled={isOutOfStock}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+        />
 
         {shouldUpdateActiveLine ? (
-          <CartForm
-            route="/cart"
-            fetcherKey="variant-list"
-            action={CartForm.ACTIONS.LinesUpdate}
-            inputs={{
-              lines: [{ id: activeLine?.id, quantity: nextQuantity }],
-            }}
+          <button
+            type="button"
+            className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+            name="increase-quantity"
+            aria-label="Increase quantity"
+            onClick={() => submitQuantity(nextQuantity)}
           >
-            <button
-              type="submit"
-              className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-              name="increase-quantity"
-              value={nextQuantity}
-              aria-label="Increase quantity"
-              disabled={activeLine?.isOptimistic}
-            >
-              <Plus />
-              <OptimisticInput
-                id={activeLine?.id}
-                data={{ quantity: nextQuantity }}
-              />
-            </button>
-          </CartForm>
+            <Plus />
+          </button>
         ) : (
           <AddToCartWithSellingPlan
             variant={variant}
@@ -401,7 +469,7 @@ function QuantityUpdateButtons({
       {showTrashButton ? (
         <CartForm
           route="/cart"
-          fetcherKey="variant-list"
+          fetcherKey={`variant-list-remove-${variant.id}`}
           action={CartForm.ACTIONS.LinesRemove}
           inputs={{ lineIds: [activeLine?.id] }}
         >
@@ -438,7 +506,7 @@ function AddToCartWithSellingPlan({
   return (
     <CartForm
       route="/cart"
-      fetcherKey="variant-list"
+      fetcherKey={`variant-list-add-${variant.id}`}
       action={CartForm.ACTIONS.LinesAdd}
       inputs={{
         lines: [
@@ -482,7 +550,7 @@ function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
         <InfoIcon className="cursor-pointer hover:scale-125 duration-300 text-body-subtle" />
       </TooltipTrigger>
       <TooltipContent
-        className="bg-white text-body shadow-lg rounded-lg p-0"
+        className="bg-white text-body p-0"
         side="left"
         sideOffset={5}
         arrow={false}

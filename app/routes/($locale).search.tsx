@@ -90,8 +90,8 @@ export async function loader({
     const buyerVariables =
       buyer?.companyLocationId && buyer?.customerAccessToken
         ? {
-          buyer,
-        }
+            buyer,
+          }
         : {};
 
     const data = await storefront.query<SearchQuery>(SEARCH_QUERY, {
@@ -293,10 +293,7 @@ export default function Search() {
 function SearchFilterToolbar() {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2">
-        <span>Sort by:</span>
-        <Sort />
-      </div>
+      <Sort />
       <SearchFiltersDrawer />
     </div>
   );
@@ -316,16 +313,9 @@ function SearchFiltersDrawer() {
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in"
-          style={{ "--fade-in-duration": "100ms" } as React.CSSProperties}
-        />
+        <Dialog.Overlay className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <Dialog.Content
-          className={clsx([
-            "fixed inset-y-0 z-10 w-full bg-(--color-background) md:w-[360px]",
-            "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
-            "flex flex-col",
-          ])}
+          className="fixed inset-y-0 right-0 z-10 flex w-full flex-col bg-(--color-background) data-[state=open]:animate-enter-from-right data-[state=closed]:animate-exit-to-right md:w-[360px]"
           aria-describedby={undefined}
         >
           <div className="flex items-center justify-between gap-2 px-4 py-3">
@@ -489,7 +479,7 @@ function NoResults({
             return (
               <div className="space-y-6 pt-20">
                 <h5>Trending Products</h5>
-                <Swimlane>
+                <Swimlane className="gap-4">
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard
                       key={product.id}

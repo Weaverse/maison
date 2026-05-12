@@ -21,18 +21,24 @@ export default Testimonials;
 export const schema = createSchema({
   type: "testimonials",
   title: "Testimonials",
-  childTypes: ["subheading", "heading", "paragraph", "testimonials-items"],
+  childTypes: ["testimonials--header", "testimonials-items"],
   settings: sectionSettings,
   presets: {
     children: [
       {
-        type: "heading",
-        content: "Testimonials",
-      },
-      {
-        type: "paragraph",
-        content:
-          "We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.",
+        type: "testimonials--header",
+        gap: 16,
+        children: [
+          {
+            type: "heading",
+            content: "Testimonials",
+          },
+          {
+            type: "paragraph",
+            content:
+              "We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.",
+          },
+        ],
       },
       {
         type: "testimonials-items",

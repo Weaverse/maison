@@ -602,7 +602,7 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "textarea",
           label: "Sale badge text",
           name: "saleBadgeText",
-          defaultValue: "-[percentage]% Off",
+          defaultValue: "[percentage]% Off",
           placeholder: "-[percentage]% Off, Saved [amount], or Sale",
           helpText: [
             "<p class='mb-1'>- Use <strong>[percentage]</strong> to display the discount percentage.</p>",
@@ -977,10 +977,10 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "textarea",
           name: "popularSearchKeywords",
           label: "Popular search keywords",
-          defaultValue: "sunglasses, hats, jackets, shoes",
-          placeholder: "sunglasses, hats, jackets, shoes",
+          defaultValue: "Blankets, Covers, Pillowcases, Shams, Sheets",
+          placeholder: "Blankets, Covers, Pillowcases, Shams, Sheets",
           helpText:
-            "Enter popular search keywords separated by commas. E.g. <strong>sunglasses, hats, jackets, shoes</strong>",
+            "Enter popular search keywords separated by commas. E.g. <strong>Blankets, Covers, Pillowcases, Shams, Sheets</strong>",
         },
       ],
     },
@@ -1209,14 +1209,14 @@ export const themeSchema: HydrogenThemeSchema = {
           label: "Payment icons",
         },
         {
-          type: "select",
+          type: "toggle-group",
           name: "paymentIconsMode",
           label: "Display mode",
           defaultValue: "manual",
           configs: {
             options: [
-              { value: "manual", label: "Manual selection" },
-              { value: "none", label: "Hide payment icons" },
+              { value: "manual", label: "Manual" },
+              { value: "none", label: "Hidden" },
             ],
           },
           helpText: "Manual mode lets you choose which payment icons to show.",

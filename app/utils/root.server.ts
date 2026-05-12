@@ -46,6 +46,7 @@ export async function loadCriticalData({
     weaverseTheme,
     googleGtmID: env.PUBLIC_GOOGLE_GTM_ID,
     swatchesConfigs,
+    locale: storefront.i18n.language.toLowerCase(),
   };
 }
 

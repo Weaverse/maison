@@ -18,6 +18,8 @@ interface FeaturedProductsData {
   selectionMethod: "auto" | "collection" | "manual";
   collection?: WeaverseCollection;
   products?: WeaverseProduct[];
+  displayType: "grid" | "carousel";
+  productsToShow: number;
 }
 
 interface FeaturedProductsProps
@@ -26,11 +28,30 @@ interface FeaturedProductsProps
   ref: React.Ref<HTMLElement>;
 }
 
+import { createContext } from "react";
+
+export const FeaturedProductsContext = createContext<{
+  displayType?: "grid" | "carousel";
+  productsToShow?: number;
+} | null>(null);
+
 export default function FeaturedProducts(props: FeaturedProductsProps) {
-  const { ref, loaderData, children, ...rest } = props;
+  const {
+    ref,
+    loaderData,
+    children,
+    displayType,
+    productsToShow,
+    selectionMethod,
+    collection,
+    products,
+    ...rest
+  } = props;
   return (
     <Section ref={ref} {...rest} overflow="unset">
-      {children}
+      <FeaturedProductsContext.Provider value={{ displayType, productsToShow }}>
+        {children}
+      </FeaturedProductsContext.Provider>
     </Section>
   );
 }
@@ -185,12 +206,35 @@ export const schema = createSchema({
     },
     {
       group: "Layout",
-      inputs: layoutInputs.filter((i) => i.name !== "borderRadius"),
+      inputs: [
+        {
+          type: "select",
+          name: "displayType",
+          label: "Display type",
+          defaultValue: "carousel",
+          configs: {
+            options: [
+              { value: "grid", label: "List" },
+              { value: "carousel", label: "Slider" },
+            ],
+          },
+        },
+        {
+          type: "range",
+          name: "productsToShow",
+          label: "Number of items",
+          defaultValue: 4,
+          configs: { min: 1, max: 12, step: 1 },
+        },
+        ...layoutInputs.filter((i) => i.name !== "borderRadius"),
+      ],
     },
   ],
   presets: {
     gap: 32,
     selectionMethod: "auto",
+    displayType: "carousel",
+    productsToShow: 4,
     children: [
       {
         type: "featured-products--header",

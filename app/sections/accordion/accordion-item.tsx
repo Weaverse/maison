@@ -12,6 +12,9 @@ import type {
 import type React from "react";
 import { cn } from "~/utils/cn";
 
+const isSvgString = (icon: string) =>
+  icon.trim().startsWith("<svg") || icon.trim().startsWith("<?xml");
+
 interface AccordionItemProps extends HydrogenComponentProps {
   title: string;
   content: string;
@@ -26,6 +29,15 @@ const AccordionItem = (props: AccordionItemProps) => {
   const renderIcon = () => {
     if (!icon) {
       return null;
+    }
+
+    if (isSvgString(icon)) {
+      return (
+        <span
+          className="h-5 w-5 flex items-center justify-center [&_svg]:h-full [&_svg]:w-full"
+          dangerouslySetInnerHTML={{ __html: icon }}
+        />
+      );
     }
 
     const iconMap = {
@@ -78,7 +90,7 @@ const AccordionItem = (props: AccordionItemProps) => {
         className={cn(
           "overflow-hidden rounded-b",
           "data-[state=closed]:animate-collapse",
-          "data-[state=open]:animate-expand",
+          "data-[state=open]:animate-expand data-[state=open]:mt-1",
         )}
       >
         <div className="p-4 text-sm">{content}</div>
@@ -97,18 +109,12 @@ export const schema: HydrogenComponentSchema = {
       group: "Item",
       inputs: [
         {
-          type: "toggle-group",
+          type: "textarea",
           name: "icon",
           label: "Icon (optional)",
-          configs: {
-            options: [
-              { value: "truck", label: "Truck" },
-              { value: "paint-brush-household", label: "Brush" },
-              { value: "ruler", label: "Ruler" },
-              { value: "package", label: "Package" },
-            ],
-          },
-          defaultValue: "truck",
+          placeholder:
+            "Paste SVG code or use presets: truck, ruler, package...",
+          helpText: "You can paste raw SVG code here for custom icons.",
         },
         {
           type: "text",
