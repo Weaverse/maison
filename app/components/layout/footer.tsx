@@ -269,7 +269,7 @@ export function Footer() {
 
           {/* Copyright - Order 3 on mobile/tablet (full width on tablet), Order 1 on desktop */}
           <div
-            className="order-3 md:w-full lg:order-1 lg:w-auto"
+            className="order-3 text-sm md:w-full lg:order-1 lg:w-auto"
             dangerouslySetInnerHTML={{ __html: copyright }}
           />
         </div>
@@ -350,7 +350,11 @@ function CompanyLocationSelector() {
         },
       )
     : [];
-  console.log("🚀 ~ CompanyLocationSelector ~ locations:", company, locations.length)
+  console.log(
+    "🚀 ~ CompanyLocationSelector ~ locations:",
+    company,
+    locations.length,
+  );
 
   if (locations.length <= 1 || !company) {
     return null;
