@@ -5,6 +5,7 @@ import {
   type OptimisticCart,
   useOptimisticCart,
 } from "@shopify/hydrogen";
+import { useThemeSettings } from "@weaverse/hydrogen";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import type {
@@ -35,6 +36,8 @@ export function VariantRow({
   cart: resolvedCart,
   sellingPlanGroups,
 }: VariantRowProps) {
+  const { bundleBadgeColor } = useThemeSettings();
+
   const initialCartLine = resolvedCart?.lines?.nodes?.find(
     (line) => line.merchandise.id === variant.id,
   );
@@ -105,8 +108,14 @@ export function VariantRow({
                 <span>Low in Stock</span>
               </div>
             ) : (
-              <div className="text-sm text-green-600 flex gap-1 items-center">
-                <span className="bg-green-600 size-2 rounded-full" />
+              <div
+                className="text-sm flex gap-1 items-center"
+                style={{ color: bundleBadgeColor }}
+              >
+                <span
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: bundleBadgeColor }}
+                />
                 <span>In Stock</span>
               </div>
             )}
@@ -185,8 +194,14 @@ export function VariantRow({
                   <span>Low in Stock</span>
                 </div>
               ) : (
-                <div className="text-sm text-green-600 flex gap-1 items-center">
-                  <span className="bg-green-600 size-2 rounded-full" />
+                <div
+                  className="text-sm flex gap-1 items-center"
+                  style={{ color: bundleBadgeColor }}
+                >
+                  <span
+                    className="size-2 rounded-full"
+                    style={{ backgroundColor: bundleBadgeColor }}
+                  />
                   <span>In Stock</span>
                 </div>
               )}
@@ -251,8 +266,14 @@ export function VariantRow({
                 <span>Low in Stock</span>
               </div>
             ) : (
-              <div className="text-xs text-green-600 flex gap-1 items-center">
-                <span className="bg-green-600 size-2 rounded-full" />
+              <div
+                className="text-xs flex gap-1 items-center"
+                style={{ color: bundleBadgeColor }}
+              >
+                <span
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: bundleBadgeColor }}
+                />
                 <span>In Stock</span>
               </div>
             )}
