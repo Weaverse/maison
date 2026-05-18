@@ -55,7 +55,7 @@ const AccordionItem = (props: AccordionItemProps) => {
       <Accordion.Header>
         <Accordion.Trigger
           style={{ backgroundColor }}
-          className="group mb-1 flex w-full gap-3 p-4 text-left rounded group-data-[state=open]:rounded-b-none"
+          className="group flex w-full gap-3 p-4 text-left rounded group-data-[state=open]:rounded-b-none"
         >
           {renderIcon()}
           <span className="text-base">{title}</span>
