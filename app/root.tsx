@@ -1,8 +1,8 @@
 // Supports weights 400-700
-import '@fontsource/poppins/400.css';
-import '@fontsource/poppins/500.css';
-import '@fontsource/poppins/600.css';
-import '@fontsource/poppins/700.css';
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/700.css";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import type { SeoConfig } from "@shopify/hydrogen";
 import { Analytics, getSeoMeta, useNonce } from "@shopify/hydrogen";
@@ -109,6 +109,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        {/*
+         * Pre-initialize window.Shopify as a configurable plain object before
+         * any third-party Shopify script (account.js, embeds) can define it as
+         * non-configurable. Hydrogen's <ShopifyAnalytics> later calls
+         * Object.defineProperty(window, 'Shopify', ...) which crashes with
+         * "Cannot redefine property: Shopify" if it was already locked down.
+         */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: "window.Shopify = window.Shopify || {};",
+          }}
+        />
         <link rel="stylesheet" href={styles} />
         <Meta />
         <Links />

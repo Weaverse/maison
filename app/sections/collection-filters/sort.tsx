@@ -3,7 +3,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useLocation, useSearchParams } from "react-router";
 import Link from "~/components/link";
 import { cn } from "~/utils/cn";
-import type { SortParam } from "~/utils/filter";
+import { clearPaginationParams, type SortParam } from "~/utils/filter";
 
 const SORT_LIST: { label: string; key: SortParam }[] = [
   { label: "Featured", key: "featured" },
@@ -62,11 +62,13 @@ export function Sort() {
           }
         >
           {SORT_LIST.map(({ key, label }) => {
-            params.set("sort", key);
+            const sortParams = new URLSearchParams(params);
+            sortParams.set("sort", key);
+            clearPaginationParams(sortParams);
             return (
               <DropdownMenu.Item key={key} asChild>
                 <Link
-                  to={`${location.pathname}?${params.toString()}`}
+                  to={`${location.pathname}?${sortParams.toString()}`}
                   className={cn(
                     "underline-offset-[6px] hover:underline hover:outline-hidden",
                     currentSort.key === key && "font-bold",

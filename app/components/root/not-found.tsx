@@ -8,17 +8,17 @@ import { Swimlane } from "~/components/swimlane";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { FeaturedData } from "~/routes/($locale).api.featured-items";
 
-export function NotFound() {
+export function NotFound({ type = "page" }: { type?: string }) {
   return (
     <Section width="fixed" verticalPadding="medium">
       <div className="flex flex-col items-center justify-center gap-10 py-20 lg:py-32 translate-y-[-10%]">
         <div className="flex flex-col justify-center items-center gap-2">
           <h1 className="text-[53px] leading-none text-body">404</h1>
           <h2 className=" text-[26px] font-normal text-center">
-            Page not found
+            {`${type.charAt(0).toUpperCase()}${type.slice(1)} not found`}
           </h2>
           <p className=" text-center text-sm">
-            Oops! The page you're looking for doesn't exist.
+            Oops! The {type} you're looking for doesn't exist.
           </p>
         </div>
         <div className="">

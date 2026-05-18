@@ -6,7 +6,11 @@ import { useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import type { CollectionQuery } from "storefront-api.generated";
 import { ChevronDown, ChevronUp } from "~/components/icons";
-import { FILTER_URL_PREFIX, filterInputToParams } from "~/utils/filter";
+import {
+  clearPaginationParams,
+  FILTER_URL_PREFIX,
+  filterInputToParams,
+} from "~/utils/filter";
 
 export function PriceRangeFilter({
   collection,
@@ -63,6 +67,7 @@ export function PriceRangeFilter({
       };
       paramsClone = filterInputToParams({ price }, paramsClone);
     }
+    clearPaginationParams(paramsClone);
     if (params.toString() !== paramsClone.toString()) {
       navigate(`${location.pathname}?${paramsClone.toString()}`, {
         preventScrollReset: true,

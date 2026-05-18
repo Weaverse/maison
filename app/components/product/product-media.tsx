@@ -50,10 +50,6 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
   collectionTitle?: string;
   showCollectionBadge?: boolean;
   showSaleBadge?: boolean;
-  priceRange?: {
-    minVariantPrice: MoneyV2;
-    maxVariantPrice: MoneyV2;
-  };
 }
 
 export function ProductMedia(props: ProductMediaProps) {
@@ -70,10 +66,7 @@ export function ProductMedia(props: ProductMediaProps) {
     collectionTitle,
     showCollectionBadge,
     showSaleBadge,
-    priceRange,
   } = props;
-
-  const { minVariantPrice, maxVariantPrice } = priceRange || {};
 
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -132,8 +125,8 @@ export function ProductMedia(props: ProductMediaProps) {
               )}
               {showSaleBadge && (
                 <SaleBadge
-                  price={minVariantPrice as MoneyV2}
-                  compareAtPrice={maxVariantPrice as MoneyV2}
+                  price={selectedVariant?.price as MoneyV2}
+                  compareAtPrice={selectedVariant?.compareAtPrice as MoneyV2}
                 />
               )}
             </div>
@@ -286,8 +279,8 @@ export function ProductMedia(props: ProductMediaProps) {
               )}
               {showSaleBadge && (
                 <SaleBadge
-                  price={minVariantPrice as MoneyV2}
-                  compareAtPrice={maxVariantPrice as MoneyV2}
+                  price={selectedVariant?.price as MoneyV2}
+                  compareAtPrice={selectedVariant?.compareAtPrice as MoneyV2}
                 />
               )}
             </div>

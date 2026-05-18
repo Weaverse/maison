@@ -101,7 +101,10 @@ export default function CollectionFilters(props: CollectionFiltersProps) {
         <div className="flex gap-5 pt-6 pb-8 lg:pt-12 lg:pb-20">
           {enableFilter && filtersPosition === "sidebar" && (
             <div className="hidden w-72 shrink-0 lg:block">
-              <div className="sticky top-[calc(var(--height-nav)+40px)] space-y-4">
+              <div
+                className="sticky flex h-[calc(100vh-var(--height-nav)-20px)] flex-col gap-4 overflow-y-auto pr-2"
+                style={{ top: "calc(var(--height-nav))" }}
+              >
                 <div className="font-bold">Filters</div>
                 <Filters />
               </div>
