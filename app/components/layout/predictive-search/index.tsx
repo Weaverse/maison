@@ -188,6 +188,10 @@ function PredictiveSearchResults() {
   // console.log("🚀 ~ PredictiveSearchResults ~ collections:", collections);
   // console.log("🚀 ~ PredictiveSearchResults ~ pages:", pages);
 
+  const hasProducts = products?.items && products.items.length > 0;
+  const hasCollections = collections?.items && collections.items.length > 0;
+  const hasPages = pages?.items && pages.items.length > 0;
+
   if (!searchTerm.current) {
     return null;
   }
@@ -202,42 +206,59 @@ function PredictiveSearchResults() {
     );
   }
 
+  // Set active tab to first available tab
+  const firstAvailableTab = hasProducts
+    ? "products"
+    : hasCollections
+      ? "collections"
+      : "pages";
+
   return (
-    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+    <Tabs.Root
+      value={activeTab}
+      onValueChange={setActiveTab}
+      defaultValue={firstAvailableTab}
+    >
       <Tabs.List className="flex gap-8 border-b border-line-subtle px-5">
-        <Tabs.Trigger
-          value="products"
-          className={cn(
-            "pb-3 text-sm font-medium transition-colors",
-            activeTab === "products"
-              ? "shadow-[0_1px_0_var(--color-line)]"
-              : "text-body-subtle/70 hover:text-body-subtle",
-          )}
-        >
-          Products
-        </Tabs.Trigger>
-        <Tabs.Trigger
-          value="collections"
-          className={cn(
-            "pb-3 text-sm font-medium transition-colors",
-            activeTab === "collections"
-              ? "shadow-[0_1px_0_var(--color-line)]"
-              : "text-body-subtle/70 hover:text-body-subtle",
-          )}
-        >
-          Collections
-        </Tabs.Trigger>
-        <Tabs.Trigger
-          value="pages"
-          className={cn(
-            "pb-3 text-sm font-medium transition-colors",
-            activeTab === "pages"
-              ? "shadow-[0_1px_0_var(--color-line)]"
-              : "text-body-subtle/70 hover:text-body-subtle",
-          )}
-        >
-          Page
-        </Tabs.Trigger>
+        {hasProducts && (
+          <Tabs.Trigger
+            value="products"
+            className={cn(
+              "pb-3 text-sm font-medium transition-colors",
+              activeTab === "products"
+                ? "shadow-[0_1px_0_var(--color-line)]"
+                : "text-body-subtle/70 hover:text-body-subtle",
+            )}
+          >
+            Products
+          </Tabs.Trigger>
+        )}
+        {hasCollections && (
+          <Tabs.Trigger
+            value="collections"
+            className={cn(
+              "pb-3 text-sm font-medium transition-colors",
+              activeTab === "collections"
+                ? "shadow-[0_1px_0_var(--color-line)]"
+                : "text-body-subtle/70 hover:text-body-subtle",
+            )}
+          >
+            Collections
+          </Tabs.Trigger>
+        )}
+        {hasPages && (
+          <Tabs.Trigger
+            value="pages"
+            className={cn(
+              "pb-3 text-sm font-medium transition-colors",
+              activeTab === "pages"
+                ? "shadow-[0_1px_0_var(--color-line)]"
+                : "text-body-subtle/70 hover:text-body-subtle",
+            )}
+          >
+            Page
+          </Tabs.Trigger>
+        )}
       </Tabs.List>
 
       <ScrollArea className="h-full">
