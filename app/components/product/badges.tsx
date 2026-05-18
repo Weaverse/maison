@@ -122,7 +122,8 @@ export function SaleBadge({
   const discountAmount = useMoney({ amount, currencyCode: price.currencyCode });
   const text = saleBadgeText
     .replace("[amount]", discountAmount.withoutTrailingZeros)
-    .replace("[percentage]", percentage);
+    .replace("[percentage]", percentage)
+    .replace(/^-/, "");
 
   if (percentage !== "0") {
     return (
