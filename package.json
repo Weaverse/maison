@@ -94,7 +94,7 @@
     "@react-router/fs-routes": "7.14.2",
     "@shopify/cli": "^3.94.3",
     "@shopify/hydrogen-codegen": "0.3.3",
-    "@shopify/mini-oxygen": "3.2.1",
+    "@shopify/mini-oxygen": "^4.1.0",
     "@shopify/oxygen-workers-types": "4.2.0",
     "@tailwindcss/forms": "0.5.11",
     "@tailwindcss/typography": "0.5.19",
