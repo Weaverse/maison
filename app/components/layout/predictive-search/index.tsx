@@ -181,17 +181,6 @@ function PredictiveSearchResults() {
   const [activeTab, setActiveTab] = useState("products");
   const params = useParams();
 
-  const products = results?.find(({ type }) => type === "products");
-  const collections = results?.find(({ type }) => type === "collections");
-  const pages = results?.find(({ type }) => type === "articles");
-  // console.log("🚀 ~ PredictiveSearchResults ~ results:", results);
-  // console.log("🚀 ~ PredictiveSearchResults ~ collections:", collections);
-  // console.log("🚀 ~ PredictiveSearchResults ~ pages:", pages);
-
-  const hasProducts = products?.items && products.items.length > 0;
-  const hasCollections = collections?.items && collections.items.length > 0;
-  const hasPages = pages?.items && pages.items.length > 0;
-
   if (!searchTerm.current) {
     return null;
   }
@@ -206,108 +195,67 @@ function PredictiveSearchResults() {
     );
   }
 
-  // Set active tab to first available tab
-  const firstAvailableTab = hasProducts
-    ? "products"
-    : hasCollections
-      ? "collections"
-      : "pages";
+  const products = results?.find(({ type }) => type === "products");
+  const collections = results?.find(({ type }) => type === "collections");
+  const pages = results?.find(({ type }) => type === "articles");
+
+  const tabs = [
+    { value: "products", label: "Products", items: products?.items },
+    { value: "collections", label: "Collections", items: collections?.items },
+    { value: "pages", label: "Page", items: pages?.items },
+  ].filter((tab) => tab.items?.length > 0);
+
+  const currentTab =
+    tabs.find((t) => t.value === activeTab)?.value ?? tabs[0]?.value;
 
   return (
-    <Tabs.Root
-      value={activeTab}
-      onValueChange={setActiveTab}
-      defaultValue={firstAvailableTab}
-    >
+    <Tabs.Root value={currentTab} onValueChange={setActiveTab}>
       <Tabs.List className="flex gap-8 border-b border-line-subtle px-5">
-        {hasProducts && (
+        {tabs.map((tab) => (
           <Tabs.Trigger
-            value="products"
+            key={tab.value}
+            value={tab.value}
             className={cn(
               "pb-3 text-sm font-medium transition-colors",
-              activeTab === "products"
+              currentTab === tab.value
                 ? "shadow-[0_1px_0_var(--color-line)]"
                 : "text-body-subtle/70 hover:text-body-subtle",
             )}
           >
-            Products
+            {tab.label}
           </Tabs.Trigger>
-        )}
-        {hasCollections && (
-          <Tabs.Trigger
-            value="collections"
-            className={cn(
-              "pb-3 text-sm font-medium transition-colors",
-              activeTab === "collections"
-                ? "shadow-[0_1px_0_var(--color-line)]"
-                : "text-body-subtle/70 hover:text-body-subtle",
-            )}
-          >
-            Collections
-          </Tabs.Trigger>
-        )}
-        {hasPages && (
-          <Tabs.Trigger
-            value="pages"
-            className={cn(
-              "pb-3 text-sm font-medium transition-colors",
-              activeTab === "pages"
-                ? "shadow-[0_1px_0_var(--color-line)]"
-                : "text-body-subtle/70 hover:text-body-subtle",
-            )}
-          >
-            Page
-          </Tabs.Trigger>
-        )}
+        ))}
       </Tabs.List>
 
       <ScrollArea className="h-full">
         <Tabs.Content value="products" className="p-5">
-          {products?.items && products.items.length > 0 ? (
-            <div className="space-y-2.5">
-              {products.items.map((item) => (
-                <ProductResultItem key={item.id} item={item} />
-              ))}
-              <Link
-                to={`${params.locale ? `/${params.locale}` : ""}/search?q=${searchTerm.current}`}
-                className="mt-6 block w-full rounded-sm bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
-              >
-                See All Results
-              </Link>
-            </div>
-          ) : (
-            <p className="py-8 text-center text-sm text-gray-500">
-              No products found
-            </p>
-          )}
+          <div className="space-y-2.5">
+            {products?.items?.map((item) => (
+              <ProductResultItem key={item.id} item={item} />
+            ))}
+            <Link
+              to={`${params.locale ? `/${params.locale}` : ""}/search?q=${searchTerm.current}`}
+              className="mt-6 block w-full rounded-sm bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
+            >
+              See All Results
+            </Link>
+          </div>
         </Tabs.Content>
 
         <Tabs.Content value="collections" className="px-5 py-4">
-          {collections?.items && collections.items.length > 0 ? (
-            <div className="space-y-4">
-              {collections.items.map((item) => (
-                <CollectionResultItem key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="py-8 text-center text-sm text-gray-500">
-              No collections found
-            </p>
-          )}
+          <div className="space-y-4">
+            {collections?.items?.map((item) => (
+              <CollectionResultItem key={item.id} item={item} />
+            ))}
+          </div>
         </Tabs.Content>
 
         <Tabs.Content value="pages" className="p-5">
-          {pages?.items && pages.items.length > 0 ? (
-            <div className="space-y-4">
-              {pages.items.map((item) => (
-                <PageResultItem key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="py-8 text-center text-sm text-gray-500">
-              No pages found
-            </p>
-          )}
+          <div className="space-y-4">
+            {pages?.items?.map((item) => (
+              <PageResultItem key={item.id} item={item} />
+            ))}
+          </div>
         </Tabs.Content>
       </ScrollArea>
     </Tabs.Root>
@@ -419,9 +367,9 @@ function KeywordsDisplay({
     suggestions.length > 0
       ? suggestions
       : popularKeywords.map((keyword) => ({
-        title: keyword,
-        styledTitle: keyword,
-      }));
+          title: keyword,
+          styledTitle: keyword,
+        }));
 
   if (keywords.length === 0) {
     return null;
