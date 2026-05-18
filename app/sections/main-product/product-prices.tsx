@@ -129,11 +129,24 @@ export default function ProductPrices(props: ProductPricesProps) {
           </span>
         </div>
       ) : (
-        <VariantPrices
-          variant={selectedVariant}
-          showCompareAtPrice={showCompareAtPrice}
-          className="text-2xl/none text-body-subtle"
-        />
+        <div className="text-2xl/none text-body-subtle">
+          {product.priceRange?.minVariantPrice?.amount !==
+          product.priceRange?.maxVariantPrice?.amount ? (
+            <span className="flex gap-2 items-baseline">
+              <span className="text-sm">From</span>
+              <VariantPrices
+                variant={selectedVariant}
+                showCompareAtPrice={showCompareAtPrice}
+              />
+            </span>
+          ) : (
+            <VariantPrices
+              variant={selectedVariant}
+              showCompareAtPrice={showCompareAtPrice}
+              className="text-2xl/none text-body-subtle"
+            />
+          )}
+        </div>
       )}
     </div>
   );

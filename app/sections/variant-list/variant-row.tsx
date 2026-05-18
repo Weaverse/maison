@@ -3,11 +3,11 @@ import {
   CartForm,
   Money,
   type OptimisticCart,
-  OptimisticInput,
   useOptimisticCart,
-  useOptimisticData,
 } from "@shopify/hydrogen";
-import { useState } from "react";
+import { useThemeSettings } from "@weaverse/hydrogen";
+import { useEffect, useRef, useState } from "react";
+import { useFetcher } from "react-router";
 import type {
   CartApiQueryFragment,
   ProductVariantFragment,
@@ -15,7 +15,6 @@ import type {
 } from "storefront-api.generated";
 import { Minus, Plus } from "~/components/icons";
 import { Image } from "~/components/image";
-import { AddToCartAnalytics } from "~/components/product/add-to-cart-button";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
 import { cn } from "~/utils/cn";
@@ -23,6 +22,8 @@ import {
   calculateSellingPlanPrice,
   getSellingPlanById,
 } from "~/utils/selling-plan-utils";
+
+const CLICK_DEBOUNCE_MS = 300;
 
 interface VariantRowProps {
   variant: ProductVariantFragment;
@@ -35,6 +36,8 @@ export function VariantRow({
   cart: resolvedCart,
   sellingPlanGroups,
 }: VariantRowProps) {
+  const { bundleBadgeColor } = useThemeSettings();
+
   const initialCartLine = resolvedCart?.lines?.nodes?.find(
     (line) => line.merchandise.id === variant.id,
   );
@@ -105,8 +108,14 @@ export function VariantRow({
                 <span>Low in Stock</span>
               </div>
             ) : (
-              <div className="text-sm text-green-600 flex gap-1 items-center">
-                <span className="bg-green-600 size-2 rounded-full" />
+              <div
+                className="text-sm flex gap-1 items-center"
+                style={{ color: bundleBadgeColor }}
+              >
+                <span
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: bundleBadgeColor }}
+                />
                 <span>In Stock</span>
               </div>
             )}
@@ -185,8 +194,14 @@ export function VariantRow({
                   <span>Low in Stock</span>
                 </div>
               ) : (
-                <div className="text-sm text-green-600 flex gap-1 items-center">
-                  <span className="bg-green-600 size-2 rounded-full" />
+                <div
+                  className="text-sm flex gap-1 items-center"
+                  style={{ color: bundleBadgeColor }}
+                >
+                  <span
+                    className="size-2 rounded-full"
+                    style={{ backgroundColor: bundleBadgeColor }}
+                  />
                   <span>In Stock</span>
                 </div>
               )}
@@ -251,8 +266,14 @@ export function VariantRow({
                 <span>Low in Stock</span>
               </div>
             ) : (
-              <div className="text-xs text-green-600 flex gap-1 items-center">
-                <span className="bg-green-600 size-2 rounded-full" />
+              <div
+                className="text-xs flex gap-1 items-center"
+                style={{ color: bundleBadgeColor }}
+              >
+                <span
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: bundleBadgeColor }}
+                />
                 <span>In Stock</span>
               </div>
             )}
@@ -299,14 +320,9 @@ function QuantityUpdateButtons({
   cart: originalCart,
   selectedPlanId,
 }: QuantityUpdateButtonsProps) {
-  type OptimisticData = {
-    action?: string;
-    quantity?: number;
-  };
-
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
-
   const increment = variant.quantityRule.increment || 1;
+  const isOutOfStock = !variant.availableForSale;
 
   const activeLine = cart?.lines?.nodes?.find((line) => {
     const isVariantMatch = line.merchandise.id === variant.id;
@@ -315,154 +331,202 @@ function QuantityUpdateButtons({
     return isVariantMatch && isPlanMatch;
   });
 
-  const optimisticId = activeLine?.id;
-  const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
+  const fetcherKey = `variant-list-${variant.id}-${selectedPlanId ?? "none"}`;
+  const fetcher = useFetcher({ key: fetcherKey });
 
-  const currentQuantity = optimisticData?.quantity || activeLine?.quantity || 0;
+  const serverQuantity = activeLine?.quantity ?? 0;
+  const [pendingDelta, setPendingDelta] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const prevQuantity = Number(Math.max(0, currentQuantity - increment));
-  const nextQuantity = Number(currentQuantity + increment);
-  const isOutOfStock = !variant.availableForSale;
+  const displayQuantity = Math.max(0, serverQuantity + pendingDelta);
 
-  const showTrashButton = Boolean(activeLine);
+  function submitCart(action: string, inputs: Record<string, unknown>) {
+    const formData = new FormData();
+    formData.append(CartForm.INPUT_NAME, JSON.stringify({ action, inputs }));
+    fetcher.submit(formData, { method: "POST", action: "/cart" });
+  }
 
-  const shouldUpdateActiveLine = Boolean(activeLine);
+  // Latest-closure ref: reassigned every render so deferred callers (debounce
+  // timer, retry effect) always invoke a flush bound to the freshest state.
+  const flushRef = useRef<(() => void) | null>(null);
+  flushRef.current = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (pendingDelta === 0) {
+      return;
+    }
+    if (fetcher.state !== "idle") {
+      // Wait for the in-flight submission; the retry effect calls back in.
+      return;
+    }
+
+    const target = Math.max(0, serverQuantity + pendingDelta);
+
+    if (!activeLine || activeLine.isOptimistic) {
+      if (pendingDelta > 0) {
+        submitCart(CartForm.ACTIONS.LinesAdd, {
+          lines: [
+            {
+              merchandiseId: variant.id,
+              quantity: pendingDelta,
+              selectedVariant: variant,
+              sellingPlanId: selectedPlanId || undefined,
+            },
+          ],
+        });
+      }
+    } else if (target === 0) {
+      submitCart(CartForm.ACTIONS.LinesRemove, { lineIds: [activeLine.id] });
+    } else {
+      submitCart(CartForm.ACTIONS.LinesUpdate, {
+        lines: [{ id: activeLine.id, quantity: target }],
+      });
+    }
+    setPendingDelta(0);
+  };
+
+  function scheduleFlush() {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(
+      () => flushRef.current?.(),
+      CLICK_DEBOUNCE_MS,
+    );
+  }
+
+  // If a flush was deferred because the fetcher was busy, retry once it idles.
+  useEffect(() => {
+    if (
+      fetcher.state === "idle" &&
+      pendingDelta !== 0 &&
+      !debounceRef.current
+    ) {
+      flushRef.current?.();
+    }
+  }, [fetcher.state, pendingDelta]);
+
+  const [inputValue, setInputValue] = useState(String(displayQuantity));
+
+  useEffect(() => {
+    setInputValue(String(displayQuantity));
+  }, [displayQuantity]);
+
+  function handleQuantityInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setInputValue(e.target.value);
+  }
+
+  function handleQuantityInputBlur() {
+    let newQuantity = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(newQuantity)) {
+      newQuantity = displayQuantity;
+    }
+    newQuantity = Math.max(0, newQuantity);
+
+    if (newQuantity !== displayQuantity) {
+      setPendingDelta(newQuantity - serverQuantity);
+      scheduleFlush();
+    }
+    setInputValue(String(newQuantity));
+  }
+
+  function handleQuantityInputKeyDown(
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) {
+    if (e.key === "Enter") {
+      handleQuantityInputBlur();
+      (e.target as HTMLInputElement).blur();
+    } else if (e.key === "Escape") {
+      setInputValue(String(displayQuantity));
+      (e.target as HTMLInputElement).blur();
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  function handleIncrement() {
+    setPendingDelta((d) => d + increment);
+    scheduleFlush();
+  }
+
+  function handleDecrement() {
+    setPendingDelta((d) => Math.max(-serverQuantity, d - increment));
+    scheduleFlush();
+  }
+
+  function handleRemove() {
+    if (!activeLine || activeLine.isOptimistic) {
+      return;
+    }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    setPendingDelta(0);
+    submitCart(CartForm.ACTIONS.LinesRemove, {
+      lineIds: [activeLine.id],
+    });
+  }
+
+  const showTrashButton = Boolean(activeLine) && displayQuantity > 0;
 
   return (
     <div className="flex items-center gap-4">
       <VolumePricingInfo variant={variant} />
       <div className="flex items-center border-2 border-(--color-line) divide-x divide-(--color-line) rounded-(--btn-border-radius)">
-        <CartForm
-          route="/cart"
-          fetcherKey="variant-list"
-          action={CartForm.ACTIONS.LinesUpdate}
-          inputs={{
-            lines: [{ id: activeLine?.id, quantity: prevQuantity }],
-          }}
+        <button
+          type="button"
+          aria-label="Decrease quantity"
+          className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          disabled={displayQuantity <= 0}
+          onClick={handleDecrement}
         >
-          <button
-            type="submit"
-            name="decrease-quantity"
-            aria-label="Decrease quantity"
-            className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-            value={prevQuantity}
-            disabled={
-              currentQuantity <= 0 || activeLine?.isOptimistic || !activeLine
-            }
-          >
-            <Minus />
-            <OptimisticInput
-              id={activeLine?.id}
-              data={{ quantity: prevQuantity }}
-            />
-          </button>
-        </CartForm>
+          <Minus />
+        </button>
 
-        <div
-          className="px-2 w-[68px] h-11 flex items-center justify-center text-sm"
+        <input
+          type="number"
+          className="px-2 w-[68px] h-11 text-center text-sm focus:outline-none bg-transparent"
           data-test="item-quantity"
-        >
-          {currentQuantity}
-        </div>
+          value={inputValue}
+          onChange={handleQuantityInputChange}
+          onBlur={handleQuantityInputBlur}
+          onKeyDown={handleQuantityInputKeyDown}
+          min={0}
+        />
 
-        {shouldUpdateActiveLine ? (
-          <CartForm
-            route="/cart"
-            fetcherKey="variant-list"
-            action={CartForm.ACTIONS.LinesUpdate}
-            inputs={{
-              lines: [{ id: activeLine?.id, quantity: nextQuantity }],
-            }}
-          >
-            <button
-              type="submit"
-              className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-              name="increase-quantity"
-              value={nextQuantity}
-              aria-label="Increase quantity"
-              disabled={activeLine?.isOptimistic}
-            >
-              <Plus />
-              <OptimisticInput
-                id={activeLine?.id}
-                data={{ quantity: nextQuantity }}
-              />
-            </button>
-          </CartForm>
-        ) : (
-          <AddToCartWithSellingPlan
-            variant={variant}
-            increment={increment}
-            isOutOfStock={isOutOfStock}
-            selectedPlanId={selectedPlanId}
-          />
-        )}
+        <button
+          type="button"
+          aria-label="Increase quantity"
+          className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          disabled={isOutOfStock}
+          onClick={handleIncrement}
+        >
+          <Plus />
+        </button>
       </div>
       {showTrashButton ? (
-        <CartForm
-          route="/cart"
-          fetcherKey="variant-list"
-          action={CartForm.ACTIONS.LinesRemove}
-          inputs={{ lineIds: [activeLine?.id] }}
+        <button
+          type="button"
+          aria-label="Remove from cart"
+          className="flex h-4 w-4 items-center justify-center border-none hover:text-red-600 transition"
+          onClick={handleRemove}
         >
-          <button
-            type="submit"
-            aria-label="Remove from cart"
-            className="flex h-4 w-4 items-center justify-center border-none hover:text-red-600 transition"
-          >
-            <span className="sr-only">Remove</span>
-            <TrashIcon aria-hidden="true" className="h-4 w-4" />
-            <OptimisticInput id={activeLine?.id} data={{ action: "remove" }} />
-          </button>
-        </CartForm>
+          <span className="sr-only">Remove</span>
+          <TrashIcon aria-hidden="true" className="h-4 w-4" />
+        </button>
       ) : (
         <div className="w-4" />
       )}
     </div>
-  );
-}
-
-interface AddToCartWithSellingPlanProps {
-  variant: ProductVariantFragment;
-  increment: number;
-  isOutOfStock: boolean;
-  selectedPlanId: string | null;
-}
-
-function AddToCartWithSellingPlan({
-  variant,
-  increment,
-  isOutOfStock,
-  selectedPlanId,
-}: AddToCartWithSellingPlanProps) {
-  return (
-    <CartForm
-      route="/cart"
-      fetcherKey="variant-list"
-      action={CartForm.ACTIONS.LinesAdd}
-      inputs={{
-        lines: [
-          {
-            merchandiseId: variant.id,
-            quantity: increment,
-            selectedVariant: variant,
-            sellingPlanId: selectedPlanId || undefined,
-          },
-        ],
-      }}
-    >
-      {(fetcher: any) => (
-        <AddToCartAnalytics fetcher={fetcher}>
-          <button
-            type="submit"
-            className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
-            disabled={isOutOfStock}
-          >
-            <Plus />
-          </button>
-        </AddToCartAnalytics>
-      )}
-    </CartForm>
   );
 }
 

@@ -90,6 +90,7 @@ import * as SlideShow from "~/sections/slideshow";
 import * as SlideShowSlide from "~/sections/slideshow/slide";
 import * as Spacer from "~/sections/spacer";
 import * as Testimonial from "~/sections/testimonials";
+import * as TestimonialHeader from "~/sections/testimonials/header";
 import * as TestimonialItem from "~/sections/testimonials/item";
 import * as TestimonialItems from "~/sections/testimonials/items";
 import * as VariantList from "~/sections/variant-list";
@@ -137,6 +138,7 @@ export const components: HydrogenComponent[] = [
   FeaturedProductHeader,
   FeaturedProductItems,
   Testimonial,
+  TestimonialHeader,
   TestimonialItems,
   TestimonialItem,
   ImageGallery,

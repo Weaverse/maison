@@ -39,11 +39,10 @@ export function Sort() {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 py-3 focus-visible:outline-hidden">
-        <span className="hidden lg:inline">
+      <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 py-3 text-sm focus-visible:outline-hidden">
+        <span>
           Sort by: <span className="font-semibold">{currentSort.label}</span>
         </span>
-        <span className="lg:hidden">Sort</span>
         <CaretDownIcon />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
@@ -51,7 +50,7 @@ export function Sort() {
           sideOffset={8}
           align="end"
           className={cn(
-            "flex h-fit w-52 flex-col gap-2 border border-line-subtle bg-background p-5 z-50",
+            "flex h-fit w-52 flex-col gap-2 rounded border border-line-subtle bg-background p-5 z-50",
             "data-[state=open]:animate-scale-in",
             "data-[state=closed]:animate-scale-out",
           )}
