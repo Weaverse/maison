@@ -293,10 +293,7 @@ export default function Search() {
 function SearchFilterToolbar() {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2">
-        <span>Sort by:</span>
-        <Sort />
-      </div>
+      <Sort />
       <SearchFiltersDrawer />
     </div>
   );
