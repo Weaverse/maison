@@ -65,7 +65,6 @@ export function Footer() {
     newsletterDescription,
     newsletterPlaceholder,
     newsletterButtonText,
-    paymentIconsMode,
     showVisaIcon,
     showMastercardIcon,
     showAmexIcon,
@@ -91,30 +90,25 @@ export function Footer() {
     DINERS_CLUB: DinersClubIcon,
   };
 
-  // Get payment icons based on mode
+  // Get payment icons based on user selection
   const getPaymentIcons = () => {
-    if (paymentIconsMode === "none") {
-      return [];
-    }
-
-    // Manual mode
-    const manualIcons: string[] = [];
+    const icons: string[] = [];
     if (showVisaIcon) {
-      manualIcons.push("VISA");
+      icons.push("VISA");
     }
     if (showMastercardIcon) {
-      manualIcons.push("MASTERCARD");
+      icons.push("MASTERCARD");
     }
     if (showAmexIcon) {
-      manualIcons.push("AMEX");
+      icons.push("AMEX");
     }
     if (showPaypalIcon) {
-      manualIcons.push("PAYPAL");
+      icons.push("PAYPAL");
     }
     if (showDinersClubIcon) {
-      manualIcons.push("DINERS_CLUB");
+      icons.push("DINERS_CLUB");
     }
-    return manualIcons;
+    return icons;
   };
 
   const paymentIconKeys = getPaymentIcons();
