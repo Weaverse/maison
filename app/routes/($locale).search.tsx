@@ -314,13 +314,13 @@ function SearchFiltersDrawer() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay
-          className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in"
+          className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
           style={{ "--fade-in-duration": "100ms" } as React.CSSProperties}
         />
         <Dialog.Content
           className={clsx([
             "fixed inset-y-0 z-10 w-full bg-(--color-background) md:w-[360px]",
-            "-translate-x-full left-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-left",
+            "right-0 data-[state=open]:animate-enter-from-right data-[state=closed]:animate-exit-to-right",
             "flex flex-col",
           ])}
           aria-describedby={undefined}
