@@ -977,10 +977,10 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "textarea",
           name: "popularSearchKeywords",
           label: "Popular search keywords",
-          defaultValue: "sunglasses, hats, jackets, shoes",
-          placeholder: "sunglasses, hats, jackets, shoes",
+          defaultValue: "Covers, Sheets, Pillowcases, Blankets, Shams",
+          placeholder: "Covers, Sheets, Pillowcases, Blankets, Shams",
           helpText:
-            "Enter popular search keywords separated by commas. E.g. <strong>sunglasses, hats, jackets, shoes</strong>",
+            "Enter popular search keywords separated by commas. E.g. <strong>Covers, Sheets, Pillowcases, Blankets, Shams</strong>",
         },
       ],
     },
