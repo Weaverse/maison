@@ -253,7 +253,7 @@ export const schema = createSchema({
         {
           type: "range",
           name: "gap",
-          label: "Items spacing",
+          label: "Content spacing",
           configs: {
             min: 0,
             max: 40,
