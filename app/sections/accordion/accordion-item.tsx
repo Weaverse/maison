@@ -1,15 +1,10 @@
-import {
-  PackageIcon,
-  PaintBrushHouseholdIcon,
-  RulerIcon,
-  TruckIcon,
-} from "@phosphor-icons/react";
 import * as Accordion from "@radix-ui/react-accordion";
 import type {
   HydrogenComponentProps,
   HydrogenComponentSchema,
 } from "@weaverse/hydrogen";
 import type React from "react";
+import { Image } from "~/components/image";
 import { cn } from "~/utils/cn";
 
 interface AccordionItemProps extends HydrogenComponentProps {
@@ -20,6 +15,9 @@ interface AccordionItemProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
 }
 
+const isSvgString = (icon: string) =>
+  icon.trim().startsWith("<svg") || icon.trim().startsWith("<?xml");
+
 const AccordionItem = (props: AccordionItemProps) => {
   const { ref, title, content, icon, backgroundColor, ...rest } = props;
 
@@ -28,20 +26,24 @@ const AccordionItem = (props: AccordionItemProps) => {
       return null;
     }
 
-    const iconMap = {
-      truck: TruckIcon,
-      "paint-brush-household": PaintBrushHouseholdIcon,
-      ruler: RulerIcon,
-      package: PackageIcon,
-    };
-
-    const IconComponent = iconMap[icon as keyof typeof iconMap];
-
-    if (!IconComponent) {
-      return null;
+    if (isSvgString(icon)) {
+      return (
+        <span
+          className="h-5 w-5"
+          dangerouslySetInnerHTML={{ __html: icon }}
+        />
+      );
     }
 
-    return <IconComponent className="h-5 w-5" />;
+    return (
+      <Image
+        src={icon}
+        className="h-5 w-5"
+        alt={title}
+        width={20}
+        height={20}
+      />
+    );
   };
 
   return (
@@ -55,7 +57,7 @@ const AccordionItem = (props: AccordionItemProps) => {
       <Accordion.Header>
         <Accordion.Trigger
           style={{ backgroundColor }}
-          className="group flex w-full gap-3 p-4 text-left rounded group-data-[state=open]:rounded-b-none"
+          className="group flex w-full gap-3 p-4 text-left rounded group-data-[state=open]:rounded-b-none group-data-[state=open]:mb-1"
         >
           {renderIcon()}
           <span className="text-base">{title}</span>
@@ -97,18 +99,11 @@ export const schema: HydrogenComponentSchema = {
       group: "Item",
       inputs: [
         {
-          type: "toggle-group",
+          type: "text",
           name: "icon",
           label: "Icon (optional)",
-          configs: {
-            options: [
-              { value: "truck", label: "Truck" },
-              { value: "paint-brush-household", label: "Brush" },
-              { value: "ruler", label: "Ruler" },
-              { value: "package", label: "Package" },
-            ],
-          },
-          defaultValue: "truck",
+          helpText:
+            "Supports URLs (http, https, /images/, .png, .svg, .jpg, ...) or SVG code.",
         },
         {
           type: "text",
