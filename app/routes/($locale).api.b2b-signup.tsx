@@ -56,7 +56,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`GraphQL request failed: ${response.status} ${errorText}`);
+        throw new Error(
+          `GraphQL request failed: ${response.status} ${errorText}`,
+        );
       }
 
       return response.json() as Promise<any>;
@@ -134,10 +136,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    return data(
-      { success: true, companyId, customerId },
-      { status: 200 },
-    );
+    return data({ success: true, companyId, customerId }, { status: 200 });
   } catch (error) {
     console.error("B2B signup error:", error);
     return data(

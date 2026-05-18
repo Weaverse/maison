@@ -7,8 +7,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { useLoaderData } from "react-router";
 import type { ArticleFragment } from "storefront-api.generated";
 import { Image } from "~/components/image";
-import { ArticleCard } from "~/sections/blogs";
 import { useAnimation } from "~/hooks/use-animation";
+import { ArticleCard } from "~/sections/blogs";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 

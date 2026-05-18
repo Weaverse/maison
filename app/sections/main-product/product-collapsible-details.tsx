@@ -24,17 +24,17 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
   const details = [
     { title: "Description", content: description },
     showShippingPolicy &&
-    shippingPolicy?.body && {
-      title: "Shipping",
-      content: getExcerpt(shippingPolicy.body),
-      learnMore: `/policies/${shippingPolicy.handle}`,
-    },
+      shippingPolicy?.body && {
+        title: "Shipping",
+        content: getExcerpt(shippingPolicy.body),
+        learnMore: `/policies/${shippingPolicy.handle}`,
+      },
     showRefundPolicy &&
-    refundPolicy?.body && {
-      title: "Returns",
-      content: getExcerpt(refundPolicy.body),
-      learnMore: `/policies/${refundPolicy.handle}`,
-    },
+      refundPolicy?.body && {
+        title: "Returns",
+        content: getExcerpt(refundPolicy.body),
+        learnMore: `/policies/${refundPolicy.handle}`,
+      },
   ].filter(Boolean);
 
   return (

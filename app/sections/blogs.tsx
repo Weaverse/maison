@@ -43,9 +43,9 @@ interface BlogsData {
 
 interface BlogsProps
   extends Omit<ArticleCardProps, "article" | "blogHandle" | "loading">,
-  SectionProps,
-  VariantProps<typeof variants>,
-  BlogsData {
+    SectionProps,
+    VariantProps<typeof variants>,
+    BlogsData {
   ref: React.Ref<HTMLElement>;
 }
 

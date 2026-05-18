@@ -71,7 +71,10 @@ export function QuickShop({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: bundleBadgeColor }} />
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: bundleBadgeColor }}
+              />
               <span className="text-xs text-body-subtle">In Stock</span>
             </div>
           </div>

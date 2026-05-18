@@ -176,13 +176,13 @@ function getLocaleFromRequest(request: Request): I18nLocale {
 
   return COUNTRIES[firstPathPart]
     ? {
-      ...COUNTRIES[firstPathPart],
-      pathPrefix: firstPathPart,
-    }
+        ...COUNTRIES[firstPathPart],
+        pathPrefix: firstPathPart,
+      }
     : {
-      ...COUNTRIES.default,
-      pathPrefix: "",
-    };
+        ...COUNTRIES.default,
+        pathPrefix: "",
+      };
 }
 
 const CART_QUERY_FRAGMENT = `#graphql

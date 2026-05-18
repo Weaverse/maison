@@ -1,8 +1,8 @@
 import { createSchema } from "@weaverse/hydrogen";
-import type { SectionProps } from "~/components/section";
-import { Section, layoutInputs } from "~/components/section";
 import { backgroundInputs } from "~/components/background-image";
 import { overlayInputs } from "~/components/overlay";
+import type { SectionProps } from "~/components/section";
+import { layoutInputs, Section } from "~/components/section";
 
 interface TestimonialsProps extends SectionProps {
   ref?: React.Ref<HTMLElement>;
