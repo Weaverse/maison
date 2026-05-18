@@ -408,6 +408,42 @@ function QuantityUpdateButtons({
     }
   }, [fetcher.state, pendingDelta]);
 
+  const [inputValue, setInputValue] = useState(String(displayQuantity));
+
+  useEffect(() => {
+    setInputValue(String(displayQuantity));
+  }, [displayQuantity]);
+
+  function handleQuantityInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setInputValue(e.target.value);
+  }
+
+  function handleQuantityInputBlur() {
+    let newQuantity = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(newQuantity)) {
+      newQuantity = displayQuantity;
+    }
+    newQuantity = Math.max(0, newQuantity);
+
+    if (newQuantity !== displayQuantity) {
+      setPendingDelta(newQuantity - serverQuantity);
+      scheduleFlush();
+    }
+    setInputValue(String(newQuantity));
+  }
+
+  function handleQuantityInputKeyDown(
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) {
+    if (e.key === "Enter") {
+      handleQuantityInputBlur();
+      (e.target as HTMLInputElement).blur();
+    } else if (e.key === "Escape") {
+      setInputValue(String(displayQuantity));
+      (e.target as HTMLInputElement).blur();
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -456,12 +492,16 @@ function QuantityUpdateButtons({
           <Minus />
         </button>
 
-        <div
-          className="px-2 w-[68px] h-11 flex items-center justify-center text-sm"
+        <input
+          type="number"
+          className="px-2 w-[68px] h-11 text-center text-sm focus:outline-none bg-transparent"
           data-test="item-quantity"
-        >
-          {displayQuantity}
-        </div>
+          value={inputValue}
+          onChange={handleQuantityInputChange}
+          onBlur={handleQuantityInputBlur}
+          onKeyDown={handleQuantityInputKeyDown}
+          min={0}
+        />
 
         <button
           type="button"
