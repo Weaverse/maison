@@ -29,7 +29,23 @@ export const headers = routeHeaders;
 
 export async function loadB2BCustomerData(args: LoaderFunctionArgs) {
   const { customerAccount } = args.context;
-  let buyer = await customerAccount.getBuyer();
+
+  // Hydrogen 2026: skip Customer Account API calls for guests entirely.
+  // getBuyer() throws when OAuth/tunnel isn't configured, which would crash
+  // every product page for unauthenticated visitors.
+  const isLoggedIn = await customerAccount.isLoggedIn();
+  if (!isLoggedIn) {
+    return {};
+  }
+
+  let buyer: Awaited<ReturnType<typeof customerAccount.getBuyer>> | null = null;
+  try {
+    buyer = await customerAccount.getBuyer();
+  } catch (err) {
+    console.warn("[B2B] getBuyer failed:", (err as Error)?.message);
+    return {};
+  }
+
   let companyLocationId = buyer?.companyLocationId || null;
   if (buyer) {
     if (buyer.companyLocationId) {
@@ -37,10 +53,17 @@ export async function loadB2BCustomerData(args: LoaderFunctionArgs) {
         buyer,
       };
     }
-    const result = await customerAccount.query(CUSTOMER_LOCATIONS_QUERY);
-    companyLocationId =
-      result.data?.customer?.companyContacts?.edges?.[0]?.node?.company
-        ?.locations?.edges?.[0]?.node?.id || null;
+    try {
+      const result = await customerAccount.query(CUSTOMER_LOCATIONS_QUERY);
+      companyLocationId =
+        result.data?.customer?.companyContacts?.edges?.[0]?.node?.company
+          ?.locations?.edges?.[0]?.node?.id || null;
+    } catch (err) {
+      console.warn(
+        "[B2B] CUSTOMER_LOCATIONS_QUERY failed:",
+        (err as Error)?.message,
+      );
+    }
     return {
       buyer: {
         ...buyer,
@@ -59,7 +82,15 @@ export async function loader(args: LoaderFunctionArgs) {
 
   const { storefront, weaverse, customerAccount } = context;
 
-  let buyer = await customerAccount.getBuyer();
+  let buyer: Awaited<ReturnType<typeof customerAccount.getBuyer>> | null = null;
+  const isLoggedIn = await customerAccount.isLoggedIn();
+  if (isLoggedIn) {
+    try {
+      buyer = await customerAccount.getBuyer();
+    } catch (err) {
+      console.warn("[B2B] getBuyer failed:", (err as Error)?.message);
+    }
+  }
   let buyerVariables =
     buyer?.companyLocationId && buyer?.customerAccessToken
       ? {

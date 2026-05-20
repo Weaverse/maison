@@ -37,6 +37,11 @@ import {
 export const headers = routeHeaders;
 
 export async function loader({ context }: LoaderFunctionArgs) {
+  // Hydrogen 2026: Customer Account API throws on unauthenticated query() calls
+  // instead of auto-redirecting. handleAuthStatus() performs the redirect to
+  // /account/login for guests — matches the pattern in account.$.tsx and Pilot.
+  await context.customerAccount.handleAuthStatus();
+
   const { data: d, errors } =
     await context.customerAccount.query<CustomerDetailsQuery>(
       CUSTOMER_DETAILS_QUERY,
