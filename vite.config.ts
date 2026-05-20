@@ -3,20 +3,27 @@ import { hydrogen } from "@shopify/hydrogen/vite";
 import { oxygen } from "@shopify/mini-oxygen/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig({
-  plugins: [
-    hydrogen(),
-    oxygen(),
-    reactRouter(),
-    tsconfigPaths(),
-    tailwindcss(),
-  ],
+export default defineConfig(({ isSsrBuild }) => ({
+  plugins: [hydrogen(), oxygen(), reactRouter(), tailwindcss()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   build: {
-    // Allow a strict Content-Security-Policy
-    // without inlining assets as base64:
     assetsInlineLimit: 0,
+    ...(!isSsrBuild && {
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes("react-player")) return "vendor-media";
+            if (id.includes("swiper")) return "vendor-media";
+            if (id.includes("react-share")) return "vendor-social";
+            if (id.includes("@phosphor-icons")) return "vendor-icons";
+            if (id.includes("@radix-ui")) return "vendor-radix";
+          },
+        },
+      },
+    }),
   },
   server: {
     warmup: {
@@ -27,6 +34,7 @@ export default defineConfig({
       ],
     },
     allowedHosts: true,
+    hmr: process.env.HMR !== "false",
   },
   ssr: {
     optimizeDeps: {
@@ -51,4 +59,4 @@ export default defineConfig({
       ],
     },
   },
-});
+}));
