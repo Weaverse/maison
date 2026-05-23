@@ -6,7 +6,12 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig(({ isSsrBuild }) => ({
-  plugins: [hydrogen(), oxygen(), reactRouter(), tailwindcss()],
+  plugins: [
+    hydrogen(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
+    reactRouter(),
+    tailwindcss(),
+  ],
   resolve: {
     tsconfigPaths: true,
   },

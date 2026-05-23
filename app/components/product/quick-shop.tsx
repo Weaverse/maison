@@ -205,7 +205,7 @@ export function QuickShopTrigger({
               ? "right-4 rounded-full shadow-xl"
               : "inset-x-4 shadow-xs",
             showOnHover &&
-            "opacity-0 transition-opacity group-hover:opacity-100",
+              "opacity-0 transition-opacity group-hover:opacity-100",
           ],
           placement === "bottom" && ["w-full shadow-xs"],
         )}

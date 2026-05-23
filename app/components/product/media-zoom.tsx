@@ -253,7 +253,7 @@ function isVisibleInParent(child: HTMLElement, parent: HTMLElement) {
 }
 
 export interface ZoomButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
 export function ZoomButton({ className, ...props }: ZoomButtonProps) {
   return (
