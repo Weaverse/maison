@@ -1,5 +1,5 @@
 import { VideoCameraIcon } from "@phosphor-icons/react";
-import { ArrowLeft, ArrowRight } from "~/components/icons";
+import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
@@ -11,13 +11,13 @@ import type {
 } from "storefront-api.generated";
 import { FreeMode, Navigation, Pagination, Thumbs } from "swiper/modules";
 import { Swiper, type SwiperClass, SwiperSlide } from "swiper/react";
+import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { Image } from "~/components/image";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
-import { ZoomButton, ZoomModal } from "./media-zoom";
-import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
 import { CollectionBadge, SaleBadge } from "./badges";
+import { ZoomButton, ZoomModal } from "./media-zoom";
 
 const variants = cva(
   [
@@ -50,10 +50,6 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
   collectionTitle?: string;
   showCollectionBadge?: boolean;
   showSaleBadge?: boolean;
-  priceRange?: {
-    minVariantPrice: MoneyV2;
-    maxVariantPrice: MoneyV2;
-  };
 }
 
 export function ProductMedia(props: ProductMediaProps) {
@@ -70,10 +66,7 @@ export function ProductMedia(props: ProductMediaProps) {
     collectionTitle,
     showCollectionBadge,
     showSaleBadge,
-    priceRange,
   } = props;
-
-  const { minVariantPrice, maxVariantPrice } = priceRange || {};
 
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -132,8 +125,8 @@ export function ProductMedia(props: ProductMediaProps) {
               )}
               {showSaleBadge && (
                 <SaleBadge
-                  price={minVariantPrice as MoneyV2}
-                  compareAtPrice={maxVariantPrice as MoneyV2}
+                  price={selectedVariant?.price as MoneyV2}
+                  compareAtPrice={selectedVariant?.compareAtPrice as MoneyV2}
                 />
               )}
             </div>
@@ -152,9 +145,9 @@ export function ProductMedia(props: ProductMediaProps) {
                     onClick={
                       canClickImage
                         ? () => {
-                          setZoomMediaId(med.id);
-                          setZoomModalOpen(true);
-                        }
+                            setZoomMediaId(med.id);
+                            setZoomModalOpen(true);
+                          }
                         : undefined
                     }
                     className={canClickImage ? "cursor-zoom-in" : ""}
@@ -166,7 +159,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={cn(
                         "w-full max-w-none object-cover lg:h-full lg:w-full rounded",
                         idx === 0 &&
-                        "[&_img]:[view-transition-name:image-expand]",
+                          "[&_img]:[view-transition-name:image-expand]",
                       )}
                     />
                   </div>
@@ -175,7 +168,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={clsx(
                         "absolute top-2 right-2 md:top-4 md:right-4",
                         zoomButtonVisibility === "hover" &&
-                        "opacity-0 group-hover:opacity-100",
+                          "opacity-0 group-hover:opacity-100",
                       )}
                       onClick={() => {
                         setZoomMediaId(med.id);
@@ -230,9 +223,9 @@ export function ProductMedia(props: ProductMediaProps) {
                     onClick={
                       canClickImage
                         ? () => {
-                          setZoomMediaId(med.id);
-                          setZoomModalOpen(true);
-                        }
+                            setZoomMediaId(med.id);
+                            setZoomModalOpen(true);
+                          }
                         : undefined
                     }
                     className={canClickImage ? "cursor-zoom-in" : ""}
@@ -252,7 +245,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={clsx(
                         "absolute top-2 right-2 md:top-6 md:right-6",
                         zoomButtonVisibility === "hover" &&
-                        "opacity-0 group-hover:opacity-100",
+                          "opacity-0 group-hover:opacity-100",
                       )}
                       onClick={() => {
                         setZoomMediaId(med.id);
@@ -286,8 +279,8 @@ export function ProductMedia(props: ProductMediaProps) {
               )}
               {showSaleBadge && (
                 <SaleBadge
-                  price={minVariantPrice as MoneyV2}
-                  compareAtPrice={maxVariantPrice as MoneyV2}
+                  price={selectedVariant?.price as MoneyV2}
+                  compareAtPrice={selectedVariant?.compareAtPrice as MoneyV2}
                 />
               )}
             </div>
@@ -315,14 +308,15 @@ export function ProductMedia(props: ProductMediaProps) {
               onSwiper={setThumbsSwiper}
               direction="horizontal"
               spaceBetween={12}
-              slidesPerView={5}
+              slidesPerView={6}
               watchSlidesProgress
               rewind
               freeMode
               className="w-full overflow-hidden"
               onInit={(sw) => {
-                ``
-                sw.el.parentElement.style.opacity = "1";
+                if (sw.el.parentElement) {
+                  sw.el.parentElement.style.opacity = "1";
+                }
               }}
               modules={[Navigation, Thumbs, FreeMode]}
             >

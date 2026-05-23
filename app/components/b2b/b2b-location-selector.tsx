@@ -38,10 +38,10 @@ export function B2BLocationSelector() {
 
   const locations = company?.locations?.edges
     ? company.locations.edges.map(
-      (location: CustomerCompanyLocationConnection) => {
-        return { ...location.node };
-      },
-    )
+        (location: CustomerCompanyLocationConnection) => {
+          return { ...location.node };
+        },
+      )
     : [];
 
   useEffect(() => {

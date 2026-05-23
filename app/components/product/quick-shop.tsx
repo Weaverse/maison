@@ -1,6 +1,7 @@
 import { HandbagSimpleIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { useThemeSettings } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Await, useFetcher, useRouteLoaderData } from "react-router";
@@ -23,6 +24,7 @@ export function QuickShop({
   data: QuickViewData;
   panelType?: "modal" | "drawer";
 }) {
+  const { bundleBadgeColor } = useThemeSettings();
   const { product } = data || {};
   const rootData = useRouteLoaderData<RootLoader>("root");
 
@@ -69,7 +71,10 @@ export function QuickShop({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: bundleBadgeColor }}
+              />
               <span className="text-xs text-body-subtle">In Stock</span>
             </div>
           </div>

@@ -62,7 +62,7 @@ function FiltersDrawer({
         <Button
           variant="outline"
           className={cn(
-            "flex h-12 items-center gap-1.5 border py-2",
+            "flex h-12 items-center gap-1.5 border py-2 text-sm",
             filtersPosition === "sidebar" && "lg:hidden",
           )}
           animate={false}

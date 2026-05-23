@@ -65,7 +65,6 @@ export function Footer() {
     newsletterDescription,
     newsletterPlaceholder,
     newsletterButtonText,
-    paymentIconsMode,
     showVisaIcon,
     showMastercardIcon,
     showAmexIcon,
@@ -91,30 +90,25 @@ export function Footer() {
     DINERS_CLUB: DinersClubIcon,
   };
 
-  // Get payment icons based on mode
+  // Get payment icons based on user selection
   const getPaymentIcons = () => {
-    if (paymentIconsMode === "none") {
-      return [];
-    }
-
-    // Manual mode
-    const manualIcons: string[] = [];
+    const icons: string[] = [];
     if (showVisaIcon) {
-      manualIcons.push("VISA");
+      icons.push("VISA");
     }
     if (showMastercardIcon) {
-      manualIcons.push("MASTERCARD");
+      icons.push("MASTERCARD");
     }
     if (showAmexIcon) {
-      manualIcons.push("AMEX");
+      icons.push("AMEX");
     }
     if (showPaypalIcon) {
-      manualIcons.push("PAYPAL");
+      icons.push("PAYPAL");
     }
     if (showDinersClubIcon) {
-      manualIcons.push("DINERS_CLUB");
+      icons.push("DINERS_CLUB");
     }
-    return manualIcons;
+    return icons;
   };
 
   const paymentIconKeys = getPaymentIcons();
@@ -275,7 +269,7 @@ export function Footer() {
 
           {/* Copyright - Order 3 on mobile/tablet (full width on tablet), Order 1 on desktop */}
           <div
-            className="order-3 md:w-full lg:order-1 lg:w-auto"
+            className="order-3 text-sm md:w-full lg:order-1 lg:w-auto"
             dangerouslySetInnerHTML={{ __html: copyright }}
           />
         </div>
@@ -356,7 +350,11 @@ function CompanyLocationSelector() {
         },
       )
     : [];
-  console.log("🚀 ~ CompanyLocationSelector ~ locations:", company, locations.length)
+  console.log(
+    "🚀 ~ CompanyLocationSelector ~ locations:",
+    company,
+    locations.length,
+  );
 
   if (locations.length <= 1 || !company) {
     return null;

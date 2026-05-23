@@ -140,7 +140,8 @@ export default function AccountSubscriptions() {
           <div className="space-y-2">
             <h3 className="text-lg font-medium">No active subscriptions</h3>
             <p className="text-body-subtle max-w-md mx-auto">
-              You don't have any active subscriptions yet. Subscribe to your favorite products to get regular deliveries and savings.
+              You don't have any active subscriptions yet. Subscribe to your
+              favorite products to get regular deliveries and savings.
             </p>
           </div>
           <Link to="/products">
@@ -157,21 +158,26 @@ export default function AccountSubscriptions() {
               {/* Card Header */}
               <div className="p-5 border-b border-line-subtle bg-gray-50/50 flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <div className="text-xs text-body-subtle font-medium uppercase tracking-wider">Status</div>
+                  <div className="text-xs text-body-subtle font-medium uppercase tracking-wider">
+                    Status
+                  </div>
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${getStatusBadgeClass(
-                      subscription.status
+                      subscription.status,
                     )}`}
                   >
                     {subscription.status}
                   </span>
                 </div>
                 <div className="text-right space-y-1">
-                  <div className="text-xs text-body-subtle font-medium uppercase tracking-wider">Frequency</div>
+                  <div className="text-xs text-body-subtle font-medium uppercase tracking-wider">
+                    Frequency
+                  </div>
                   <div className="text-sm font-medium">
-                    Every {getIntervalLabel(
+                    Every{" "}
+                    {getIntervalLabel(
                       subscription.billingPolicy.interval,
-                      subscription.billingPolicy.intervalCount.count
+                      subscription.billingPolicy.intervalCount.count,
                     )}
                   </div>
                 </div>
@@ -181,7 +187,9 @@ export default function AccountSubscriptions() {
               <div className="p-5 flex-1 space-y-6">
                 {/* Products */}
                 <div className="space-y-3">
-                  <h4 className="text-xs text-body-subtle font-medium uppercase tracking-wider">Product</h4>
+                  <h4 className="text-xs text-body-subtle font-medium uppercase tracking-wider">
+                    Product
+                  </h4>
                   <ul className="space-y-3">
                     {subscription.lines.nodes.map((line) => (
                       <li key={line.id} className="flex items-start gap-3">
@@ -210,10 +218,12 @@ export default function AccountSubscriptions() {
                     <div className="flex justify-between items-baseline text-sm">
                       <span className="text-body-subtle">Next Billing</span>
                       <span className="font-semibold">
-                        {new Date(subscription.nextBillingDate).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
+                        {new Date(
+                          subscription.nextBillingDate,
+                        ).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
                         })}
                       </span>
                     </div>
@@ -221,11 +231,14 @@ export default function AccountSubscriptions() {
                   <div className="flex justify-between items-baseline text-sm">
                     <span className="text-body-subtle">Started</span>
                     <span>
-                      {new Date(subscription.createdAt).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
+                      {new Date(subscription.createdAt).toLocaleDateString(
+                        undefined,
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </span>
                   </div>
                 </div>
@@ -234,7 +247,10 @@ export default function AccountSubscriptions() {
                   <div className="pt-4 border-t border-line-subtle">
                     <div className="flex flex-wrap gap-2">
                       {subscription.discounts.nodes.map((discount) => (
-                        <span key={discount.id} className="inline-flex items-center text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded">
+                        <span
+                          key={discount.id}
+                          className="inline-flex items-center text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded"
+                        >
                           <TagIcon className="w-3 h-3 mr-1" />
                           {discount.title}
                           {discount.value.__typename ===
@@ -286,5 +302,3 @@ export default function AccountSubscriptions() {
     </Section>
   );
 }
-
-

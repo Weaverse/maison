@@ -1,6 +1,8 @@
 import { createSchema } from "@weaverse/hydrogen";
+import { backgroundInputs } from "~/components/background-image";
+import { overlayInputs } from "~/components/overlay";
 import type { SectionProps } from "~/components/section";
-import { Section, sectionSettings } from "~/components/section";
+import { layoutInputs, Section } from "~/components/section";
 
 interface TestimonialsProps extends SectionProps {
   ref?: React.Ref<HTMLElement>;
@@ -21,18 +23,32 @@ export default Testimonials;
 export const schema = createSchema({
   type: "testimonials",
   title: "Testimonials",
-  childTypes: ["subheading", "heading", "paragraph", "testimonials-items"],
-  settings: sectionSettings,
+  childTypes: ["testimonials--header", "testimonials-items"],
+  settings: [
+    {
+      group: "Layout",
+      inputs: layoutInputs.map((input) =>
+        input.name === "gap" ? { ...input, defaultValue: 60 } : input,
+      ),
+    },
+    { group: "Background", inputs: backgroundInputs },
+    { group: "Overlay", inputs: overlayInputs },
+  ],
   presets: {
     children: [
       {
-        type: "heading",
-        content: "Testimonials",
-      },
-      {
-        type: "paragraph",
-        content:
-          "We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.",
+        type: "testimonials--header",
+        children: [
+          {
+            type: "heading",
+            content: "Testimonials",
+          },
+          {
+            type: "paragraph",
+            content:
+              "We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.",
+          },
+        ],
       },
       {
         type: "testimonials-items",

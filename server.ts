@@ -95,6 +95,13 @@ export async function createAppLoadContext(
     session,
     i18n: getLocaleFromRequest(request),
     cart: { queryFragment: CART_QUERY_FRAGMENT },
+    customerAccount: {
+      // Hydrogen 2026 hard-fails Customer Account API OAuth on any hostname
+      // that doesn't end with `.tryhydrogen.dev`. We use a custom tunnel
+      // (lee.weaverse.dev) with the redirect_uri already registered in the
+      // Shopify admin, so we opt out of the strict tunnel check.
+      useCustomAuthDomain: true,
+    },
   });
 
   return {
@@ -176,13 +183,13 @@ function getLocaleFromRequest(request: Request): I18nLocale {
 
   return COUNTRIES[firstPathPart]
     ? {
-      ...COUNTRIES[firstPathPart],
-      pathPrefix: firstPathPart,
-    }
+        ...COUNTRIES[firstPathPart],
+        pathPrefix: firstPathPart,
+      }
     : {
-      ...COUNTRIES.default,
-      pathPrefix: "",
-    };
+        ...COUNTRIES.default,
+        pathPrefix: "",
+      };
 }
 
 const CART_QUERY_FRAGMENT = `#graphql

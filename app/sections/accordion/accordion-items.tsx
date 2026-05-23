@@ -40,7 +40,7 @@ export const schema: HydrogenComponentSchema = {
         {
           type: "range",
           name: "gap",
-          label: "Items spacing",
+          label: "Content spacing",
           configs: {
             min: 0,
             max: 60,

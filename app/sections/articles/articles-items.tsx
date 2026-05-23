@@ -51,7 +51,7 @@ const variants = cva("grid", {
 
 interface ArticlesItemsProps
   extends VariantProps<typeof variants>,
-  HydrogenComponentProps {
+    HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;

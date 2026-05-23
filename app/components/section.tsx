@@ -197,7 +197,7 @@ export const layoutInputs: InspectorGroup["inputs"] = [
   {
     type: "range",
     name: "gap",
-    label: "Items spacing",
+    label: "Content spacing",
     configs: {
       min: 0,
       max: 60,

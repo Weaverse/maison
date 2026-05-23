@@ -9,7 +9,7 @@ import {
 } from "@shopify/hydrogen";
 import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import useScroll from "react-use/esm/useScroll";
 import type { CartApiQueryFragment } from "storefront-api.generated";
@@ -304,6 +304,7 @@ function ItemRemoveButton({
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds: [lineId] }}
+      fetcherKey="cart-line-remove"
     >
       <button
         className={clsx(
@@ -323,12 +324,20 @@ function ItemRemoveButton({
 function CartLineQuantityAdjust({ line }: { line: CartLine }) {
   const optimisticId = line?.id;
   const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
+  const [inputValue, setInputValue] = useState("");
+
+  const optimisticQuantity = optimisticData?.quantity || line?.quantity;
+
+  // Sync input value with optimisticQuantity changes
+  useEffect(() => {
+    if (optimisticQuantity !== undefined) {
+      setInputValue(String(optimisticQuantity));
+    }
+  }, [optimisticQuantity]);
 
   if (!line || typeof line?.quantity === "undefined") {
     return null;
   }
-
-  const optimisticQuantity = optimisticData?.quantity || line.quantity;
 
   const { id: lineId, isOptimistic, merchandise } = line;
 
@@ -346,6 +355,43 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
 
   // Check if we've reached the maximum
   const isAtMaximum = maximum !== null && nextQuantity > maximum;
+
+  function handleQuantityInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setInputValue(e.target.value);
+  }
+
+  function handleQuantityInputBlur() {
+    let newQuantity = Number.parseInt(inputValue, 10) || optimisticQuantity;
+    newQuantity = Math.max(minimum, newQuantity);
+    if (maximum) {
+      newQuantity = Math.min(maximum, newQuantity);
+    }
+    setInputValue(String(newQuantity));
+
+    if (newQuantity !== optimisticQuantity) {
+      const formData = new FormData();
+      formData.append(
+        CartForm.INPUT_NAME,
+        JSON.stringify({
+          action: CartForm.ACTIONS.LinesUpdate,
+          inputs: { lines: [{ id: lineId, quantity: newQuantity }] },
+        }),
+      );
+      fetch("/cart", { method: "POST", body: formData });
+    }
+  }
+
+  function handleQuantityInputKeyDown(
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) {
+    if (e.key === "Enter") {
+      handleQuantityInputBlur();
+      (e.target as HTMLInputElement).blur();
+    } else if (e.key === "Escape") {
+      setInputValue(String(optimisticQuantity));
+      (e.target as HTMLInputElement).blur();
+    }
+  }
 
   return (
     <>
@@ -375,12 +421,18 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
           </button>
         </UpdateCartButton>
 
-        <div
-          className="min-w-[4rem] px-3 text-center h-9 flex items-center justify-center"
+        <input
+          type="number"
+          value={inputValue}
+          onChange={handleQuantityInputChange}
+          onBlur={handleQuantityInputBlur}
+          onKeyDown={handleQuantityInputKeyDown}
+          className="w-16 px-3 text-center h-9 text-sm focus:outline-none bg-transparent"
           data-test="item-quantity"
-        >
-          {optimisticQuantity}
-        </div>
+          min={minimum}
+          max={maximum || undefined}
+          disabled={isOptimistic}
+        />
 
         <UpdateCartButton lines={[{ id: lineId, quantity: nextQuantity }]}>
           <button

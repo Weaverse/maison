@@ -83,7 +83,9 @@ function getPlayerSize(id: string) {
   return { width: "100%", height: "auto" };
 }
 
-const ReactPlayer = lazy(() => import("react-player/lazy"));
+// react-player v3 is ESM-only and lazy-loads individual players internally,
+// so the /lazy subpath is no longer needed or available
+const ReactPlayer = lazy(() => import("react-player"));
 
 export default function HeroVideo(props: HeroVideoProps) {
   const {
@@ -165,7 +167,7 @@ export default function HeroVideo(props: HeroVideoProps) {
         {inView && (
           <Suspense fallback={null}>
             <ReactPlayer
-              url={videoURL}
+              src={videoURL}
               playing
               muted
               loop={true}
@@ -253,7 +255,7 @@ export const schema = createSchema({
         {
           type: "range",
           name: "gap",
-          label: "Items spacing",
+          label: "Content spacing",
           configs: {
             min: 0,
             max: 40,

@@ -67,7 +67,6 @@ export default function ProductInformation(
               zoomTrigger={zoomTrigger}
               zoomButtonVisibility={zoomButtonVisibility}
               collectionTitle={product?.collections?.nodes?.[0]?.title}
-              priceRange={product?.priceRange}
               showCollectionBadge={showCollectionBadge}
               showSaleBadge={showSaleBadge}
             />
