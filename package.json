@@ -26,7 +26,7 @@
     "url": "https://github.com/weaverse/maison/issues"
   },
   "scripts": {
-    "build": "shopify hydrogen build --codegen",
+    "build": "shopify hydrogen codegen && react-router build",
     "dev": "shopify hydrogen dev --codegen --port 3456",
     "dev:ca": "shopify hydrogen dev --codegen --port 3456 --customer-account-push__unstable",
     "preview": "shopify hydrogen preview --build",
@@ -40,9 +40,14 @@
     "biome": "biome check",
     "biome:fix": "biome check --write",
     "format": "biome format --write",
-    "format:check": "biome format"
+    "format:check": "biome format",
+    "cf-typegen": "wrangler types && react-router typegen",
+    "check": "tsc && react-router build && wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "cf-dev": "wrangler dev --port 8787"
   },
   "dependencies": {
+    "@cloudflare/vite-plugin": "^1.15.3",
     "@fontsource/poppins": "^5.2.7",
     "@graphql-codegen/cli": "6.0.0",
     "@phosphor-icons/react": "2.1.10",
@@ -64,7 +69,7 @@
     "@shopify/hydrogen-react": "^2026.4.2",
     "@shopify/remix-oxygen": "3.0.0",
     "@tailwindcss/vite": "^4.3.0",
-    "@weaverse/hydrogen": "^5.13.0",
+    "@weaverse/hydrogen": "^5.14.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "colord": "2.9.3",

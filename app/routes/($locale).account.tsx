@@ -137,7 +137,7 @@ function Account({ customer, heading, featuredData }: AccountType) {
             {({ featuredProducts }) => (
               <div className="space-y-8 pt-20">
                 <h5>Featured products</h5>
-                <Swimlane>
+                <Swimlane className="gap-4">
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard
                       key={product.id}

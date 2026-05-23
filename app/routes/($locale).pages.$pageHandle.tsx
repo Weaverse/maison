@@ -31,7 +31,7 @@ export async function loader({ request, params, context }: RouteLoaderArgs) {
   ]);
 
   if (!page) {
-    throw new Response(null, { status: 404 });
+    throw new Response("page", { status: 404 });
   }
   redirectIfHandleIsLocalized(request, {
     handle: params.pageHandle,

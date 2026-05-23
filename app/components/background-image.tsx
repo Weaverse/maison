@@ -22,7 +22,7 @@ const variants = cva("absolute inset-0 z-[-1] h-full w-full", {
       "bottom right": "object-[bottom_right]",
     },
     enableImageHover: {
-      true: "transition-transform duration-300 ease-out group-hover:scale-105",
+      true: "transition-transform duration-700 ease-out group-hover:scale-105",
       false: "",
     },
   },

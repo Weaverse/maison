@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useFetcher } from "react-router";
-// import { BreadCrumb } from "~/components/breadcrumb";
+import { BreadCrumb } from "~/components/breadcrumb";
 import Link from "~/components/link";
 import { ProductCard } from "~/components/product/product-card";
 import { Section } from "~/components/section";
@@ -27,7 +27,7 @@ export function NotFound({ type = "page" }: { type?: string }) {
           </Link>
         </div>
       </div>
-      {/* <FeaturedProducts /> */}
+      <FeaturedProducts />
     </Section>
   );
 }

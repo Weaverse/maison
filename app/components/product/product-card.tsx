@@ -165,7 +165,7 @@ export function ProductCard({
       </div>
       <div
         className={clsx(
-          "flex flex-col gap-3 py-5 text-sm",
+          "product-card--content flex flex-col gap-3 py-4 text-sm",
           pcardBackgroundColor && "px-2",
           isVertical && [
             pcardAlignment === "left" && "text-left",

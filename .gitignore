@@ -23,5 +23,4 @@ scripts/
 templates/
 specs/
 .wrangler/
-wrangler.json
 .dev.vars

@@ -20,6 +20,6 @@ export function validateWeaverseData(weaverseData: WeaverseLoaderData) {
     (weaverseData?.page?.id?.includes("fallback") &&
       !weaverseData?.configs?.requestInfo?.queries?.isDesignMode)
   ) {
-    throw new Response(null, { status: 404 });
+    throw new Response("page", { status: 404 });
   }
 }
