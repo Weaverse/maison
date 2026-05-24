@@ -14,6 +14,9 @@ export default defineConfig(({ isSsrBuild }) => ({
   ],
   resolve: {
     tsconfigPaths: true,
+    alias: {
+      debug: "debug/src/browser.js",
+    },
   },
   build: {
     assetsInlineLimit: 0,
