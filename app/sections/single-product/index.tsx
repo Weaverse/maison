@@ -1,4 +1,8 @@
-import { Money, ShopPayButton } from "@shopify/hydrogen";
+import {
+  getAdjacentAndFirstAvailableVariants,
+  Money,
+  ShopPayButton,
+} from "@shopify/hydrogen";
 import type { ProductVariantComponent } from "@shopify/hydrogen/storefront-api-types";
 import {
   type ComponentLoaderArgs,
@@ -164,6 +168,7 @@ export default function SingleProduct(props: SingleProductProps) {
                 product={product}
                 selectedVariant={selectedVariant}
                 setSelectedVariant={setSelectedVariant}
+                variants={getAdjacentAndFirstAvailableVariants(product)}
               />
             </div>
             <Quantity value={quantity} onChange={setQuantity} />

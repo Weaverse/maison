@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite", "./node_modules/@weaverse/biome/biome.json"],
+  "extends": ["@weaverse/biome"],
   "linter": {
     "rules": {
       "style": {
@@ -9,7 +9,9 @@
         "useNamingConvention": "off",
         "noParameterAssign": "off",
         "noMagicNumbers": "off",
-        "noNestedTernary": "off"
+        "noNestedTernary": "off",
+        "useConsistentTypeDefinitions": "off",
+        "useConsistentArrowReturn": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",
@@ -19,8 +21,6 @@
         "noArrayIndexKey": "off"
       },
       "nursery": {
-        "useConsistentTypeDefinitions": "off",
-        "useConsistentArrowReturn": "off",
         "noUnnecessaryConditions": "off"
       },
       "correctness": {

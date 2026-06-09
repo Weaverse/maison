@@ -28,10 +28,7 @@ const AccordionItem = (props: AccordionItemProps) => {
 
     if (isSvgString(icon)) {
       return (
-        <span
-          className="h-5 w-5"
-          dangerouslySetInnerHTML={{ __html: icon }}
-        />
+        <span className="h-5 w-5" dangerouslySetInnerHTML={{ __html: icon }} />
       );
     }
 

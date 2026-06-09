@@ -2,8 +2,8 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
-  type WeaverseImage,
   useParentInstance,
+  type WeaverseImage,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
@@ -50,7 +50,7 @@ const variants = cva("h-auto w-full", {
 
 interface ImageWithTextImageProps
   extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  HydrogenComponentProps {
   image: WeaverseImage | string;
   imageAspectRatio: ImageAspectRatio;
   ref?: React.Ref<HTMLDivElement>;
@@ -97,7 +97,7 @@ function ImageWithTextImage(props: ImageWithTextImageProps) {
             "h-auto w-full",
             variants({ objectFit }),
             enableImageHover &&
-              "transition-transform duration-300 ease-out group-hover:scale-105",
+            "transition-transform duration-700 ease-out group-hover:scale-105",
           )}
         />
       </div>

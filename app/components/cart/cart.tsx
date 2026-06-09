@@ -304,6 +304,7 @@ function ItemRemoveButton({
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds: [lineId] }}
+      fetcherKey="cart-line-remove"
     >
       <button
         className={clsx(

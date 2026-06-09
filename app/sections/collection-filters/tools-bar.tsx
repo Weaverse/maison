@@ -1,6 +1,5 @@
 import { SlidersIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import clsx from "clsx";
 import { useLoaderData } from "react-router";
 import type { CollectionQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";
@@ -73,16 +72,9 @@ function FiltersDrawer({
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in"
-          style={{ "--fade-in-duration": "100ms" } as React.CSSProperties}
-        />
+        <Dialog.Overlay className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <Dialog.Content
-          className={clsx([
-            "fixed inset-y-0 z-10 w-full bg-(--color-background) md:w-[360px]",
-            "translate-x-full right-0 data-[state=open]:translate-x-0 data-[state=open]:animate-enter-from-right",
-            "flex flex-col",
-          ])}
+          className="fixed inset-y-0 right-0 z-10 flex w-full flex-col bg-(--color-background) data-[state=open]:animate-enter-from-right data-[state=closed]:animate-exit-to-right md:w-[360px]"
           aria-describedby={undefined}
         >
           <div className="flex items-center justify-between gap-2 px-5 py-3">

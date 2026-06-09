@@ -1,8 +1,7 @@
 import type { HydrogenComponentProps } from "@weaverse/hydrogen";
 import { createSchema } from "@weaverse/hydrogen";
-import { Section } from "~/components/section";
-import { layoutInputs } from "~/components/section";
 import { backgroundInputs } from "~/components/background-image";
+import { layoutInputs, Section } from "~/components/section";
 
 interface CompanyStoryProps extends HydrogenComponentProps {
   ref?: React.Ref<HTMLElement>;

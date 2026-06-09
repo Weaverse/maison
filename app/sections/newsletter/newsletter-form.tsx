@@ -1,10 +1,10 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import clsx from "clsx";
 import { useFetcher } from "react-router";
 import { Button } from "~/components/button";
 import type { CustomerApiPlayLoad } from "~/routes/($locale).api.customer";
-import type { VariantProps } from "class-variance-authority";
-import { cva } from "class-variance-authority";
 
 const inputVariants = cva("border max-w-full", {
   variants: {
@@ -65,7 +65,10 @@ function NewsLetterForm(props: NewsLetterInputProps) {
         data-motion="fade-up"
       >
         <div
-          className={clsx(inputVariants({ borderRadius }), "border-(--color-line)")}
+          className={clsx(
+            inputVariants({ borderRadius }),
+            "border-(--color-line)",
+          )}
           style={{
             backgroundColor: inputBackgroundColor,
           }}

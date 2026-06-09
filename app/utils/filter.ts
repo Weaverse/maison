@@ -16,6 +16,12 @@ export type SortParam =
   | "featured"
   | "relevance";
 
+export function clearPaginationParams(params: URLSearchParams) {
+  params.delete("cursor");
+  params.delete("direction");
+  return params;
+}
+
 export function getAppliedFilterLink(
   { filter }: AppliedFilter,
   params: URLSearchParams,
@@ -25,6 +31,7 @@ export function getAppliedFilterLink(
   for (const [k, v] of Object.entries(filter)) {
     paramsClone.delete(FILTER_URL_PREFIX + k, JSON.stringify(v));
   }
+  clearPaginationParams(paramsClone);
   return `${location.pathname}?${paramsClone.toString()}`;
 }
 
@@ -35,6 +42,7 @@ export function getFilterLink(
 ) {
   const paramsClone = new URLSearchParams(params);
   const newParams = filterInputToParams(input, paramsClone);
+  clearPaginationParams(newParams);
   return `${location.pathname}?${newParams.toString()}`;
 }
 

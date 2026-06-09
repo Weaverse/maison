@@ -26,7 +26,12 @@ export type NormalizedPredictiveSearchResults = Array<
 >;
 
 export type NormalizedPredictiveSearchResultItem = {
-  __typename?: "SearchQuerySuggestion" | "Product" | "Article" | "Collection" | "Page";
+  __typename?:
+    | "SearchQuerySuggestion"
+    | "Product"
+    | "Article"
+    | "Collection"
+    | "Page";
   handle: string;
   id: string;
   image?: PredictiveSearchResultItemImage;

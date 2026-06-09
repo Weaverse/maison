@@ -1,8 +1,8 @@
 import type { HydrogenComponentProps } from "@weaverse/hydrogen";
 import {
   createSchema,
-  type WeaverseImage,
   IMAGES_PLACEHOLDERS,
+  type WeaverseImage,
 } from "@weaverse/hydrogen";
 import { Image } from "~/components/image";
 import type { OverlayProps } from "~/components/overlay";
@@ -15,7 +15,7 @@ interface CompanyStoryImageData extends OverlayProps {
 
 interface CompanyStoryImageProps
   extends HydrogenComponentProps,
-  CompanyStoryImageData {
+    CompanyStoryImageData {
   ref?: React.Ref<HTMLDivElement>;
 }
 

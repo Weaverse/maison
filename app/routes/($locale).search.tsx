@@ -90,8 +90,8 @@ export async function loader({
     const buyerVariables =
       buyer?.companyLocationId && buyer?.customerAccessToken
         ? {
-          buyer,
-        }
+            buyer,
+          }
         : {};
 
     const data = await storefront.query<SearchQuery>(SEARCH_QUERY, {
