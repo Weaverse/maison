@@ -17,7 +17,14 @@ interface ArticlesProps extends SectionProps<ArticlesLoaderData>, ArticlesData {
 }
 
 export default function Articles(props: ArticlesProps) {
-  const { ref, children, ...rest } = props;
+  const {
+    ref,
+    children,
+    loaderData: _loaderData,
+    blog: _blog,
+    articlesToShow: _articlesToShow,
+    ...rest
+  } = props;
   return (
     <Section ref={ref} {...rest}>
       {children}

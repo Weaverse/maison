@@ -21,7 +21,14 @@ interface FeaturedCollectionsProps
 }
 
 export default function FeaturedCollections(props: FeaturedCollectionsProps) {
-  const { ref, children, ...rest } = props;
+  const {
+    ref,
+    children,
+    loaderData: _loaderData,
+    collections: _collections,
+    collectionsToShow: _collectionsToShow,
+    ...rest
+  } = props;
   const [scope] = useAnimation(ref);
   return (
     <Section ref={scope} {...rest}>

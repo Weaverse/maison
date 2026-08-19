@@ -4,7 +4,6 @@ import {
   flattenConnection,
   generateCacheControlHeader,
 } from "@shopify/hydrogen";
-import { data, type LoaderFunctionArgs } from "@shopify/remix-oxygen";
 import type {
   CustomerDetailsFragment,
   CustomerDetailsQuery,
@@ -12,7 +11,9 @@ import type {
 import { Suspense } from "react";
 import {
   Await,
+  data,
   Form,
+  type LoaderFunctionArgs,
   Outlet,
   useLoaderData,
   useMatches,

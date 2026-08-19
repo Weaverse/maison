@@ -1,8 +1,8 @@
 import { flattenConnection } from "@shopify/hydrogen";
 import type { FulfillmentStatus } from "@shopify/hydrogen/customer-account-api-types";
-import { type LoaderFunctionArgs, redirect } from "@shopify/remix-oxygen";
 import type { OrderFragment, OrderQuery } from "customer-account-api.generated";
 import type { MetaFunction } from "react-router";
+import { type LoaderFunctionArgs, redirect } from "react-router";
 // biome-ignore lint/style/noExportedImports: <explanation> --- IGNORE ---
 import { OrderDetails } from "~/components/customer/order-details";
 

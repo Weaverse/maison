@@ -2,10 +2,35 @@ import { reactRouter } from "@react-router/dev/vite";
 import { hydrogen } from "@shopify/hydrogen/vite";
 import { oxygen } from "@shopify/mini-oxygen/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { fileURLToPath } from "node:url";
+import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 
+const SSR_STUBBED_MODULES = new Set(["react-player"]);
+
+function ssrStubClientOnlyModules(): Plugin {
+  return {
+    name: "ssr-stub-client-only-modules",
+    enforce: "pre",
+    resolveId(id, _importer, options) {
+      if (options?.ssr && SSR_STUBBED_MODULES.has(id)) {
+        return fileURLToPath(
+          new URL("./app/utils/ssr-client-only-stub.ts", import.meta.url),
+        );
+      }
+      return null;
+    },
+  };
+}
+
 export default defineConfig(({ isSsrBuild }) => ({
-  plugins: [hydrogen(), oxygen(), reactRouter(), tailwindcss()],
+  plugins: [
+    hydrogen(),
+    oxygen(),
+    reactRouter(),
+    tailwindcss(),
+    ssrStubClientOnlyModules(),
+  ],
   resolve: {
     tsconfigPaths: true,
   },
@@ -15,7 +40,6 @@ export default defineConfig(({ isSsrBuild }) => ({
       rollupOptions: {
         output: {
           manualChunks(id: string) {
-            if (id.includes("react-player")) return "vendor-media";
             if (id.includes("swiper")) return "vendor-media";
             if (id.includes("react-share")) return "vendor-social";
             if (id.includes("@phosphor-icons")) return "vendor-icons";
@@ -39,23 +63,10 @@ export default defineConfig(({ isSsrBuild }) => ({
   ssr: {
     optimizeDeps: {
       include: [
-        "deepmerge",
         "@radix-ui/react-primitive",
         "jsonp",
         "classnames",
-        "typographic-trademark",
-        "typographic-single-spaces",
-        "typographic-registered-trademark",
-        "typographic-math-symbols",
-        "typographic-en-dashes",
-        "typographic-em-dashes",
-        "typographic-ellipses",
-        "typographic-currency",
-        "typographic-copyright",
-        "typographic-apostrophes-for-possessive-plurals",
-        "typographic-quotes",
-        "typographic-apostrophes",
-        "textr",
+        "react-share",
       ],
     },
   },

@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="@shopify/remix-oxygen" />
 /// <reference types="@shopify/oxygen-workers-types" />
 
 // Enhance TypeScript's built-in typings.
@@ -10,8 +9,8 @@ import type {
   Storefront as StorefrontBase,
 } from "@shopify/hydrogen";
 import type { WeaverseClient } from "@weaverse/hydrogen";
+import type { createHydrogenRouterContext } from "./app/.server/context";
 import type { I18nLocale } from "./app/types/locale";
-import type { createAppLoadContext } from "./server";
 
 declare global {
   /**
@@ -36,14 +35,15 @@ declare global {
 
 declare module "react-router" {
   interface AppLoadContext
-    extends Awaited<ReturnType<typeof createAppLoadContext>> {
-    // to change context type, change the return of createAppLoadContext() instead
+    extends Awaited<ReturnType<typeof createHydrogenRouterContext>> {
+    // to change context type, change createHydrogenRouterContext() instead
     // Override storefront type to use I18nLocale instead of I18nBase so that
     // pathPrefix / currency / label etc. are visible to consumers of context.
     storefront: Omit<StorefrontBase, "i18n"> & {
       i18n: I18nLocale;
     };
     weaverse: WeaverseClient;
+    additionalContext: HydrogenAdditionalContext;
   }
 
   // TODO: remove this once we've migrated our loaders to `Route.LoaderArgs`
