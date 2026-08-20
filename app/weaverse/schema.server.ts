@@ -46,7 +46,7 @@ export const themeSchema: HydrogenThemeSchema = {
             step: 10,
             unit: "px",
           },
-          defaultValue: 1280,
+          defaultValue: 1440,
         },
         {
           type: "range",
@@ -82,7 +82,7 @@ export const themeSchema: HydrogenThemeSchema = {
             step: 1,
             unit: "rem",
           },
-          defaultValue: 6,
+          defaultValue: 5,
         },
       ],
     },
@@ -160,13 +160,8 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "image",
           name: "logoData",
           label: "Logo",
-          defaultValue: {
-            id: "gid://shopify/MediaImage/34144817938616",
-            altText: "Logo",
-            url: "https://cdn.shopify.com/s/files/1/0623/5095/0584/files/Pilot_logo_b04f1938-06e5-414d-8a47-d5fcca424000.png?v=1697101908",
-            width: 320,
-            height: 116,
-          },
+          // No default: the header falls back to the shop-name wordmark, which
+          // is what the design specifies. Merchants can still upload an image.
         },
         {
           type: "image",
@@ -447,7 +442,9 @@ export const themeSchema: HydrogenThemeSchema = {
             step: 1,
             unit: "px",
           },
-          defaultValue: 60,
+          // 63 makes the 1.2 scale land on the design system's h3/h4/h6
+          // (44 / 37 / 26).
+          defaultValue: 63,
         },
         {
           type: "range",
@@ -458,7 +455,7 @@ export const themeSchema: HydrogenThemeSchema = {
             max: 2,
             step: 0.1,
           },
-          defaultValue: 1.2,
+          defaultValue: 1.1,
         },
         {
           type: "heading",
@@ -484,7 +481,7 @@ export const themeSchema: HydrogenThemeSchema = {
               { label: "250", value: "0.25em" },
             ],
           },
-          defaultValue: "-0.0125em",
+          defaultValue: "0.025em",
         },
         {
           type: "range",
@@ -496,7 +493,7 @@ export const themeSchema: HydrogenThemeSchema = {
             step: 1,
             unit: "px",
           },
-          defaultValue: 16,
+          defaultValue: 14,
         },
         {
           type: "range",
@@ -507,7 +504,7 @@ export const themeSchema: HydrogenThemeSchema = {
             max: 2,
             step: 0.1,
           },
-          defaultValue: 1.5,
+          defaultValue: 1.6,
         },
       ],
     },
@@ -524,7 +521,8 @@ export const themeSchema: HydrogenThemeSchema = {
             step: 1,
             unit: "px",
           },
-          defaultValue: 4,
+          // Design system's Border/radius-sm
+          defaultValue: 12,
         },
       ],
     },

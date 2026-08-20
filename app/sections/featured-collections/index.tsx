@@ -24,7 +24,7 @@ export default function FeaturedCollections(props: FeaturedCollectionsProps) {
   const { ref, children, ...rest } = props;
   const [scope] = useAnimation(ref);
   return (
-    <Section ref={scope} {...rest}>
+    <Section ref={scope} {...rest} overflow="unset">
       {children}
     </Section>
   );
@@ -142,8 +142,11 @@ export const schema = createSchema({
       },
       {
         type: "featured-collections--items",
+        layout: "carousel",
         mobileGridSize: "2",
-        desktopGridSize: "5",
+        desktopGridSize: "4",
+        mobileCarouselItems: 2,
+        desktopCarouselItems: 4,
         gap: 16,
         imageAspectRatio: "1/1",
         imageBorderRadius: 4,
@@ -151,6 +154,8 @@ export const schema = createSchema({
         cardBackgroundColor: "#DCDCDC",
         cardPadding: 12,
         cardBorderRadius: 4,
+        arrowsShape: "circle",
+        arrowsBgColor: "#EDEAE6",
       },
     ],
   },
