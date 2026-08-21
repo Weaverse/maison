@@ -6,6 +6,11 @@ import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 
+// Client-only heavy modules replaced with a stub in the SSR build. The
+// worker bundle inlines all dynamic imports, so React.lazy alone cannot
+// keep them out of the server file — react-player's media stack (hls.js,
+// dashjs, media-chrome, Mux/Vimeo) is ~3MB of cold-start parse cost that
+// can only ever run in a browser. See app/utils/ssr-client-only-stub.ts.
 const SSR_STUBBED_MODULES = new Set(["react-player"]);
 
 function ssrStubClientOnlyModules(): Plugin {
@@ -40,6 +45,11 @@ export default defineConfig(({ isSsrBuild }) => ({
       rollupOptions: {
         output: {
           manualChunks(id: string) {
+            // Do NOT force react-player into a manual chunk: it is
+            // lazy()-imported only by the hero-video section. Co-locating it
+            // with an eager dep (swiper, used by the homepage slideshow) drags
+            // its media stack (hls/mux/vimeo) onto every page and defeats the
+            // lazy boundary. Let Rollup split it with its dynamic import.
             if (id.includes("swiper")) return "vendor-media";
             if (id.includes("react-share")) return "vendor-social";
             if (id.includes("@phosphor-icons")) return "vendor-icons";

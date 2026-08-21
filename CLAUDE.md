@@ -191,7 +191,7 @@ Key integration points:
 
 ### Environment Configuration
 
-Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` and `@shopify/remix-oxygen` for environment handling.
+Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` for environment handling.
 
 ### Testing Strategy
 
@@ -203,7 +203,7 @@ Required environment variables are defined in `env.d.ts`. The project uses `@sho
 
 ### Biome Configuration
 
-The project extends from `ultracite` and `@weaverse/biome` configurations with these customizations:
+The project extends from `@weaverse/biome` with these customizations:
 - Double quotes for strings
 - Semicolons always
 - Trailing commas
@@ -240,6 +240,6 @@ The project extends from `ultracite` and `@weaverse/biome` configurations with t
 ### Key Configuration Files
 - **react-router.config.ts**: React Router v7 configuration (SSR enabled, app directory structure)
 - **vite.config.ts**: Includes Hydrogen, Oxygen, Tailwind CSS v4, and development server warmup
-- **biome.json**: Code quality configuration extending from `ultracite` and `@weaverse/biome`
+- **biome.json**: Code quality configuration extending from `@weaverse/biome`
 - **codegen.ts**: GraphQL code generation for Shopify Storefront and Customer Account APIs
 - **tsconfig.json**: TypeScript config with `~/` path alias, strict mode disabled for compatibility

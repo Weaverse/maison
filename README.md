@@ -94,8 +94,7 @@ npm run e2e
 Maison uses parallel data loading for optimal performance. Every route loads Weaverse data alongside GraphQL queries using `Promise.all()`:
 
 ```ts:routes/($locale)._index.tsx
-import { data } from '@shopify/remix-oxygen';
-import { type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { data, type LoaderFunctionArgs } from "react-router";
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront, weaverse } = context;

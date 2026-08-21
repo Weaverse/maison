@@ -114,11 +114,11 @@ See [`.weaverse/docs/customer-account-local-dev.md`](.weaverse/docs/customer-acc
 
 ### Environment Configuration
 
-Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` and `@shopify/remix-oxygen` for environment handling.
+Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` for environment handling.
 
 ### Biome Configuration
 
-The project extends from `ultracite` and `@weaverse/biome` configurations with these customizations:
+The project extends from `@weaverse/biome` with these customizations:
 - Double quotes for strings
 - Semicolons always
 - Trailing commas
