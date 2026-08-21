@@ -4,7 +4,7 @@ This file provides guidance to AI agents (Claude, GitHub Copilot, Cursor, etc.) 
 
 ## Project Overview
 
-This is **Maison**, a B2B Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React 19, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 20+ and uses Biome for linting/formatting.
+This is **Maison**, a B2B Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React 19, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 22.12+ and uses Biome for linting/formatting.
 
 ## Architecture Overview
 

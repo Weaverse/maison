@@ -56,8 +56,8 @@ These **Shopify (Plus)** brands built on top of Weaverse/Maison:
 
 **Requirements:**
 
-- Node.js version 20.0.0 or higher
-- `npm` or `pnpm` package manager
+- Node.js version 22.12.0 or higher
+- `npm` package manager
 
 **Follow these steps to get started with Maison and begin crafting your Hydrogen-driven storefront:**
 
