@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is **maison**, a Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 20+ and uses Biome for linting/formatting. Current version: 5.6.0 with upcoming 5.7.0 release.
+This is **maison**, a Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 22.12+ and uses Biome for linting/formatting. Current version: 5.6.0 with upcoming 5.7.0 release.
 
 ## Essential Commands
 
@@ -191,7 +191,7 @@ Key integration points:
 
 ### Environment Configuration
 
-Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` and `@shopify/remix-oxygen` for environment handling.
+Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` for environment handling.
 
 ### Testing Strategy
 
@@ -203,7 +203,7 @@ Required environment variables are defined in `env.d.ts`. The project uses `@sho
 
 ### Biome Configuration
 
-The project extends from `ultracite` and `@weaverse/biome` configurations with these customizations:
+The project extends from `@weaverse/biome` with these customizations:
 - Double quotes for strings
 - Semicolons always
 - Trailing commas
@@ -233,13 +233,13 @@ The project extends from `ultracite` and `@weaverse/biome` configurations with t
 ## Development Setup Requirements
 
 ### Node.js and Dependencies
-- **Node.js**: Version 20.0.0 or higher required
+- **Node.js**: Version 22.12.0 or higher required
 - **Package Manager**: npm (configured in package.json, don't use pnpm)
 - **Environment**: Copy `.env.example` to `.env` and configure Shopify store credentials
 
 ### Key Configuration Files
 - **react-router.config.ts**: React Router v7 configuration (SSR enabled, app directory structure)
 - **vite.config.ts**: Includes Hydrogen, Oxygen, Tailwind CSS v4, and development server warmup
-- **biome.json**: Code quality configuration extending from `ultracite` and `@weaverse/biome`
+- **biome.json**: Code quality configuration extending from `@weaverse/biome`
 - **codegen.ts**: GraphQL code generation for Shopify Storefront and Customer Account APIs
 - **tsconfig.json**: TypeScript config with `~/` path alias, strict mode disabled for compatibility

@@ -56,8 +56,8 @@ These **Shopify (Plus)** brands built on top of Weaverse/Maison:
 
 **Requirements:**
 
-- Node.js version 20.0.0 or higher
-- `npm` or `pnpm` package manager
+- Node.js version 22.12.0 or higher
+- `npm` package manager
 
 **Follow these steps to get started with Maison and begin crafting your Hydrogen-driven storefront:**
 
@@ -94,8 +94,7 @@ npm run e2e
 Maison uses parallel data loading for optimal performance. Every route loads Weaverse data alongside GraphQL queries using `Promise.all()`:
 
 ```ts:routes/($locale)._index.tsx
-import { data } from '@shopify/remix-oxygen';
-import { type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { data, type LoaderFunctionArgs } from "react-router";
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront, weaverse } = context;

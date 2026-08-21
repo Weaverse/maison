@@ -1,10 +1,10 @@
 import type { CustomerAddressInput } from "@shopify/hydrogen/customer-account-api-types";
-import { type ActionFunction, data, redirect } from "@shopify/remix-oxygen";
 import type {
   CustomerAddressCreateMutation,
   CustomerAddressDeleteMutation,
   CustomerAddressUpdateMutation,
 } from "customer-account-api.generated";
+import { type ActionFunction, data, redirect } from "react-router";
 import invariant from "tiny-invariant";
 // biome-ignore lint/style/noExportedImports: <explanation> --- IGNORE ---
 import { AccountEditAddressForm } from "~/components/customer/edit-address-form";

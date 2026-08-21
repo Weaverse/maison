@@ -45,10 +45,13 @@ const variants = cva("paragraph", {
   },
 });
 
+const BLOCK_ELEMENT_PATTERN =
+  /<(?:address|article|aside|blockquote|div|dl|fieldset|figcaption|figure|footer|form|h[1-6]|header|hgroup|hr|main|nav|ol|p|pre|section|table|ul)\b/i;
+
 function Paragraph(props: ParagraphProps) {
   const {
     ref,
-    as: Tag = "p",
+    as = "p",
     width,
     content,
     textSize,
@@ -57,6 +60,7 @@ function Paragraph(props: ParagraphProps) {
     className,
     ...rest
   } = props;
+  const Tag = as === "p" && BLOCK_ELEMENT_PATTERN.test(content) ? "div" : as;
   return (
     <Tag
       ref={ref}

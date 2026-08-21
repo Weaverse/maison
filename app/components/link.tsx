@@ -80,6 +80,7 @@ export interface LinkData
     Partial<LinkStyles>,
     VariantProps<typeof variants> {
   text?: string;
+  openInNewTab?: boolean;
 }
 
 export interface LinkProps
@@ -148,6 +149,7 @@ export function Link(props: LinkProps) {
     borderColorHover,
     children,
     target,
+    openInNewTab,
     ...rest
   } = props;
   const { enableViewTransition } = useThemeSettings();
@@ -170,6 +172,12 @@ export function Link(props: LinkProps) {
   }
 
   const isExternal = checkExternal(href);
+  const resolvedTarget =
+    target !== undefined
+      ? target
+      : openInNewTab || isExternal
+        ? "_blank"
+        : undefined;
 
   return (
     <RemixLink
@@ -178,7 +186,7 @@ export function Link(props: LinkProps) {
       to={href}
       style={style}
       className={cn(variants({ variant, className }))}
-      target={target !== undefined ? target : isExternal ? "_blank" : undefined}
+      target={resolvedTarget}
       {...rest}
     >
       {children || text}

@@ -3,6 +3,236 @@
 /* eslint-disable */
 import type * as StorefrontAPI from '@shopify/hydrogen/storefront-api-types';
 
+export type MoneyFragment = Pick<
+  StorefrontAPI.MoneyV2,
+  'currencyCode' | 'amount'
+>;
+
+export type CartLineFragment = Pick<
+  StorefrontAPI.CartLine,
+  'id' | 'quantity'
+> & {
+  attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+  cost: {
+    totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    amountPerQuantity: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+    >;
+  };
+  sellingPlanAllocation?: StorefrontAPI.Maybe<{
+    sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
+  }>;
+  merchandise: Pick<
+    StorefrontAPI.ProductVariant,
+    'id' | 'availableForSale' | 'requiresShipping' | 'title'
+  > & {
+    compareAtPrice?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+    >;
+    price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    image?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+    >;
+    product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'>;
+    selectedOptions: Array<
+      Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+    >;
+    quantityRule: Pick<
+      StorefrontAPI.QuantityRule,
+      'increment' | 'minimum' | 'maximum'
+    >;
+  };
+};
+
+export type CartLineComponentFragment = Pick<
+  StorefrontAPI.ComponentizableCartLine,
+  'id' | 'quantity'
+> & {
+  attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+  cost: {
+    totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    amountPerQuantity: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+    >;
+  };
+  sellingPlanAllocation?: StorefrontAPI.Maybe<{
+    sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
+  }>;
+  merchandise: Pick<
+    StorefrontAPI.ProductVariant,
+    | 'id'
+    | 'availableForSale'
+    | 'requiresShipping'
+    | 'title'
+    | 'requiresComponents'
+  > & {
+    compareAtPrice?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+    >;
+    price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    image?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+    >;
+    product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'>;
+    selectedOptions: Array<
+      Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+    >;
+    quantityRule: Pick<
+      StorefrontAPI.QuantityRule,
+      'increment' | 'minimum' | 'maximum'
+    >;
+    components: {
+      nodes: Array<
+        Pick<StorefrontAPI.ProductVariantComponent, 'quantity'> & {
+          productVariant: Pick<StorefrontAPI.ProductVariant, 'id' | 'title'> & {
+            product: Pick<StorefrontAPI.Product, 'handle'>;
+          };
+        }
+      >;
+    };
+  };
+};
+
+export type CartApiQueryFragment = Pick<
+  StorefrontAPI.Cart,
+  'updatedAt' | 'id' | 'checkoutUrl' | 'totalQuantity' | 'note'
+> & {
+  buyerIdentity: Pick<
+    StorefrontAPI.CartBuyerIdentity,
+    'countryCode' | 'email' | 'phone'
+  > & {
+    customer?: StorefrontAPI.Maybe<
+      Pick<
+        StorefrontAPI.Customer,
+        'id' | 'email' | 'firstName' | 'lastName' | 'displayName'
+      >
+    >;
+  };
+  lines: {
+    nodes: Array<
+      | (Pick<StorefrontAPI.CartLine, 'id' | 'quantity'> & {
+          attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+          cost: {
+            totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            amountPerQuantity: Pick<
+              StorefrontAPI.MoneyV2,
+              'currencyCode' | 'amount'
+            >;
+            compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+            >;
+          };
+          sellingPlanAllocation?: StorefrontAPI.Maybe<{
+            sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
+          }>;
+          merchandise: Pick<
+            StorefrontAPI.ProductVariant,
+            'id' | 'availableForSale' | 'requiresShipping' | 'title'
+          > & {
+            compareAtPrice?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+            >;
+            price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            image?: StorefrontAPI.Maybe<
+              Pick<
+                StorefrontAPI.Image,
+                'id' | 'url' | 'altText' | 'width' | 'height'
+              >
+            >;
+            product: Pick<
+              StorefrontAPI.Product,
+              'handle' | 'title' | 'id' | 'vendor'
+            >;
+            selectedOptions: Array<
+              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+            >;
+            quantityRule: Pick<
+              StorefrontAPI.QuantityRule,
+              'increment' | 'minimum' | 'maximum'
+            >;
+          };
+        })
+      | (Pick<StorefrontAPI.ComponentizableCartLine, 'id' | 'quantity'> & {
+          attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+          cost: {
+            totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            amountPerQuantity: Pick<
+              StorefrontAPI.MoneyV2,
+              'currencyCode' | 'amount'
+            >;
+            compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+            >;
+          };
+          sellingPlanAllocation?: StorefrontAPI.Maybe<{
+            sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
+          }>;
+          merchandise: Pick<
+            StorefrontAPI.ProductVariant,
+            | 'id'
+            | 'availableForSale'
+            | 'requiresShipping'
+            | 'title'
+            | 'requiresComponents'
+          > & {
+            compareAtPrice?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+            >;
+            price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            image?: StorefrontAPI.Maybe<
+              Pick<
+                StorefrontAPI.Image,
+                'id' | 'url' | 'altText' | 'width' | 'height'
+              >
+            >;
+            product: Pick<
+              StorefrontAPI.Product,
+              'handle' | 'title' | 'id' | 'vendor'
+            >;
+            selectedOptions: Array<
+              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+            >;
+            quantityRule: Pick<
+              StorefrontAPI.QuantityRule,
+              'increment' | 'minimum' | 'maximum'
+            >;
+            components: {
+              nodes: Array<
+                Pick<StorefrontAPI.ProductVariantComponent, 'quantity'> & {
+                  productVariant: Pick<
+                    StorefrontAPI.ProductVariant,
+                    'id' | 'title'
+                  > & {product: Pick<StorefrontAPI.Product, 'handle'>};
+                }
+              >;
+            };
+          };
+        })
+    >;
+  };
+  cost: {
+    subtotalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    totalDutyAmount?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+    >;
+    totalTaxAmount?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+    >;
+  };
+  attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+  discountCodes: Array<
+    Pick<StorefrontAPI.CartDiscountCode, 'code' | 'applicable'>
+  >;
+  appliedGiftCards: Array<
+    Pick<StorefrontAPI.AppliedGiftCard, 'id' | 'lastCharacters'> & {
+      amountUsed: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    }
+  >;
+};
+
 export type ProductVariantFragment = Pick<
   StorefrontAPI.ProductVariant,
   | 'id'
@@ -3689,236 +3919,6 @@ export type SwatchesQuery = {
       }
     >;
   };
-};
-
-export type MoneyFragment = Pick<
-  StorefrontAPI.MoneyV2,
-  'currencyCode' | 'amount'
->;
-
-export type CartLineFragment = Pick<
-  StorefrontAPI.CartLine,
-  'id' | 'quantity'
-> & {
-  attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
-  cost: {
-    totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    amountPerQuantity: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-  };
-  sellingPlanAllocation?: StorefrontAPI.Maybe<{
-    sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
-  }>;
-  merchandise: Pick<
-    StorefrontAPI.ProductVariant,
-    'id' | 'availableForSale' | 'requiresShipping' | 'title'
-  > & {
-    compareAtPrice?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-    price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    image?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-    >;
-    product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'>;
-    selectedOptions: Array<
-      Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
-    >;
-    quantityRule: Pick<
-      StorefrontAPI.QuantityRule,
-      'increment' | 'minimum' | 'maximum'
-    >;
-  };
-};
-
-export type CartLineComponentFragment = Pick<
-  StorefrontAPI.ComponentizableCartLine,
-  'id' | 'quantity'
-> & {
-  attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
-  cost: {
-    totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    amountPerQuantity: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-  };
-  sellingPlanAllocation?: StorefrontAPI.Maybe<{
-    sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
-  }>;
-  merchandise: Pick<
-    StorefrontAPI.ProductVariant,
-    | 'id'
-    | 'availableForSale'
-    | 'requiresShipping'
-    | 'title'
-    | 'requiresComponents'
-  > & {
-    compareAtPrice?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-    price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    image?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-    >;
-    product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'>;
-    selectedOptions: Array<
-      Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
-    >;
-    quantityRule: Pick<
-      StorefrontAPI.QuantityRule,
-      'increment' | 'minimum' | 'maximum'
-    >;
-    components: {
-      nodes: Array<
-        Pick<StorefrontAPI.ProductVariantComponent, 'quantity'> & {
-          productVariant: Pick<StorefrontAPI.ProductVariant, 'id' | 'title'> & {
-            product: Pick<StorefrontAPI.Product, 'handle'>;
-          };
-        }
-      >;
-    };
-  };
-};
-
-export type CartApiQueryFragment = Pick<
-  StorefrontAPI.Cart,
-  'updatedAt' | 'id' | 'checkoutUrl' | 'totalQuantity' | 'note'
-> & {
-  buyerIdentity: Pick<
-    StorefrontAPI.CartBuyerIdentity,
-    'countryCode' | 'email' | 'phone'
-  > & {
-    customer?: StorefrontAPI.Maybe<
-      Pick<
-        StorefrontAPI.Customer,
-        'id' | 'email' | 'firstName' | 'lastName' | 'displayName'
-      >
-    >;
-  };
-  lines: {
-    nodes: Array<
-      | (Pick<StorefrontAPI.CartLine, 'id' | 'quantity'> & {
-          attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
-          cost: {
-            totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-            amountPerQuantity: Pick<
-              StorefrontAPI.MoneyV2,
-              'currencyCode' | 'amount'
-            >;
-            compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
-              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-            >;
-          };
-          sellingPlanAllocation?: StorefrontAPI.Maybe<{
-            sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
-          }>;
-          merchandise: Pick<
-            StorefrontAPI.ProductVariant,
-            'id' | 'availableForSale' | 'requiresShipping' | 'title'
-          > & {
-            compareAtPrice?: StorefrontAPI.Maybe<
-              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-            >;
-            price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-            image?: StorefrontAPI.Maybe<
-              Pick<
-                StorefrontAPI.Image,
-                'id' | 'url' | 'altText' | 'width' | 'height'
-              >
-            >;
-            product: Pick<
-              StorefrontAPI.Product,
-              'handle' | 'title' | 'id' | 'vendor'
-            >;
-            selectedOptions: Array<
-              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
-            >;
-            quantityRule: Pick<
-              StorefrontAPI.QuantityRule,
-              'increment' | 'minimum' | 'maximum'
-            >;
-          };
-        })
-      | (Pick<StorefrontAPI.ComponentizableCartLine, 'id' | 'quantity'> & {
-          attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
-          cost: {
-            totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-            amountPerQuantity: Pick<
-              StorefrontAPI.MoneyV2,
-              'currencyCode' | 'amount'
-            >;
-            compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
-              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-            >;
-          };
-          sellingPlanAllocation?: StorefrontAPI.Maybe<{
-            sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
-          }>;
-          merchandise: Pick<
-            StorefrontAPI.ProductVariant,
-            | 'id'
-            | 'availableForSale'
-            | 'requiresShipping'
-            | 'title'
-            | 'requiresComponents'
-          > & {
-            compareAtPrice?: StorefrontAPI.Maybe<
-              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-            >;
-            price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-            image?: StorefrontAPI.Maybe<
-              Pick<
-                StorefrontAPI.Image,
-                'id' | 'url' | 'altText' | 'width' | 'height'
-              >
-            >;
-            product: Pick<
-              StorefrontAPI.Product,
-              'handle' | 'title' | 'id' | 'vendor'
-            >;
-            selectedOptions: Array<
-              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
-            >;
-            quantityRule: Pick<
-              StorefrontAPI.QuantityRule,
-              'increment' | 'minimum' | 'maximum'
-            >;
-            components: {
-              nodes: Array<
-                Pick<StorefrontAPI.ProductVariantComponent, 'quantity'> & {
-                  productVariant: Pick<
-                    StorefrontAPI.ProductVariant,
-                    'id' | 'title'
-                  > & {product: Pick<StorefrontAPI.Product, 'handle'>};
-                }
-              >;
-            };
-          };
-        })
-    >;
-  };
-  cost: {
-    subtotalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    totalDutyAmount?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-    totalTaxAmount?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-  };
-  attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
-  discountCodes: Array<
-    Pick<StorefrontAPI.CartDiscountCode, 'code' | 'applicable'>
-  >;
-  appliedGiftCards: Array<
-    Pick<StorefrontAPI.AppliedGiftCard, 'id' | 'lastCharacters'> & {
-      amountUsed: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    }
-  >;
 };
 
 interface GeneratedQueryTypes {
