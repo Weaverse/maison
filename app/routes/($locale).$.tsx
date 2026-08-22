@@ -1,6 +1,5 @@
-import type { LoaderFunctionArgs } from "@shopify/remix-oxygen";
 import { getWeaverseSeoMeta } from "@weaverse/hydrogen";
-import type { MetaFunction } from "react-router";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { validateWeaverseData, WeaverseContent } from "~/weaverse";
 
 export async function loader({ context }: LoaderFunctionArgs) {

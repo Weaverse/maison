@@ -4,7 +4,7 @@ This file provides guidance to AI agents (Claude, GitHub Copilot, Cursor, etc.) 
 
 ## Project Overview
 
-This is **Maison**, a B2B Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React 19, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 20+ and uses Biome for linting/formatting.
+This is **Maison**, a B2B Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React 19, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 22.12+ and uses Biome for linting/formatting.
 
 ## Architecture Overview
 
@@ -114,11 +114,11 @@ See [`.weaverse/docs/customer-account-local-dev.md`](.weaverse/docs/customer-acc
 
 ### Environment Configuration
 
-Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` and `@shopify/remix-oxygen` for environment handling.
+Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` for environment handling.
 
 ### Biome Configuration
 
-The project extends from `ultracite` and `@weaverse/biome` configurations with these customizations:
+The project extends from `@weaverse/biome` with these customizations:
 - Double quotes for strings
 - Semicolons always
 - Trailing commas

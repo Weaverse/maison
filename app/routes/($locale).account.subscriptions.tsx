@@ -1,14 +1,12 @@
 import { ArrowLeft, CircleNotchIcon, TagIcon, X } from "@phosphor-icons/react";
 import { Image } from "@shopify/hydrogen";
+import type { SubscriptionsContractsQueryQuery } from "customer-account-api.generated";
 import {
   type ActionFunctionArgs,
   data,
-  type LoaderFunctionArgs,
-} from "@shopify/remix-oxygen";
-import type { SubscriptionsContractsQueryQuery } from "customer-account-api.generated";
-import {
   Form,
   Link,
+  type LoaderFunctionArgs,
   useActionData,
   useLoaderData,
   useNavigation,

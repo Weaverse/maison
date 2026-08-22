@@ -12,8 +12,8 @@ import {
   type LoaderFunctionArgs,
   type MetaArgs,
   redirect,
-} from "@shopify/remix-oxygen";
-import { useLoaderData } from "react-router";
+  useLoaderData,
+} from "react-router";
 import type { CollectionQuery } from "storefront-api.generated";
 import invariant from "tiny-invariant";
 import { PRODUCT_CARD_FRAGMENT } from "~/graphql/fragments";

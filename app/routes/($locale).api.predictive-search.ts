@@ -1,5 +1,5 @@
 import { mapSelectedProductOptionToObject } from "@shopify/hydrogen";
-import { data, type LoaderFunctionArgs } from "@shopify/remix-oxygen";
+import { data, type LoaderFunctionArgs } from "react-router";
 import type {
   PredictiveArticleFragment,
   PredictiveCollectionFragment,

@@ -2,14 +2,13 @@ import { MagnifyingGlassIcon, UserIcon } from "@phosphor-icons/react";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
-import { Suspense } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 import {
   Await,
   useLocation,
   useRouteError,
   useRouteLoaderData,
 } from "react-router";
-import useWindowScroll from "react-use/esm/useWindowScroll";
 import Link from "~/components/link";
 import { Logo } from "~/components/logo";
 import type { RootLoader } from "~/root";
@@ -45,13 +44,29 @@ function useIsHomeCheck() {
   return pathname.replace(selectedLocale.pathPrefix, "") === "/";
 }
 
+function subscribeToScroll(onStoreChange: () => void) {
+  window.addEventListener("scroll", onStoreChange, { passive: true });
+  return () => window.removeEventListener("scroll", onStoreChange);
+}
+
+function getScrollSnapshot() {
+  return window.scrollY >= 50;
+}
+
+function getServerScrollSnapshot() {
+  return false;
+}
+
 export function Header() {
   const { enableTransparentHeader, headerWidth } = useThemeSettings();
   const isHome = useIsHomeCheck();
-  const { y } = useWindowScroll();
+  const scrolled = useSyncExternalStore(
+    subscribeToScroll,
+    getScrollSnapshot,
+    getServerScrollSnapshot,
+  );
   const routeError = useRouteError();
 
-  const scrolled = y >= 50;
   const enableTransparent = enableTransparentHeader && isHome && !routeError;
   const isTransparent = enableTransparent && !scrolled;
 

@@ -27,7 +27,15 @@ interface FeaturedProductsProps
 }
 
 export default function FeaturedProducts(props: FeaturedProductsProps) {
-  const { ref, loaderData, children, ...rest } = props;
+  const {
+    ref,
+    loaderData: _loaderData,
+    children,
+    selectionMethod: _selectionMethod,
+    collection: _collection,
+    products: _products,
+    ...rest
+  } = props;
   return (
     <Section ref={ref} {...rest} overflow="unset">
       {children}
