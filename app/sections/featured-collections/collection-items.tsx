@@ -6,11 +6,11 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { useRef } from "react";
-import { ArrowLeft, ArrowRight } from "~/components/icons";
+import type { CSSProperties } from "react";
 import { Image } from "~/components/image";
-import Link from "~/components/link";
-import { Swimlane } from "~/components/swimlane";
+import Link, { type LinkStyles, linkStylesInputs } from "~/components/link";
+import type { OverlayProps } from "~/components/overlay";
+import { Overlay, overlayInputs } from "~/components/overlay";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
@@ -24,58 +24,77 @@ const gridVariants = cva("grid", {
       "3": "grid-cols-3",
     },
     desktopGridSize: {
+      "2": "md:grid-cols-2",
       "3": "md:grid-cols-3",
       "4": "md:grid-cols-4",
       "5": "md:grid-cols-5",
       "6": "md:grid-cols-6",
     },
-  },
-  defaultVariants: {
-    mobileGridSize: "2",
-    desktopGridSize: "4",
-  },
-});
-
-const arrowButtonVariants = cva("p-4 pointer-events-auto", {
-  variants: {
-    arrowsShape: {
-      square: "",
-      rounded: "rounded-md",
-      circle: "rounded-full",
+    gap: {
+      0: "gap-0",
+      4: "gap-1",
+      8: "gap-2",
+      12: "gap-3",
+      16: "gap-4",
+      20: "gap-5",
+      24: "gap-6",
+      28: "gap-7",
+      32: "gap-8",
+      36: "gap-9",
+      40: "gap-10",
     },
   },
   defaultVariants: {
-    arrowsShape: "circle",
+    mobileGridSize: "2",
+    desktopGridSize: "5",
+    gap: 16,
   },
 });
 
-// Height-to-width factor for each supported aspect ratio, used to derive the
-// image height from the carousel column width. "adapt" is unknown at render
-// time, so it falls back to centering on the whole card.
-const IMAGE_HEIGHT_FACTOR: Partial<Record<ImageAspectRatio, number>> = {
-  "1/1": 1,
-  "3/4": 4 / 3,
-  "4/3": 3 / 4,
-  "16/9": 9 / 16,
-};
+const editorialGridVariants = cva("", {
+  variants: {
+    desktopGridSize: {
+      "2": "md:grid-cols-2",
+      "3": "md:grid-cols-3",
+      "4": "md:grid-cols-3 lg:grid-cols-4",
+      "5": "md:grid-cols-3 xl:grid-cols-5",
+      "6": "md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6",
+    },
+    gap: {
+      0: "md:gap-0",
+      4: "md:gap-1",
+      8: "md:gap-2",
+      12: "md:gap-3",
+      16: "md:gap-4",
+      20: "md:gap-5",
+      24: "md:gap-6",
+      28: "md:gap-7",
+      32: "md:gap-8",
+      36: "md:gap-9",
+      40: "md:gap-10",
+    },
+    contentPosition: {
+      over: "absolute inset-0 z-1 flex flex-col items-start justify-end",
+      below: "",
+    },
+  },
+});
 
-// Featured products centers its arrows on the whole product card, which — because
-// that card carries a much taller text block — lands at ~79% of the image height.
-// Collection cards have a short text block, so anchor to the image and reuse the
-// same fraction to keep both carousels visually aligned.
-const ARROWS_IMAGE_POSITION = 4.79;
+type LayoutStyle = "standard" | "editorial";
+type ContentPosition = "over" | "below";
 
 interface CollectionItemsData
   extends VariantProps<typeof gridVariants>,
-    VariantProps<typeof arrowButtonVariants>,
+    Partial<OverlayProps>,
+    Partial<LinkStyles>,
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
-  layout?: "grid" | "carousel";
-  gap?: number;
-  mobileCarouselItems?: number;
-  desktopCarouselItems?: number;
+  layoutStyle?: LayoutStyle;
+  contentPosition?: ContentPosition;
   imageAspectRatio: ImageAspectRatio;
   imageBorderRadius: number;
+  collectionNameColor?: string;
+  buttonText?: string;
   titleColor?: string;
   countColor?: string;
   showProductCount?: boolean;
@@ -83,10 +102,11 @@ interface CollectionItemsData
   cardHoverBackgroundColor?: string;
   cardPadding?: number;
   cardBorderRadius?: number;
-  arrowsBgColor?: string;
 }
 
-type CollectionCardProps = Pick<
+type Collection = FeaturedCollectionsLoaderData[0];
+
+type StandardCollectionCardProps = Pick<
   CollectionItemsData,
   | "imageAspectRatio"
   | "imageBorderRadius"
@@ -98,10 +118,10 @@ type CollectionCardProps = Pick<
   | "cardPadding"
   | "cardBorderRadius"
 > & {
-  collection: FeaturedCollectionsLoaderData[0];
+  collection: Collection;
 };
 
-function CollectionCard({
+function StandardCollectionCard({
   collection,
   imageAspectRatio,
   imageBorderRadius,
@@ -112,13 +132,12 @@ function CollectionCard({
   cardHoverBackgroundColor,
   cardPadding,
   cardBorderRadius,
-}: CollectionCardProps) {
+}: StandardCollectionCardProps) {
   return (
     <Link
       to={`/collections/${collection.handle}`}
       className={cn(
-        "group flex flex-col gap-5 transition-colors duration-300",
-        "bg-(--card-bg)",
+        "group flex flex-col gap-5 bg-(--card-bg) transition-colors duration-300",
         cardHoverBackgroundColor && "hover:bg-(--hover-bg)",
       )}
       style={
@@ -129,38 +148,28 @@ function CollectionCard({
           }),
           padding: `${cardPadding}px`,
           borderRadius: `${cardBorderRadius}px`,
-        } as React.CSSProperties
+        } as CSSProperties
       }
       data-motion="fade-up"
     >
-      {collection.image ? (
-        <div
-          className="overflow-hidden"
-          style={{ borderRadius: `${imageBorderRadius}px` }}
-        >
-          <Image
-            data={collection.image}
-            aspectRatio={calculateAspectRatio(
-              collection.image,
-              imageAspectRatio,
-            )}
-            sizes="auto"
-            className="transition-transform duration-300 group-hover:scale-105"
-          />
-        </div>
-      ) : (
-        <div
-          className="w-full overflow-hidden bg-gray-100"
-          style={{ borderRadius: `${imageBorderRadius}px` }}
-        >
-          <Image
-            data={{ url: IMAGES_PLACEHOLDERS.image }}
-            aspectRatio={imageAspectRatio}
-            sizes="auto"
-            className="transition-transform duration-300 group-hover:scale-105"
-          />
-        </div>
-      )}
+      <div
+        className={cn(
+          "w-full overflow-hidden",
+          !collection.image && "bg-gray-100",
+        )}
+        style={{ borderRadius: `${imageBorderRadius}px` }}
+      >
+        <Image
+          data={collection.image ?? { url: IMAGES_PLACEHOLDERS.image }}
+          aspectRatio={
+            collection.image
+              ? calculateAspectRatio(collection.image, imageAspectRatio)
+              : imageAspectRatio
+          }
+          sizes="auto"
+          className="transition-transform duration-300 group-hover:scale-105"
+        />
+      </div>
       <div className="flex flex-col gap-1">
         <div className="w-fit">
           <h6
@@ -170,14 +179,14 @@ function CollectionCard({
             {collection.title ?? "Title here"}
           </h6>
           <div
-            className="h-[1px] w-0 transition-all duration-500 group-hover:w-full"
+            className="h-px w-0 transition-all duration-500 group-hover:w-full"
             style={{ backgroundColor: titleColor || "currentColor" }}
           />
         </div>
         {showProductCount && (
           <span className="text-sm" style={{ color: countColor }}>
-            {collection?.products?.nodes?.length !== undefined
-              ? `${collection.products?.nodes?.length} products`
+            {collection.products?.nodes?.length !== undefined
+              ? `${collection.products.nodes.length} products`
               : "No products available"}
           </span>
         )}
@@ -186,15 +195,179 @@ function CollectionCard({
   );
 }
 
+type EditorialCollectionCardProps = Pick<
+  CollectionItemsData,
+  | "desktopGridSize"
+  | "imageAspectRatio"
+  | "imageBorderRadius"
+  | "contentPosition"
+  | "collectionNameColor"
+  | "buttonText"
+  | "enableOverlay"
+  | "overlayType"
+  | "overlayColor"
+  | "overlayColorHover"
+  | "overlayOpacity"
+  | "gradientDirection"
+  | "gradientFrom"
+  | "gradientFromOpacity"
+  | "gradientTo"
+  | "gradientToOpacity"
+  | "backgroundColor"
+  | "textColor"
+  | "borderColor"
+  | "backgroundColorHover"
+  | "textColorHover"
+  | "borderColorHover"
+> & {
+  collection: Collection;
+};
+
+function EditorialCollectionCard({
+  collection,
+  desktopGridSize,
+  imageAspectRatio,
+  imageBorderRadius,
+  contentPosition = "over",
+  collectionNameColor,
+  buttonText,
+  enableOverlay,
+  overlayType,
+  overlayColor,
+  overlayColorHover,
+  overlayOpacity,
+  gradientDirection,
+  gradientFrom,
+  gradientFromOpacity,
+  gradientTo,
+  gradientToOpacity,
+  backgroundColor,
+  textColor,
+  borderColor,
+  backgroundColorHover,
+  textColorHover,
+  borderColorHover,
+}: EditorialCollectionCardProps) {
+  const collectionPath = `/collections/${collection.handle}`;
+  const imageStyle = {
+    aspectRatio: collection.image
+      ? calculateAspectRatio(collection.image, imageAspectRatio)
+      : imageAspectRatio,
+    borderRadius: `${imageBorderRadius}px`,
+  };
+  const image = (
+    <Image
+      data={collection.image ?? { url: IMAGES_PLACEHOLDERS.image }}
+      sizes="(min-width: 48em) 33vw, 100vw"
+    />
+  );
+
+  return (
+    <div className="group group/overlay relative w-full" data-motion="fade-up">
+      {contentPosition === "below" ? (
+        <Link
+          to={collectionPath}
+          aria-label={`View ${collection.title} collection`}
+          className="block overflow-hidden"
+          style={imageStyle}
+        >
+          {image}
+        </Link>
+      ) : (
+        <div className="overflow-hidden" style={imageStyle}>
+          {image}
+        </div>
+      )}
+      {contentPosition === "over" && (
+        <Overlay
+          enableOverlay={Boolean(enableOverlay)}
+          overlayType={overlayType}
+          overlayColor={overlayColor ?? "#000000"}
+          overlayColorHover={overlayColorHover ?? overlayColor ?? "#000000"}
+          overlayOpacity={overlayOpacity ?? 30}
+          gradientDirection={gradientDirection}
+          gradientFrom={gradientFrom ?? "#000000"}
+          gradientFromOpacity={gradientFromOpacity}
+          gradientTo={gradientTo ?? "#000000"}
+          gradientToOpacity={gradientToOpacity ?? 0}
+          className="z-0"
+        />
+      )}
+      <div
+        className={cn(
+          contentPosition === "over" && "items-start",
+          editorialGridVariants({ contentPosition }),
+        )}
+      >
+        <div
+          className={cn(
+            contentPosition === "over"
+              ? "flex flex-col items-start text-left text-(--collection-name-color)"
+              : "py-4",
+            contentPosition === "over" && "p-7",
+            contentPosition === "over" &&
+              (desktopGridSize === "2" || desktopGridSize === "3") &&
+              "md:p-12",
+          )}
+          style={
+            { "--collection-name-color": collectionNameColor } as CSSProperties
+          }
+        >
+          {contentPosition === "over" ? (
+            <h5>{collection.title}</h5>
+          ) : (
+            <h6>{collection.title}</h6>
+          )}
+          {contentPosition === "over" && buttonText && (
+            <div className="grid grid-rows-[0fr] translate-y-4 opacity-0 transition-all duration-300 ease-out group-hover:mt-4 group-hover:grid-rows-[1fr] group-hover:translate-y-0 group-hover:opacity-100 xl:group-hover:mt-7">
+              <div className="overflow-hidden">
+                <Link
+                  to={collectionPath}
+                  variant="custom"
+                  backgroundColor={backgroundColor}
+                  textColor={textColor}
+                  borderColor={borderColor}
+                  backgroundColorHover={backgroundColorHover}
+                  textColorHover={textColorHover}
+                  borderColorHover={borderColorHover}
+                >
+                  {buttonText}
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CollectionItems(props: CollectionItemsData) {
   const {
     ref,
-    layout = "carousel",
-    gap = 16,
-    mobileCarouselItems = 2,
-    desktopCarouselItems = 4,
+    layoutStyle = "standard",
+    gap,
     imageAspectRatio,
     imageBorderRadius,
+    contentPosition,
+    collectionNameColor,
+    buttonText,
+    enableOverlay,
+    overlayType,
+    overlayColor,
+    overlayColorHover,
+    overlayOpacity,
+    gradientDirection,
+    gradientFrom,
+    gradientFromOpacity,
+    gradientTo,
+    gradientToOpacity,
+    backgroundColor,
+    textColor,
+    borderColor,
+    backgroundColorHover,
+    textColorHover,
+    borderColorHover,
     titleColor,
     countColor,
     showProductCount = true,
@@ -204,13 +377,10 @@ function CollectionItems(props: CollectionItemsData) {
     cardBorderRadius,
     mobileGridSize,
     desktopGridSize,
-    arrowsShape,
-    arrowsBgColor,
     ...rest
   } = props;
 
   const parent = useParentInstance();
-  const swimlaneRef = useRef<HTMLDivElement | null>(null);
   const itemsToShow = Number(parent.data?.data?.collectionsToShow ?? 10);
   const collections: FeaturedCollectionsLoaderData = parent.data?.loaderData
     ?.length
@@ -218,121 +388,69 @@ function CollectionItems(props: CollectionItemsData) {
     : new Array(itemsToShow).fill(COLLECTION_PLACEHOLDER);
   const items = collections.slice(0, itemsToShow);
 
-  const cardProps = {
-    imageAspectRatio,
-    imageBorderRadius,
-    titleColor,
-    countColor,
-    showProductCount,
-    cardBackgroundColor,
-    cardHoverBackgroundColor,
-    cardPadding,
-    cardBorderRadius,
-  };
-
-  // grid layout
-  if (layout === "grid") {
+  if (layoutStyle === "editorial") {
     return (
       <div
         ref={ref}
         {...rest}
-        className={cn(gridVariants({ mobileGridSize, desktopGridSize }))}
-        style={{ gap: `40px ${gap}px` }}
+        className={cn(
+          "grid w-full grid-cols-1 gap-2",
+          editorialGridVariants({ desktopGridSize, gap }),
+        )}
       >
         {items.map((collection, ind) => (
-          <CollectionCard
+          <EditorialCollectionCard
             key={`${collection.id}-${ind}`}
             collection={collection}
-            {...cardProps}
+            desktopGridSize={desktopGridSize}
+            imageAspectRatio={imageAspectRatio}
+            imageBorderRadius={imageBorderRadius}
+            contentPosition={contentPosition}
+            collectionNameColor={collectionNameColor}
+            buttonText={buttonText}
+            enableOverlay={enableOverlay}
+            overlayType={overlayType}
+            overlayColor={overlayColor}
+            overlayColorHover={overlayColorHover}
+            overlayOpacity={overlayOpacity}
+            gradientDirection={gradientDirection}
+            gradientFrom={gradientFrom}
+            gradientFromOpacity={gradientFromOpacity}
+            gradientTo={gradientTo}
+            gradientToOpacity={gradientToOpacity}
+            backgroundColor={backgroundColor}
+            textColor={textColor}
+            borderColor={borderColor}
+            backgroundColorHover={backgroundColorHover}
+            textColorHover={textColorHover}
+            borderColorHover={borderColorHover}
           />
         ))}
       </div>
     );
   }
 
-  // carousel layout
-  const handleScroll = (direction: number) => {
-    const container = swimlaneRef.current;
-    if (!container) {
-      return;
-    }
-
-    const children = Array.from(container.children) as HTMLElement[];
-    if (children.length === 0) {
-      return;
-    }
-
-    const itemWidth = children[0].offsetWidth + gap;
-    const currentIndex = Math.round(container.scrollLeft / itemWidth);
-    const targetIndex = Math.max(
-      0,
-      Math.min(children.length - 1, currentIndex + direction),
-    );
-
-    container.scrollTo({
-      left: targetIndex * itemWidth,
-      behavior: "smooth",
-    });
-  };
-
-  const handlePrev = () => handleScroll(-1);
-  const handleNext = () => handleScroll(1);
-
-  const padding = cardPadding ?? 0;
-  const heightFactor = IMAGE_HEIGHT_FACTOR[imageAspectRatio];
-  const arrowsTop = heightFactor
-    ? `calc(${padding}px + (var(--cols) - ${padding * 2}px) * ${heightFactor} * ${ARROWS_IMAGE_POSITION})`
-    : "50%";
-
   return (
     <div
       ref={ref}
       {...rest}
-      className="relative"
-      style={
-        {
-          "--mobile-cols": `calc((100% - ${mobileCarouselItems - 1} * ${gap}px) / ${mobileCarouselItems})`,
-          "--desktop-cols": `calc((100% - ${desktopCarouselItems - 1} * ${gap}px) / ${desktopCarouselItems})`,
-        } as React.CSSProperties
-      }
+      className={cn(gridVariants({ mobileGridSize, desktopGridSize, gap }))}
     >
-      <Swimlane
-        ref={swimlaneRef}
-        className="[grid-auto-columns:var(--mobile-cols)] md:[grid-auto-columns:var(--desktop-cols)]"
-        style={{ gap: `${gap}px` }}
-      >
-        {items.map((collection, ind) => (
-          <div key={`${collection.id}-${ind}`} className="snap-start">
-            <CollectionCard collection={collection} {...cardProps} />
-          </div>
-        ))}
-      </Swimlane>
-
-      {/* navi arrows */}
-      <div
-        className="absolute -left-2 -right-2 md:-left-5 md:-right-5 lg:-left-7 lg:-right-7 [--cols:var(--mobile-cols)] md:[--cols:var(--desktop-cols)] -translate-y-1/2 flex justify-between pointer-events-none z-[1]"
-        style={{ top: arrowsTop }}
-      >
-        <button
-          type="button"
-          onClick={handlePrev}
-          className={arrowButtonVariants({ arrowsShape })}
-          style={{ backgroundColor: arrowsBgColor }}
-          aria-label="Previous collection"
-        >
-          <ArrowLeft />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleNext}
-          className={arrowButtonVariants({ arrowsShape })}
-          style={{ backgroundColor: arrowsBgColor }}
-          aria-label="Next collection"
-        >
-          <ArrowRight />
-        </button>
-      </div>
+      {items.map((collection, ind) => (
+        <StandardCollectionCard
+          key={`${collection.id}-${ind}`}
+          collection={collection}
+          imageAspectRatio={imageAspectRatio}
+          imageBorderRadius={imageBorderRadius}
+          titleColor={titleColor}
+          countColor={countColor}
+          showProductCount={showProductCount}
+          cardBackgroundColor={cardBackgroundColor}
+          cardHoverBackgroundColor={cardHoverBackgroundColor}
+          cardPadding={cardPadding}
+          cardBorderRadius={cardBorderRadius}
+        />
+      ))}
     </div>
   );
 }
@@ -354,6 +472,14 @@ const COLLECTION_PLACEHOLDER: FeaturedCollectionsLoaderData[0] = {
   },
 };
 
+function isStandardLayout(data: CollectionItemsData) {
+  return (data.layoutStyle ?? "standard") === "standard";
+}
+
+function isEditorialOverlay(data: CollectionItemsData) {
+  return data.layoutStyle === "editorial" && data.contentPosition === "over";
+}
+
 export default CollectionItems;
 
 export const schema = createSchema({
@@ -361,35 +487,19 @@ export const schema = createSchema({
   title: "Collection items",
   settings: [
     {
-      group: "Layout",
+      group: "Collection items",
       inputs: [
         {
           type: "select",
-          name: "layout",
-          label: "Display mode",
-          defaultValue: "carousel",
+          name: "layoutStyle",
+          label: "Layout style",
+          defaultValue: "standard",
           configs: {
             options: [
-              { value: "grid", label: "Grid" },
-              { value: "carousel", label: "Carousel" },
+              { value: "standard", label: "Standard grid" },
+              { value: "editorial", label: "Editorial" },
             ],
           },
-        },
-        {
-          type: "range",
-          name: "mobileCarouselItems",
-          label: "Carousel items (mobile)",
-          defaultValue: 2,
-          configs: { min: 1, max: 4, step: 1 },
-          condition: (data: CollectionItemsData) => data.layout === "carousel",
-        },
-        {
-          type: "range",
-          name: "desktopCarouselItems",
-          label: "Carousel items (desktop)",
-          defaultValue: 4,
-          configs: { min: 1, max: 6, step: 1 },
-          condition: (data: CollectionItemsData) => data.layout === "carousel",
         },
         {
           type: "toggle-group",
@@ -402,22 +512,22 @@ export const schema = createSchema({
               { value: "2", label: "2" },
             ],
           },
-          condition: (data: CollectionItemsData) => data.layout === "grid",
+          condition: isStandardLayout,
         },
         {
           type: "toggle-group",
           name: "desktopGridSize",
           label: "Items per row (desktop)",
-          defaultValue: "4",
+          defaultValue: "5",
           configs: {
             options: [
+              { value: "2", label: "2" },
               { value: "3", label: "3" },
               { value: "4", label: "4" },
               { value: "5", label: "5" },
               { value: "6", label: "6" },
             ],
           },
-          condition: (data: CollectionItemsData) => data.layout === "grid",
         },
         {
           type: "range",
@@ -434,32 +544,6 @@ export const schema = createSchema({
       ],
     },
     {
-      group: "Navigation",
-      inputs: [
-        {
-          type: "toggle-group",
-          name: "arrowsShape",
-          label: "Arrows shape",
-          defaultValue: "circle",
-          configs: {
-            options: [
-              { value: "square", label: "Square", icon: "square" },
-              { value: "rounded", label: "Rounded", icon: "squircle" },
-              { value: "circle", label: "Circle", icon: "circle" },
-            ],
-          },
-          condition: (data: CollectionItemsData) => data.layout === "carousel",
-        },
-        {
-          type: "color",
-          name: "arrowsBgColor",
-          label: "Arrows background color",
-          defaultValue: "#EDEAE6",
-          condition: (data: CollectionItemsData) => data.layout === "carousel",
-        },
-      ],
-    },
-    {
       group: "Collection card",
       inputs: [
         {
@@ -467,11 +551,13 @@ export const schema = createSchema({
           name: "cardBackgroundColor",
           label: "Card background",
           defaultValue: "#DCDCDC",
+          condition: isStandardLayout,
         },
         {
           type: "color",
           name: "cardHoverBackgroundColor",
           label: "Card hover background",
+          condition: isStandardLayout,
         },
         {
           type: "range",
@@ -479,6 +565,7 @@ export const schema = createSchema({
           label: "Card padding",
           defaultValue: 12,
           configs: { min: 0, max: 32, step: 1, unit: "px" },
+          condition: isStandardLayout,
         },
         {
           type: "range",
@@ -486,6 +573,7 @@ export const schema = createSchema({
           label: "Card border radius",
           defaultValue: 4,
           configs: { min: 0, max: 50, step: 1, unit: "px" },
+          condition: isStandardLayout,
         },
         {
           type: "select",
@@ -516,31 +604,78 @@ export const schema = createSchema({
             unit: "px",
           },
         },
-        { type: "color", name: "titleColor", label: "Title color" },
-        { type: "color", name: "countColor", label: "Count color" },
+        {
+          type: "color",
+          name: "titleColor",
+          label: "Title color",
+          condition: isStandardLayout,
+        },
+        {
+          type: "color",
+          name: "countColor",
+          label: "Count color",
+          condition: isStandardLayout,
+        },
         {
           type: "switch",
           name: "showProductCount",
           label: "Show product count",
           defaultValue: true,
+          condition: isStandardLayout,
         },
       ],
     },
+    {
+      group: "Editorial card",
+      inputs: [
+        {
+          type: "select",
+          name: "contentPosition",
+          label: "Content position",
+          configs: {
+            options: [
+              { value: "over", label: "Over image" },
+              { value: "below", label: "Below image" },
+            ],
+          },
+          defaultValue: "over",
+          condition: (data: CollectionItemsData) =>
+            data.layoutStyle === "editorial",
+        },
+        {
+          type: "color",
+          name: "collectionNameColor",
+          label: "Collection name color",
+          defaultValue: "#ffffff",
+          condition: isEditorialOverlay,
+        },
+        {
+          type: "heading",
+          label: "Overlay",
+          condition: isEditorialOverlay,
+        },
+        ...overlayInputs.map((input) => ({
+          ...input,
+          condition: isEditorialOverlay,
+        })),
+        {
+          type: "heading",
+          label: "Button (optional)",
+          condition: isEditorialOverlay,
+        },
+        {
+          type: "text",
+          name: "buttonText",
+          label: "Button text",
+          defaultValue: "Discover now",
+          placeholder: "Discover now",
+          condition: isEditorialOverlay,
+        },
+        ...linkStylesInputs.map((input) => ({
+          ...input,
+          condition: isEditorialOverlay,
+        })),
+      ],
+    },
   ],
-  presets: {
-    layout: "carousel",
-    mobileGridSize: "2",
-    desktopGridSize: "4",
-    mobileCarouselItems: 2,
-    desktopCarouselItems: 4,
-    gap: 16,
-    imageAspectRatio: "1/1",
-    imageBorderRadius: 4,
-    showProductCount: true,
-    cardBackgroundColor: "#DCDCDC",
-    cardPadding: 12,
-    cardBorderRadius: 4,
-    arrowsShape: "circle",
-    arrowsBgColor: "#EDEAE6",
-  },
 });
