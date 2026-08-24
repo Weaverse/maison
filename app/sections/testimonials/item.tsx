@@ -4,64 +4,85 @@ import {
   IMAGES_PLACEHOLDERS,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
-import clsx from "clsx";
 import { Image } from "~/components/image";
 
 interface TestimonialItemProps extends HydrogenComponentProps {
   ref: React.Ref<HTMLDivElement>;
-  heading: string;
   content: string;
+  image: WeaverseImage;
+  badgeText: string;
+  badgeBackgroundColor?: string;
   authorImage: WeaverseImage;
   authorName: string;
   authorTitle: string;
-  hideOnMobile: boolean;
+}
+
+function resolveImage(value: WeaverseImage | string, altText: string) {
+  return typeof value === "object" ? value : { url: value, altText };
 }
 
 export default function TestimonialItem(props: TestimonialItemProps) {
   const {
     ref,
-    heading,
     content,
+    image,
+    badgeText,
+    badgeBackgroundColor,
     authorImage,
     authorName,
     authorTitle,
-    hideOnMobile,
     ...rest
   } = props;
 
   return (
-    <div
-      ref={ref}
-      {...rest}
-      data-motion="slide-in"
-      className={clsx(hideOnMobile && "hidden sm:block")}
-    >
-      <figure className="rounded-sm bg-gray-50 p-6">
-        <blockquote>
-          <div className="text-xl md:text-2xl">{heading}</div>
-          <p
-            className="my-4 text-gray-500"
-            suppressHydrationWarning
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        </blockquote>
-        <figcaption className="flex items-center space-x-3">
+    <div ref={ref} {...rest} data-motion="slide-in" className="h-full">
+      <figure className="flex h-full flex-col items-start justify-start gap-6 rounded-[16px] border border-line p-6 text-body">
+        <figcaption className="flex w-full items-center gap-2.5">
           <Image
-            className="h-9 w-9 rounded-full"
-            data={
-              typeof authorImage === "object"
-                ? authorImage
-                : { url: authorImage, altText: authorName }
-            }
             alt={authorName}
-            width={36}
+            className="size-9 shrink-0 rounded-[8px] object-cover"
+            data={resolveImage(authorImage, authorName)}
             sizes="auto"
+            width={36}
           />
-          <div className="space-y-0.5">
-            <div className="font-medium">{authorName}</div>
-            <div className="text-gray-500 text-sm">{authorTitle}</div>
+          <div className="flex flex-col justify-center gap-0.5 whitespace-nowrap">
+            <div className="font-semibold text-base leading-[1.6] tracking-[0.28px]">
+              {authorName}
+            </div>
+            <div className="text-sm leading-none tracking-[0.24px]">
+              {authorTitle}
+            </div>
           </div>
         </figcaption>
+
+        <div className="w-full overflow-hidden rounded-[12px]">
+          <Image
+            alt={authorName}
+            aspectRatio="1/1"
+            className="w-full object-cover"
+            data={resolveImage(image, authorName)}
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          />
+        </div>
+
+        {badgeText ? (
+          <div
+            className="flex w-fit items-center justify-center rounded-[8px] px-5 py-1.5"
+            style={{ backgroundColor: badgeBackgroundColor }}
+          >
+            <span className="whitespace-nowrap text-base leading-[1.6] tracking-[0.28px]">
+              {badgeText}
+            </span>
+          </div>
+        ) : null}
+
+        <blockquote className="flex w-full items-center">
+          <p
+            className="min-w-0 flex-1 text-base leading-[1.6] tracking-[0.28px]"
+            dangerouslySetInnerHTML={{ __html: content }}
+            suppressHydrationWarning
+          />
+        </blockquote>
       </figure>
     </div>
   );
@@ -75,17 +96,29 @@ export const schema = createSchema({
       group: "Testimonial",
       inputs: [
         {
+          type: "image",
+          name: "image",
+          label: "Image",
+          defaultValue: IMAGES_PLACEHOLDERS.product_1,
+        },
+        {
           type: "text",
-          name: "heading",
-          label: "Heading",
-          defaultValue: "Reliable international shipping",
-          placeholder: "Testimonial heading",
+          name: "badgeText",
+          label: "Badge",
+          defaultValue: "Pillow",
+          placeholder: "Product or category",
+        },
+        {
+          type: "color",
+          name: "badgeBackgroundColor",
+          label: "Badge background",
+          defaultValue: "#EBEAE5",
         },
         {
           type: "textarea",
           name: "content",
           label: "Content",
-          defaultValue: `I've ordered to multiple countries without issue. Their calculated duties/taxes and import fees make international delivery transparent.`,
+          defaultValue: `Stay organized with our spacious wardrobes. Tailored to fit your needs, these storage solutions offer a perfect blend of style.`,
           placeholder: "Testimonial content",
         },
         {
@@ -98,21 +131,15 @@ export const schema = createSchema({
           type: "text",
           name: "authorName",
           label: "Author Name",
-          defaultValue: "Emma Thomas",
+          defaultValue: "Emily Lee",
           placeholder: "Author name",
         },
         {
           type: "text",
           name: "authorTitle",
           label: "Author Title",
-          defaultValue: "International Customer",
+          defaultValue: "Housewife",
           placeholder: "Author title",
-        },
-        {
-          type: "switch",
-          label: "Hide on Mobile",
-          name: "hideOnMobile",
-          defaultValue: false,
         },
       ],
     },
