@@ -43,6 +43,8 @@ import * as HotspotsItem from "~/sections/hotspots/item";
 import * as ImageGallery from "~/sections/image-gallery";
 import * as ImageGalleryItem from "~/sections/image-gallery/image";
 import * as ImageGalleryItems from "~/sections/image-gallery/items";
+import * as ImageWithProduct from "~/sections/image-with-product";
+import * as ImageWithProductCard from "~/sections/image-with-product/product-card";
 import * as ImageWithText from "~/sections/image-with-text";
 import * as ImageWithTextContent from "~/sections/image-with-text/content";
 import * as ImageWithTextImage from "~/sections/image-with-text/image";
@@ -141,6 +143,8 @@ export const components: HydrogenComponent[] = [
   TestimonialHeader,
   TestimonialItems,
   TestimonialItem,
+  ImageWithProduct,
+  ImageWithProductCard,
   ImageGallery,
   ImageGalleryItems,
   ImageGalleryItem,
