@@ -33,7 +33,7 @@ export default function ImageWithProduct(props: ImageWithProductProps) {
       <div className="relative">
         {heading ? (
           <h2
-            className="mb-6 w-fit max-w-[min(100%,620px)] rounded-br-[20px] rounded-tr-[48px] px-8 py-4 font-normal text-[26px] leading-none md:px-[72px] md:py-8 md:text-[32px]"
+            className="mb-6 w-fit max-w-[min(100%,620px)] rounded-br-[20px] rounded-tr-[48px] px-8 py-4 font-normal text-[26px] leading-none md:px-18 md:py-8 md:text-[32px]"
             style={
               {
                 color: headingColor,
