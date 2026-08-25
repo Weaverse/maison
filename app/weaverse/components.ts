@@ -89,6 +89,7 @@ import * as RelatedArticlesHeader from "~/sections/related-articles/related-arti
 import * as RelatedArticlesItems from "~/sections/related-articles/related-articles-items";
 import * as RelatedProducts from "~/sections/related-products";
 import * as RelatedProductsHeader from "~/sections/related-products/related-products-header";
+import * as RichText from "~/sections/rich-text";
 import * as SingleProduct from "~/sections/single-product";
 import * as SlideShow from "~/sections/slideshow";
 import * as SlideShowSlide from "~/sections/slideshow/slide";
@@ -147,6 +148,7 @@ export const components: HydrogenComponent[] = [
   TestimonialItem,
   Highlights,
   HighlightsItem,
+  RichText,
   ImageWithProduct,
   ImageWithProductCard,
   ImageGallery,
