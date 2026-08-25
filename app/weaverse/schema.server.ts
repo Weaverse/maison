@@ -117,7 +117,9 @@ export const themeSchema: HydrogenThemeSchema = {
             step: 1,
             unit: "px",
           },
-          defaultValue: 36,
+          // 48 = 32px social buttons + 8px vertical padding on each side, which
+          // is also the height the tablet/mobile bar uses in the design.
+          defaultValue: 48,
         },
         {
           type: "range",
@@ -295,7 +297,7 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Footer background",
           name: "footerBgColor",
-          defaultValue: "#4E4C47",
+          defaultValue: "#38352F",
         },
         {
           type: "color",
@@ -1082,22 +1084,36 @@ export const themeSchema: HydrogenThemeSchema = {
           defaultValue: "fixed",
         },
         {
-          type: "image",
-          name: "footerLogoData",
-          label: "Logo",
+          type: "switch",
+          name: "showFooterWordmark",
+          label: "Show oversized wordmark",
+          defaultValue: true,
+        },
+        {
+          type: "text",
+          name: "footerWordmark",
+          label: "Wordmark text",
           defaultValue: "",
+          placeholder: "Defaults to the store name",
+          helpText:
+            "Set at 128px with wide letter spacing on desktop — keep it under about 8 characters so it does not overflow.",
+          condition: (theme) => theme.showFooterWordmark === true,
         },
         {
           type: "range",
-          name: "footerLogoWidth",
-          label: "Logo width",
-          configs: {
-            min: 20,
-            max: 200,
-            step: 1,
-            unit: "px",
-          },
-          defaultValue: 80,
+          name: "footerWordmarkScale",
+          label: "Wordmark size",
+          configs: { min: 50, max: 150, step: 5, unit: "%" },
+          defaultValue: 100,
+          helpText:
+            "100% spans the full footer width. Lower values shrink it, higher values let it bleed past the edges.",
+          condition: (theme) => theme.showFooterWordmark === true,
+        },
+        {
+          type: "text",
+          name: "footerBrandTitle",
+          label: "Brand heading",
+          defaultValue: "Our shop",
         },
         {
           type: "richtext",
