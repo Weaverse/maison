@@ -299,9 +299,9 @@ export function Footer() {
             )}
           </div>
         </div>
-        <div className="w-full border-t border-line-subtle" />
         <FooterMenu />
-        <div className="w-full border-t border-line-subtle" />
+        {/* Same treatment as the star divider below */}
+        <div className="h-px w-full bg-[#A79D95] opacity-35" />
         <div className="flex flex-col gap-6 py-6 md:flex-row md:flex-wrap md:justify-between lg:flex-nowrap lg:items-center">
           {/* Payment Icons - Order 2 on mobile/tablet, Order 3 on desktop */}
           {paymentIconKeys.length > 0 && (

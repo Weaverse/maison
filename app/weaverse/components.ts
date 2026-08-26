@@ -50,6 +50,8 @@ import * as ImageWithProductCard from "~/sections/image-with-product/product-car
 import * as ImageWithText from "~/sections/image-with-text";
 import * as ImageWithTextContent from "~/sections/image-with-text/content";
 import * as ImageWithTextImage from "~/sections/image-with-text/image";
+import * as Instagram from "~/sections/instagram";
+import * as InstagramItem from "~/sections/instagram/item";
 import * as JudgemeReview from "~/sections/judgeme-reviews";
 import * as JudgemeReviewList from "~/sections/judgeme-reviews/review-list";
 import * as JudgemeReviewSummary from "~/sections/judgeme-reviews/review-summary";
@@ -149,6 +151,8 @@ export const components: HydrogenComponent[] = [
   Highlights,
   HighlightsItem,
   RichText,
+  Instagram,
+  InstagramItem,
   ImageWithProduct,
   ImageWithProductCard,
   ImageGallery,
