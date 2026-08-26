@@ -313,7 +313,9 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Background color",
           name: "buttonPrimaryBg",
-          defaultValue: "#908379",
+          // Figma's `--color/primary/background`, used by the rich text CTA,
+          // the B2B location dialog and the single product button.
+          defaultValue: "#8A7F68",
         },
         {
           type: "color",
@@ -1149,31 +1151,6 @@ export const themeSchema: HydrogenThemeSchema = {
           name: "socialFacebook",
           label: "Facebook",
           defaultValue: "https://www.facebook.com/weaverse",
-        },
-        {
-          type: "heading",
-          label: "Store information",
-        },
-        {
-          type: "text",
-          name: "addressTitle",
-          label: "Title",
-          defaultValue: "OUR SHOP",
-          placeholder: "Our shop",
-        },
-        {
-          type: "text",
-          name: "storeAddress",
-          label: "Address",
-          defaultValue: "301 Front St W, Toronto, ON M5V 2T6, Canada",
-          placeholder: "301 Front St W, Toronto, ON M5V 2T6, Canada",
-        },
-        {
-          type: "text",
-          name: "storeEmail",
-          label: "Email",
-          defaultValue: "contact@my-store.com",
-          placeholder: "contact@my-store.com",
         },
         {
           type: "heading",
