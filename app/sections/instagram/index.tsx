@@ -32,6 +32,26 @@ export default function Instagram(props: InstagramProps) {
     ...rest
   } = props;
 
+  const handleLabel = (
+    <>
+      <span className="whitespace-nowrap text-base leading-none tracking-[0.28px] underline">
+        {handle}
+      </span>
+      <ArrowRight />
+    </>
+  );
+
+  const viewMoreClass =
+    "flex aspect-square w-full items-center justify-center rounded-[16px] bg-background p-4 text-center";
+
+  const viewMoreLabel = (
+    <span className="font-serif text-[24px] text-body-subtle leading-normal">
+      View more in
+      <br />
+      <span className="text-body">{handle}</span>
+    </span>
+  );
+
   return (
     <Section ref={ref} {...rest}>
       <div className="flex w-full flex-col gap-16">
@@ -43,16 +63,19 @@ export default function Instagram(props: InstagramProps) {
               </h3>
             ) : null}
             {handle ? (
-              <Link
-                className="flex shrink-0 items-center gap-2.5 p-1 text-body"
-                target="_blank"
-                to={profileUrl || "#"}
-              >
-                <span className="whitespace-nowrap text-base leading-none tracking-[0.28px] underline">
-                  {handle}
-                </span>
-                <ArrowRight />
-              </Link>
+              profileUrl ? (
+                <Link
+                  className="flex shrink-0 items-center gap-2.5 p-1 text-body"
+                  target="_blank"
+                  to={profileUrl}
+                >
+                  {handleLabel}
+                </Link>
+              ) : (
+                <div className="flex shrink-0 items-center gap-2.5 p-1 text-body">
+                  {handleLabel}
+                </div>
+              )
             ) : null}
           </div>
         )}
@@ -69,17 +92,13 @@ export default function Instagram(props: InstagramProps) {
           {children}
 
           {showViewMore ? (
-            <Link
-              className="flex aspect-square w-full items-center justify-center rounded-[16px] bg-background p-4 text-center"
-              target="_blank"
-              to={profileUrl || "#"}
-            >
-              <span className="font-serif text-[24px] text-body-subtle leading-normal">
-                View more in
-                <br />
-                <span className="text-body">{handle}</span>
-              </span>
-            </Link>
+            profileUrl ? (
+              <Link className={viewMoreClass} target="_blank" to={profileUrl}>
+                {viewMoreLabel}
+              </Link>
+            ) : (
+              <div className={viewMoreClass}>{viewMoreLabel}</div>
+            )
           ) : null}
         </div>
       </div>

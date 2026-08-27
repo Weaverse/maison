@@ -100,9 +100,9 @@ export default function ImageWithProductCard(props: ImageWithProductCardProps) {
           className="flex w-full max-w-[360px] flex-col gap-2 rounded-[16px] p-6"
           style={{ backgroundColor: labelBackgroundColor }}
         >
-          <div className="grid grid-rows-[0fr] transition-all duration-500 ease-out md:group-hover:grid-rows-[1fr]">
+          <div className="grid grid-rows-[0fr] transition-all duration-500 ease-out md:group-focus-within:grid-rows-[1fr] md:group-hover:grid-rows-[1fr]">
             <div className="overflow-hidden">
-              <div className="w-full translate-y-6 overflow-hidden rounded-[16px] opacity-0 transition-all duration-500 ease-out md:group-hover:translate-y-0 md:group-hover:opacity-100">
+              <div className="w-full translate-y-6 overflow-hidden rounded-[16px] opacity-0 transition-all duration-500 ease-out md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100 md:group-hover:translate-y-0 md:group-hover:opacity-100">
                 <Image
                   alt={image.altText || product?.title || "Product"}
                   aspectRatio="1/1"
@@ -160,7 +160,7 @@ export default function ImageWithProductCard(props: ImageWithProductCardProps) {
             {detailsText || "View product details"}
           </Link>
 
-          <div className="grid grid-rows-[0fr] transition-all duration-500 ease-out md:group-hover:grid-rows-[1fr]">
+          <div className="grid grid-rows-[0fr] transition-all duration-500 ease-out md:group-focus-within:grid-rows-[1fr] md:group-hover:grid-rows-[1fr]">
             <div className="overflow-hidden">
               <Link
                 to={href}
@@ -168,6 +168,7 @@ export default function ImageWithProductCard(props: ImageWithProductCardProps) {
                   "block w-full px-6 py-[18px] text-center text-sm tracking-wide",
                   "transition-all duration-500 ease-out",
                   "pointer-events-none translate-y-6 opacity-0",
+                  "md:group-focus-within:pointer-events-auto md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100",
                   "md:group-hover:pointer-events-auto md:group-hover:translate-y-0 md:group-hover:opacity-100",
                 )}
                 style={{

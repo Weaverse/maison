@@ -181,6 +181,11 @@ export function Link(props: LinkProps) {
       : openInNewTab || isExternal
         ? "_blank"
         : undefined;
+  // Anything opening in a new tab gets `noopener noreferrer`. Modern browsers
+  // imply `noopener` for `target="_blank"`, but merchant-entered URLs (social
+  // links, Instagram posts) are exactly the case worth being explicit about.
+  const resolvedRel =
+    resolvedTarget === "_blank" ? "noopener noreferrer" : undefined;
 
   return (
     <RemixLink
@@ -190,6 +195,7 @@ export function Link(props: LinkProps) {
       style={style}
       className={cn(variants({ variant, className }))}
       target={resolvedTarget}
+      rel={resolvedRel}
       {...rest}
     >
       {children || text}
