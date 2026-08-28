@@ -70,6 +70,7 @@ export default function ProductInformation(
               showCollectionBadge={showCollectionBadge}
               showSaleBadge={showSaleBadge}
               viewTransitionHandle={handle}
+              navInset={24}
             />
           </div>
           <div className="md:w-1/2 lg:w-1/3">

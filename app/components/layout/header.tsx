@@ -32,7 +32,7 @@ const variants = cva("", {
     padding: {
       full: "",
       stretch: "px-3 md:px-10 lg:px-16",
-      fixed: "mx-auto px-5 md:px-6 lg:px-6",
+      fixed: "mx-auto px-5 md:px-6 lg:px-10",
     },
   },
 });
@@ -116,9 +116,14 @@ export function Header() {
         >
           <MagnifyingGlassIcon className="h-5 w-5" />
         </button>
-        <Logo />
+        {/* Left column — grows on mobile so the logo stays centered between
+            the menu/search buttons and the actions; a flex-1 rail on desktop
+            so the nav sits dead-center of the header. */}
+        <div className="flex min-w-0 grow items-center lg:flex-1 lg:justify-start">
+          <Logo />
+        </div>
         <DesktopMenu />
-        <div className="z-1 flex items-center gap-1">
+        <div className="z-1 flex items-center gap-1 lg:flex-1 lg:justify-end">
           <PredictiveSearchButton />
           <AccountLink className="relative flex h-8 w-8 items-center justify-center" />
           <CartDrawer />

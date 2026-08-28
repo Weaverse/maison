@@ -38,14 +38,20 @@ import * as FeaturedProductHeader from "~/sections/featured-products/product-hea
 import * as FeaturedProductItems from "~/sections/featured-products/product-items";
 import * as HeroImage from "~/sections/hero-image";
 import * as HeroVideo from "~/sections/hero-video";
+import * as Highlights from "~/sections/highlights";
+import * as HighlightsItem from "~/sections/highlights/item";
 import * as Hotspots from "~/sections/hotspots";
 import * as HotspotsItem from "~/sections/hotspots/item";
 import * as ImageGallery from "~/sections/image-gallery";
 import * as ImageGalleryItem from "~/sections/image-gallery/image";
 import * as ImageGalleryItems from "~/sections/image-gallery/items";
+import * as ImageWithProduct from "~/sections/image-with-product";
+import * as ImageWithProductCard from "~/sections/image-with-product/product-card";
 import * as ImageWithText from "~/sections/image-with-text";
 import * as ImageWithTextContent from "~/sections/image-with-text/content";
 import * as ImageWithTextImage from "~/sections/image-with-text/image";
+import * as Instagram from "~/sections/instagram";
+import * as InstagramItem from "~/sections/instagram/item";
 import * as JudgemeReview from "~/sections/judgeme-reviews";
 import * as JudgemeReviewList from "~/sections/judgeme-reviews/review-list";
 import * as JudgemeReviewSummary from "~/sections/judgeme-reviews/review-summary";
@@ -85,6 +91,7 @@ import * as RelatedArticlesHeader from "~/sections/related-articles/related-arti
 import * as RelatedArticlesItems from "~/sections/related-articles/related-articles-items";
 import * as RelatedProducts from "~/sections/related-products";
 import * as RelatedProductsHeader from "~/sections/related-products/related-products-header";
+import * as RichText from "~/sections/rich-text";
 import * as SingleProduct from "~/sections/single-product";
 import * as SlideShow from "~/sections/slideshow";
 import * as SlideShowSlide from "~/sections/slideshow/slide";
@@ -141,6 +148,13 @@ export const components: HydrogenComponent[] = [
   TestimonialHeader,
   TestimonialItems,
   TestimonialItem,
+  Highlights,
+  HighlightsItem,
+  RichText,
+  Instagram,
+  InstagramItem,
+  ImageWithProduct,
+  ImageWithProductCard,
   ImageGallery,
   ImageGalleryItems,
   ImageGalleryItem,

@@ -3,8 +3,8 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-poppins: Poppins, sans-serif;
-  --font-serif: Arial, IBMPlexSerif, Palatino, ui-serif;
+  --font-sans: Montserrat, sans-serif;
+  --font-serif: Belleza, Palatino, ui-serif, serif;
 
   --breakpoint-sm: 32em;
   --breakpoint-md: 48em;
@@ -361,6 +361,7 @@
   h4,
   h5,
   h6 {
+    font-family: var(--font-serif);
     letter-spacing: var(--heading-base-spacing);
     line-height: var(--heading-base-line-height);
   }
@@ -443,7 +444,7 @@
   }
 
   html {
-    @apply font-poppins;
+    @apply font-sans;
     scroll-padding-top: 10rem;
   }
 

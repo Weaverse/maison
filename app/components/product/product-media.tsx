@@ -53,6 +53,15 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
   showCollectionBadge?: boolean;
   showSaleBadge?: boolean;
   viewTransitionHandle?: string;
+  /** Overrides the default `rounded` (4px) on the main image. */
+  imageBorderRadius?: number;
+  /** Overrides the default `rounded` (4px) on each thumbnail. */
+  thumbnailBorderRadius?: number;
+  /**
+   * Inset of the prev/next buttons from the image edge, in px. Omitted keeps
+   * the default, where the buttons straddle the edge from outside.
+   */
+  navInset?: number;
 }
 
 export function ProductMedia(props: ProductMediaProps) {
@@ -70,7 +79,31 @@ export function ProductMedia(props: ProductMediaProps) {
     showCollectionBadge,
     showSaleBadge,
     viewTransitionHandle,
+    imageBorderRadius,
+    thumbnailBorderRadius,
+    navInset,
   } = props;
+
+  const imageRadiusStyle =
+    imageBorderRadius === undefined
+      ? undefined
+      : { borderRadius: `${imageBorderRadius}px` };
+  const thumbnailRadiusStyle =
+    thumbnailBorderRadius === undefined
+      ? undefined
+      : { borderRadius: `${thumbnailBorderRadius}px` };
+  const navOutsideClasses =
+    "-left-2 -right-2 md:-left-3 md:-right-3 lg:-left-7 lg:-right-7";
+  // Below lg the buttons pull out by their own 16px padding (`p-4`), which puts
+  // the arrow glyph's outer edge exactly on the image edge. From lg they sit
+  // `navInset` inside instead.
+  const navInsetStyle =
+    navInset === undefined
+      ? undefined
+      : ({
+          "--nav-inset": "-16px",
+          "--nav-inset-lg": `${navInset}px`,
+        } as React.CSSProperties);
 
   const productPageHref = usePrefixPathWithLocale(
     `/products/${viewTransitionHandle || ""}`,
@@ -229,6 +262,7 @@ export function ProductMedia(props: ProductMediaProps) {
                 <SwiperSlide
                   key={med.id}
                   className="group bg-gray-100 rounded overflow-hidden"
+                  style={imageRadiusStyle}
                 >
                   <div
                     onClick={
@@ -297,7 +331,15 @@ export function ProductMedia(props: ProductMediaProps) {
             </div>
           )}
 
-          <div className="pointer-events-none absolute top-1/2 -left-2 -right-2 z-3 flex -translate-y-1/2 justify-between md:-left-3 md:-right-3 lg:-left-7 lg:-right-7">
+          <div
+            className={cn(
+              "pointer-events-none absolute top-1/2 z-3 flex -translate-y-1/2 justify-between",
+              navInset === undefined
+                ? navOutsideClasses
+                : "left-(--nav-inset) right-(--nav-inset) lg:left-(--nav-inset-lg) lg:right-(--nav-inset-lg)",
+            )}
+            style={navInsetStyle}
+          >
             <button
               type="button"
               className="media_slider__prev p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
@@ -340,6 +382,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       "h-auto! cursor-pointer rounded overflow-hidden",
                       "[&.swiper-slide-thumb-active]:border-[3px] [&.swiper-slide-thumb-active]:border-line [&.swiper-slide-thumb-active]:p-0",
                     )}
+                    style={thumbnailRadiusStyle}
                   >
                     <Image
                       data={{

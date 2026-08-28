@@ -8,30 +8,35 @@ import { layoutInputs, Section } from "~/components/section";
 
 const variants = cva("grid h-full w-full items-start", {
   variants: {
-    accordionLayout: {
-      column: "grid-cols-1 md:grid-cols-2",
-      row: "grid-cols-1 justify-center [&_.accordion--items]:max-w-[660px] [&_.accordion--items]:mx-auto",
+    desktopColumns: {
+      "1": "mx-auto max-w-[660px] grid-cols-1 md:grid-cols-1",
+      "2": "grid-cols-1 md:grid-cols-2",
     },
   },
   defaultVariants: {
-    accordionLayout: "column",
+    desktopColumns: "2",
   },
 });
 
 interface AccordionSectionProps
   extends SectionProps,
     VariantProps<typeof variants> {
+  accordionLayout?: "column" | "row";
   ref?: React.Ref<HTMLElement>;
 }
 
 const AccordionSection = (props: AccordionSectionProps) => {
-  const { ref, accordionLayout, children, ...rest } = props;
+  const { ref, accordionLayout, desktopColumns, children, ...rest } = props;
+  const resolvedDesktopColumns =
+    desktopColumns ?? (accordionLayout === "row" ? "1" : "2");
 
   return (
     <Section
       ref={ref}
       {...rest}
-      containerClassName={clsx(variants({ accordionLayout }))}
+      containerClassName={clsx(
+        variants({ desktopColumns: resolvedDesktopColumns }),
+      )}
     >
       {children}
     </Section>
@@ -55,14 +60,14 @@ export const schema: HydrogenComponentSchema = {
       group: "Accordion layout",
       inputs: [
         {
-          type: "toggle-group",
-          name: "accordionLayout",
-          label: "Accordion layout",
-          defaultValue: "column",
+          type: "select",
+          name: "desktopColumns",
+          label: "Desktop columns",
+          defaultValue: "2",
           configs: {
             options: [
-              { value: "column", label: "Column" },
-              { value: "row", label: "Row" },
+              { value: "1", label: "1 column" },
+              { value: "2", label: "2 columns" },
             ],
           },
         },
@@ -72,6 +77,7 @@ export const schema: HydrogenComponentSchema = {
   childTypes: ["accordion--info-group", "accordion--items"],
   presets: {
     gap: 16,
+    desktopColumns: "2",
     children: [
       {
         type: "accordion--info-group",

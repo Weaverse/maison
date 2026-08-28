@@ -32,11 +32,6 @@ export function B2BLocationProvider({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetcher.load is stable but fetcher is not
   useEffect(() => {
-    console.log(
-      "🚀 ~ B2BLocationProvider ~ fetcher:",
-      fetcher.data,
-      fetcher.state,
-    );
     if (fetcher.data || fetcher.state === "loading") {
       return;
     }

@@ -18,8 +18,12 @@ export function DesktopMenu() {
     const items = headerMenu.items as unknown as SingleMenuItem[];
 
     return (
-      <NavigationMenu.Root value={value} onValueChange={setValue}>
-        <NavigationMenu.List className="hidden h-full grow justify-center lg:flex">
+      <NavigationMenu.Root
+        className="hidden shrink-0 lg:block"
+        value={value}
+        onValueChange={setValue}
+      >
+        <NavigationMenu.List className="flex h-full items-center justify-center gap-8">
           {items.map((menuItem) => {
             const { id, items: childItems = [], title, to } = menuItem;
             const level = getMaxDepth(menuItem);
@@ -37,20 +41,21 @@ export function DesktopMenu() {
               <NavigationMenu.Item key={id} value={id}>
                 <NavigationMenu.Trigger
                   className={clsx([
-                    "flex h-full cursor-pointer items-center gap-1.5 px-3 py-2",
+                    "flex h-full cursor-pointer items-center gap-1.5 py-2",
+                    "tracking-[-0.01em]",
                     'data-[state="open"]:[&>svg]:rotate-180',
                     "focus:outline-hidden",
                   ])}
                 >
                   {hasSubmenu ? (
                     <>
-                      <span>{title}</span>
+                      <RevealUnderline>{title}</RevealUnderline>
                       <CaretDownIcon className="h-3.5 w-3.5 transition-transform" />
                     </>
                   ) : (
                     <NavigationMenu.Link asChild>
                       <Link to={to} className="transition-none">
-                        {title}
+                        <RevealUnderline>{title}</RevealUnderline>
                       </Link>
                     </NavigationMenu.Link>
                   )}

@@ -16,6 +16,7 @@ import type {
   ProductQuery,
   ProductVariantFragment,
 } from "storefront-api.generated";
+import { backgroundInputs } from "~/components/background-image";
 import { Button } from "~/components/button";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
@@ -35,6 +36,8 @@ interface SingleProductData {
   productsCount: number;
   product: WeaverseProduct;
   showThumbnails: boolean;
+  imageBorderRadius: number;
+  thumbnailBorderRadius: number;
 }
 
 type SingleProductProps = HydrogenComponentProps<
@@ -45,7 +48,15 @@ type SingleProductProps = HydrogenComponentProps<
   };
 
 export default function SingleProduct(props: SingleProductProps) {
-  const { ref, loaderData, product: _product, showThumbnails, ...rest } = props;
+  const {
+    ref,
+    loaderData,
+    product: _product,
+    showThumbnails,
+    imageBorderRadius,
+    thumbnailBorderRadius,
+    ...rest
+  } = props;
   const { storeDomain, product } = loaderData || {};
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedVariant, setSelectedVariant] =
@@ -122,18 +133,28 @@ export default function SingleProduct(props: SingleProductProps) {
   }
 
   return (
-    <Section ref={ref} {...rest}>
+    // `overflow="unset"` — the gallery's prev/next buttons sit outside the
+    // image column, and Section clips them by default.
+    <Section ref={ref} {...rest} overflow="unset">
       <div ref={scope}>
-        <div className="fade-up grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-12">
+        {/* 7:5 — Figma gives the gallery 760.4px and the info column 543.6px
+            inside a 1304px track, which is 7fr / 5fr to within 0.3px.
+            `minmax(0, …)` is required: a bare `7fr` means `minmax(auto, 7fr)`,
+            so the slider's min-content would push the track past the container.
+            Tailwind's own `grid-cols-2` uses `minmax(0, 1fr)` for this reason. */}
+        <div className="fade-up grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14">
           <ProductMedia
             mediaLayout="slider"
-            imageAspectRatio="adapt"
+            imageAspectRatio="1/1"
             media={product?.media.nodes}
             selectedVariant={selectedVariant}
             showThumbnails={showThumbnails}
+            imageBorderRadius={imageBorderRadius}
+            thumbnailBorderRadius={thumbnailBorderRadius}
+            navInset={24}
           />
           <div
-            className="flex flex-col justify-start space-y-5"
+            className="flex flex-col justify-start space-y-8"
             data-motion="slide-in"
           >
             <div className="space-y-4">
@@ -145,14 +166,17 @@ export default function SingleProduct(props: SingleProductProps) {
               <h3 data-motion="fade-up" className="tracking-tight">
                 {product?.title}
               </h3>
-              <VariantPrices variant={selectedVariant} />
+              <VariantPrices
+                variant={selectedVariant}
+                className="font-serif text-[26px] text-body-subtle leading-[1.1] tracking-[-0.52px]"
+              />
               <JudgemeStarsRating
                 productHandle={product.handle}
                 ratingText="{{rating}} ({{total_reviews}} reviews)"
                 errorText=""
               />
               <p
-                className="fade-up line-clamp-5 leading-relaxed"
+                className="fade-up text-base text-body-subtle leading-[1.6] tracking-[0.28px]"
                 suppressHydrationWarning
                 dangerouslySetInnerHTML={{ __html: product?.summary }}
               />
@@ -243,10 +267,20 @@ export const loader = async (args: ComponentLoaderArgs<SingleProductData>) => {
 export const schema = createSchema({
   type: "single-product",
   title: "Single product",
+  presets: {
+    backgroundColor: "#EBEAE5",
+    showThumbnails: true,
+    imageBorderRadius: 16,
+    thumbnailBorderRadius: 12,
+  },
   settings: [
     {
       group: "Layout",
-      inputs: layoutInputs,
+      inputs: layoutInputs.filter((inp) => inp.name !== "borderRadius"),
+    },
+    {
+      group: "Background",
+      inputs: backgroundInputs.filter((inp) => inp.name === "backgroundColor"),
     },
     {
       group: "Product",
@@ -266,7 +300,22 @@ export const schema = createSchema({
           label: "Show thumbnails",
           name: "showThumbnails",
           type: "switch",
-          defaultValue: false,
+          defaultValue: true,
+        },
+        {
+          label: "Image border radius",
+          name: "imageBorderRadius",
+          type: "range",
+          configs: { min: 0, max: 40, step: 2, unit: "px" },
+          defaultValue: 16,
+        },
+        {
+          label: "Thumbnail border radius",
+          name: "thumbnailBorderRadius",
+          type: "range",
+          configs: { min: 0, max: 40, step: 2, unit: "px" },
+          defaultValue: 12,
+          condition: (data: SingleProductData) => data.showThumbnails === true,
         },
       ],
     },

@@ -46,7 +46,7 @@ export function Logo() {
             )}
           </>
         ) : (
-          <div className="line-clamp-1 font-semibold text-lg sm:text-2xl uppercase tracking-tighter">
+          <div className="line-clamp-1 font-serif text-2xl leading-[1.1] uppercase tracking-[-0.06em] lg:text-4xl">
             {shopName}
           </div>
         )}

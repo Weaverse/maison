@@ -12,6 +12,7 @@ export interface OverlayData {
   // Gradient overlay options
   gradientDirection?: "to top" | "to bottom" | "to left" | "to right";
   gradientFrom?: string;
+  gradientFromOpacity?: number;
   gradientTo?: string;
   gradientToOpacity?: number;
 }
@@ -29,6 +30,7 @@ export function Overlay(props: OverlayProps) {
     overlayOpacity,
     gradientDirection,
     gradientFrom,
+    gradientFromOpacity = 100,
     gradientTo,
     gradientToOpacity,
     className,
@@ -66,7 +68,7 @@ export function Overlay(props: OverlayProps) {
           {
             background: `linear-gradient(${gradientDirection}, ${hexToRgba(
               gradientFrom,
-              100,
+              gradientFromOpacity,
             )} 0%, ${hexToRgba(gradientTo, gradientToOpacity)} 100%)`,
           } as CSSProperties
         }
@@ -165,6 +167,20 @@ export const overlayInputs: InspectorGroup["inputs"] = [
     name: "gradientFrom",
     label: "Gradient from color",
     defaultValue: "#000000",
+    condition: (data: OverlayData) =>
+      data.enableOverlay && data.overlayType === "gradient",
+  },
+  {
+    type: "range",
+    name: "gradientFromOpacity",
+    label: "Gradient from opacity",
+    defaultValue: 100,
+    configs: {
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: "%",
+    },
     condition: (data: OverlayData) =>
       data.enableOverlay && data.overlayType === "gradient",
   },

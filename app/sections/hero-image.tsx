@@ -19,7 +19,7 @@ export interface HeroImageProps extends VariantProps<typeof variants> {
 }
 
 const variants = cva(
-  "flex flex-col [&_.paragraph]:mx-[unset] [&_.heading]:max-w-[660px]",
+  "flex flex-col [&_.paragraph]:mx-[unset] [&_.heading]:max-w-[720px]",
   {
     variants: {
       height: {
@@ -34,16 +34,24 @@ const variants = cva(
         false: "",
       },
       contentPosition: {
-        "top left": "items-start justify-start [&_.paragraph]:text-left",
-        "top center": "items-center justify-start [&_.paragraph]:text-center",
-        "top right": "items-end justify-start [&_.paragraph]:text-right",
-        "center left": "items-start justify-center [&_.paragraph]:text-left",
+        "top left":
+          "items-start justify-start pt-7 pl-2 lg:pt-18 lg:pl-5 [&_.paragraph]:text-left",
+        "top center":
+          "items-center justify-start pt-7 lg:pt-18 [&_.paragraph]:text-center",
+        "top right":
+          "items-end justify-start pt-7 pr-2 lg:pt-18 lg:pr-5 [&_.paragraph]:text-right",
+        "center left":
+          "items-start justify-center pl-2 lg:pl-5 [&_.paragraph]:text-left",
         "center center":
           "items-center justify-center [&_.paragraph]:text-center",
-        "center right": "items-end justify-center [&_.paragraph]:text-right",
-        "bottom left": "items-start justify-end [&_.paragraph]:text-left",
-        "bottom center": "items-center justify-end [&_.paragraph]:text-center",
-        "bottom right": "items-end justify-end [&_.paragraph]:text-right",
+        "center right":
+          "items-end justify-center pr-2 lg:pr-5 [&_.paragraph]:text-right",
+        "bottom left":
+          "items-start justify-end pb-7 pl-2 lg:pb-18 lg:pl-5 [&_.paragraph]:text-left",
+        "bottom center":
+          "items-center justify-end pb-7 lg:pb-18 [&_.paragraph]:text-center",
+        "bottom right":
+          "items-end justify-end pr-2 pb-7 lg:pr-5 lg:pb-18 [&_.paragraph]:text-right",
       },
     },
     compoundVariants: [
@@ -164,34 +172,49 @@ export const schema = createSchema({
   ],
   childTypes: ["subheading", "heading", "paragraph", "button"],
   presets: {
-    height: "large",
+    height: "custom",
+    heightForMobile: 500,
+    heightForDesktop: 640,
     contentPosition: "center center",
+    width: "custom",
+    customWidth: 720,
+    gap: 32,
+    verticalPadding: "none",
     backgroundImage: IMAGES_PLACEHOLDERS.banner_1,
     backgroundFit: "cover",
     enableOverlay: true,
-    overlayOpacity: 40,
+    overlayType: "gradient",
+    gradientDirection: "to bottom",
+    gradientFrom: "#301F12",
+    gradientFromOpacity: 0,
+    gradientTo: "#A2927A",
+    gradientToOpacity: 80,
     children: [
       {
         type: "subheading",
-        content: "Subheading",
-        color: "#ffffff",
+        content: "Welcome industry insiders",
+        color: "#FEF6EB",
+        alignment: "center",
       },
       {
         type: "heading",
-        content: "Hero image with text overlay",
-        as: "h2",
-        color: "#ffffff",
+        content: "Pillows that feel like clouds",
+        as: "h3",
+        color: "#FEF6EB",
         size: "default",
+        alignment: "center",
       },
       {
         type: "paragraph",
         content:
-          "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.",
-        color: "#ffffff",
+          "Wide inventory of furniture with plenty of essentials that no home would be complete without.",
+        color: "#FEF6EB",
+        alignment: "center",
       },
       {
         type: "button",
-        text: "Discover now",
+        text: "Shop Now",
+        variant: "secondary",
       },
     ],
   },
