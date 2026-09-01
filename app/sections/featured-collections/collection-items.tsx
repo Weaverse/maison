@@ -121,6 +121,23 @@ type StandardCollectionCardProps = Pick<
   collection: Collection;
 };
 
+// The Storefront API has no count field on Collection, so the query fetches up
+// to 250 product ids. Past that the label reads "250+" rather than reporting a
+// wrong number.
+function getProductCountLabel(
+  products?: {
+    nodes: unknown[];
+    pageInfo?: { hasNextPage: boolean };
+  } | null,
+) {
+  if (!products) {
+    return null;
+  }
+  const total = products.nodes.length;
+  const suffix = products.pageInfo?.hasNextPage ? "+" : "";
+  return `${total}${suffix} ${total === 1 && !suffix ? "product" : "products"}`;
+}
+
 function StandardCollectionCard({
   collection,
   imageAspectRatio,
@@ -133,6 +150,8 @@ function StandardCollectionCard({
   cardPadding,
   cardBorderRadius,
 }: StandardCollectionCardProps) {
+  const productCountLabel = getProductCountLabel(collection.products);
+
   return (
     <Link
       to={`/collections/${collection.handle}`}
@@ -183,11 +202,9 @@ function StandardCollectionCard({
             style={{ backgroundColor: titleColor || "currentColor" }}
           />
         </div>
-        {showProductCount && (
+        {showProductCount && productCountLabel && (
           <span className="text-sm" style={{ color: countColor }}>
-            {collection.products?.nodes?.length !== undefined
-              ? `${collection.products.nodes.length} products`
-              : "No products available"}
+            {productCountLabel}
           </span>
         )}
       </div>
@@ -469,6 +486,7 @@ const COLLECTION_PLACEHOLDER: FeaturedCollectionsLoaderData[0] = {
   },
   products: {
     nodes: [],
+    pageInfo: { hasNextPage: false },
   },
 };
 
