@@ -66,7 +66,7 @@ export function CartSummary({
       className={clsx(
         layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
         layout === "page" &&
-          "sticky top-(--height-nav) grid h-fit w-full gap-6 bg-background-subtle/50 p-6 md:min-w-[380px] md:max-w-[420px] bg-white rounded-sm z-[1]",
+          "z-[1] grid h-fit w-full gap-6 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav) lg:w-[360px] lg:max-w-[360px]",
       )}
     >
       <h2
