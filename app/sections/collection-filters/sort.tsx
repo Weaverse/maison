@@ -50,7 +50,7 @@ export function Sort() {
           sideOffset={8}
           align="end"
           className={cn(
-            "flex h-fit w-52 flex-col gap-2 rounded border border-line-subtle bg-background p-5 z-50",
+            "z-50 flex h-fit w-60 flex-col items-start gap-4 rounded border border-line-subtle bg-background p-6 text-left text-sm leading-[1.6] tracking-[0.28px] uppercase",
             "data-[state=open]:animate-scale-in",
             "data-[state=closed]:animate-scale-out",
           )}
@@ -70,8 +70,8 @@ export function Sort() {
                 <Link
                   to={`${location.pathname}?${sortParams.toString()}`}
                   className={cn(
-                    "underline-offset-[6px] hover:underline hover:outline-hidden",
-                    currentSort.key === key && "font-bold",
+                    "font-normal outline-hidden transition-opacity hover:opacity-70 focus-visible:opacity-70",
+                    currentSort.key === key && "font-semibold",
                   )}
                   preventScrollReset
                 >
