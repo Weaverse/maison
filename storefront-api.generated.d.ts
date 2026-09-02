@@ -20,6 +20,15 @@ export type CartLineFragment = Pick<
       Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
     >;
   };
+  discountAllocations: Array<
+    | {discountedAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>}
+    | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+        discountedAmount: Pick<
+          StorefrontAPI.MoneyV2,
+          'currencyCode' | 'amount'
+        >;
+      })
+  >;
   sellingPlanAllocation?: StorefrontAPI.Maybe<{
     sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
   }>;
@@ -57,6 +66,15 @@ export type CartLineComponentFragment = Pick<
       Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
     >;
   };
+  discountAllocations: Array<
+    | {discountedAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>}
+    | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+        discountedAmount: Pick<
+          StorefrontAPI.MoneyV2,
+          'currencyCode' | 'amount'
+        >;
+      })
+  >;
   sellingPlanAllocation?: StorefrontAPI.Maybe<{
     sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
   }>;
@@ -124,6 +142,20 @@ export type CartApiQueryFragment = Pick<
               Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
             >;
           };
+          discountAllocations: Array<
+            | {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              }
+            | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              })
+          >;
           sellingPlanAllocation?: StorefrontAPI.Maybe<{
             sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
           }>;
@@ -166,6 +198,20 @@ export type CartApiQueryFragment = Pick<
               Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
             >;
           };
+          discountAllocations: Array<
+            | {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              }
+            | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              })
+          >;
           sellingPlanAllocation?: StorefrontAPI.Maybe<{
             sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
           }>;
@@ -215,14 +261,17 @@ export type CartApiQueryFragment = Pick<
   cost: {
     subtotalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    totalDutyAmount?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-    totalTaxAmount?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
   };
   attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+  discountAllocations: Array<
+    | {discountedAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>}
+    | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+        discountedAmount: Pick<
+          StorefrontAPI.MoneyV2,
+          'currencyCode' | 'amount'
+        >;
+      })
+  >;
   discountCodes: Array<
     Pick<StorefrontAPI.CartDiscountCode, 'code' | 'applicable'>
   >;

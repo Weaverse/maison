@@ -13,6 +13,7 @@ import {
   useOptimisticData,
 } from "@shopify/hydrogen";
 import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
+import { useThemeSettings } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
@@ -27,6 +28,7 @@ import { Section } from "~/components/section";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
 import { CartBestSellers } from "./cart-best-sellers";
+import { CartDiscount } from "./cart-discount";
 import { CartSummary } from "./cart-summary";
 
 type CartLine = OptimisticCart<CartApiQueryFragment>["lines"]["nodes"][0];
@@ -64,6 +66,7 @@ function CartDetails({
   layout: Layouts;
   cart: OptimisticCart<CartApiQueryFragment>;
 }) {
+  const { enableDiscountCode } = useThemeSettings();
   const content = (
     <div
       className={clsx(
@@ -79,12 +82,15 @@ function CartDetails({
       <div
         className={clsx(
           "space-y-4",
-          layout === "drawer" ? "flex-shrink-0" : "self-start",
+          layout === "drawer" ? "flex-shrink-0" : "self-start lg:w-[360px]",
         )}
       >
         <CartSummary cart={cart} layout={layout}>
           <CartCheckoutActions checkoutUrl={cart.checkoutUrl} layout={layout} />
         </CartSummary>
+        {layout === "page" && (
+          <CartDiscount cart={cart} canApply={Boolean(enableDiscountCode)} />
+        )}
       </div>
     </div>
   );
