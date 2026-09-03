@@ -486,7 +486,7 @@ function NoResults({
             return (
               <div className="space-y-6 pt-20">
                 <h5>Trending Products</h5>
-                <Swimlane>
+                <Swimlane className="gap-4">
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard
                       key={product.id}

@@ -292,8 +292,21 @@ function CartLineItem({
             <ItemRemoveButton lineId={id} className="-mt-1.5 -mr-2" />
           )}
         </div>
-        <div className="flex flex-col items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-2">
-          <div className="flex min-w-0 flex-col items-start gap-4 md:flex-row md:items-center md:gap-3">
+        <div
+          className={clsx(
+            layout === "drawer" &&
+              "flex flex-col-reverse items-start gap-2 md:flex-row md:items-center",
+            layout === "page" &&
+              "flex flex-col items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-2",
+          )}
+        >
+          <div
+            className={clsx(
+              layout === "drawer" && "flex min-w-0 items-center md:grow",
+              layout === "page" &&
+                "flex min-w-0 flex-col items-start gap-4 md:flex-row md:items-center md:gap-3",
+            )}
+          >
             <CartLineQuantityAdjust line={line} layout={layout} />
             {layout === "page" &&
               line.sellingPlanAllocation?.sellingPlan?.name && (
@@ -306,7 +319,10 @@ function CartLineItem({
           <CartLinePrice
             line={line}
             as="span"
-            className="ml-auto hidden md:block"
+            className={clsx(
+              layout === "drawer" && "shrink-0",
+              layout === "page" && "ml-auto hidden md:block",
+            )}
           />
         </div>
       </div>
@@ -428,8 +444,9 @@ function CartLineQuantityAdjust({
       </label>
       <div
         className={clsx(
-          "flex h-[45px] shrink-0 items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base",
-          layout === "page" && "w-[180px]",
+          "flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base",
+          layout === "page" && "shrink-0",
+          layout === "drawer" && "min-w-0",
         )}
       >
         <UpdateCartButton lines={[{ id: lineId, quantity: prevQuantity }]}>
