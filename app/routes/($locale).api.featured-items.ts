@@ -1,4 +1,4 @@
-import { data, type LoaderFunctionArgs } from "@shopify/remix-oxygen";
+import { data, type LoaderFunctionArgs } from "react-router";
 import type { FeaturedItemsQuery } from "storefront-api.generated";
 import invariant from "tiny-invariant";
 import { PRODUCT_CARD_FRAGMENT } from "~/graphql/fragments";

@@ -15,12 +15,15 @@ import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 
 export const variants = cva(
-  ["inline-flex transition-colors", "rounded-(--btn-border-radius)"],
+  [
+    "inline-flex items-center justify-center leading-none transition-colors",
+    "rounded-(--btn-border-radius)",
+  ],
   {
     variants: {
       variant: {
         primary: [
-          "border px-4 py-3",
+          "border px-6 py-[18px]",
           "text-(--btn-primary-text)",
           "bg-(--btn-primary-bg)",
           "border-(--btn-primary-bg)",
@@ -29,7 +32,7 @@ export const variants = cva(
           "hover:border-(--btn-primary-bg)",
         ],
         secondary: [
-          "border px-4 py-3",
+          "border px-6 py-[18px]",
           "text-(--btn-secondary-text)",
           "bg-(--btn-secondary-bg)",
           "border-(--btn-secondary-bg)",
@@ -38,7 +41,7 @@ export const variants = cva(
           "hover:border-(--btn-secondary-text)",
         ],
         outline: [
-          "border px-4 py-3",
+          "border px-6 py-[18px]",
           "text-(--btn-outline-text)",
           "bg-transparent",
           "border-(--btn-outline-text)",
@@ -47,7 +50,7 @@ export const variants = cva(
           "hover:border-(--btn-outline-text)",
         ],
         custom: [
-          "border px-4 py-3",
+          "border px-6 py-[18px]",
           "text-(--btn-text)",
           "bg-(--btn-bg)",
           "border-(--btn-border)",
@@ -80,6 +83,7 @@ export interface LinkData
     Partial<LinkStyles>,
     VariantProps<typeof variants> {
   text?: string;
+  openInNewTab?: boolean;
 }
 
 export interface LinkProps
@@ -148,6 +152,7 @@ export function Link(props: LinkProps) {
     borderColorHover,
     children,
     target,
+    openInNewTab,
     ...rest
   } = props;
   const { enableViewTransition } = useThemeSettings();
@@ -170,6 +175,17 @@ export function Link(props: LinkProps) {
   }
 
   const isExternal = checkExternal(href);
+  const resolvedTarget =
+    target !== undefined
+      ? target
+      : openInNewTab || isExternal
+        ? "_blank"
+        : undefined;
+  // Anything opening in a new tab gets `noopener noreferrer`. Modern browsers
+  // imply `noopener` for `target="_blank"`, but merchant-entered URLs (social
+  // links, Instagram posts) are exactly the case worth being explicit about.
+  const resolvedRel =
+    resolvedTarget === "_blank" ? "noopener noreferrer" : undefined;
 
   return (
     <RemixLink
@@ -178,7 +194,8 @@ export function Link(props: LinkProps) {
       to={href}
       style={style}
       className={cn(variants({ variant, className }))}
-      target={target !== undefined ? target : isExternal ? "_blank" : undefined}
+      target={resolvedTarget}
+      rel={resolvedRel}
       {...rest}
     >
       {children || text}

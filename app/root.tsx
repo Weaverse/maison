@@ -1,18 +1,16 @@
-// Supports weights 400-700
-import "@fontsource/poppins/400.css";
-import "@fontsource/poppins/500.css";
-import "@fontsource/poppins/600.css";
-import "@fontsource/poppins/700.css";
+// Body/UI typeface — supports weights 400-700
+import "@fontsource/montserrat/400.css";
+import "@fontsource/montserrat/500.css";
+import "@fontsource/montserrat/600.css";
+import "@fontsource/montserrat/700.css";
+// Heading typeface — ships a single 400 weight
+import "@fontsource/belleza/400.css";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import type { SeoConfig } from "@shopify/hydrogen";
 import { Analytics, getSeoMeta, useNonce } from "@shopify/hydrogen";
-import type {
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaArgs,
-} from "@shopify/remix-oxygen";
 import { useThemeSettings, withWeaverse } from "@weaverse/hydrogen";
 import type { CSSProperties } from "react";
+import type { LinksFunction, LoaderFunctionArgs, MetaArgs } from "react-router";
 import {
   isRouteErrorResponse,
   Links,

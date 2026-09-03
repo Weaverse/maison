@@ -1,84 +1,136 @@
 import type { Collection } from "@shopify/hydrogen/storefront-api-types";
-import { clsx } from "clsx";
+import { IMAGES_PLACEHOLDERS } from "@weaverse/hydrogen";
 import type { CSSProperties } from "react";
 import { Image } from "~/components/image";
-import { Link } from "~/components/link";
-import { Overlay, type OverlayProps } from "~/components/overlay";
+import Link from "~/components/link";
 import type { ImageAspectRatio } from "~/types/image";
+import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
 
-interface CollectionCardProps extends OverlayProps {
+interface CollectionCardProps {
   collection: Collection;
   imageAspectRatio: ImageAspectRatio;
-  collectionNameColor: string;
+  imageBorderRadius: number;
+  titleColor?: string;
+  countColor?: string;
+  showProductCount?: boolean;
+  cardBackgroundColor?: string;
+  cardHoverBackgroundColor?: string;
+  cardPadding?: number;
+  cardBorderRadius?: number;
   loading?: HTMLImageElement["loading"];
+}
+
+function getCollectionImage(collection: Collection) {
+  if (collection.image) {
+    return collection.image;
+  }
+
+  const firstProduct = collection.products.nodes[0];
+  const firstProductMedia = firstProduct?.media?.nodes[0];
+  return firstProductMedia?.previewImage ?? null;
+}
+
+function getProductCount(collection: Collection) {
+  const productsCount = (
+    collection as Collection & { productsCount?: { count?: number } | null }
+  ).productsCount?.count;
+
+  if (typeof productsCount === "number") {
+    return productsCount;
+  }
+
+  return collection.products.nodes.length;
 }
 
 export function CollectionCard({
   collection,
   imageAspectRatio,
-  collectionNameColor,
+  imageBorderRadius,
+  titleColor,
+  countColor,
+  showProductCount = true,
+  cardBackgroundColor,
+  cardHoverBackgroundColor,
+  cardPadding,
+  cardBorderRadius,
   loading,
-  enableOverlay,
-  overlayColor,
-  overlayColorHover,
-  overlayOpacity,
 }: CollectionCardProps) {
   if (collection.products.nodes.length === 0) {
     return null;
   }
 
-  let collectionImage = collection.image;
-  if (!collectionImage) {
-    const collectionProducts = collection.products.nodes;
-    if (collectionProducts.length > 0) {
-      const firstProduct = collectionProducts[0];
-      if (firstProduct.media.nodes.length > 0) {
-        const firstProductMedia = firstProduct.media.nodes[0];
-        if (firstProductMedia.previewImage) {
-          collectionImage = firstProductMedia.previewImage;
-        }
-      }
-    }
-  }
+  const collectionImage = getCollectionImage(collection);
+  const productCount = getProductCount(collection);
+
   return (
     <Link
       to={`/collections/${collection.handle}`}
-      className="flex flex-col gap-2"
+      className={cn(
+        "group flex flex-col gap-5 transition-colors duration-300",
+        "bg-(--card-bg)",
+        cardHoverBackgroundColor && "hover:bg-(--hover-bg)",
+      )}
       style={
         {
-          "--aspect-ratio": calculateAspectRatio(
-            collection?.image,
-            imageAspectRatio,
-          ),
+          "--card-bg": cardBackgroundColor,
+          ...(cardHoverBackgroundColor && {
+            "--hover-bg": cardHoverBackgroundColor,
+          }),
+          padding: `${cardPadding}px`,
+          borderRadius: `${cardBorderRadius}px`,
         } as CSSProperties
       }
+      data-motion="fade-up"
     >
-      <div className="group relative flex aspect-(--aspect-ratio) items-center justify-center overflow-hidden">
-        {collectionImage ? (
+      {collectionImage ? (
+        <div
+          className="overflow-hidden"
+          style={{ borderRadius: `${imageBorderRadius}px` }}
+        >
           <Image
             data={collectionImage}
-            width={collectionImage.width || 600}
-            height={collectionImage.height || 400}
-            sizes="(max-width: 32em) 100vw, 45vw"
-            loading={loading}
-            className={clsx(
-              "absolute inset-0 z-0",
-              "transition-all duration-300",
-              "scale-100 will-change-transform group-hover:scale-[1.03]",
+            aspectRatio={calculateAspectRatio(
+              collectionImage,
+              imageAspectRatio,
             )}
+            sizes="auto"
+            loading={loading}
+            className="transition-transform duration-300 group-hover:scale-105"
           />
-        ) : null}
-        <h5 style={{ color: collectionNameColor }} className="z-1">
-          {collection.title}
-        </h5>
-        <Overlay
-          enableOverlay={enableOverlay}
-          overlayColor={overlayColor}
-          overlayColorHover={overlayColorHover}
-          overlayOpacity={overlayOpacity}
-          className="z-0"
-        />
+        </div>
+      ) : (
+        <div
+          className="w-full overflow-hidden bg-gray-100"
+          style={{ borderRadius: `${imageBorderRadius}px` }}
+        >
+          <Image
+            data={{ url: IMAGES_PLACEHOLDERS.image }}
+            aspectRatio={imageAspectRatio}
+            sizes="auto"
+            loading={loading}
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+      )}
+      <div className="flex flex-col gap-1">
+        <div className="w-fit">
+          <h6
+            className="font-normal text-[26px] line-clamp-1 leading-6"
+            style={{ color: titleColor }}
+          >
+            {collection.title ?? "Title here"}
+          </h6>
+          <div
+            className="h-[1px] w-0 transition-all duration-500 group-hover:w-full"
+            style={{ backgroundColor: titleColor || "currentColor" }}
+          />
+        </div>
+        {showProductCount && (
+          <span className="text-sm" style={{ color: countColor }}>
+            {`${productCount} products`}
+          </span>
+        )}
       </div>
     </Link>
   );

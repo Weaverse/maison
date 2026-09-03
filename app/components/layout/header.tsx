@@ -2,14 +2,13 @@ import { MagnifyingGlassIcon, UserIcon } from "@phosphor-icons/react";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
-import { Suspense } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 import {
   Await,
   useLocation,
   useRouteError,
   useRouteLoaderData,
 } from "react-router";
-import useWindowScroll from "react-use/esm/useWindowScroll";
 import Link from "~/components/link";
 import { Logo } from "~/components/logo";
 import type { RootLoader } from "~/root";
@@ -33,7 +32,7 @@ const variants = cva("", {
     padding: {
       full: "",
       stretch: "px-3 md:px-10 lg:px-16",
-      fixed: "mx-auto px-5 md:px-6 lg:px-6",
+      fixed: "mx-auto px-5 md:px-6 lg:px-10",
     },
   },
 });
@@ -45,13 +44,29 @@ function useIsHomeCheck() {
   return pathname.replace(selectedLocale.pathPrefix, "") === "/";
 }
 
+function subscribeToScroll(onStoreChange: () => void) {
+  window.addEventListener("scroll", onStoreChange, { passive: true });
+  return () => window.removeEventListener("scroll", onStoreChange);
+}
+
+function getScrollSnapshot() {
+  return window.scrollY >= 50;
+}
+
+function getServerScrollSnapshot() {
+  return false;
+}
+
 export function Header() {
   const { enableTransparentHeader, headerWidth } = useThemeSettings();
   const isHome = useIsHomeCheck();
-  const { y } = useWindowScroll();
+  const scrolled = useSyncExternalStore(
+    subscribeToScroll,
+    getScrollSnapshot,
+    getServerScrollSnapshot,
+  );
   const routeError = useRouteError();
 
-  const scrolled = y >= 50;
   const enableTransparent = enableTransparentHeader && isHome && !routeError;
   const isTransparent = enableTransparent && !scrolled;
 
@@ -101,9 +116,14 @@ export function Header() {
         >
           <MagnifyingGlassIcon className="h-5 w-5" />
         </button>
-        <Logo />
+        {/* Left column — grows on mobile so the logo stays centered between
+            the menu/search buttons and the actions; a flex-1 rail on desktop
+            so the nav sits dead-center of the header. */}
+        <div className="flex min-w-0 grow items-center lg:flex-1 lg:justify-start">
+          <Logo />
+        </div>
         <DesktopMenu />
-        <div className="z-1 flex items-center gap-1">
+        <div className="z-1 flex items-center gap-1 lg:flex-1 lg:justify-end">
           <PredictiveSearchButton />
           <AccountLink className="relative flex h-8 w-8 items-center justify-center" />
           <CartDrawer />

@@ -17,10 +17,10 @@ import type {
   ProductFilter,
   SearchSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
-import type { LoaderFunctionArgs, MetaArgs } from "@shopify/remix-oxygen";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { clsx } from "clsx";
 import { Fragment, Suspense, useEffect, useState } from "react";
+import type { LoaderFunctionArgs, MetaArgs } from "react-router";
 import { Await, Form, useLoaderData } from "react-router";
 import type { SearchQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";

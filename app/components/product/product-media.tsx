@@ -3,6 +3,7 @@ import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import { useViewTransitionState } from "react-router";
 import type {
   Media_MediaImage_Fragment,
   Media_Video_Fragment,
@@ -13,6 +14,7 @@ import { FreeMode, Navigation, Pagination, Thumbs } from "swiper/modules";
 import { Swiper, type SwiperClass, SwiperSlide } from "swiper/react";
 import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { Image } from "~/components/image";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
@@ -50,6 +52,16 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
   collectionTitle?: string;
   showCollectionBadge?: boolean;
   showSaleBadge?: boolean;
+  viewTransitionHandle?: string;
+  /** Overrides the default `rounded` (4px) on the main image. */
+  imageBorderRadius?: number;
+  /** Overrides the default `rounded` (4px) on each thumbnail. */
+  thumbnailBorderRadius?: number;
+  /**
+   * Inset of the prev/next buttons from the image edge, in px. Omitted keeps
+   * the default, where the buttons straddle the edge from outside.
+   */
+  navInset?: number;
 }
 
 export function ProductMedia(props: ProductMediaProps) {
@@ -66,7 +78,38 @@ export function ProductMedia(props: ProductMediaProps) {
     collectionTitle,
     showCollectionBadge,
     showSaleBadge,
+    viewTransitionHandle,
+    imageBorderRadius,
+    thumbnailBorderRadius,
+    navInset,
   } = props;
+
+  const imageRadiusStyle =
+    imageBorderRadius === undefined
+      ? undefined
+      : { borderRadius: `${imageBorderRadius}px` };
+  const thumbnailRadiusStyle =
+    thumbnailBorderRadius === undefined
+      ? undefined
+      : { borderRadius: `${thumbnailBorderRadius}px` };
+  const navOutsideClasses =
+    "-left-2 -right-2 md:-left-3 md:-right-3 lg:-left-7 lg:-right-7";
+  // Below lg the buttons pull out by their own 16px padding (`p-4`), which puts
+  // the arrow glyph's outer edge exactly on the image edge. From lg they sit
+  // `navInset` inside instead.
+  const navInsetStyle =
+    navInset === undefined
+      ? undefined
+      : ({
+          "--nav-inset": "-16px",
+          "--nav-inset-lg": `${navInset}px`,
+        } as React.CSSProperties);
+
+  const productPageHref = usePrefixPathWithLocale(
+    `/products/${viewTransitionHandle || ""}`,
+  );
+  const hasSharedTransition =
+    useViewTransitionState(productPageHref) && Boolean(viewTransitionHandle);
 
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
@@ -74,7 +117,7 @@ export function ProductMedia(props: ProductMediaProps) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
+  // biome-ignore lint/correctness/useExhaustiveDependencies: media index only changes with the selected variant
   useEffect(() => {
     if (selectedVariant && swiper) {
       const index = getSelectedVariantMediaIndex(media, selectedVariant);
@@ -119,7 +162,7 @@ export function ProductMedia(props: ProductMediaProps) {
       <>
         <div className="relative">
           {(showCollectionBadge || showSaleBadge) && (
-            <div className="absolute top-3 left-3 md:top-5 md:left-5 flex items-center gap-2 z-[2]">
+            <div className="absolute top-3 left-3 z-2 flex items-center gap-2 md:top-5 md:left-5">
               {showCollectionBadge && (
                 <CollectionBadge collectionTitle={collectionTitle || ""} />
               )}
@@ -159,6 +202,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       className={cn(
                         "w-full max-w-none object-cover lg:h-full lg:w-full rounded",
                         idx === 0 &&
+                          hasSharedTransition &&
                           "[&_img]:[view-transition-name:image-expand]",
                       )}
                     />
@@ -218,6 +262,7 @@ export function ProductMedia(props: ProductMediaProps) {
                 <SwiperSlide
                   key={med.id}
                   className="group bg-gray-100 rounded overflow-hidden"
+                  style={imageRadiusStyle}
                 >
                   <div
                     onClick={
@@ -234,10 +279,11 @@ export function ProductMedia(props: ProductMediaProps) {
                       media={med}
                       imageAspectRatio={imageAspectRatio}
                       index={idx}
-                      className={
+                      className={cn(
                         idx === 0 &&
-                        "[&_img]:[view-transition-name:image-expand]"
-                      }
+                          hasSharedTransition &&
+                          "[&_img]:[view-transition-name:image-expand]",
+                      )}
                     />
                   </div>
                   {shouldShowButton && (
@@ -258,12 +304,11 @@ export function ProductMedia(props: ProductMediaProps) {
             })}
           </Swiper>
 
-          {/* progress bar */}
           {media.length > 1 && (
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-[1] flex items-center justify-center pb-10">
-              <div className="w-[160px] h-[2px] bg-(--color-line-subtle) relative">
+            <div className="absolute bottom-0 left-1/2 z-1 flex -translate-x-1/2 items-center justify-center pb-10">
+              <div className="relative h-0.5 w-40 bg-line-subtle">
                 <div
-                  className="absolute left-0 top-0 h-full bg-(--color-line) transition-all duration-300"
+                  className="absolute top-0 left-0 h-full bg-line transition-all duration-300"
                   style={{
                     width: `${((activeIndex + 1) / media.length) * 100}%`,
                   }}
@@ -273,7 +318,7 @@ export function ProductMedia(props: ProductMediaProps) {
           )}
 
           {(showCollectionBadge || showSaleBadge) && (
-            <div className="absolute top-3 left-3 md:top-5 md:left-5 flex items-center gap-2 z-[2]">
+            <div className="absolute top-3 left-3 z-2 flex items-center gap-2 md:top-5 md:left-5">
               {showCollectionBadge && (
                 <CollectionBadge collectionTitle={collectionTitle || ""} />
               )}
@@ -286,7 +331,15 @@ export function ProductMedia(props: ProductMediaProps) {
             </div>
           )}
 
-          <div className="absolute -left-2 -right-2 md:-left-3 md:-right-3 lg:-left-7 lg:-right-7 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[3]">
+          <div
+            className={cn(
+              "pointer-events-none absolute top-1/2 z-3 flex -translate-y-1/2 justify-between",
+              navInset === undefined
+                ? navOutsideClasses
+                : "left-(--nav-inset) right-(--nav-inset) lg:left-(--nav-inset-lg) lg:right-(--nav-inset-lg)",
+            )}
+            style={navInsetStyle}
+          >
             <button
               type="button"
               className="media_slider__prev p-4 pointer-events-auto rounded-full border border-transparent bg-(--btn-secondary-bg) transition-all duration-200 disabled:cursor-not-allowed disabled:text-body-subtle"
@@ -327,8 +380,9 @@ export function ProductMedia(props: ProductMediaProps) {
                     className={cn(
                       "relative",
                       "h-auto! cursor-pointer rounded overflow-hidden",
-                      "[&.swiper-slide-thumb-active]:border-[3px] [&.swiper-slide-thumb-active]:border-(--color-line) [&.swiper-slide-thumb-active]:p-0",
+                      "[&.swiper-slide-thumb-active]:border-[3px] [&.swiper-slide-thumb-active]:border-line [&.swiper-slide-thumb-active]:p-0",
                     )}
+                    style={thumbnailRadiusStyle}
                   >
                     <Image
                       data={{

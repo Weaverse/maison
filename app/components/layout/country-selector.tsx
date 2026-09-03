@@ -27,6 +27,9 @@ export function CountrySelector() {
   )}${search}`;
 
   const countries = (fetcher.data ?? {}) as Localizations;
+  // `label` comes through as "United States (USD $)"; the design shows the
+  // country on its own, with the currency appended after a dash.
+  const countryName = selectedLocale.label.replace(/\s*\([^)]*\)\s*$/, "");
   const defaultLocale = countries?.default;
   const defaultLocalePrefix = defaultLocale
     ? `${defaultLocale?.language}-${defaultLocale?.country}`
@@ -76,11 +79,11 @@ export function CountrySelector() {
         <Popover.Trigger asChild>
           <button
             type="button"
-            className="flex cursor-pointer items-center gap-2 text-sm outline-hidden"
+            className="flex h-[33px] cursor-pointer items-center gap-2 py-3 text-base leading-none tracking-[0.28px] outline-hidden"
             aria-label="Select country"
           >
-            <span>
-              {selectedLocale.country} - {selectedLocale.currency}
+            <span className="whitespace-nowrap">
+              {countryName} - {selectedLocale.currency}
             </span>
             <CaretDownIcon className="h-4 w-4" />
           </button>

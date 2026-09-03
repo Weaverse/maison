@@ -20,6 +20,7 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
     overlayOpacity,
     gradientDirection,
     gradientFrom,
+    gradientFromOpacity,
     gradientTo,
     gradientToOpacity,
   } = props;
@@ -39,6 +40,7 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
         overlayOpacity={overlayOpacity}
         gradientDirection={gradientDirection}
         gradientFrom={gradientFrom}
+        gradientFromOpacity={gradientFromOpacity}
         gradientTo={gradientTo}
         gradientToOpacity={gradientToOpacity}
       />

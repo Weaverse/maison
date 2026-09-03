@@ -14,7 +14,8 @@ export function DropdownMenu({ menuItem }: { menuItem: SingleMenuItem }) {
       <Root open={open} onOpenChange={setOpen} modal={false}>
         <Trigger
           className={clsx([
-            "flex h-full cursor-pointer items-center gap-1.5 px-3 py-2",
+            "flex h-full cursor-pointer items-center gap-1.5 py-2",
+            "tracking-[-0.01em]",
             "focus:outline-hidden",
             "data-[state=open]:[&>svg]:rotate-180",
           ])}
@@ -22,7 +23,7 @@ export function DropdownMenu({ menuItem }: { menuItem: SingleMenuItem }) {
             setOpen(true);
           }}
         >
-          <span>{title}</span>
+          <RevealUnderline>{title}</RevealUnderline>
           <CaretDownIcon className="h-3.5 w-3.5 transition-transform" />
         </Trigger>
         <Content
