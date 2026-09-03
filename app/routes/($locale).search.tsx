@@ -19,7 +19,7 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { clsx } from "clsx";
-import { Fragment, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { LoaderFunctionArgs, MetaArgs } from "react-router";
 import { Await, Form, useLoaderData } from "react-router";
 import type { SearchQuery } from "storefront-api.generated";
@@ -210,11 +210,11 @@ export default function Search() {
       </h4>
       <Form
         method="get"
-        className="mx-auto mt-6 mb-4 flex w-[700px] max-w-[90vw] items-center gap-3 border border-line px-3 rounded-lg"
+        className="mx-auto mt-6 mb-4 flex w-full max-w-[700px] items-center gap-3 rounded-lg border border-line px-3"
       >
         <MagnifyingGlassIcon className="h-5 w-5 shrink-0 text-gray-500" />
         <input
-          className="h-full w-full py-4 focus-visible:outline-hidden"
+          className="h-full min-w-0 grow py-4 focus-visible:outline-hidden"
           value={searchKey}
           onChange={(e) => setSearchKey(e.target.value)}
           name="q"
@@ -442,18 +442,18 @@ function PopularKeywords() {
     .filter((k) => k.length > 0);
 
   return (
-    <div className="flex items-center justify-center text-body-subtle mb-8">
+    <div className="mb-8 flex flex-wrap items-center justify-center gap-1 text-body-subtle">
       <span>Popular searches:</span>
       {popularKeywords.map((search, ind) => (
-        <Fragment key={search}>
+        <span key={search} className="inline-flex items-center">
           <Link
             to={`/search?q=${search}`}
-            className="ml-1 underline-offset-4 hover:underline"
+            className="underline-offset-4 hover:underline"
           >
             {search}
           </Link>
-          {ind < popularKeywords.length - 1 && <span className="mr-px">,</span>}
-        </Fragment>
+          {ind < popularKeywords.length - 1 && <span>,</span>}
+        </span>
       ))}
     </div>
   );
