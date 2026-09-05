@@ -54,12 +54,13 @@ export const schema = createSchema({
           name: "separatorThickness",
           label: "Separator thickness",
           configs: {
-            min: 2,
+            min: 1,
             max: 10,
             step: 1,
             unit: "px",
           },
-          defaultValue: 2,
+          // The design draws this as a 1px Color/border/subtle rule.
+          defaultValue: 1,
           condition: (data: CompanyStorySeparatorData) =>
             data.enableSeparator === true,
         },

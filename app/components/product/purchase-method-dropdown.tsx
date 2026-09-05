@@ -60,13 +60,13 @@ export function PurchaseMethodDropdown({
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          "w-full h-11 flex items-center justify-between gap-4 px-3 text-sm border-2 border-(--color-line) rounded bg-white",
+          "w-full h-11 flex items-center justify-between gap-4 px-3 text-base border border-(--color-line) rounded-(--btn-border-radius) bg-white",
           disabled && "opacity-50 cursor-not-allowed",
         )}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
-        <span className="truncate text-left text-sm">{displayText}</span>
+        <span className="truncate text-left text-base">{displayText}</span>
         <CaretDown
           size={16}
           className={cn("shrink-0 transition", isOpen && "rotate-180")}
