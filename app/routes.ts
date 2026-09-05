@@ -7,7 +7,11 @@ import { hydrogenRoutes } from "@shopify/hydrogen";
 export default hydrogenRoutes([
   // APIs
   route(
-    "/:locale?/api/product/:productHandle/reviews?",
+    "/:locale?/api/product/:productHandle/reviews",
+    "routes/api/reviews.ts",
+  ),
+  route(
+    "/:locale?/api/product/:productHandle",
     "routes/api/product.$productHandle.ts",
   ),
   // Flat routes for all other files in the routes directory
