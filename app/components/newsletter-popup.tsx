@@ -19,12 +19,16 @@ export function useShouldRenderNewsletterPopup() {
   const locale = data?.selectedLocale ?? DEFAULT_LOCALE;
   const { newsletterPopupEnabled, newsletterPopupHomeOnly } =
     useThemeSettings();
+  const isDesignMode = useWeaverseStudioCheck();
+  const klaviyoConfigured = Boolean(data?.integrations?.klaviyo);
   const pathParts = location.pathname.split("/").filter(Boolean);
   const isHomePage =
     pathParts.length === 0 ||
     (pathParts.length === 1 && pathParts[0] === locale.pathPrefix.slice(1));
   return (
-    newsletterPopupEnabled && (newsletterPopupHomeOnly ? isHomePage : true)
+    newsletterPopupEnabled &&
+    (klaviyoConfigured || isDesignMode) &&
+    (newsletterPopupHomeOnly ? isHomePage : true)
   );
 }
 

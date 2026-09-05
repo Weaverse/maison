@@ -106,6 +106,8 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
     );
   }
 
+  const hasReviews = (data.totalReviews ?? 0) > 0;
+
   return (
     <div
       {...rest}
@@ -127,7 +129,7 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
       <div className="flex items-center gap-2">
         <StarRating rating={data?.averageRating} />
         <span className="leading-4">
-          {data?.totalReviews > 0
+          {hasReviews
             ? formatRatingText(
                 ratingText,
                 data.averageRating,

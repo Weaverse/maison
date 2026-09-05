@@ -9,10 +9,12 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
-import { useFetcher } from "react-router";
+import { useFetcher, useRouteLoaderData } from "react-router";
 import { CompanyLocationButton } from "~/components/b2b/company-location-button";
 import { RevealUnderline } from "~/components/reveal-underline";
 import { useShopMenu } from "~/hooks/use-shop-menu";
+import { useWeaverseStudioCheck } from "~/hooks/use-weaverse-studio-check";
+import type { RootLoader } from "~/root";
 import type { SingleMenuItem } from "~/types/menu";
 import { cn } from "~/utils/cn";
 import {
@@ -131,6 +133,11 @@ export function Footer() {
     showDinersClubIcon,
   } = useThemeSettings();
   const fetcher = useFetcher<{ ok: boolean; error: string }>();
+  const rootData = useRouteLoaderData<RootLoader>("root");
+  const isDesignMode = useWeaverseStudioCheck();
+  const showKlaviyoSignup =
+    showNewsletterSignup &&
+    (Boolean(rootData?.integrations?.klaviyo) || Boolean(isDesignMode));
 
   // Compute message and error from fetcher data
   const message = fetcher.data?.ok ? "Thank you for signing up! 🎉" : "";
@@ -248,7 +255,7 @@ export function Footer() {
             </div>
 
             {/* Newsletter Card (Conditional) */}
-            {showNewsletterSignup && (
+            {showKlaviyoSignup && (
               <div className="flex w-full flex-1 flex-col gap-3 rounded-[16px] bg-[#585247] p-6">
                 <p className="whitespace-nowrap font-serif text-[22px] text-[#F1F1E6]">
                   {newsletterTitle}
