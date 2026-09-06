@@ -1,4 +1,9 @@
-import { InfoIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  InfoIcon,
+  MinusIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import {
   CartForm,
   Money,
@@ -13,7 +18,6 @@ import type {
   ProductVariantFragment,
   SellingPlanGroupFragment,
 } from "storefront-api.generated";
-import { Minus, Plus } from "~/components/icons";
 import { Image } from "~/components/image";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
@@ -91,7 +95,7 @@ export function VariantRow({
               data={variant.image}
               width={99}
               height={99}
-              className="h-[99px] w-[99px] object-cover rounded border border-(--color-line-subtle)"
+              className="h-[99px] w-[99px] object-cover rounded-xl border border-(--color-line-subtle)"
               alt={variant.image.altText || variantTitle}
             />
           )}
@@ -167,39 +171,39 @@ export function VariantRow({
       {/* tablet layout */}
       <div
         className={cn(
-          "hidden md:grid lg:hidden grid-cols-[6fr_1fr_1fr] gap-6 items-center",
+          "hidden md:grid lg:hidden grid-cols-[1fr_150px_160px] gap-6 items-center",
         )}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3.5">
           {variant.image && (
             <Image
               data={variant.image}
               width={99}
               height={99}
-              className="h-[99px] w-[99px] object-cover rounded border border-(--color-line-subtle)"
+              className="h-[99px] w-[99px] object-cover rounded-xl border border-(--color-line-subtle)"
               alt={variant.image.altText || variantTitle}
             />
           )}
-          <div className="flex-1 flex flex-col">
+          <div className="flex flex-1 flex-col justify-center gap-4">
             <div className="space-y-1">
-              <div className="font-medium">{variantTitle}</div>
-              <div className="text-sm text-body/70">SKU: {variant.sku}</div>
+              <div className="font-semibold text-base">{variantTitle}</div>
+              <div className="text-base">SKU: {variant.sku}</div>
               {isOutOfStock ? (
-                <div className="text-sm text-red-600 font-medium">
+                <div className="font-medium text-[12px] text-red-600">
                   Out of Stock
                 </div>
               ) : isLowStock ? (
-                <div className="flex items-center gap-1 text-sm text-orange-600">
+                <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
                   <InfoIcon size={14} />
                   <span>Low in Stock</span>
                 </div>
               ) : (
                 <div
-                  className="text-sm flex gap-1 items-center"
+                  className="flex items-center gap-1.5 text-[12px]"
                   style={{ color: bundleBadgeColor }}
                 >
                   <span
-                    className="size-2 rounded-full"
+                    className="size-1.5 rounded-full"
                     style={{ backgroundColor: bundleBadgeColor }}
                   />
                   <span>In Stock</span>
@@ -207,7 +211,7 @@ export function VariantRow({
               )}
             </div>
             {sellingPlanGroups.nodes.length > 0 && (
-              <div className="my-4 w-[230px]">
+              <div className="w-[230px]">
                 <PurchaseMethodDropdown
                   sellingPlanGroups={sellingPlanGroups}
                   selectedPlanId={selectedPlanId}
@@ -215,21 +219,19 @@ export function VariantRow({
                 />
               </div>
             )}
-            <div className={cn(!sellingPlanGroups.nodes.length && "mt-[23px]")}>
-              <QuantityUpdateButtons
-                cart={resolvedCart}
-                variant={variant}
-                selectedPlanId={selectedPlanId}
-              />
-            </div>
+            <QuantityUpdateButtons
+              cart={resolvedCart}
+              variant={variant}
+              selectedPlanId={selectedPlanId}
+            />
           </div>
         </div>
 
-        <div className="text-center text-sm">
+        <div className="text-center text-base">
           <Money data={unitPrice} as="span" withoutTrailingZeros />
           <span>/unit</span>
         </div>
-        <div className="text-right font-semibold text-sm">
+        <div className="text-right font-semibold text-base">
           <Money data={totalPrice} as="span" withoutTrailingZeros />
         </div>
       </div>
@@ -239,8 +241,8 @@ export function VariantRow({
         className={cn(
           "hidden lg:grid gap-6 items-center",
           sellingPlanGroups.nodes.length > 0
-            ? "grid-cols-[1fr_280px_270px_160px_153px]"
-            : "grid-cols-[1fr_270px_160px_153px]",
+            ? "grid-cols-[1fr_230px_280px_200px_153px]"
+            : "grid-cols-[1fr_280px_200px_153px]",
         )}
       >
         <div className="flex items-center gap-3.5">
@@ -249,29 +251,29 @@ export function VariantRow({
               data={variant.image}
               width={99}
               height={99}
-              className="h-[99px] w-[99px] object-cover rounded border border-(--color-line-subtle)"
+              className="h-[99px] w-[99px] object-cover rounded-xl border border-(--color-line-subtle)"
               alt={variant.image.altText || variantTitle}
             />
           )}
           <div className="space-y-1">
-            <div className="font-semibold text-sm">{variantTitle}</div>
-            <div className="text-sm text-body/70">SKU: {variant.sku}</div>
+            <div className="font-semibold text-base">{variantTitle}</div>
+            <div className="text-base">SKU: {variant.sku}</div>
             {isOutOfStock ? (
-              <div className="text-xs text-red-600 font-medium">
+              <div className="font-medium text-[12px] text-red-600">
                 Out of Stock
               </div>
             ) : isLowStock ? (
-              <div className="flex items-center gap-1 text-xs text-orange-600">
+              <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
                 <InfoIcon size={14} />
                 <span>Low in Stock</span>
               </div>
             ) : (
               <div
-                className="text-xs flex gap-1 items-center"
+                className="flex items-center gap-1.5 text-[12px]"
                 style={{ color: bundleBadgeColor }}
               >
                 <span
-                  className="size-2 rounded-full"
+                  className="size-1.5 rounded-full"
                   style={{ backgroundColor: bundleBadgeColor }}
                 />
                 <span>In Stock</span>
@@ -297,11 +299,11 @@ export function VariantRow({
             selectedPlanId={selectedPlanId}
           />
         </div>
-        <div className="text-center text-sm">
+        <div className="text-center text-base">
           <Money data={unitPrice} as="span" withoutTrailingZeros />
           <span>/unit</span>
         </div>
-        <div className="text-right font-semibold text-sm">
+        <div className="text-right font-semibold text-base">
           <Money data={totalPrice} as="span" withoutTrailingZeros />
         </div>
       </div>
@@ -479,22 +481,22 @@ function QuantityUpdateButtons({
   const showTrashButton = Boolean(activeLine) && displayQuantity > 0;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3">
       <VolumePricingInfo variant={variant} />
-      <div className="flex items-center border-2 border-(--color-line) divide-x divide-(--color-line) rounded-(--btn-border-radius)">
+      <div className="flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base">
         <button
           type="button"
           aria-label="Decrease quantity"
-          className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
           disabled={displayQuantity <= 0}
           onClick={handleDecrement}
         >
-          <Minus />
+          <MinusIcon className="size-4" aria-hidden="true" />
         </button>
 
         <input
           type="number"
-          className="px-2 w-[68px] h-11 text-center text-sm focus:outline-none bg-transparent"
+          className="h-full min-w-0 grow basis-16 bg-transparent px-2 text-center text-base focus:outline-none"
           data-test="item-quantity"
           value={inputValue}
           onChange={handleQuantityInputChange}
@@ -506,11 +508,11 @@ function QuantityUpdateButtons({
         <button
           type="button"
           aria-label="Increase quantity"
-          className="h-11 w-11 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+          className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
           disabled={isOutOfStock}
           onClick={handleIncrement}
         >
-          <Plus />
+          <PlusIcon className="size-4" aria-hidden="true" />
         </button>
       </div>
       {showTrashButton ? (

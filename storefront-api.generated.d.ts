@@ -20,6 +20,15 @@ export type CartLineFragment = Pick<
       Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
     >;
   };
+  discountAllocations: Array<
+    | {discountedAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>}
+    | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+        discountedAmount: Pick<
+          StorefrontAPI.MoneyV2,
+          'currencyCode' | 'amount'
+        >;
+      })
+  >;
   sellingPlanAllocation?: StorefrontAPI.Maybe<{
     sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
   }>;
@@ -57,6 +66,15 @@ export type CartLineComponentFragment = Pick<
       Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
     >;
   };
+  discountAllocations: Array<
+    | {discountedAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>}
+    | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+        discountedAmount: Pick<
+          StorefrontAPI.MoneyV2,
+          'currencyCode' | 'amount'
+        >;
+      })
+  >;
   sellingPlanAllocation?: StorefrontAPI.Maybe<{
     sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
   }>;
@@ -124,6 +142,20 @@ export type CartApiQueryFragment = Pick<
               Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
             >;
           };
+          discountAllocations: Array<
+            | {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              }
+            | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              })
+          >;
           sellingPlanAllocation?: StorefrontAPI.Maybe<{
             sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
           }>;
@@ -166,6 +198,20 @@ export type CartApiQueryFragment = Pick<
               Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
             >;
           };
+          discountAllocations: Array<
+            | {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              }
+            | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+                discountedAmount: Pick<
+                  StorefrontAPI.MoneyV2,
+                  'currencyCode' | 'amount'
+                >;
+              })
+          >;
           sellingPlanAllocation?: StorefrontAPI.Maybe<{
             sellingPlan: Pick<StorefrontAPI.SellingPlan, 'id' | 'name'>;
           }>;
@@ -215,14 +261,17 @@ export type CartApiQueryFragment = Pick<
   cost: {
     subtotalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
-    totalDutyAmount?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
-    totalTaxAmount?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
-    >;
   };
   attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
+  discountAllocations: Array<
+    | {discountedAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>}
+    | (Pick<StorefrontAPI.CartCodeDiscountAllocation, 'code'> & {
+        discountedAmount: Pick<
+          StorefrontAPI.MoneyV2,
+          'currencyCode' | 'amount'
+        >;
+      })
+  >;
   discountCodes: Array<
     Pick<StorefrontAPI.CartDiscountCode, 'code' | 'applicable'>
   >;
@@ -2069,6 +2118,10 @@ export type CollectionsQuery = {
             'id' | 'url' | 'width' | 'height' | 'altText'
           >
         >;
+        productCount: {
+          nodes: Array<Pick<StorefrontAPI.Product, 'id'>>;
+          pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage'>;
+        };
         products: {
           nodes: Array<
             Pick<StorefrontAPI.Product, 'id' | 'title' | 'handle'> & {
@@ -2657,7 +2710,10 @@ export type CollectionsByIdsQuery = {
             'id' | 'altText' | 'width' | 'height' | 'url'
           >
         >;
-        products: {nodes: Array<Pick<StorefrontAPI.Product, 'id'>>};
+        products: {
+          nodes: Array<Pick<StorefrontAPI.Product, 'id'>>;
+          pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage'>;
+        };
       }
     >
   >;
@@ -3958,7 +4014,7 @@ interface GeneratedQueryTypes {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
-  '#graphql\n  query collections(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        id\n        title\n        description\n        handle\n        seo {\n          description\n          title\n        }\n        image {\n          id\n          url\n          width\n          height\n          altText\n        }\n        products(first: 1) {\n          nodes {\n            id\n            title\n            handle\n            media(first: 1) {\n              nodes {\n                previewImage {\n                  id\n                  url\n                  width\n                  height\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
+  '#graphql\n  query collections(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        id\n        title\n        description\n        handle\n        seo {\n          description\n          title\n        }\n        image {\n          id\n          url\n          width\n          height\n          altText\n        }\n        productCount: products(first: 50) {\n          nodes {\n            id\n          }\n          pageInfo {\n            hasNextPage\n          }\n        }\n        products(first: 1) {\n          nodes {\n            id\n            title\n            handle\n            media(first: 1) {\n              nodes {\n                previewImage {\n                  id\n                  url\n                  width\n                  height\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
     return: CollectionsQuery;
     variables: CollectionsQueryVariables;
   };
@@ -3990,7 +4046,7 @@ interface GeneratedQueryTypes {
     return: BlogSingleQuery;
     variables: BlogSingleQueryVariables;
   };
-  '#graphql\n  query collectionsByIds($country: CountryCode, $language: LanguageCode, $ids: [ID!]!)\n  @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Collection {\n        id\n        title\n        handle\n        onlineStoreUrl\n        description\n        image {\n          id\n          altText\n          width\n          height\n          url\n        }\n        products(first: 250) { nodes { id } }\n      }\n    }\n  }\n': {
+  '#graphql\n  query collectionsByIds($country: CountryCode, $language: LanguageCode, $ids: [ID!]!)\n  @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Collection {\n        id\n        title\n        handle\n        onlineStoreUrl\n        description\n        image {\n          id\n          altText\n          width\n          height\n          url\n        }\n        products(first: 250) {\n          nodes { id }\n          pageInfo { hasNextPage }\n        }\n      }\n    }\n  }\n': {
     return: CollectionsByIdsQuery;
     variables: CollectionsByIdsQueryVariables;
   };

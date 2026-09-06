@@ -99,31 +99,31 @@ export function QuickShop({
           </div>
           {/* tablet/desktop header */}
           {sellingPlanGroups?.nodes?.length > 0 ? (
-            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
-              <div className="text-sm font-semibold uppercase">Variant</div>
-              <div className="text-sm font-semibold uppercase text-center">
+            <div className="hidden md:grid grid-cols-[1fr_230px_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+              <div className="font-semibold text-base uppercase">Variant</div>
+              <div className="font-semibold text-base uppercase text-center">
                 Purchase Method
               </div>
-              <div className="text-sm font-semibold uppercase text-center">
+              <div className="font-semibold text-base uppercase text-center">
                 Quantity
               </div>
-              <div className="text-sm font-semibold uppercase text-center">
+              <div className="font-semibold text-base uppercase text-center">
                 Price
               </div>
-              <div className="text-sm font-semibold uppercase text-right">
+              <div className="font-semibold text-base uppercase text-right">
                 Variant Price
               </div>
             </div>
           ) : (
-            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
-              <div className="text-sm font-semibold uppercase">Variant</div>
-              <div className="text-sm font-semibold uppercase text-center">
+            <div className="hidden md:grid grid-cols-[1fr_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+              <div className="font-semibold text-base uppercase">Variant</div>
+              <div className="font-semibold text-base uppercase text-center">
                 Quantity
               </div>
-              <div className="text-sm font-semibold uppercase text-center">
+              <div className="font-semibold text-base uppercase text-center">
                 Price
               </div>
-              <div className="text-sm font-semibold uppercase text-right">
+              <div className="font-semibold text-base uppercase text-right">
                 Variant Price
               </div>
             </div>
@@ -142,7 +142,11 @@ export function QuickShop({
                   ))}
                 </div>
                 <div className="sticky bottom-0 bg-background pb-6 px-6 md:pb-10 md:px-10 -mx-6 md:-mx-10 -mb-6 md:-mb-10">
-                  <Subtotal cart={resolvedCart} variants={variants} />
+                  <Subtotal
+                    cart={resolvedCart}
+                    variants={variants}
+                    hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+                  />
                 </div>
               </>
             )}

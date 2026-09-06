@@ -54,7 +54,10 @@ const COLLECTIONS_QUERY = `#graphql
           height
           url
         }
-        products(first: 250) { nodes { id } }
+        products(first: 250) {
+          nodes { id }
+          pageInfo { hasNextPage }
+        }
       }
     }
   }

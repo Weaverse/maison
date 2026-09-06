@@ -1,5 +1,4 @@
 import { Pagination } from "@shopify/hydrogen";
-import type { Collection } from "@shopify/hydrogen/storefront-api-types";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
@@ -122,7 +121,7 @@ function CollectionsItems(props: CollectionsItemsProps) {
               {nodes.map((collection, i) => (
                 <CollectionCard
                   key={collection.id}
-                  collection={collection as Collection}
+                  collection={collection}
                   loading={getImageLoadingPriority(i, 2)}
                   {...cardProps}
                 />

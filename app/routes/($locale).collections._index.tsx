@@ -80,6 +80,14 @@ const COLLECTIONS_QUERY = `#graphql
           height
           altText
         }
+        productCount: products(first: 50) {
+          nodes {
+            id
+          }
+          pageInfo {
+            hasNextPage
+          }
+        }
         products(first: 1) {
           nodes {
             id

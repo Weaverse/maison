@@ -231,7 +231,8 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "color",
           label: "Text (subtle)",
           name: "colorTextSubtle",
-          defaultValue: "#524B46",
+          // Design system's Color/text/subtle
+          defaultValue: "#7B7165",
         },
         {
           type: "color",

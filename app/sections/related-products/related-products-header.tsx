@@ -12,7 +12,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
     <div
       ref={ref}
       {...rest}
-      className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      className="mb-10 flex flex-row items-center justify-between md:mb-0"
       style={{ gap: `${gap}px` }}
     >
       {children}

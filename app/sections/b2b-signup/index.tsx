@@ -1,6 +1,7 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import { forwardRef, useState } from "react";
 import { Form, useFetcher } from "react-router";
+import { Button } from "~/components/button";
 import { cn } from "~/utils/cn";
 
 interface B2BSignupProps extends HydrogenComponentProps {
@@ -48,14 +49,16 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
     <section
       ref={ref}
       {...rest}
-      className={cn("py-16 px-4 bg-white")}
+      className={cn("px-4 py-16")}
       style={{ color: textColor, backgroundColor }}
     >
-      <div className="mx-auto max-w-[480px] bg-white p-8 space-y-6 rounded-lg">
+      <div className="mx-auto max-w-[480px] space-y-6 rounded-2xl bg-white p-8">
         <div className="text-center space-y-[9px]">
-          <h2 className="text-[32px] font-normal leading-tight">{heading}</h2>
+          <h2 className="font-serif font-normal text-[32px] leading-[1.1] tracking-[-0.02em]">
+            {heading}
+          </h2>
           {description && (
-            <p className="text-sm opacity-80 text-body-subtle">{description}</p>
+            <p className="text-base text-body-subtle">{description}</p>
           )}
         </div>
 
@@ -88,7 +91,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 required
                 value={formState.name}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
+                className="w-full rounded-xl border border-line px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
               />
             </div>
 
@@ -99,7 +102,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 placeholder="Company name"
                 value={formState.company}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
+                className="w-full rounded-xl border border-line px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
               />
             </div>
 
@@ -111,7 +114,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 required
                 value={formState.email}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
+                className="w-full rounded-xl border border-line px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
               />
             </div>
 
@@ -122,7 +125,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 placeholder="Website"
                 value={formState.website}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
+                className="w-full rounded-xl border border-line px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
               />
             </div>
 
@@ -133,18 +136,18 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 rows={5}
                 value={formState.message}
                 onChange={handleChange}
-                className="w-full resize-none rounded-lg border border-line px-4 py-3 text-sm focus:outline-none"
+                className="w-full resize-none rounded-xl border border-line px-3 py-[18px] text-base placeholder:text-body-subtle focus:outline-none"
               />
             </div>
 
             <div className="flex justify-center">
-              <button
+              <Button
                 type="submit"
+                loading={isSubmitting}
                 disabled={isSubmitting}
-                className="rounded bg-[#9c8c7a] px-8 py-3 font-medium text-white transition-colors hover:bg-[#8a7a68] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSubmitting ? "Submitting..." : buttonText}
-              </button>
+                {buttonText}
+              </Button>
             </div>
           </Form>
         )}

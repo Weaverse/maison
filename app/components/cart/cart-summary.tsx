@@ -13,6 +13,7 @@ import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
+import { getCartDiscounts } from "~/utils/cart-discounts";
 import {
   DiscountDialog,
   GiftCardDialog,
@@ -43,6 +44,7 @@ export function CartSummary({
     string | null
   >(null);
   const [removingGiftCard, setRemovingGiftCard] = useState<string | null>(null);
+  const dcApplyFetcher = useFetcher({ key: "discount-code-apply" });
   const dcRemoveFetcher = useFetcher({ key: "discount-code-remove" });
   const gcRemoveFetcher = useFetcher({ key: "gift-card-remove" });
   // Line removal submits with this stable fetcherKey. The CartLineItem that
@@ -54,9 +56,24 @@ export function CartSummary({
 
   const { cost, discountCodes, isOptimistic, appliedGiftCards, note } = cart;
 
+  // On the cart page the discount code moved into its own card below the
+  // summary, so only the drawer still triggers the dialog from here.
+  const showDiscountTrigger = enableDiscountCode && layout === "drawer";
+  const actionCount = [
+    enableCartNote,
+    showDiscountTrigger,
+    enableGiftCard,
+  ].filter(Boolean).length;
+
+  const { total: discountTotal } = getCartDiscounts(cart);
+  const subtotalValue = Number(cost?.subtotalAmount?.amount || 0);
+  const totalValue = Number(cost?.totalAmount?.amount || 0);
+  const hasDiscount = subtotalValue > totalValue && totalValue > 0;
+
   // show loading state for optimistic line item changes or pending cart actions
   const isCartUpdating =
     isOptimistic ||
+    dcApplyFetcher.state !== "idle" ||
     dcRemoveFetcher.state !== "idle" ||
     gcRemoveFetcher.state !== "idle" ||
     lineRemoveFetcher.state !== "idle";
@@ -66,16 +83,97 @@ export function CartSummary({
       className={clsx(
         layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
         layout === "page" &&
-          "sticky top-(--height-nav) grid h-fit w-full gap-6 bg-background-subtle/50 p-6 md:min-w-[380px] md:max-w-[420px] bg-white rounded-sm z-[1]",
+          "z-[1] grid h-fit w-full gap-5 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav)",
       )}
     >
-      <h2
-        className={clsx(
-          layout === "page" ? "font-semibold text-base" : "sr-only",
-        )}
-      >
-        Order Summary
-      </h2>
+      {layout === "page" ? (
+        <div className="grid gap-6">
+          <h2 className="font-semibold text-base">Order Summary</h2>
+          <div className="h-px w-full bg-line-subtle" />
+          <dl className="flex items-start gap-2.5 text-base leading-none">
+            <dt className="min-w-0 grow">Subtotal</dt>
+            <dd className="shrink-0 whitespace-nowrap">
+              {isCartUpdating ? (
+                <Skeleton className="h-4 w-20 rounded" />
+              ) : cost?.subtotalAmount?.amount ? (
+                <Money data={cost.subtotalAmount} />
+              ) : (
+                "-"
+              )}
+            </dd>
+          </dl>
+          {discountTotal > 0 && cost?.subtotalAmount && (
+            <dl className="flex items-start gap-2.5 text-base leading-none">
+              <dt className="min-w-0 grow">Discount</dt>
+              <dd className="shrink-0 whitespace-nowrap">
+                {isCartUpdating ? (
+                  <Skeleton className="h-4 w-20 rounded" />
+                ) : (
+                  <span className="inline-flex items-center">
+                    -
+                    <Money
+                      as="span"
+                      withoutTrailingZeros
+                      data={{
+                        ...cost.subtotalAmount,
+                        amount: String(discountTotal),
+                      }}
+                    />
+                  </span>
+                )}
+              </dd>
+            </dl>
+          )}
+          <p className="text-base text-body-subtle/80 leading-[1.6]">
+            Shipping and taxes will be calculated at checkout.
+          </p>
+          <div className="h-px w-full bg-line-subtle" />
+          <dl className="flex items-start gap-2.5 font-semibold text-base leading-[1.6]">
+            <dt className="min-w-0 grow">Total</dt>
+            <dd className="shrink-0 whitespace-nowrap">
+              {isCartUpdating ? (
+                <Skeleton className="h-4 w-20 rounded" />
+              ) : cost?.totalAmount?.amount ? (
+                <Money data={cost.totalAmount} />
+              ) : (
+                "-"
+              )}
+            </dd>
+          </dl>
+        </div>
+      ) : (
+        <>
+          <h2 className="sr-only">Order Summary</h2>
+          <div className="grid gap-3">
+            <dl className="grid gap-2.5 text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="font-semibold text-base uppercase">Subtotal</dt>
+                {isCartUpdating ? (
+                  <Skeleton className="h-4 w-20 rounded" />
+                ) : (
+                  <dd className="flex items-center gap-2 text-base">
+                    {hasDiscount && (
+                      <span className="font-medium text-body-subtle/80 text-sm line-through">
+                        <Money data={cost?.subtotalAmount} />
+                      </span>
+                    )}
+                    <span className="font-semibold">
+                      {cost?.totalAmount?.amount ? (
+                        <Money data={cost?.totalAmount} />
+                      ) : (
+                        "-"
+                      )}
+                    </span>
+                  </dd>
+                )}
+              </div>
+            </dl>
+            <p className="text-body-subtle/80 text-sm">
+              Shipping and taxes will be calculated at checkout.
+            </p>
+          </div>
+        </>
+      )}
 
       {/* applied gift cards display */}
       {appliedGiftCards?.length > 0 && (
@@ -129,7 +227,7 @@ export function CartSummary({
       )}
 
       {/* applied discount codes display */}
-      {discountCodes?.length > 0 && (
+      {layout === "drawer" && discountCodes?.length > 0 && (
         <div className="flex flex-wrap justify-end gap-2">
           {discountCodes
             .filter((discount) => discount.applicable)
@@ -178,52 +276,15 @@ export function CartSummary({
         </div>
       )}
 
-      <div className="grid gap-3">
-        {(() => {
-          const subtotal = Number(cost?.subtotalAmount?.amount || 0);
-          const total = Number(cost?.totalAmount?.amount || 0);
-          const hasDiscount = subtotal > total && total > 0;
-
-          return (
-            <dl className="grid gap-2.5 text-sm">
-              <div className="flex items-center justify-between">
-                <dt className="font-semibold uppercase text-base">Subtotal</dt>
-                {isCartUpdating ? (
-                  <Skeleton className="h-4 w-20 rounded" />
-                ) : (
-                  <dd className="flex items-center gap-2 text-base">
-                    {hasDiscount && (
-                      <span className="line-through text-body-subtle/80 text-sm font-medium">
-                        <Money data={cost?.subtotalAmount} />
-                      </span>
-                    )}
-                    <span className="font-semibold">
-                      {cost?.totalAmount?.amount ? (
-                        <Money data={cost?.totalAmount} />
-                      ) : (
-                        "-"
-                      )}
-                    </span>
-                  </dd>
-                )}
-              </div>
-            </dl>
-          );
-        })()}
-
-        <p className="text-body-subtle/80 text-sm">
-          Shipping and taxes will be calculated at checkout.
-        </p>
-      </div>
-
       {/* action buttons */}
-      {(enableCartNote || enableDiscountCode || enableGiftCard) && (
+      {actionCount > 0 && (
         <div
           className={clsx(
             "gap-2",
-            layout === "page"
-              ? "grid grid-cols-3"
-              : "flex items-center justify-end",
+            layout === "drawer" && "flex items-center justify-end",
+            layout === "page" && "grid",
+            layout === "page" &&
+              (actionCount > 1 ? "grid-cols-2" : "grid-cols-1"),
           )}
         >
           {enableCartNote && (
@@ -242,15 +303,12 @@ export function CartSummary({
               <NoteDialog cartNote={note} layout={layout} />
             </Dialog.Root>
           )}
-          {enableDiscountCode && (
+          {showDiscountTrigger && (
             <Dialog.Root>
               <Dialog.Trigger asChild>
                 <Button
                   variant="secondary"
-                  className={clsx(
-                    "px-3 py-2 text-sm font-normal rounded border-0",
-                    layout === "page" && "w-full",
-                  )}
+                  className="rounded border-0 px-3 py-2 font-normal text-sm"
                 >
                   {discountCodeButtonText}
                 </Button>

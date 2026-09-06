@@ -1,4 +1,9 @@
-import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  CircleNotchIcon,
+  MinusIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import {
   CartForm,
   Money,
@@ -8,6 +13,7 @@ import {
   useOptimisticData,
 } from "@shopify/hydrogen";
 import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
+import { useThemeSettings } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
@@ -22,6 +28,7 @@ import { Section } from "~/components/section";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
 import { CartBestSellers } from "./cart-best-sellers";
+import { CartDiscount } from "./cart-discount";
 import { CartSummary } from "./cart-summary";
 
 type CartLine = OptimisticCart<CartApiQueryFragment>["lines"]["nodes"][0];
@@ -59,13 +66,14 @@ function CartDetails({
   layout: Layouts;
   cart: OptimisticCart<CartApiQueryFragment>;
 }) {
+  const { enableDiscountCode } = useThemeSettings();
   const content = (
     <div
       className={clsx(
         layout === "drawer" && "flex h-full flex-col px-5",
         layout === "page" && [
           "mx-auto w-full max-w-(--page-width) pb-12",
-          "grid md:grid-cols-[1fr_auto] md:items-start",
+          "grid lg:grid-cols-[1fr_auto] lg:items-start",
           "gap-6",
         ],
       )}
@@ -74,12 +82,15 @@ function CartDetails({
       <div
         className={clsx(
           "space-y-4",
-          layout === "drawer" ? "flex-shrink-0" : "self-start",
+          layout === "drawer" ? "flex-shrink-0" : "self-start lg:w-[360px]",
         )}
       >
         <CartSummary cart={cart} layout={layout}>
           <CartCheckoutActions checkoutUrl={cart.checkoutUrl} layout={layout} />
         </CartSummary>
+        {layout === "page" && (
+          <CartDiscount cart={cart} canApply={Boolean(enableDiscountCode)} />
+        )}
       </div>
     </div>
   );
@@ -107,7 +118,7 @@ function CartLines({
       ref={scrollRef}
       className={clsx([
         y > 0 ? "border-line-subtle border-t" : "",
-        layout === "page" && "grow bg-white p-6 rounded-sm",
+        layout === "page" && "grow rounded-2xl bg-white p-4 sm:p-6",
         layout === "drawer" &&
           "flex-1 min-h-0 overflow-auto transition -mx-5 pb-4",
       ])}
@@ -151,13 +162,13 @@ function CartCheckoutActions({
         <Link
           to="/cart"
           onClick={() => toggleCartDrawer(false)}
-          className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded text-sm font-normal"
+          className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded-(--btn-border-radius) text-base font-normal"
         >
           View Cart
         </Link>
       )}
       <a href={checkoutUrl} target="_self" className="w-full">
-        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 rounded text-sm font-normal">
+        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal">
           Checkout
         </Button>
       </a>
@@ -215,8 +226,8 @@ function CartLineItem({
   return (
     <li
       className={clsx(
-        "flex gap-4",
-        layout === "page" && "not-last:pb-6",
+        "flex",
+        layout === "page" ? "gap-3.5 not-last:pb-6 sm:gap-4" : "gap-3 sm:gap-4",
         className,
       )}
       style={{
@@ -232,23 +243,23 @@ function CartLineItem({
             height={250}
             data={image}
             className={clsx(
-              "h-auto object-cover aspect-square rounded-sm",
-              layout === "page" ? "w-[160px]" : "w-[140px]",
+              "aspect-square h-auto rounded-xl object-cover",
+              layout === "page" ? "w-[120px] sm:w-[160px]" : "w-[140px]",
             )}
             alt={title}
             aspectRatio={calculateAspectRatio(image, "adapt")}
           />
         )}
       </div>
-      <div className="flex grow flex-col justify-between gap-3">
+      <div className="flex min-w-0 grow flex-col justify-between gap-4">
         <div className="flex items-start justify-between gap-6">
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <div className="font-semibold">
               {product?.handle ? (
                 <Link
                   to={url}
                   onClick={() => toggleCartDrawer(false)}
-                  className="inline-block hover:opacity-70 transition-opacity"
+                  className="inline-block break-words transition-opacity hover:opacity-70"
                 >
                   {product?.title || ""}
                 </Link>
@@ -257,11 +268,18 @@ function CartLineItem({
               )}
             </div>
             {formattedVariant && (
-              <div className="text-body-subtle text-sm">{formattedVariant}</div>
+              <div className="text-base">{formattedVariant}</div>
+            )}
+            {layout === "page" && (
+              <CartLinePrice
+                line={line}
+                as="span"
+                className="mt-2 block md:hidden"
+              />
             )}
             {layout === "drawer" &&
               line.sellingPlanAllocation?.sellingPlan?.name && (
-                <div className="mt-3 inline-flex items-center gap-1 rounded bg-[#EBE8E5] px-2.5 py-1 text-xs text-body-subtle">
+                <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#EBE8E5] px-2 py-1 text-xs text-body-subtle">
                   <SubscriptionIcon className="h-3 w-3" />
                   <span>{line.sellingPlanAllocation.sellingPlan.name}</span>
                 </div>
@@ -274,18 +292,38 @@ function CartLineItem({
             <ItemRemoveButton lineId={id} className="-mt-1.5 -mr-2" />
           )}
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <CartLineQuantityAdjust line={line} />
+        <div
+          className={clsx(
+            layout === "drawer" &&
+              "flex flex-col-reverse items-start gap-2 md:flex-row md:items-center",
+            layout === "page" &&
+              "flex flex-col items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-2",
+          )}
+        >
+          <div
+            className={clsx(
+              layout === "drawer" && "flex min-w-0 items-center md:grow",
+              layout === "page" &&
+                "flex min-w-0 flex-col items-start gap-4 md:flex-row md:items-center md:gap-3",
+            )}
+          >
+            <CartLineQuantityAdjust line={line} layout={layout} />
             {layout === "page" &&
               line.sellingPlanAllocation?.sellingPlan?.name && (
-                <div className="inline-flex items-center gap-1 rounded bg-[#EBE8E5] px-2.5 py-1 text-xs text-body-subtle">
+                <div className="inline-flex items-center gap-1 rounded-lg bg-[#EBE8E5] px-2 py-1 text-xs text-body-subtle">
                   <SubscriptionIcon className="h-3 w-3" />
                   <span>{line.sellingPlanAllocation.sellingPlan.name}</span>
                 </div>
               )}
           </div>
-          <CartLinePrice line={line} as="span" />
+          <CartLinePrice
+            line={line}
+            as="span"
+            className={clsx(
+              layout === "drawer" && "shrink-0",
+              layout === "page" && "ml-auto hidden md:block",
+            )}
+          />
         </div>
       </div>
     </li>
@@ -321,7 +359,13 @@ function ItemRemoveButton({
   );
 }
 
-function CartLineQuantityAdjust({ line }: { line: CartLine }) {
+function CartLineQuantityAdjust({
+  line,
+  layout,
+}: {
+  line: CartLine;
+  layout: Layouts;
+}) {
   const optimisticId = line?.id;
   const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
   const [inputValue, setInputValue] = useState("");
@@ -398,13 +442,19 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
       <label htmlFor={`quantity-${lineId}`} className="sr-only">
         Quantity, {optimisticQuantity}
       </label>
-      <div className="flex items-center border-2 border-(--color-line) divide-x divide-(--color-line) rounded-(--btn-border-radius) text-sm">
+      <div
+        className={clsx(
+          "flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base",
+          layout === "page" && "shrink-0",
+          layout === "drawer" && "min-w-0",
+        )}
+      >
         <UpdateCartButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             type="submit"
             name="decrease-quantity"
             aria-label={`Decrease quantity by ${increment}`}
-            className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+            className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
             value={prevQuantity}
             disabled={optimisticQuantity <= minimum || isOptimistic}
             title={
@@ -413,7 +463,7 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
                 : ""
             }
           >
-            <span>&#8722;</span>
+            <MinusIcon className="size-4" aria-hidden="true" />
             <OptimisticInput
               id={optimisticId}
               data={{ quantity: prevQuantity }}
@@ -427,7 +477,7 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
           onChange={handleQuantityInputChange}
           onBlur={handleQuantityInputBlur}
           onKeyDown={handleQuantityInputKeyDown}
-          className="w-16 px-3 text-center h-9 text-sm focus:outline-none bg-transparent"
+          className="h-full min-w-0 grow basis-16 bg-transparent px-2 text-center text-base text-body-subtle focus:outline-none"
           data-test="item-quantity"
           min={minimum}
           max={maximum || undefined}
@@ -437,14 +487,14 @@ function CartLineQuantityAdjust({ line }: { line: CartLine }) {
         <UpdateCartButton lines={[{ id: lineId, quantity: nextQuantity }]}>
           <button
             type="submit"
-            className="h-9 w-9 flex items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
+            className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
             name="increase-quantity"
             value={nextQuantity}
             aria-label={`Increase quantity by ${increment}`}
             disabled={isOptimistic || isAtMaximum}
             title={isAtMaximum ? `Maximum quantity is ${maximum}` : ""}
           >
-            <span>&#43;</span>
+            <PlusIcon className="size-4" aria-hidden="true" />
             <OptimisticInput
               id={optimisticId}
               data={{ quantity: nextQuantity }}
@@ -480,10 +530,12 @@ function UpdateCartButton({
 function CartLinePrice({
   line,
   priceType = "regular",
+  className,
   ...passthroughProps
 }: {
   line: CartLine;
   priceType?: "regular" | "compareAt";
+  className?: string;
   [key: string]: any;
 }) {
   let fetcher = useFetcher({
@@ -494,7 +546,9 @@ function CartLinePrice({
   }
 
   if (fetcher.state !== "idle") {
-    return <CircleNotchIcon size={18} className="animate-spin" />;
+    return (
+      <CircleNotchIcon size={18} className={clsx("animate-spin", className)} />
+    );
   }
 
   const moneyV2 =
@@ -511,7 +565,7 @@ function CartLinePrice({
       withoutTrailingZeros
       {...passthroughProps}
       data={moneyV2}
-      className="ml-auto font-semibold"
+      className={clsx("font-semibold", className)}
     />
   );
 }
