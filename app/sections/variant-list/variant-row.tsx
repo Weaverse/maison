@@ -174,17 +174,17 @@ export function VariantRow({
           "hidden md:grid lg:hidden grid-cols-[1fr_150px_160px] gap-6 items-center",
         )}
       >
-        <div className="flex items-start gap-3.5">
+        <div className="flex min-w-0 items-start gap-3.5">
           {variant.image && (
             <Image
               data={variant.image}
               width={99}
               height={99}
-              className="h-[99px] w-[99px] object-cover rounded-xl border border-(--color-line-subtle)"
+              className="h-[99px] w-[99px] shrink-0 object-cover rounded-xl border border-(--color-line-subtle)"
               alt={variant.image.altText || variantTitle}
             />
           )}
-          <div className="flex flex-1 flex-col justify-center gap-4">
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-4">
             <div className="space-y-1">
               <div className="font-semibold text-base">{variantTitle}</div>
               <div className="text-base">SKU: {variant.sku}</div>
@@ -211,7 +211,7 @@ export function VariantRow({
               )}
             </div>
             {sellingPlanGroups.nodes.length > 0 && (
-              <div className="w-[230px]">
+              <div className="w-full max-w-[230px]">
                 <PurchaseMethodDropdown
                   sellingPlanGroups={sellingPlanGroups}
                   selectedPlanId={selectedPlanId}
