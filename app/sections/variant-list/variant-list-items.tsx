@@ -68,7 +68,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
           </div>
 
           {/* tablet layout */}
-          <div className="hidden md:block lg:hidden space-y-6">
+          <div className="hidden md:block xl:hidden space-y-6">
             <div className="space-y-4">
               {/* Three tracks, matching `VariantRow`'s tablet grid. The design
                   draws a fourth QUANTITY column with its label at opacity 0 and
@@ -106,7 +106,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
           </div>
 
           {/* desktop layout */}
-          <div className="hidden lg:block space-y-6">
+          <div className="hidden xl:block space-y-6">
             <div className="space-y-6">
               {sellingPlanGroups?.nodes?.length > 0 ? (
                 <div className="grid grid-cols-[1fr_230px_280px_200px_153px] gap-6 border-b border-line-subtle py-3">

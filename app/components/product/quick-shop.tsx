@@ -97,9 +97,20 @@ export function QuickShop({
               Products
             </div>
           </div>
-          {/* tablet/desktop header */}
+          {/* tablet header — same template as `VariantRow`'s tablet grid. */}
+          <div className="hidden md:grid xl:hidden grid-cols-[1fr_150px_160px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+            <div className="font-semibold text-base uppercase">Variant</div>
+            <div className="font-semibold text-base uppercase text-center">
+              Price
+            </div>
+            <div className="font-semibold text-base uppercase text-right">
+              Variant Price
+            </div>
+          </div>
+
+          {/* desktop header */}
           {sellingPlanGroups?.nodes?.length > 0 ? (
-            <div className="hidden md:grid grid-cols-[1fr_230px_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+            <div className="hidden xl:grid grid-cols-[1fr_230px_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
               <div className="font-semibold text-base uppercase">Variant</div>
               <div className="font-semibold text-base uppercase text-center">
                 Purchase Method
@@ -115,7 +126,7 @@ export function QuickShop({
               </div>
             </div>
           ) : (
-            <div className="hidden md:grid grid-cols-[1fr_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+            <div className="hidden xl:grid grid-cols-[1fr_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
               <div className="font-semibold text-base uppercase">Variant</div>
               <div className="font-semibold text-base uppercase text-center">
                 Quantity

@@ -76,7 +76,7 @@ export function Subtotal({
       </div>
 
       {/* tablet layout */}
-      <div className="hidden border-line-subtle border-t pt-6 md:block lg:hidden">
+      <div className="hidden border-line-subtle border-t pt-6 md:block xl:hidden">
         <div className="flex flex-col gap-3 py-3">
           <div className="flex items-center gap-4">
             <Button variant="outline" onClick={() => toggleCartDrawer(true)}>
@@ -102,7 +102,7 @@ export function Subtotal({
       </div>
 
       {/* desktop layout */}
-      <div className="hidden border-line-subtle border-t pt-[15px] lg:block">
+      <div className="hidden border-line-subtle border-t pt-[15px] xl:block">
         <div
           className={cn(
             "grid items-center gap-6 py-3",

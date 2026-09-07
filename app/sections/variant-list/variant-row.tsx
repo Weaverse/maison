@@ -171,7 +171,7 @@ export function VariantRow({
       {/* tablet layout */}
       <div
         className={cn(
-          "hidden md:grid lg:hidden grid-cols-[1fr_150px_160px] gap-6 items-center",
+          "hidden md:grid xl:hidden grid-cols-[1fr_150px_160px] gap-6 items-center",
         )}
       >
         <div className="flex min-w-0 items-start gap-3.5">
@@ -239,7 +239,7 @@ export function VariantRow({
       {/* desktop layout */}
       <div
         className={cn(
-          "hidden lg:grid gap-6 items-center",
+          "hidden xl:grid gap-6 items-center",
           sellingPlanGroups.nodes.length > 0
             ? "grid-cols-[1fr_230px_280px_200px_153px]"
             : "grid-cols-[1fr_280px_200px_153px]",
