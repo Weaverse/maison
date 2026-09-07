@@ -70,14 +70,15 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
           {/* tablet layout */}
           <div className="hidden md:block lg:hidden space-y-6">
             <div className="space-y-4">
-              <div className="grid grid-cols-[1fr_200px_150px_160px] gap-6 border-b border-line-subtle py-3">
+              {/* Three tracks, matching `VariantRow`'s tablet grid. The design
+                  draws a fourth QUANTITY column with its label at opacity 0 and
+                  spans the row's variant cell across it; both shapes place Price
+                  and Variant Price identically, so the two grids are kept on one
+                  template rather than two. */}
+              <div className="grid grid-cols-[1fr_150px_160px] gap-6 border-b border-line-subtle py-3">
                 <div className="font-semibold text-base text-body-subtle uppercase">
                   Variant
                 </div>
-                {/* The design keeps this column as a spacer: its label is set
-                    to opacity 0 because the quantity control lives inside the
-                    variant cell on tablet. */}
-                <div aria-hidden />
                 <div className="font-semibold text-base text-body-subtle uppercase text-center">
                   Price
                 </div>
