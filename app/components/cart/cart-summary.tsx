@@ -65,10 +65,17 @@ export function CartSummary({
     enableGiftCard,
   ].filter(Boolean).length;
 
-  const { total: discountTotal } = getCartDiscounts(cart);
-  const subtotalValue = Number(cost?.subtotalAmount?.amount || 0);
+  const { total: discountTotal, lineLevel } = getCartDiscounts(cart);
+  // `cost.subtotalAmount` is already net of line-level discounts, so a code
+  // scoped to specific products would otherwise be subtracted twice. Adding
+  // them back gives the pre-discount figure, and the rows then read
+  // Subtotal - Discount = Total for cart-level and line-level codes alike.
+  const subtotalValue = Number(cost?.subtotalAmount?.amount || 0) + lineLevel;
   const totalValue = Number(cost?.totalAmount?.amount || 0);
   const hasDiscount = subtotalValue > totalValue && totalValue > 0;
+  const subtotalMoney = cost?.subtotalAmount
+    ? { ...cost.subtotalAmount, amount: String(subtotalValue) }
+    : null;
 
   // show loading state for optimistic line item changes or pending cart actions
   const isCartUpdating =
@@ -95,8 +102,8 @@ export function CartSummary({
             <dd className="shrink-0 whitespace-nowrap">
               {isCartUpdating ? (
                 <Skeleton className="h-4 w-20 rounded" />
-              ) : cost?.subtotalAmount?.amount ? (
-                <Money data={cost.subtotalAmount} />
+              ) : subtotalMoney ? (
+                <Money data={subtotalMoney} />
               ) : (
                 "-"
               )}
@@ -154,7 +161,7 @@ export function CartSummary({
                   <dd className="flex items-center gap-2 text-base">
                     {hasDiscount && (
                       <span className="font-medium text-body-subtle/80 text-sm line-through">
-                        <Money data={cost?.subtotalAmount} />
+                        <Money data={subtotalMoney} />
                       </span>
                     )}
                     <span className="font-semibold">
