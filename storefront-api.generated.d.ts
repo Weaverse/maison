@@ -2102,6 +2102,9 @@ export type CollectionsQueryVariables = StorefrontAPI.Exact<{
   endCursor?: StorefrontAPI.InputMaybe<
     StorefrontAPI.Scalars['String']['input']
   >;
+  productCountLimit?: StorefrontAPI.InputMaybe<
+    StorefrontAPI.Scalars['Int']['input']
+  >;
 }>;
 
 export type CollectionsQuery = {
@@ -2122,21 +2125,19 @@ export type CollectionsQuery = {
           nodes: Array<Pick<StorefrontAPI.Product, 'id'>>;
           pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage'>;
         };
-        products: {
-          nodes: Array<
-            Pick<StorefrontAPI.Product, 'id' | 'title' | 'handle'> & {
-              media: {
-                nodes: Array<{
-                  previewImage?: StorefrontAPI.Maybe<
-                    Pick<
-                      StorefrontAPI.Image,
-                      'id' | 'url' | 'width' | 'height' | 'altText'
-                    >
-                  >;
-                }>;
-              };
-            }
-          >;
+        fallbackProduct: {
+          nodes: Array<{
+            media: {
+              nodes: Array<{
+                previewImage?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'id' | 'url' | 'width' | 'height' | 'altText'
+                  >
+                >;
+              }>;
+            };
+          }>;
         };
       }
     >;
@@ -2695,6 +2696,9 @@ export type CollectionsByIdsQueryVariables = StorefrontAPI.Exact<{
   ids:
     | Array<StorefrontAPI.Scalars['ID']['input']>
     | StorefrontAPI.Scalars['ID']['input'];
+  productCountLimit?: StorefrontAPI.InputMaybe<
+    StorefrontAPI.Scalars['Int']['input']
+  >;
 }>;
 
 export type CollectionsByIdsQuery = {
@@ -4014,7 +4018,7 @@ interface GeneratedQueryTypes {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
-  '#graphql\n  query collections(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        id\n        title\n        description\n        handle\n        seo {\n          description\n          title\n        }\n        image {\n          id\n          url\n          width\n          height\n          altText\n        }\n        productCount: products(first: 50) {\n          nodes {\n            id\n          }\n          pageInfo {\n            hasNextPage\n          }\n        }\n        products(first: 1) {\n          nodes {\n            id\n            title\n            handle\n            media(first: 1) {\n              nodes {\n                previewImage {\n                  id\n                  url\n                  width\n                  height\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
+  "#graphql\n  query collections(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n    $productCountLimit: Int\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        id\n        title\n        description\n        handle\n        seo {\n          description\n          title\n        }\n        image {\n          id\n          url\n          width\n          height\n          altText\n        }\n        # Two connections on purpose, each selecting only what it needs.\n        # Merging them would apply the fallback's field set to every counted\n        # node, so the cap could no longer be raised without paying for it.\n        productCount: products(first: $productCountLimit) {\n          nodes {\n            id\n          }\n          pageInfo {\n            hasNextPage\n          }\n        }\n        fallbackProduct: products(first: 1) {\n          nodes {\n            media(first: 1) {\n              nodes {\n                previewImage {\n                  id\n                  url\n                  width\n                  height\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n": {
     return: CollectionsQuery;
     variables: CollectionsQueryVariables;
   };
@@ -4046,7 +4050,7 @@ interface GeneratedQueryTypes {
     return: BlogSingleQuery;
     variables: BlogSingleQueryVariables;
   };
-  '#graphql\n  query collectionsByIds($country: CountryCode, $language: LanguageCode, $ids: [ID!]!)\n  @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Collection {\n        id\n        title\n        handle\n        onlineStoreUrl\n        description\n        image {\n          id\n          altText\n          width\n          height\n          url\n        }\n        products(first: 250) {\n          nodes { id }\n          pageInfo { hasNextPage }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query collectionsByIds(\n    $country: CountryCode\n    $language: LanguageCode\n    $ids: [ID!]!\n    $productCountLimit: Int\n  )\n  @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Collection {\n        id\n        title\n        handle\n        onlineStoreUrl\n        description\n        image {\n          id\n          altText\n          width\n          height\n          url\n        }\n        products(first: $productCountLimit) {\n          nodes { id }\n          pageInfo { hasNextPage }\n        }\n      }\n    }\n  }\n': {
     return: CollectionsByIdsQuery;
     variables: CollectionsByIdsQueryVariables;
   };

@@ -29,14 +29,14 @@ function getCollectionImage(collection: CollectionCardData) {
     return collection.image;
   }
 
-  const firstProduct = collection.products.nodes[0];
-  const firstProductMedia = firstProduct?.media?.nodes[0];
+  const firstProductMedia =
+    collection.fallbackProduct.nodes[0]?.media?.nodes[0];
   return firstProductMedia?.previewImage ?? null;
 }
 
-// The Storefront API has no count field on Collection, so the query fetches up
-// to 50 product ids under the `productCount` alias. Past that the label reads
-// "50+" rather than reporting a wrong number.
+// The Storefront API has no count field on Collection, so the query fetches ids
+// under the `productCount` alias, capped at `COLLECTION_PRODUCT_COUNT_LIMIT`.
+// Past that the label reads "N+" rather than reporting a wrong number.
 function getProductCountLabel(collection: CollectionCardData) {
   const { productCount } = collection;
 
@@ -62,7 +62,9 @@ export function CollectionCard({
   cardBorderRadius,
   loading,
 }: CollectionCardProps) {
-  if (collection.products.nodes.length === 0) {
+  // Read emptiness from the connection that exists to count, not from the
+  // single-node one that exists to supply a fallback image.
+  if (collection.productCount.nodes.length === 0) {
     return null;
   }
 
