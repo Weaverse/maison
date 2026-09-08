@@ -18,7 +18,7 @@ export function MobileMenu() {
     <Dialog.Root>
       <Dialog.Trigger
         asChild
-        className="relative flex h-8 w-8 items-center justify-center focus-visible:outline-hidden lg:hidden"
+        className="relative flex h-8 w-8 items-center justify-center focus-visible:outline-hidden xl:hidden"
       >
         <MenuTrigger />
       </Dialog.Trigger>
