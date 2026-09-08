@@ -10,6 +10,11 @@ import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
 import type { RootLoader } from "~/root";
+import {
+  VARIANT_GRID_DESKTOP,
+  VARIANT_GRID_DESKTOP_COMPACT,
+  VARIANT_GRID_TABLET,
+} from "~/sections/variant-list/grid";
 import { Subtotal } from "~/sections/variant-list/subtotal";
 import { VariantRow } from "~/sections/variant-list/variant-row";
 
@@ -98,7 +103,12 @@ export function QuickShop({
             </div>
           </div>
           {/* tablet header — same template as `VariantRow`'s tablet grid. */}
-          <div className="hidden md:grid xl:hidden grid-cols-[1fr_150px_160px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+          <div
+            className={clsx(
+              "hidden gap-6 border-b border-line-subtle py-3 text-body-subtle md:grid xl:hidden",
+              VARIANT_GRID_TABLET,
+            )}
+          >
             <div className="font-semibold text-base uppercase">Variant</div>
             <div className="font-semibold text-base uppercase text-center">
               Price
@@ -110,7 +120,12 @@ export function QuickShop({
 
           {/* desktop header */}
           {sellingPlanGroups?.nodes?.length > 0 ? (
-            <div className="hidden xl:grid grid-cols-[1fr_230px_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+            <div
+              className={clsx(
+                "hidden gap-6 border-b border-line-subtle py-3 text-body-subtle xl:grid",
+                VARIANT_GRID_DESKTOP,
+              )}
+            >
               <div className="font-semibold text-base uppercase">Variant</div>
               <div className="font-semibold text-base uppercase text-center">
                 Purchase Method
@@ -126,7 +141,12 @@ export function QuickShop({
               </div>
             </div>
           ) : (
-            <div className="hidden xl:grid grid-cols-[1fr_280px_200px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
+            <div
+              className={clsx(
+                "hidden gap-6 border-b border-line-subtle py-3 text-body-subtle xl:grid",
+                VARIANT_GRID_DESKTOP_COMPACT,
+              )}
+            >
               <div className="font-semibold text-base uppercase">Variant</div>
               <div className="font-semibold text-base uppercase text-center">
                 Quantity

@@ -7,6 +7,7 @@ import type {
 } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
+import { desktopVariantGrid } from "~/sections/variant-list/grid";
 import { cn } from "~/utils/cn";
 
 type SubtotalProps = {
@@ -106,9 +107,7 @@ export function Subtotal({
         <div
           className={cn(
             "grid items-center gap-6 py-3",
-            hasPurchaseMethod
-              ? "grid-cols-[1fr_230px_280px_200px_153px]"
-              : "grid-cols-[1fr_280px_200px_153px]",
+            desktopVariantGrid(hasPurchaseMethod),
           )}
         >
           <div className="flex items-center gap-4">

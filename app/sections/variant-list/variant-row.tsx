@@ -21,6 +21,10 @@ import type {
 import { Image } from "~/components/image";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
+import {
+  desktopVariantGrid,
+  VARIANT_GRID_TABLET,
+} from "~/sections/variant-list/grid";
 import { cn } from "~/utils/cn";
 import {
   calculateSellingPlanPrice,
@@ -171,7 +175,8 @@ export function VariantRow({
       {/* tablet layout */}
       <div
         className={cn(
-          "hidden md:grid xl:hidden grid-cols-[1fr_150px_160px] gap-6 items-center",
+          "hidden md:grid xl:hidden gap-6 items-center",
+          VARIANT_GRID_TABLET,
         )}
       >
         <div className="flex min-w-0 items-start gap-3.5">
@@ -240,9 +245,7 @@ export function VariantRow({
       <div
         className={cn(
           "hidden xl:grid gap-6 items-center",
-          sellingPlanGroups.nodes.length > 0
-            ? "grid-cols-[1fr_230px_280px_200px_153px]"
-            : "grid-cols-[1fr_280px_200px_153px]",
+          desktopVariantGrid(sellingPlanGroups.nodes.length > 0),
         )}
       >
         <div className="flex items-center gap-3.5">

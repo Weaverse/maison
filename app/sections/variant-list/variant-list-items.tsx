@@ -19,7 +19,13 @@ import type {
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 import type { RootLoader } from "~/root";
+import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
+import {
+  VARIANT_GRID_DESKTOP,
+  VARIANT_GRID_DESKTOP_COMPACT,
+  VARIANT_GRID_TABLET,
+} from "./grid";
 import { Subtotal } from "./subtotal";
 import { VariantRow } from "./variant-row";
 
@@ -75,7 +81,12 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                   spans the row's variant cell across it; both shapes place Price
                   and Variant Price identically, so the two grids are kept on one
                   template rather than two. */}
-              <div className="grid grid-cols-[1fr_150px_160px] gap-6 border-b border-line-subtle py-3">
+              <div
+                className={cn(
+                  "grid gap-6 border-b border-line-subtle py-3",
+                  VARIANT_GRID_TABLET,
+                )}
+              >
                 <div className="font-semibold text-base text-body-subtle uppercase">
                   Variant
                 </div>
@@ -109,7 +120,12 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
           <div className="hidden xl:block space-y-6">
             <div className="space-y-6">
               {sellingPlanGroups?.nodes?.length > 0 ? (
-                <div className="grid grid-cols-[1fr_230px_280px_200px_153px] gap-6 border-b border-line-subtle py-3">
+                <div
+                  className={cn(
+                    "grid gap-6 border-b border-line-subtle py-3",
+                    VARIANT_GRID_DESKTOP,
+                  )}
+                >
                   <div className="font-semibold text-base text-body-subtle uppercase">
                     Variant
                   </div>
@@ -127,7 +143,12 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-[1fr_280px_200px_153px] gap-6 border-b border-line-subtle py-3">
+                <div
+                  className={cn(
+                    "grid gap-6 border-b border-line-subtle py-3",
+                    VARIANT_GRID_DESKTOP_COMPACT,
+                  )}
+                >
                   <div className="font-semibold text-base text-body-subtle uppercase">
                     Variant
                   </div>
