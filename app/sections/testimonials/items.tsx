@@ -84,7 +84,11 @@ function TestimonialsItems(props: TestimonialsItemsProps) {
         ))}
       </Swimlane>
 
-      <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 -left-2 -right-2 z-[1] flex justify-between md:-left-16 md:-right-16">
+      {/* Tablet places the arrows 16px inside the content box, overlapping the
+          first and last card. They only clear the carousel once the viewport is
+          wider than `--page-width` by more than the offset, so the outside
+          placement waits for `2xl`. */}
+      <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 -left-2 -right-2 z-[1] flex justify-between md:left-4 md:right-4 2xl:-left-16 2xl:-right-16">
         <button
           aria-label="Previous testimonial"
           className={arrowButtonVariants({ arrowsShape })}
