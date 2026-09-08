@@ -23,16 +23,33 @@ export function CartDiscount({
   const money = cart?.cost?.subtotalAmount;
   const { byCode } = getCartDiscounts(cart);
   const [code, setCode] = useState("");
+  const [submittedCode, setSubmittedCode] = useState("");
   const [removingCode, setRemovingCode] = useState<string | null>(null);
   const applyFetcher = useFetcher({ key: "discount-code-apply" });
   const removeFetcher = useFetcher({ key: "discount-code-remove" });
 
   const appliedCodes = discountCodes.filter((discount) => discount.applicable);
   const isApplying = applyFetcher.state !== "idle";
-  const submitted = Boolean(code && !isApplying && applyFetcher.data);
   const isApplied = appliedCodes.some(
     (discount) => discount.code.toLowerCase() === code.trim().toLowerCase(),
   );
+  // The verdict on the code just submitted, taken from the response to that
+  // submission rather than from the `cart` prop: the prop only catches up once
+  // the loader revalidates, which lands in a later commit whenever that request
+  // is slow, long enough to paint the banner over a code that was applied.
+  //
+  // Matching by code rather than reading a boolean also covers the render
+  // between `setSubmittedCode` and the fetcher leaving idle, where `data` still
+  // holds the previous submission: that response does not mention this code, so
+  // there is no verdict yet and nothing is shown.
+  const verdict = applyFetcher.data?.cart?.discountCodes?.find(
+    (discount: { code: string; applicable: boolean }) =>
+      discount.code.toLowerCase() === submittedCode.toLowerCase(),
+  );
+  const rejected =
+    !isApplying &&
+    code.trim() === submittedCode &&
+    verdict?.applicable === false;
 
   // Clear the field once the code shows up as an applied chip, so the input
   // never sits next to a chip repeating the same code.
@@ -52,6 +69,7 @@ export function CartDiscount({
     if (!discountCode) {
       return;
     }
+    setSubmittedCode(discountCode);
     applyFetcher.submit(
       {
         [CartForm.INPUT_NAME]: JSON.stringify({
@@ -81,10 +99,7 @@ export function CartDiscount({
             name="discountCode"
             value={code}
             placeholder="Promo code"
-            onChange={(event) => {
-              setCode(event.target.value);
-              applyFetcher.data = null;
-            }}
+            onChange={(event) => setCode(event.target.value)}
             className="min-w-0 grow rounded-(--btn-border-radius) border border-(--color-line) px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
           />
           <Button
@@ -99,9 +114,7 @@ export function CartDiscount({
         </form>
       )}
 
-      {submitted && !isApplied && (
-        <Banner variant="error">Invalid discount code.</Banner>
-      )}
+      {rejected && <Banner variant="error">Invalid discount code.</Banner>}
 
       {appliedCodes.length > 0 && (
         <div className="flex flex-wrap gap-2">
