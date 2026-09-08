@@ -45,11 +45,11 @@ export default function TestimonialItem(props: TestimonialItemProps) {
             sizes="auto"
             width={36}
           />
-          <div className="flex flex-col justify-center gap-0.5 whitespace-nowrap">
+          <div className="flex min-w-0 flex-col justify-center gap-0.5 break-words">
             <div className="font-semibold text-base leading-[1.6] tracking-[0.28px]">
               {authorName}
             </div>
-            <div className="text-sm leading-none tracking-[0.24px]">
+            <div className="text-sm leading-[1.4] tracking-[0.24px]">
               {authorTitle}
             </div>
           </div>
@@ -67,10 +67,10 @@ export default function TestimonialItem(props: TestimonialItemProps) {
 
         {badgeText ? (
           <div
-            className="flex w-fit items-center justify-center rounded-[8px] px-5 py-1.5"
+            className="flex w-fit max-w-full items-center justify-center rounded-[8px] px-5 py-1.5"
             style={{ backgroundColor: badgeBackgroundColor }}
           >
-            <span className="whitespace-nowrap text-base leading-[1.6] tracking-[0.28px]">
+            <span className="min-w-0 break-words text-base leading-[1.6] tracking-[0.28px]">
               {badgeText}
             </span>
           </div>
