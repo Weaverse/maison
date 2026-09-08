@@ -55,13 +55,15 @@ export default function TestimonialItem(props: TestimonialItemProps) {
           </div>
         </figcaption>
 
-        <div className="w-full overflow-hidden rounded-[12px]">
+        {/* The carousel switches from one card to `desktopCarouselItems` at
+            `md`, so `sizes` has to break at the same width. */}
+        <div className="w-full shrink-0 overflow-hidden rounded-[12px]">
           <Image
             alt={authorName}
             aspectRatio="1/1"
-            className="w-full object-cover"
+            className="w-full"
             data={resolveImage(image, authorName)}
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            sizes="(min-width: 768px) 33vw, 100vw"
           />
         </div>
 
