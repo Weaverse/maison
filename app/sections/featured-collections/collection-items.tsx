@@ -13,6 +13,7 @@ import type { OverlayProps } from "~/components/overlay";
 import { Overlay, overlayInputs } from "~/components/overlay";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
+import { getProductCountLabel } from "~/utils/collection";
 import { calculateAspectRatio } from "~/utils/image";
 import type { FeaturedCollectionsLoaderData } from ".";
 
@@ -120,23 +121,6 @@ type StandardCollectionCardProps = Pick<
 > & {
   collection: Collection;
 };
-
-// The Storefront API has no count field on Collection, so the query fetches up
-// to 250 product ids. Past that the label reads "250+" rather than reporting a
-// wrong number.
-function getProductCountLabel(
-  products?: {
-    nodes: unknown[];
-    pageInfo?: { hasNextPage: boolean };
-  } | null,
-) {
-  if (!products) {
-    return null;
-  }
-  const total = products.nodes.length;
-  const suffix = products.pageInfo?.hasNextPage ? "+" : "";
-  return `${total}${suffix} ${total === 1 && !suffix ? "product" : "products"}`;
-}
 
 function StandardCollectionCard({
   collection,

@@ -5,6 +5,7 @@ import { Image } from "~/components/image";
 import Link from "~/components/link";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
+import { getProductCountLabel } from "~/utils/collection";
 import { calculateAspectRatio } from "~/utils/image";
 
 /** Exactly what the collections query returns, so no cast is needed. */
@@ -34,21 +35,6 @@ function getCollectionImage(collection: CollectionCardData) {
   return firstProductMedia?.previewImage ?? null;
 }
 
-// The Storefront API has no count field on Collection, so the query fetches ids
-// under the `productCount` alias, capped at `COLLECTION_PRODUCT_COUNT_LIMIT`.
-// Past that the label reads "N+" rather than reporting a wrong number.
-function getProductCountLabel(collection: CollectionCardData) {
-  const { productCount } = collection;
-
-  if (!productCount) {
-    return null;
-  }
-
-  const total = productCount.nodes.length;
-  const suffix = productCount.pageInfo.hasNextPage ? "+" : "";
-  return `${total}${suffix} ${total === 1 && !suffix ? "product" : "products"}`;
-}
-
 export function CollectionCard({
   collection,
   imageAspectRatio,
@@ -69,7 +55,7 @@ export function CollectionCard({
   }
 
   const collectionImage = getCollectionImage(collection);
-  const productCountLabel = getProductCountLabel(collection);
+  const productCountLabel = getProductCountLabel(collection.productCount);
 
   return (
     <Link
