@@ -1,5 +1,7 @@
 import type { HydrogenThemeSchema } from "@weaverse/hydrogen";
-import { COUNTRIES } from "~/utils/const";
+import enUS from "~/locales/en.json";
+import type { StoreLocalization } from "~/types/locale";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "~/utils/const";
 import { version } from "../../package.json";
 
 export const themeSchema: HydrogenThemeSchema = {
@@ -14,23 +16,13 @@ export const themeSchema: HydrogenThemeSchema = {
   },
   i18n: {
     urlStructure: "url-path",
-    defaultLocale: {
-      pathPrefix: "",
-      label: "United States (USD $)",
-      language: "EN",
-      country: "US",
-      currency: "USD",
-    },
-    shopLocales: Object.entries(COUNTRIES).map(
-      ([pathPrefix, { label, language, country }]) => {
-        return {
-          pathPrefix: pathPrefix === "default" ? "" : pathPrefix,
-          label,
-          language,
-          country,
-        };
-      },
-    ),
+    defaultLocale: DEFAULT_LOCALE,
+    shopLocales: [...SUPPORTED_LOCALES],
+    // The theme ships one catalogue, for the default locale. Every other
+    // locale is translated by the merchant in Studio, and `translation` is
+    // what puts that UI in front of them.
+    staticContent: enUS,
+    translation: true,
   },
   settings: [
     {
@@ -1234,3 +1226,25 @@ export const themeSchema: HydrogenThemeSchema = {
     },
   ],
 };
+
+/**
+ * Narrow the declared locales to those Shopify actually has live, so the
+ * Studio locale picker and the storefront selector agree.
+ */
+export function getThemeSchema({
+  availableLocales,
+  defaultLocale,
+}: StoreLocalization): HydrogenThemeSchema {
+  return {
+    ...themeSchema,
+    i18n: {
+      ...(themeSchema.i18n ?? {
+        urlStructure: "url-path" as const,
+        defaultLocale,
+        shopLocales: availableLocales,
+      }),
+      defaultLocale,
+      shopLocales: availableLocales,
+    },
+  };
+}
