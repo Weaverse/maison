@@ -447,7 +447,7 @@ function PopularKeywords() {
       {popularKeywords.map((search, ind) => (
         <span key={search} className="inline-flex items-center">
           <Link
-            to={`/search?q=${search}`}
+            to={`/search?q=${encodeURIComponent(search)}`}
             className="underline-offset-4 hover:underline"
           >
             {search}
