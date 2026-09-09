@@ -19,7 +19,13 @@ import type {
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 import type { RootLoader } from "~/root";
+import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
+import {
+  VARIANT_GRID_DESKTOP,
+  VARIANT_GRID_DESKTOP_COMPACT,
+  VARIANT_GRID_TABLET,
+} from "./grid";
 import { Subtotal } from "./subtotal";
 import { VariantRow } from "./variant-row";
 
@@ -60,18 +66,34 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
           </div>
 
           <div className="md:hidden mt-6">
-            <Subtotal cart={resolvedCart} variants={variants} />
+            <Subtotal
+              cart={resolvedCart}
+              variants={variants}
+              hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+            />
           </div>
 
           {/* tablet layout */}
-          <div className="hidden md:block lg:hidden space-y-6">
+          <div className="hidden md:block xl:hidden space-y-6">
             <div className="space-y-4">
-              <div className="grid grid-cols-[6fr_1fr_1fr] gap-6 border-b border-line-subtle py-3">
-                <div className="text-sm font-bold uppercase">Variant</div>
-                <div className="text-sm font-bold uppercase text-center">
+              {/* Three tracks, matching `VariantRow`'s tablet grid. The design
+                  draws a fourth QUANTITY column with its label at opacity 0 and
+                  spans the row's variant cell across it; both shapes place Price
+                  and Variant Price identically, so the two grids are kept on one
+                  template rather than two. */}
+              <div
+                className={cn(
+                  "grid gap-6 border-b border-line-subtle py-3",
+                  VARIANT_GRID_TABLET,
+                )}
+              >
+                <div className="font-semibold text-base text-body-subtle uppercase">
+                  Variant
+                </div>
+                <div className="font-semibold text-base text-body-subtle uppercase text-center">
                   Price
                 </div>
-                <div className="text-sm font-bold uppercase text-right ">
+                <div className="font-semibold text-base text-body-subtle uppercase text-right">
                   Variant Price
                 </div>
               </div>
@@ -87,38 +109,56 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
               </div>
             </div>
 
-            <Subtotal cart={resolvedCart} variants={variants} />
+            <Subtotal
+              cart={resolvedCart}
+              variants={variants}
+              hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+            />
           </div>
 
           {/* desktop layout */}
-          <div className="hidden lg:block space-y-6">
+          <div className="hidden xl:block space-y-6">
             <div className="space-y-6">
               {sellingPlanGroups?.nodes?.length > 0 ? (
-                <div className="grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
-                  <div className="text-sm font-semibold uppercase">Variant</div>
-                  <div className="text-sm font-semibold uppercase text-center">
+                <div
+                  className={cn(
+                    "grid gap-6 border-b border-line-subtle py-3",
+                    VARIANT_GRID_DESKTOP,
+                  )}
+                >
+                  <div className="font-semibold text-base text-body-subtle uppercase">
+                    Variant
+                  </div>
+                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
                     Purchase Method
                   </div>
-                  <div className="text-sm font-semibold uppercase text-center">
+                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
                     Quantity
                   </div>
-                  <div className="text-sm font-semibold uppercase text-center">
+                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
                     Price
                   </div>
-                  <div className="text-sm font-semibold uppercase text-right ">
+                  <div className="font-semibold text-base text-body-subtle uppercase text-right">
                     Variant Price
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3">
-                  <div className="text-sm font-semibold uppercase">Variant</div>
-                  <div className="text-sm font-semibold uppercase text-center">
+                <div
+                  className={cn(
+                    "grid gap-6 border-b border-line-subtle py-3",
+                    VARIANT_GRID_DESKTOP_COMPACT,
+                  )}
+                >
+                  <div className="font-semibold text-base text-body-subtle uppercase">
+                    Variant
+                  </div>
+                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
                     Quantity
                   </div>
-                  <div className="text-sm font-semibold uppercase text-center">
+                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
                     Price
                   </div>
-                  <div className="text-sm font-semibold uppercase text-right ">
+                  <div className="font-semibold text-base text-body-subtle uppercase text-right">
                     Variant Price
                   </div>
                 </div>
@@ -135,7 +175,11 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
               </div>
             </div>
 
-            <Subtotal cart={resolvedCart} variants={variants} />
+            <Subtotal
+              cart={resolvedCart}
+              variants={variants}
+              hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+            />
           </div>
         </div>
       )}

@@ -21,6 +21,14 @@ export const CART_QUERY_FRAGMENT = `#graphql
         ...Money
       }
     }
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+    }
     sellingPlanAllocation {
       sellingPlan {
         id
@@ -80,6 +88,14 @@ export const CART_QUERY_FRAGMENT = `#graphql
       }
       compareAtAmountPerQuantity {
         ...Money
+      }
+    }
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+      ... on CartCodeDiscountAllocation {
+        code
       }
     }
     sellingPlanAllocation {
@@ -170,17 +186,19 @@ export const CART_QUERY_FRAGMENT = `#graphql
       totalAmount {
         ...Money
       }
-      totalDutyAmount {
-        ...Money
-      }
-      totalTaxAmount {
-        ...Money
-      }
     }
     note
     attributes {
       key
       value
+    }
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
     }
     discountCodes {
       code

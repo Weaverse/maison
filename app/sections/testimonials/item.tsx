@@ -45,32 +45,34 @@ export default function TestimonialItem(props: TestimonialItemProps) {
             sizes="auto"
             width={36}
           />
-          <div className="flex flex-col justify-center gap-0.5 whitespace-nowrap">
+          <div className="flex min-w-0 flex-col justify-center gap-0.5 break-words">
             <div className="font-semibold text-base leading-[1.6] tracking-[0.28px]">
               {authorName}
             </div>
-            <div className="text-sm leading-none tracking-[0.24px]">
+            <div className="text-sm leading-[1.4] tracking-[0.24px]">
               {authorTitle}
             </div>
           </div>
         </figcaption>
 
-        <div className="w-full overflow-hidden rounded-[12px]">
+        {/* The carousel switches from one card to `desktopCarouselItems` at
+            `md`, so `sizes` has to break at the same width. */}
+        <div className="w-full shrink-0 overflow-hidden rounded-[12px]">
           <Image
             alt={authorName}
             aspectRatio="1/1"
-            className="w-full object-cover"
+            className="w-full"
             data={resolveImage(image, authorName)}
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            sizes="(min-width: 768px) 33vw, 100vw"
           />
         </div>
 
         {badgeText ? (
           <div
-            className="flex w-fit items-center justify-center rounded-[8px] px-5 py-1.5"
+            className="flex w-fit max-w-full items-center justify-center rounded-[8px] px-5 py-1.5"
             style={{ backgroundColor: badgeBackgroundColor }}
           >
-            <span className="whitespace-nowrap text-base leading-[1.6] tracking-[0.28px]">
+            <span className="min-w-0 break-words text-base leading-[1.6] tracking-[0.28px]">
               {badgeText}
             </span>
           </div>

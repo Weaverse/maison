@@ -121,9 +121,9 @@ export default function CartRoute() {
 
   return (
     <>
-      <div className="px-3 py-6 md:px-10 md:py-12 lg:px-16 bg-[#F2F0EE]">
+      <div className="px-3 py-6 md:px-6 md:py-12 lg:px-16 bg-[#F2F0EE]">
         <div className="mx-auto w-full max-w-(--page-width)">
-          <h1 className="mb-8 text-2xl font-normal md:text-3xl leading-normal">
+          <h1 className="mb-8 font-serif text-[28px] font-normal leading-[1.1] tracking-[-0.02em] md:text-[37px]">
             Cart
           </h1>
           <Await resolve={rootData?.cart}>

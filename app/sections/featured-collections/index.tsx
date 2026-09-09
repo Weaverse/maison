@@ -8,6 +8,7 @@ import { backgroundInputs } from "~/components/background-image";
 import type { SectionProps } from "~/components/section";
 import { layoutInputs, Section } from "~/components/section";
 import { useAnimation } from "~/hooks/use-animation";
+import { COLLECTION_PRODUCT_COUNT_LIMIT } from "~/utils/const";
 
 interface FeaturedCollectionsData {
   collections: WeaverseCollection[];
@@ -38,7 +39,12 @@ export default function FeaturedCollections(props: FeaturedCollectionsProps) {
 }
 
 const COLLECTIONS_QUERY = `#graphql
-  query collectionsByIds($country: CountryCode, $language: LanguageCode, $ids: [ID!]!)
+  query collectionsByIds(
+    $country: CountryCode
+    $language: LanguageCode
+    $ids: [ID!]!
+    $productCountLimit: Int
+  )
   @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
       ... on Collection {
@@ -54,7 +60,10 @@ const COLLECTIONS_QUERY = `#graphql
           height
           url
         }
-        products(first: 250) { nodes { id } }
+        products(first: $productCountLimit) {
+          nodes { id }
+          pageInfo { hasNextPage }
+        }
       }
     }
   }
@@ -78,6 +87,7 @@ export const loader = async ({
           country,
           language,
           ids,
+          productCountLimit: COLLECTION_PRODUCT_COUNT_LIMIT,
         },
       },
     );

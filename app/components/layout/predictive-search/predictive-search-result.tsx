@@ -67,7 +67,7 @@ function SearchResultItem({
         className="flex gap-4"
         to={
           __typename === "SearchQuerySuggestion" || !url
-            ? `/search?q=${id}`
+            ? `/search?q=${encodeURIComponent(id)}`
             : url
         }
         data-type={__typename}

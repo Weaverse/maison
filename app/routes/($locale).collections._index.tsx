@@ -4,7 +4,7 @@ import type { RouteLoaderArgs } from "@weaverse/hydrogen";
 import type { MetaFunction } from "react-router";
 import type { CollectionsQuery } from "storefront-api.generated";
 import { routeHeaders } from "~/utils/cache";
-import { PAGINATION_SIZE } from "~/utils/const";
+import { COLLECTION_PRODUCT_COUNT_LIMIT, PAGINATION_SIZE } from "~/utils/const";
 import { seoPayload } from "~/utils/seo.server";
 import { WeaverseContent } from "~/weaverse";
 
@@ -27,6 +27,7 @@ export const loader = async (args: RouteLoaderArgs) => {
         ...variables,
         country: storefront.i18n.country,
         language: storefront.i18n.language,
+        productCountLimit: COLLECTION_PRODUCT_COUNT_LIMIT,
       },
     }),
     weaverse.loadPage({
@@ -62,6 +63,7 @@ const COLLECTIONS_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
+    $productCountLimit: Int
   ) @inContext(country: $country, language: $language) {
     collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {
       nodes {
@@ -80,11 +82,19 @@ const COLLECTIONS_QUERY = `#graphql
           height
           altText
         }
-        products(first: 1) {
+        # Two connections on purpose, each selecting only what it needs.
+        # Merging them would apply the fallback's field set to every counted
+        # node, so the cap could no longer be raised without paying for it.
+        productCount: products(first: $productCountLimit) {
           nodes {
             id
-            title
-            handle
+          }
+          pageInfo {
+            hasNextPage
+          }
+        }
+        fallbackProduct: products(first: 1) {
+          nodes {
             media(first: 1) {
               nodes {
                 previewImage {

@@ -78,6 +78,17 @@ export const COUNTRIES: Localizations = {
 
 export const PAGINATION_SIZE = 16;
 
+/**
+ * How many product ids a collection card fetches to report its product count.
+ *
+ * `Collection` has no count field in the Storefront API, so the only way to
+ * report one is to fetch ids and read `pageInfo.hasNextPage`; past this many the
+ * label falls back to "N+". Both the collections page and the featured
+ * collections section read it from here so the same collection cannot report
+ * two different numbers.
+ */
+export const COLLECTION_PRODUCT_COUNT_LIMIT = 250;
+
 export const DEFAULT_LOCALE: I18nLocale = Object.freeze({
   ...COUNTRIES.default,
   pathPrefix: "",
