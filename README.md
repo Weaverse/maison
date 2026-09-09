@@ -87,6 +87,17 @@ npm run build
 npm run e2e
 ```
 
+## Third-party integrations
+
+Maison ships Judge.me reviews and Klaviyo newsletter signup. Both use **private** API tokens that stay on the server (`JUDGEME_PRIVATE_API_TOKEN`, `KLAVIYO_PRIVATE_API_TOKEN`). Do not prefix them with `PUBLIC_` or put them in Weaverse settings.
+
+- **Local:** copy placeholders from `.env.example` into `.env` (untracked) and restart `npm run dev`.
+- **Oxygen:** add the same variable names under Hydrogen → Environments and variables for Preview and Production, then redeploy.
+- **Unconfigured:** product pages still render. Reviews show an empty/no-reviews state. Newsletter forms are hidden until a Klaviyo token is set (Studio still shows them for design).
+- **Configured:** open a product with reviews, and submit the footer/popup email form. Confirm the token never appears in page source or loader JSON.
+
+Theme-level setup docs: [GitHub issue #56](https://github.com/Weaverse/maison/issues/56).
+
 ## Features overview
 
 ### Fetching page data with parallel loading
