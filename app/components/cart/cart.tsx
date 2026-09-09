@@ -270,13 +270,6 @@ function CartLineItem({
             {formattedVariant && (
               <div className="text-base">{formattedVariant}</div>
             )}
-            {layout === "page" && (
-              <CartLinePrice
-                line={line}
-                as="span"
-                className="mt-2 block md:hidden"
-              />
-            )}
             {layout === "drawer" &&
               line.sellingPlanAllocation?.sellingPlan?.name && (
                 <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#EBE8E5] px-2 py-1 text-xs text-body-subtle">
@@ -316,12 +309,18 @@ function CartLineItem({
                 </div>
               )}
           </div>
+          {/* One node for both layouts, so the price is not in the document
+              twice. On the page at mobile widths the design groups it with the
+              variant, 8px below it and 16px above the stepper: `order-first`
+              moves it there, and the negative margin trims the column's 16px
+              gap to the 8px the design draws. */}
           <CartLinePrice
             line={line}
             as="span"
             className={clsx(
               layout === "drawer" && "shrink-0",
-              layout === "page" && "ml-auto hidden md:block",
+              layout === "page" &&
+                "-mt-2 order-first md:order-none md:mt-0 md:ml-auto",
             )}
           />
         </div>
