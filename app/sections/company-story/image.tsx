@@ -40,7 +40,7 @@ const CompanyStoryImage = (props: CompanyStoryImageProps) => {
     <div
       ref={ref}
       {...rest}
-      className="relative h-[280px] w-full overflow-hidden rounded-t-[4px]"
+      className="relative h-[280px] w-full overflow-hidden"
     >
       {heroImage ? (
         <>

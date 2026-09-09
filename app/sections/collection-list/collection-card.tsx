@@ -1,14 +1,18 @@
-import type { Collection } from "@shopify/hydrogen/storefront-api-types";
 import { IMAGES_PLACEHOLDERS } from "@weaverse/hydrogen";
 import type { CSSProperties } from "react";
+import type { CollectionsQuery } from "storefront-api.generated";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
+import { getProductCountLabel } from "~/utils/collection";
 import { calculateAspectRatio } from "~/utils/image";
 
+/** Exactly what the collections query returns, so no cast is needed. */
+type CollectionCardData = CollectionsQuery["collections"]["nodes"][number];
+
 interface CollectionCardProps {
-  collection: Collection;
+  collection: CollectionCardData;
   imageAspectRatio: ImageAspectRatio;
   imageBorderRadius: number;
   titleColor?: string;
@@ -21,26 +25,14 @@ interface CollectionCardProps {
   loading?: HTMLImageElement["loading"];
 }
 
-function getCollectionImage(collection: Collection) {
+function getCollectionImage(collection: CollectionCardData) {
   if (collection.image) {
     return collection.image;
   }
 
-  const firstProduct = collection.products.nodes[0];
-  const firstProductMedia = firstProduct?.media?.nodes[0];
+  const firstProductMedia =
+    collection.fallbackProduct.nodes[0]?.media?.nodes[0];
   return firstProductMedia?.previewImage ?? null;
-}
-
-function getProductCount(collection: Collection) {
-  const productsCount = (
-    collection as Collection & { productsCount?: { count?: number } | null }
-  ).productsCount?.count;
-
-  if (typeof productsCount === "number") {
-    return productsCount;
-  }
-
-  return collection.products.nodes.length;
 }
 
 export function CollectionCard({
@@ -56,12 +48,14 @@ export function CollectionCard({
   cardBorderRadius,
   loading,
 }: CollectionCardProps) {
-  if (collection.products.nodes.length === 0) {
+  // Read emptiness from the connection that exists to count, not from the
+  // single-node one that exists to supply a fallback image.
+  if (collection.productCount.nodes.length === 0) {
     return null;
   }
 
   const collectionImage = getCollectionImage(collection);
-  const productCount = getProductCount(collection);
+  const productCountLabel = getProductCountLabel(collection.productCount);
 
   return (
     <Link
@@ -126,9 +120,9 @@ export function CollectionCard({
             style={{ backgroundColor: titleColor || "currentColor" }}
           />
         </div>
-        {showProductCount && (
+        {showProductCount && productCountLabel && (
           <span className="text-sm" style={{ color: countColor }}>
-            {`${productCount} products`}
+            {productCountLabel}
           </span>
         )}
       </div>

@@ -12,7 +12,7 @@ export function Logo() {
     <Link
       to="/"
       prefetch="intent"
-      className="z-30 flex h-full w-full items-center justify-center lg:h-fit lg:w-fit"
+      className="z-30 flex h-full w-full items-center justify-center xl:h-fit xl:w-fit"
     >
       <div
         className="relative h-full"
@@ -46,7 +46,7 @@ export function Logo() {
             )}
           </>
         ) : (
-          <div className="line-clamp-1 font-serif text-2xl leading-[1.1] uppercase tracking-[-0.06em] lg:text-4xl">
+          <div className="line-clamp-1 font-serif text-2xl leading-[1.1] uppercase tracking-[-0.06em] xl:text-4xl">
             {shopName}
           </div>
         )}

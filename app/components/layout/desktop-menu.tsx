@@ -19,7 +19,7 @@ export function DesktopMenu() {
 
     return (
       <NavigationMenu.Root
-        className="hidden shrink-0 lg:block"
+        className="hidden shrink-0 xl:block"
         value={value}
         onValueChange={setValue}
       >

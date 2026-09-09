@@ -18,7 +18,7 @@ const CompanyStoryContent = (props: CompanyStoryContentProps) => {
     <div
       ref={ref}
       {...rest}
-      className="px-5 py-10 md:px-20 rounded-b-[4px]"
+      className="px-5 py-10 md:px-20"
       style={{
         backgroundColor: contentBackgroundColor,
       }}

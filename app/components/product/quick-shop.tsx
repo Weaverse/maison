@@ -10,6 +10,11 @@ import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
 import type { RootLoader } from "~/root";
+import {
+  VARIANT_GRID_DESKTOP,
+  VARIANT_GRID_DESKTOP_COMPACT,
+  VARIANT_GRID_TABLET,
+} from "~/sections/variant-list/grid";
 import { Subtotal } from "~/sections/variant-list/subtotal";
 import { VariantRow } from "~/sections/variant-list/variant-row";
 
@@ -97,33 +102,59 @@ export function QuickShop({
               Products
             </div>
           </div>
-          {/* tablet/desktop header */}
+          {/* tablet header — same template as `VariantRow`'s tablet grid. */}
+          <div
+            className={clsx(
+              "hidden gap-6 border-b border-line-subtle py-3 text-body-subtle md:grid xl:hidden",
+              VARIANT_GRID_TABLET,
+            )}
+          >
+            <div className="font-semibold text-base uppercase">Variant</div>
+            <div className="font-semibold text-base uppercase text-center">
+              Price
+            </div>
+            <div className="font-semibold text-base uppercase text-right">
+              Variant Price
+            </div>
+          </div>
+
+          {/* desktop header */}
           {sellingPlanGroups?.nodes?.length > 0 ? (
-            <div className="hidden md:grid grid-cols-[1fr_280px_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
-              <div className="text-sm font-semibold uppercase">Variant</div>
-              <div className="text-sm font-semibold uppercase text-center">
+            <div
+              className={clsx(
+                "hidden gap-6 border-b border-line-subtle py-3 text-body-subtle xl:grid",
+                VARIANT_GRID_DESKTOP,
+              )}
+            >
+              <div className="font-semibold text-base uppercase">Variant</div>
+              <div className="font-semibold text-base uppercase text-center">
                 Purchase Method
               </div>
-              <div className="text-sm font-semibold uppercase text-center">
+              <div className="font-semibold text-base uppercase text-center">
                 Quantity
               </div>
-              <div className="text-sm font-semibold uppercase text-center">
+              <div className="font-semibold text-base uppercase text-center">
                 Price
               </div>
-              <div className="text-sm font-semibold uppercase text-right">
+              <div className="font-semibold text-base uppercase text-right">
                 Variant Price
               </div>
             </div>
           ) : (
-            <div className="hidden md:grid grid-cols-[1fr_270px_160px_153px] gap-6 border-b border-line-subtle py-3 text-body-subtle">
-              <div className="text-sm font-semibold uppercase">Variant</div>
-              <div className="text-sm font-semibold uppercase text-center">
+            <div
+              className={clsx(
+                "hidden gap-6 border-b border-line-subtle py-3 text-body-subtle xl:grid",
+                VARIANT_GRID_DESKTOP_COMPACT,
+              )}
+            >
+              <div className="font-semibold text-base uppercase">Variant</div>
+              <div className="font-semibold text-base uppercase text-center">
                 Quantity
               </div>
-              <div className="text-sm font-semibold uppercase text-center">
+              <div className="font-semibold text-base uppercase text-center">
                 Price
               </div>
-              <div className="text-sm font-semibold uppercase text-right">
+              <div className="font-semibold text-base uppercase text-right">
                 Variant Price
               </div>
             </div>
@@ -142,7 +173,11 @@ export function QuickShop({
                   ))}
                 </div>
                 <div className="sticky bottom-0 bg-background pb-6 px-6 md:pb-10 md:px-10 -mx-6 md:-mx-10 -mb-6 md:-mb-10">
-                  <Subtotal cart={resolvedCart} variants={variants} />
+                  <Subtotal
+                    cart={resolvedCart}
+                    variants={variants}
+                    hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+                  />
                 </div>
               </>
             )}

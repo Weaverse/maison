@@ -21,7 +21,7 @@ const CompanyStoryContact = (props: CompanyStoryContactProps) => {
     <div
       ref={ref}
       {...rest}
-      className="rounded-b px-5 py-8 md:px-20"
+      className="px-5 py-8 md:px-20"
       style={{
         backgroundColor: contentBackgroundColor,
       }}

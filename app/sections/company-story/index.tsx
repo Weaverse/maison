@@ -12,7 +12,8 @@ function CompanyStory(props: CompanyStoryProps) {
 
   return (
     <Section ref={ref} {...rest}>
-      {children}
+      {/* Border/radius-md on the card itself, clipping the blocks inside it. */}
+      <div className="overflow-hidden rounded-2xl">{children}</div>
     </Section>
   );
 }

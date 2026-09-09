@@ -13,6 +13,7 @@ import type { OverlayProps } from "~/components/overlay";
 import { Overlay, overlayInputs } from "~/components/overlay";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
+import { getProductCountLabel } from "~/utils/collection";
 import { calculateAspectRatio } from "~/utils/image";
 import type { FeaturedCollectionsLoaderData } from ".";
 
@@ -133,6 +134,8 @@ function StandardCollectionCard({
   cardPadding,
   cardBorderRadius,
 }: StandardCollectionCardProps) {
+  const productCountLabel = getProductCountLabel(collection.products);
+
   return (
     <Link
       to={`/collections/${collection.handle}`}
@@ -183,11 +186,9 @@ function StandardCollectionCard({
             style={{ backgroundColor: titleColor || "currentColor" }}
           />
         </div>
-        {showProductCount && (
+        {showProductCount && productCountLabel && (
           <span className="text-sm" style={{ color: countColor }}>
-            {collection.products?.nodes?.length !== undefined
-              ? `${collection.products.nodes.length} products`
-              : "No products available"}
+            {productCountLabel}
           </span>
         )}
       </div>
@@ -469,6 +470,7 @@ const COLLECTION_PLACEHOLDER: FeaturedCollectionsLoaderData[0] = {
   },
   products: {
     nodes: [],
+    pageInfo: { hasNextPage: false },
   },
 };
 

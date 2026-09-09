@@ -54,7 +54,7 @@ export function ScrollingAnnouncement() {
   return (
     <div
       id="announcement-bar"
-      className="relative flex w-full items-center justify-center py-3 lg:py-2"
+      className="relative flex w-full items-center justify-center py-3 xl:py-2"
       style={
         {
           height: `${topbarHeight}px`,
@@ -63,9 +63,9 @@ export function ScrollingAnnouncement() {
         } as React.CSSProperties
       }
     >
-      <div className="mx-auto flex h-full w-full max-w-(--page-width) items-center justify-center px-5 md:px-8 lg:gap-8 lg:px-10">
+      <div className="mx-auto flex h-full w-full max-w-(--page-width) items-center justify-center px-5 md:px-8 xl:gap-8 xl:px-10">
         {/* Left — socials */}
-        <div className="hidden flex-1 items-center gap-3 lg:flex">
+        <div className="hidden flex-1 items-center gap-3 xl:flex">
           {socials.map(({ name, to, Icon }) => (
             <a
               aria-label={name}
@@ -82,7 +82,7 @@ export function ScrollingAnnouncement() {
 
         {/* Middle — scrolling below lg, static from lg */}
         <div
-          className="flex w-full items-center justify-center opacity-80 lg:w-[600px]"
+          className="flex w-full items-center justify-center opacity-80 xl:w-[600px]"
           style={
             {
               "--marquee-duration": `${MAX_DURATION / topbarScrollingSpeed}s`,
@@ -90,7 +90,7 @@ export function ScrollingAnnouncement() {
             } as React.CSSProperties
           }
         >
-          <div className="flex w-full items-center overflow-hidden whitespace-nowrap lg:hidden">
+          <div className="flex w-full items-center overflow-hidden whitespace-nowrap xl:hidden">
             {new Array(10).fill("").map((_, idx) => (
               <div
                 className="animate-marquee px-[calc(var(--gap)/2)]"
@@ -106,14 +106,14 @@ export function ScrollingAnnouncement() {
           </div>
 
           <div
-            className="hidden flex-1 text-center text-base leading-[1.6] tracking-[0.28px] lg:block [&_p]:inline"
+            className="hidden flex-1 text-center text-base leading-[1.6] tracking-[0.28px] xl:block [&_p]:inline"
             dangerouslySetInnerHTML={{ __html: topbarText }}
             suppressHydrationWarning
           />
         </div>
 
         {/* Right — company location */}
-        <div className="hidden flex-1 justify-end lg:flex">
+        <div className="hidden flex-1 justify-end xl:flex">
           <CompanyLocationButton />
         </div>
       </div>
