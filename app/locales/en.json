@@ -1,7 +1,34 @@
 {
   "cart": {
     "title": "Cart",
-    "close": "Close cart drawer"
+    "close": "Close",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "taxNote": "Shipping and taxes will be calculated at checkout.",
+    "viewCart": "View Cart",
+    "checkout": "Checkout",
+    "startShopping": "Start Shopping",
+    "noProducts": "No products found.",
+    "shopBestSellers": "Shop Best Sellers",
+    "promoCode": "Promo code",
+    "apply": "Apply",
+    "invalidDiscount": "Invalid discount code.",
+    "orderNote": "Order Note",
+    "addNote": "Add note",
+    "noteSaved": "Cart note saved successfully 🎉",
+    "noteInstructions": "Order special instructions",
+    "discountCode": "Discount Code",
+    "discountApplied": "Discount applied successfully 🎉",
+    "giftCard": "Giftcard",
+    "giftCardApplied": "Gift card applied successfully 🎉",
+    "invalidGiftCard": "Invalid gift card code.",
+    "freeShippingReached": "Congratulations! You've got free shipping!",
+    "freeShippingProgress": "You're {{amount}} away from free shipping!",
+    "closeDrawer": "Close cart drawer",
+    "removeDiscount": "Remove discount code {{code}}",
+    "removeItem": "Remove"
   },
   "navigation": {
     "menu": "MENU"

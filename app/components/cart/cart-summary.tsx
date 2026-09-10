@@ -6,7 +6,7 @@ import {
 } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useState } from "react";
 import { useFetcher } from "react-router";
@@ -31,6 +31,7 @@ export function CartSummary({
   cart: OptimisticCart<CartApiQueryFragment>;
   layout: Layouts;
 }) {
+  const { t } = useTranslation();
   const {
     enableCartNote,
     cartNoteButtonText,
@@ -95,10 +96,10 @@ export function CartSummary({
     >
       {layout === "page" ? (
         <div className="grid gap-6">
-          <h2 className="font-semibold text-base">Order Summary</h2>
+          <h2 className="font-semibold text-base">{t("cart.orderSummary")}</h2>
           <div className="h-px w-full bg-line-subtle" />
           <dl className="flex items-start gap-2.5 text-base leading-none">
-            <dt className="min-w-0 grow">Subtotal</dt>
+            <dt className="min-w-0 grow">{t("cart.subtotal")}</dt>
             <dd className="shrink-0 whitespace-nowrap">
               {isCartUpdating ? (
                 <Skeleton className="h-4 w-20 rounded" />
@@ -111,7 +112,7 @@ export function CartSummary({
           </dl>
           {discountTotal > 0 && cost?.subtotalAmount && (
             <dl className="flex items-start gap-2.5 text-base leading-none">
-              <dt className="min-w-0 grow">Discount</dt>
+              <dt className="min-w-0 grow">{t("cart.discount")}</dt>
               <dd className="shrink-0 whitespace-nowrap">
                 {isCartUpdating ? (
                   <Skeleton className="h-4 w-20 rounded" />
@@ -132,11 +133,11 @@ export function CartSummary({
             </dl>
           )}
           <p className="text-base text-body-subtle/80 leading-[1.6]">
-            Shipping and taxes will be calculated at checkout.
+            {t("cart.taxNote")}
           </p>
           <div className="h-px w-full bg-line-subtle" />
           <dl className="flex items-start gap-2.5 font-semibold text-base leading-[1.6]">
-            <dt className="min-w-0 grow">Total</dt>
+            <dt className="min-w-0 grow">{t("cart.total")}</dt>
             <dd className="shrink-0 whitespace-nowrap">
               {isCartUpdating ? (
                 <Skeleton className="h-4 w-20 rounded" />

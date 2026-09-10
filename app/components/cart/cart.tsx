@@ -13,7 +13,7 @@ import {
   useOptimisticData,
 } from "@shopify/hydrogen";
 import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
@@ -152,6 +152,7 @@ function CartCheckoutActions({
   checkoutUrl: string;
   layout: Layouts;
 }) {
+  const { t } = useTranslation();
   if (!checkoutUrl) {
     return null;
   }
@@ -164,12 +165,12 @@ function CartCheckoutActions({
           onClick={() => toggleCartDrawer(false)}
           className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded-(--btn-border-radius) text-base font-normal"
         >
-          View Cart
+          {t("cart.viewCart")}
         </Link>
       )}
       <a href={checkoutUrl} target="_self" className="w-full">
         <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal">
-          Checkout
+          {t("cart.checkout")}
         </Button>
       </a>
       {/* @todo: <CartShopPayButton cart={cart} /> */}
@@ -336,6 +337,7 @@ function ItemRemoveButton({
   lineId: CartLine["id"];
   className?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <CartForm
       route="/cart"
@@ -350,7 +352,7 @@ function ItemRemoveButton({
         )}
         type="submit"
       >
-        <span className="sr-only">Remove</span>
+        <span className="sr-only">{t("cart.removeItem")}</span>
         <TrashIcon aria-hidden="true" className="h-4 w-4" />
       </button>
       <OptimisticInput id={lineId} data={{ action: "remove" }} />
@@ -578,6 +580,7 @@ function CartEmpty({
   layout?: Layouts;
   onClose?: () => void;
 }) {
+  const { t } = useTranslation();
   const scrollRef = useRef(null);
   const { y } = useScroll(scrollRef);
   return (
@@ -608,7 +611,7 @@ function CartEmpty({
           )}
           onClick={onClose}
         >
-          Start Shopping
+          {t("cart.startShopping")}
         </Link>
       </div>
       <Section
@@ -618,7 +621,7 @@ function CartEmpty({
         <div className="grid gap-4">
           <CartBestSellers
             count={4}
-            heading="Shop Best Sellers"
+            heading={t("cart.shopBestSellers")}
             layout={layout}
             sortKey="BEST_SELLING"
           />
