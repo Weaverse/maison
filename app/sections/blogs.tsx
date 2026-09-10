@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useState } from "react";
 import { useLoaderData } from "react-router";
@@ -142,6 +142,7 @@ export function ArticleCard({
   cardGap,
   className,
 }: ArticleCardProps) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn("flex flex-col", className)}
@@ -196,7 +197,7 @@ export function ArticleCard({
             to={`/blogs/${blogHandle}/${article.handle}`}
             variant="underline"
           >
-            Read more →
+            {t("blog.readMore")} →
           </Link>
         </div>
       )}

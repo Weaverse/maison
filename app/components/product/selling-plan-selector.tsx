@@ -79,12 +79,14 @@ export function SellingPlanSelector({
               let discountText = "";
               if (adjustmentValue) {
                 if ("adjustmentPercentage" in adjustmentValue) {
-                  discountText = `Save ${adjustmentValue.adjustmentPercentage}%`;
+                  discountText = t("product.savePercent", {
+                    percent: adjustmentValue.adjustmentPercentage,
+                  });
                 } else if (
                   "adjustmentAmount" in adjustmentValue &&
                   adjustmentValue.adjustmentAmount
                 ) {
-                  discountText = "Save ";
+                  discountText = t("product.save");
                 }
               }
 

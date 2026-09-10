@@ -230,7 +230,7 @@ export function NewsletterPopup() {
                     }}
                     className="mt-4 text-body-subtle text-sm underline underline-offset-4 hover:text-body"
                   >
-                    Don't show this again
+                    {t("newsletter.dismiss")}
                   </button>
                 )}
               </div>

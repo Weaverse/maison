@@ -68,7 +68,15 @@
     "lowInStock": "Low in Stock",
     "bundledProducts": "Bundled Products",
     "removeAll": "Remove All",
-    "outOfStock": "Out of Stock"
+    "outOfStock": "Out of Stock",
+    "noImage": "No image",
+    "viewFullDetails": "View full details",
+    "addBundleToCart": "Add bundle to cart",
+    "unavailable": "Unavailable",
+    "soldOut": "Sold Out",
+    "save": "Save",
+    "savePercent": "Save {{percent}}%",
+    "exampleTitle": "EXAMPLE PRODUCT TITLE"
   },
   "collection": {
     "filters": "Filters",
@@ -84,7 +92,8 @@
     "increaseMin": "Increase min price",
     "decreaseMin": "Decrease min price",
     "increaseMax": "Increase max price",
-    "decreaseMax": "Decrease max price"
+    "decreaseMax": "Decrease max price",
+    "fromPrice": "From"
   },
   "sort": {
     "featured": "Featured",
@@ -198,7 +207,8 @@
   },
   "newsletter": {
     "title": "Newsletter Signup",
-    "emailPlaceholder": "Enter your email"
+    "emailPlaceholder": "Enter your email",
+    "dismiss": "Don't show this again"
   },
   "reviews": {
     "submitted": "Review Submitted Successfully!",
@@ -245,5 +255,39 @@
     "selectLocation": "Select company location",
     "selectLocationNote": "Select your location to shop with your company’s custom pricing, specific product availability, and authorized checkout settings.",
     "companyLocation": "Company location:"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "hours",
+    "minutes": "minutes",
+    "seconds": "seconds"
+  },
+  "blog": {
+    "tags": "Tags",
+    "share": "Share",
+    "readMore": "Read more",
+    "titlePlaceholder": "Title here",
+    "datePlaceholder": "Date here",
+    "authorPlaceholder": "Author here"
+  },
+  "map": {
+    "embeddedFrame": "Google map embedded frame"
+  },
+  "video": {
+    "youtubePlayer": "YouTube video player"
+  },
+  "testimonial": {
+    "previous": "Previous testimonial",
+    "next": "Next testimonial"
+  },
+  "carousel": {
+    "previousProduct": "Previous product",
+    "nextProduct": "Next product"
+  },
+  "instagram": {
+    "viewMoreIn": "View more in"
+  },
+  "ourTeam": {
+    "noMembers": "No members data available"
   }
 }

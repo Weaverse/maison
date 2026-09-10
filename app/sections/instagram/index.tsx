@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 import type { CSSProperties } from "react";
 import { backgroundInputs } from "~/components/background-image";
 import { Link } from "~/components/link";
@@ -20,6 +20,7 @@ interface InstagramProps extends SectionProps, InstagramData {
 }
 
 export default function Instagram(props: InstagramProps) {
+  const { t } = useTranslation();
   const {
     ref,
     heading,
@@ -46,7 +47,7 @@ export default function Instagram(props: InstagramProps) {
 
   const viewMoreLabel = (
     <span className="font-serif text-[24px] text-body-subtle leading-normal">
-      View more in
+      {t("instagram.viewMoreIn")}
       <br />
       <span className="text-body">{handle}</span>
     </span>

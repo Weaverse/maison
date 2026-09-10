@@ -1,6 +1,7 @@
 import {
   createSchema,
   type HydrogenComponentProps,
+  useTranslation,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
@@ -37,6 +38,7 @@ interface LogoListItemProps
 }
 
 const LogoListItem = (props: LogoListItemProps) => {
+  const { t } = useTranslation();
   const { ref, src, altText, borderRadius, children, ...rest } = props;
 
   const imageData =
@@ -55,7 +57,7 @@ const LogoListItem = (props: LogoListItemProps) => {
         />
       ) : (
         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-          <span className="text-gray-500 text-sm">No image</span>
+          <span className="text-gray-500 text-sm">{t("product.noImage")}</span>
         </div>
       )}
       {children}

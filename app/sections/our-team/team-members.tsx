@@ -7,6 +7,7 @@ import {
   createSchema,
   type HydrogenComponentProps,
   useParentInstance,
+  useTranslation,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
 import { Link } from "react-router";
@@ -28,6 +29,7 @@ interface TeamMembersProps extends HydrogenComponentProps {
 }
 
 function TeamMembers(props: TeamMembersProps) {
+  const { t } = useTranslation();
   const { ref, ...rest } = props;
   const parent = useParentInstance();
   const { metaobjects }: OurTeamQuery = parent.data?.loaderData || {};
@@ -109,7 +111,7 @@ function TeamMembers(props: TeamMembersProps) {
   }
   return (
     <div ref={ref} {...rest}>
-      <div className="p-8 text-center">No members data available</div>
+      <div className="p-8 text-center">{t("ourTeam.noMembers")}</div>
     </div>
   );
 }

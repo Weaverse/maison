@@ -92,7 +92,7 @@ export function QuickShop({
             variant="underline"
             className="w-fit text-sm text-body-subtle"
           >
-            View full details
+            {t("product.viewFullDetails")}
           </Link>
         </div>
       </div>

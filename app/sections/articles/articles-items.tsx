@@ -3,6 +3,7 @@ import {
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
   useParentInstance,
+  useTranslation,
 } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ArticleFragment } from "storefront-api.generated";
@@ -60,6 +61,7 @@ interface ArticlesItemsProps
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
+  const { t } = useTranslation();
   const {
     ref,
     gap,
@@ -95,10 +97,12 @@ function ArticlesItems(props: ArticlesItemsProps) {
               />
             </div>
             <div className="flex flex-col gap-4">
-              <h6 className="text-2xl leading-8 font-normal">Title here</h6>
+              <h6 className="text-2xl leading-8 font-normal">
+                {t("blog.titlePlaceholder")}
+              </h6>
               <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
-                <span>Date here —</span>
-                <span>Author here</span>
+                <span>{t("blog.datePlaceholder")} —</span>
+                <span>{t("blog.authorPlaceholder")}</span>
               </div>
             </div>
           </div>

@@ -140,7 +140,7 @@ export function PriceRangeFilter({
             type="number"
             value={minPrice ?? ""}
             min={minVariantPrice}
-            placeholder="From"
+            placeholder={t("collection.fromPrice")}
             onChange={(e) => {
               const { value } = e.target;
               const newMinPrice = Number.isNaN(Number.parseFloat(value))
