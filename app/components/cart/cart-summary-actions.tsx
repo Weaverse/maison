@@ -68,7 +68,7 @@ export function NoteDialog({
           <button
             type="button"
             className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center"
-            aria-label={t("cart.close")}
+            aria-label={t("cart.closeDialog")}
           >
             <XIcon size={16} />
           </button>
@@ -169,7 +169,7 @@ export function DiscountDialog({
           <button
             type="button"
             className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center"
-            aria-label={t("cart.close")}
+            aria-label={t("cart.closeDialog")}
           >
             <XIcon size={16} />
           </button>
@@ -283,7 +283,7 @@ export function GiftCardDialog({
           <button
             type="button"
             className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center"
-            aria-label={t("cart.close")}
+            aria-label={t("cart.closeDialog")}
           >
             <XIcon size={16} />
           </button>

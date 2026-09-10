@@ -1,7 +1,7 @@
 {
   "cart": {
     "title": "Cart",
-    "close": "Close",
+    "close": "Close cart drawer",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "discount": "Discount",
@@ -26,9 +26,9 @@
     "invalidGiftCard": "Invalid gift card code.",
     "freeShippingReached": "Congratulations! You've got free shipping!",
     "freeShippingProgress": "You're {{amount}} away from free shipping!",
-    "closeDrawer": "Close cart drawer",
     "removeDiscount": "Remove discount code {{code}}",
-    "removeItem": "Remove"
+    "removeItem": "Remove",
+    "closeDialog": "Close"
   },
   "navigation": {
     "menu": "MENU"
