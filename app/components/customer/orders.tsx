@@ -64,7 +64,7 @@ function OrderCard({ order }: { order: OrderCardFragment }) {
             width={500}
             height={500}
             className="h-auto max-w-36"
-            alt={lineItems[0].image?.altText ?? "Order image"}
+            alt={lineItems[0].image?.altText ?? t("account.orderImage")}
             src={lineItems[0].image.url}
           />
         </Link>

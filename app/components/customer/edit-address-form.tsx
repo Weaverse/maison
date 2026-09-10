@@ -37,7 +37,7 @@ export function AccountEditAddressForm() {
   return (
     <div className="space-y-2">
       <div className="py-2.5 text-xl">
-        {isNewAddress ? "Add new address" : "Edit address"}
+        {isNewAddress ? t("account.newAddress") : t("account.editAddress")}
       </div>
       <Form method="post" className="space-y-3">
         <input
