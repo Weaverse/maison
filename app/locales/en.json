@@ -76,7 +76,8 @@
     "soldOut": "Sold Out",
     "save": "Save",
     "savePercent": "Save {{percent}}%",
-    "exampleTitle": "EXAMPLE PRODUCT TITLE"
+    "exampleTitle": "EXAMPLE PRODUCT TITLE",
+    "add": "Add"
   },
   "collection": {
     "filters": "Filters",

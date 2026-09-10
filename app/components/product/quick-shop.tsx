@@ -262,7 +262,7 @@ export function QuickShopTrigger({
           <>
             <HandbagSimpleIcon size={16} className="h-4 w-4" />
             <span className="w-0 overflow-hidden pl-0 text-base transition-all group-hover/quick-shop:w-9.5 group-hover/quick-shop:pl-2">
-              Add
+              {t("product.add")}
             </span>
           </>
         ) : (
