@@ -1,4 +1,5 @@
 import { CaretRightIcon, MapPinLineIcon } from "@phosphor-icons/react";
+import { useTranslation } from "@weaverse/hydrogen";
 import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
@@ -20,6 +21,7 @@ export function CompanyLocationButton({
   showLabel = false,
   className,
 }: CompanyLocationButtonProps) {
+  const { t } = useTranslation();
   const { company, companyLocationId, setModalOpen } = useB2BLocation();
 
   const locations: CustomerCompanyLocation[] = company?.locations?.edges
@@ -40,7 +42,7 @@ export function CompanyLocationButton({
     <div className={cn("flex flex-col items-start gap-1", className)}>
       {showLabel ? (
         <span className="pl-2 text-[12px] leading-none tracking-[0.24px]">
-          Company location:
+          {t("b2b.companyLocation")}
         </span>
       ) : null}
       <button

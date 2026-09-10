@@ -231,5 +231,19 @@
   },
   "actions": {
     "cancel": "Cancel"
+  },
+  "form": {
+    "nameRequired": "Your name*",
+    "company": "Company name",
+    "email": "Contact email*",
+    "website": "Website",
+    "message": "Message",
+    "thankYou": "Thank you for your interest!",
+    "willReply": "We'll get back to you shortly."
+  },
+  "b2b": {
+    "selectLocation": "Select company location",
+    "selectLocationNote": "Select your location to shop with your company’s custom pricing, specific product availability, and authorized checkout settings.",
+    "companyLocation": "Company location:"
   }
 }

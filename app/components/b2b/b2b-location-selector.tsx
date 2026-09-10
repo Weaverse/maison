@@ -72,7 +72,7 @@ export function B2BLocationSelector() {
             <div className="flex w-full items-start gap-4 bg-[#EBEAE5] px-10 py-4">
               <div className="flex min-w-0 flex-1 items-start py-2.5">
                 <Dialog.Title className="whitespace-nowrap font-semibold text-base text-body leading-none tracking-[0.28px]">
-                  Select company location
+                  {t("b2b.selectLocation")}
                 </Dialog.Title>
               </div>
               <div className="flex items-center self-stretch">
@@ -89,9 +89,7 @@ export function B2BLocationSelector() {
 
             <div className="flex w-full flex-col gap-8 px-10 pb-10">
               <Dialog.Description className="w-full text-base text-body leading-[1.6] tracking-[0.28px]">
-                Select your location to shop with your company&rsquo;s custom
-                pricing, specific product availability, and authorized checkout
-                settings.
+                {t("b2b.selectLocationNote")}
               </Dialog.Description>
 
               {/* Radio List */}
