@@ -109,7 +109,7 @@ export default function ProductPrices(props: ProductPricesProps) {
       {combinedListing ? (
         <div className="flex gap-2 text-2xl/none text-body-subtle">
           <span className="flex gap-1">
-            From
+            {t("product.from")}
             <VariantPrices
               variant={{ price: product.priceRange.minVariantPrice }}
               showCompareAtPrice={false}

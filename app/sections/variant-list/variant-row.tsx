@@ -109,7 +109,7 @@ export function VariantRow({
             <div className="text-sm text-body/70">SKU: {variant.sku}</div>
             {isOutOfStock ? (
               <div className="text-sm text-red-600 font-medium">
-                Out of Stock
+                {t("product.outOfStock")}
               </div>
             ) : isLowStock ? (
               <div className="flex items-center gap-1 text-sm text-orange-600">
@@ -196,7 +196,7 @@ export function VariantRow({
               <div className="text-base">SKU: {variant.sku}</div>
               {isOutOfStock ? (
                 <div className="font-medium text-[12px] text-red-600">
-                  Out of Stock
+                  {t("product.outOfStock")}
                 </div>
               ) : isLowStock ? (
                 <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
@@ -264,7 +264,7 @@ export function VariantRow({
             <div className="text-base">SKU: {variant.sku}</div>
             {isOutOfStock ? (
               <div className="font-medium text-[12px] text-red-600">
-                Out of Stock
+                {t("product.outOfStock")}
               </div>
             ) : isLowStock ? (
               <div className="flex items-center gap-1.5 text-[12px] text-orange-600">

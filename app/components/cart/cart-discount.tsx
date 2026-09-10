@@ -93,7 +93,7 @@ export function CartDiscount({
       {canApply && (
         <form onSubmit={handleSubmit} className="flex items-start gap-3">
           <label htmlFor="cart-discount-code" className="sr-only">
-            Promo code
+            {t("cart.promoCode")}
           </label>
           <input
             id="cart-discount-code"

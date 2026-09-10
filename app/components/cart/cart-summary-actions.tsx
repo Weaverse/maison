@@ -204,7 +204,7 @@ export function DiscountDialog({
             loading={fetcher.state !== "idle"}
             disabled={fetcher.state !== "idle"}
           >
-            Apply
+            {t("cart.apply")}
           </Button>
         </form>
       </Dialog.Content>
@@ -290,7 +290,7 @@ export function GiftCardDialog({
         </Dialog.Close>
 
         <Dialog.Title className="mb-4 font-medium text-sm">
-          Giftcard
+          {t("cart.giftCard")}
         </Dialog.Title>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -318,7 +318,7 @@ export function GiftCardDialog({
             loading={fetcher.state !== "idle"}
             disabled={fetcher.state !== "idle"}
           >
-            Apply
+            {t("cart.apply")}
           </Button>
         </form>
       </Dialog.Content>

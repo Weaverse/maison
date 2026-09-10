@@ -102,7 +102,7 @@ export function QuickShop({
           {/* mobile header */}
           <div className="border-b border-line-subtle py-3 md:hidden">
             <div className="text-sm font-semibold uppercase text-body-subtle">
-              Products
+              {t("product.products")}
             </div>
           </div>
           {/* tablet header — same template as `VariantRow`'s tablet grid. */}

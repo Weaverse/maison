@@ -39,7 +39,8 @@
     "home": "Home"
   },
   "notFound": {
-    "featuredProducts": "Featured products"
+    "featuredProducts": "Featured products",
+    "visitHomepage": "Visit Homepage"
   },
   "product": {
     "addToCart": "Add to cart",
@@ -66,7 +67,8 @@
     "products": "PRODUCTS",
     "lowInStock": "Low in Stock",
     "bundledProducts": "Bundled Products",
-    "removeAll": "Remove All"
+    "removeAll": "Remove All",
+    "outOfStock": "Out of Stock"
   },
   "collection": {
     "filters": "Filters",
@@ -183,14 +185,16 @@
     "loadPrevious": "Load previous"
   },
   "accessibility": {
-    "close": "Close"
+    "close": "Close",
+    "skipToContent": "Skip to content"
   },
   "system": {
     "error": "Error",
     "tryAgain": "Try Again",
     "policies": "Policies",
     "orderRedirectError": "Error redirecting to the order status URL",
-    "backToPolicies": "Back to Policies"
+    "backToPolicies": "Back to Policies",
+    "takeMeHome": "Take me to the home page"
   },
   "newsletter": {
     "title": "Newsletter Signup",

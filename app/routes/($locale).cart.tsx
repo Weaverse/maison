@@ -8,6 +8,7 @@ import type {
   CartLineInput,
   CartLineUpdateInput,
 } from "@shopify/hydrogen/storefront-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import {
   type ActionFunctionArgs,
   Await,
@@ -114,6 +115,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 export default function CartRoute() {
+  const { t } = useTranslation();
   const rootData = useRouteLoaderData<RootLoader>("root");
   if (!rootData) {
     return null;
@@ -124,7 +126,7 @@ export default function CartRoute() {
       <div className="px-3 py-6 md:px-6 md:py-12 lg:px-16 bg-[#F2F0EE]">
         <div className="mx-auto w-full max-w-(--page-width)">
           <h1 className="mb-8 font-serif text-[28px] font-normal leading-[1.1] tracking-[-0.02em] md:text-[37px]">
-            Cart
+            {t("cart.title")}
           </h1>
           <Await resolve={rootData?.cart}>
             {(cart) => (

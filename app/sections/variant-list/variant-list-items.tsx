@@ -261,6 +261,7 @@ function AddToCartAnalytics({
 }
 
 function AddAllToCartButton({ lines }: { lines: OptimisticCartLineInput[] }) {
+  const { t } = useTranslation();
   return (
     <CartForm
       route="/cart"
@@ -276,7 +277,7 @@ function AddAllToCartButton({ lines }: { lines: OptimisticCartLineInput[] }) {
               disabled={fetcher.state !== "idle"}
               onClick={() => toggleCartDrawer(true)}
             >
-              View Cart
+              {t("cart.viewCart")}
             </Button>
           </AddToCartAnalytics>
         );

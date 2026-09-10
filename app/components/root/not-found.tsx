@@ -10,6 +10,7 @@ import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { FeaturedData } from "~/routes/($locale).api.featured-items";
 
 export function NotFound({ type = "page" }: { type?: string }) {
+  const { t } = useTranslation();
   return (
     <Section width="fixed" verticalPadding="medium">
       <div className="flex flex-col items-center justify-center gap-10 py-20 lg:py-32 translate-y-[-10%]">
@@ -24,7 +25,7 @@ export function NotFound({ type = "page" }: { type?: string }) {
         </div>
         <div className="">
           <Link variant="secondary" to="/">
-            Visit Homepage
+            {t("notFound.visitHomepage")}
           </Link>
         </div>
       </div>

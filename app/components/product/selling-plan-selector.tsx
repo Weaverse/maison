@@ -1,4 +1,5 @@
 import { Money } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useLocation, useNavigate } from "react-router";
 import type { SellingPlanGroupFragment } from "storefront-api.generated";
@@ -14,6 +15,7 @@ export function SellingPlanSelector({
   sellingPlanGroups,
   selectedSellingPlanId,
 }: SellingPlanSelectorProps) {
+  const { t } = useTranslation();
   const { search, pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -58,7 +60,7 @@ export function SellingPlanSelector({
         </div>
         <div className="flex-1">
           <span className="text-sm font-medium d-block text-body">
-            One-time purchase
+            {t("product.oneTimePurchase")}
           </span>
         </div>
       </label>

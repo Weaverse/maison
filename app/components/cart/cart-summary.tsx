@@ -178,9 +178,7 @@ export function CartSummary({
                 )}
               </div>
             </dl>
-            <p className="text-body-subtle/80 text-sm">
-              Shipping and taxes will be calculated at checkout.
-            </p>
+            <p className="text-body-subtle/80 text-sm">{t("cart.taxNote")}</p>
           </div>
         </>
       )}
