@@ -1,3 +1,4 @@
+import { useTranslation } from "@weaverse/hydrogen";
 import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { BreadCrumb } from "~/components/breadcrumb";
@@ -33,6 +34,7 @@ export function NotFound({ type = "page" }: { type?: string }) {
 }
 
 export function FeaturedProducts() {
+  const { t } = useTranslation();
   const { load, data } = useFetcher<FeaturedData>();
   const api = usePrefixPathWithLocale("/api/featured-items");
 
@@ -49,7 +51,7 @@ export function FeaturedProducts() {
 
   return (
     <div className="space-y-8 pt-20">
-      <h5>Featured products</h5>
+      <h5>{t("notFound.featuredProducts")}</h5>
       <Swimlane className="gap-4">
         {featuredProducts.nodes.map((product) => (
           <ProductCard

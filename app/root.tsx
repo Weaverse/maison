@@ -95,7 +95,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
   );
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>("root");
   const locale = data?.selectedLocale ?? DEFAULT_LOCALE;
@@ -180,4 +180,9 @@ function App() {
   return <Outlet />;
 }
 
-export default withWeaverse(App);
+// Wrap the layout rather than the route: `Header`, `Footer` and the cart
+// drawer render here, outside `App`, and they need the Weaverse providers —
+// `useTranslation` among them — in scope.
+export const Layout = withWeaverse(RootLayout);
+
+export default App;

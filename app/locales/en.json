@@ -1,20 +1,12 @@
 {
-  "actions": {
-    "addToCart": "Add to cart",
-    "soldOut": "Sold out",
-    "viewCart": "View cart",
-    "checkout": "Checkout",
-    "apply": "Apply",
-    "remove": "Remove",
-    "removeAll": "Remove all",
-    "viewAll": "View all",
-    "search": "Search",
-    "submit": "Submit",
-    "send": "Send"
+  "cart": {
+    "title": "Cart",
+    "close": "Close cart drawer"
   },
-  "locale": {
-    "selectorLabel": "Country and language",
-    "country": "Country",
-    "language": "Language"
+  "navigation": {
+    "menu": "MENU"
+  },
+  "notFound": {
+    "featuredProducts": "Featured products"
   }
 }
