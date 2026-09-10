@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Button } from "~/components/button";
 import { Image } from "~/components/image";
 import { StarRating } from "~/components/star-rating";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import type { JudgeMeReviewType, JudgemeReviewImage } from "~/types/judgeme";
 import { cn } from "~/utils/cn";
-import { formatDate } from "~/utils/misc";
+import { formatDateTime } from "~/utils/locale";
 
 function truncateEmail(email: string) {
   const [username, domain] = email.split("@");
@@ -38,6 +39,7 @@ export function ReviewItem({
   showReviewTitle = true,
   showReviewDate = true,
 }: ReviewItemProps) {
+  const locale = useSelectedLocale();
   const { t } = useTranslation();
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
@@ -116,7 +118,7 @@ export function ReviewItem({
         )}
         {showReviewDate && (
           <p className="flex-shrink-0 text-gray-500 text-sm truncate">
-            {formatDate(review.created_at)}
+            {formatDateTime(review.created_at, locale)}
           </p>
         )}
       </div>

@@ -191,7 +191,19 @@
     "country": "Country",
     "phoneNumber": "Phone Number",
     "loading": "Loading...",
-    "loadPrevious": "Load previous"
+    "loadPrevious": "Load previous",
+    "frequencyEvery": "Every {{interval}}",
+    "intervalDay": "{{count}} day",
+    "intervalDays": "{{count}} days",
+    "intervalWeek": "{{count}} week",
+    "intervalWeeks": "{{count}} weeks",
+    "intervalMonth": "{{count}} month",
+    "intervalMonths": "{{count}} months",
+    "intervalYear": "{{count}} year",
+    "intervalYears": "{{count}} years",
+    "statusActive": "Active",
+    "statusPaused": "Paused",
+    "statusCancelled": "Cancelled"
   },
   "accessibility": {
     "close": "Close",

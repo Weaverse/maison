@@ -9,6 +9,7 @@ import type { ProductQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import type { RootLoader } from "~/root";
 import {
   VARIANT_GRID_DESKTOP,
@@ -17,6 +18,7 @@ import {
 } from "~/sections/variant-list/grid";
 import { Subtotal } from "~/sections/variant-list/subtotal";
 import { VariantRow } from "~/sections/variant-list/variant-row";
+import { formatNumber } from "~/utils/locale";
 
 interface QuickViewData {
   product: NonNullable<ProductQuery["product"]>;
@@ -29,6 +31,7 @@ export function QuickShop({
   data: QuickViewData;
   panelType?: "modal" | "drawer";
 }) {
+  const locale = useSelectedLocale();
   const { t } = useTranslation();
   const { bundleBadgeColor } = useThemeSettings();
   const { product } = data || {};
@@ -44,10 +47,10 @@ export function QuickShop({
   const currencyCode = priceRange?.minVariantPrice?.currencyCode || "USD";
 
   const formatPrice = (amount: string) => {
-    return new Intl.NumberFormat("en-US", {
+    return formatNumber(Number.parseFloat(amount), locale, {
       style: "currency",
       currency: currencyCode,
-    }).format(Number.parseFloat(amount));
+    });
   };
 
   return (

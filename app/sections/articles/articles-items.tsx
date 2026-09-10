@@ -11,9 +11,11 @@ import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import { RevealUnderline } from "~/components/reveal-underline";
 import { useAnimation } from "~/hooks/use-animation";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
+import { formatDate } from "~/utils/locale";
 import type { ArticlesLoaderData } from ".";
 
 const variants = cva("grid", {
@@ -149,6 +151,7 @@ function ArticleCard({
   showDate: boolean;
   imageBorderRadius: number;
 }) {
+  const locale = useSelectedLocale();
   return (
     <div className="group flex flex-col gap-5">
       {article.image && (
@@ -180,11 +183,7 @@ function ArticleCard({
           <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
             {showDate && (
               <span>
-                {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {formatDate(article.publishedAt, locale)}
                 {showAuthor && " —"}
               </span>
             )}

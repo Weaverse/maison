@@ -16,7 +16,9 @@ import { Button } from "~/components/button";
 import { Section } from "~/components/section";
 import { SUBSCRIPTION_CANCEL_MUTATION } from "~/graphql/customer-account/CustomerSubscriptionsMutations.account";
 import { SUBSCRIPTIONS_CONTRACTS_QUERY } from "~/graphql/customer-account/CustomerSubscriptionsQuery.account";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import { routeHeaders } from "~/utils/cache";
+import { formatDate } from "~/utils/locale";
 
 export const headers = routeHeaders;
 
@@ -68,14 +70,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
   return data({ success: true });
 }
 
-function getIntervalLabel(interval: string, count: number): string {
-  const intervalLabels: Record<string, string> = {
-    DAY: count === 1 ? "day" : "days",
-    WEEK: count === 1 ? "week" : "weeks",
-    MONTH: count === 1 ? "month" : "months",
-    YEAR: count === 1 ? "year" : "years",
-  };
-  return `${count} ${intervalLabels[interval] || interval.toLowerCase()}`;
+/**
+ * Weaverse's `t()` only substitutes `{{vars}}` — it has no plural selection —
+ * so singular and plural are separate keys and the choice is made here.
+ */
+const INTERVAL_KEYS: Record<string, [singular: string, plural: string]> = {
+  DAY: ["account.intervalDay", "account.intervalDays"],
+  WEEK: ["account.intervalWeek", "account.intervalWeeks"],
+  MONTH: ["account.intervalMonth", "account.intervalMonths"],
+  YEAR: ["account.intervalYear", "account.intervalYears"],
+};
+
+const STATUS_KEYS: Record<string, string> = {
+  ACTIVE: "account.statusActive",
+  PAUSED: "account.statusPaused",
+  CANCELLED: "account.statusCancelled",
+};
+
+function getIntervalLabel(
+  interval: string,
+  count: number,
+  t: (key: string, variables?: Record<string, string | number>) => string,
+): string {
+  const keys = INTERVAL_KEYS[interval];
+  if (!keys) {
+    return `${count} ${interval.toLowerCase()}`;
+  }
+  return t(count === 1 ? keys[0] : keys[1], { count });
 }
 
 function getStatusBadgeClass(status: string): string {
@@ -92,6 +113,7 @@ function getStatusBadgeClass(status: string): string {
 }
 
 export default function AccountSubscriptions() {
+  const locale = useSelectedLocale();
   const { t } = useTranslation();
   const { subscriptions } = useLoaderData<LoaderData>();
   const actionData = useActionData<{ error?: string; success?: boolean }>();
@@ -166,7 +188,9 @@ export default function AccountSubscriptions() {
                       subscription.status,
                     )}`}
                   >
-                    {subscription.status}
+                    {STATUS_KEYS[subscription.status]
+                      ? t(STATUS_KEYS[subscription.status])
+                      : subscription.status}
                   </span>
                 </div>
                 <div className="text-right space-y-1">
@@ -174,11 +198,13 @@ export default function AccountSubscriptions() {
                     {t("account.frequency")}
                   </div>
                   <div className="text-sm font-medium">
-                    Every{" "}
-                    {getIntervalLabel(
-                      subscription.billingPolicy.interval,
-                      subscription.billingPolicy.intervalCount.count,
-                    )}
+                    {t("account.frequencyEvery", {
+                      interval: getIntervalLabel(
+                        subscription.billingPolicy.interval,
+                        subscription.billingPolicy.intervalCount.count,
+                        t,
+                      ),
+                    })}
                   </div>
                 </div>
               </div>
@@ -220,9 +246,7 @@ export default function AccountSubscriptions() {
                         {t("account.nextBilling")}
                       </span>
                       <span className="font-semibold">
-                        {new Date(
-                          subscription.nextBillingDate,
-                        ).toLocaleDateString(undefined, {
+                        {formatDate(subscription.nextBillingDate, locale, {
                           year: "numeric",
                           month: "short",
                           day: "numeric",
@@ -235,14 +259,11 @@ export default function AccountSubscriptions() {
                       {t("account.started")}
                     </span>
                     <span>
-                      {new Date(subscription.createdAt).toLocaleDateString(
-                        undefined,
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        },
-                      )}
+                      {formatDate(subscription.createdAt, locale, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                 </div>

@@ -150,6 +150,28 @@ export function formatDate(
   );
 }
 
+/**
+ * Review timestamps: the date and the time. `Intl` joins the two the way each
+ * locale expects, so there is no connector word to translate.
+ */
+export function formatDateTime(
+  value: Date | string | number,
+  locale: Pick<I18nLocale, "language" | "country">,
+) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return formatDate(date, locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function formatNumber(
   value: number,
   locale: Pick<I18nLocale, "language" | "country">,

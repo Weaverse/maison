@@ -5,7 +5,8 @@ import { useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 import { Image } from "~/components/image";
 import { StarRating } from "~/components/star-rating";
-import { formatDate } from "~/utils/misc";
+import { useSelectedLocale } from "~/hooks/use-locale";
+import { formatDateTime } from "~/utils/locale";
 
 export type AliReview = {
   id: number;
@@ -48,6 +49,7 @@ type ReviewItemProps = ReviewItemData & {
 };
 
 export function ReviewItem(props: ReviewItemProps) {
+  const locale = useSelectedLocale();
   const { t } = useTranslation();
   const {
     review,
@@ -76,7 +78,7 @@ export function ReviewItem(props: ReviewItemProps) {
           </div>
           {showDate && (
             <p className="font-normal text-gray-500 text-sm">
-              {formatDate(review.created_at)}
+              {formatDateTime(review.created_at, locale)}
             </p>
           )}
         </div>

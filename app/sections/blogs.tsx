@@ -7,9 +7,11 @@ import { Button } from "~/components/button";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import { layoutInputs, Section, type SectionProps } from "~/components/section";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio, getImageLoadingPriority } from "~/utils/image";
+import { formatDate } from "~/utils/locale";
 
 const variants = cva("grid gap-x-4 gap-y-10", {
   variants: {
@@ -142,6 +144,7 @@ export function ArticleCard({
   cardGap,
   className,
 }: ArticleCardProps) {
+  const locale = useSelectedLocale();
   const { t } = useTranslation();
   return (
     <div
@@ -175,11 +178,7 @@ export function ArticleCard({
         <div className="flex flex-wrap text-sm gap-1 text-body-subtle">
           {showDate && (
             <span>
-              {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+              {formatDate(article.publishedAt, locale)}
               {showAuthor && " —"}
             </span>
           )}
