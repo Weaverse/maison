@@ -1,5 +1,6 @@
 import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
 import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import { type FetcherWithComponents, useFetcher } from "react-router";
 import type {
   CartApiQueryFragment,
@@ -22,6 +23,7 @@ export function Subtotal({
   variants,
   hasPurchaseMethod = false,
 }: SubtotalProps) {
+  const { t } = useTranslation();
   let totalItems = 0;
   let subtotal = 0;
   let existingLineIds: string[] = [];
@@ -55,20 +57,22 @@ export function Subtotal({
               className="text-sm"
               onClick={() => toggleCartDrawer(true)}
             >
-              View Cart
+              {t("cart.viewCart")}
             </Button>
             {<RemoveAllFromCartButton lineIds={existingLineIds} />}
           </div>
           <div className="space-y-6 text-body-subtle">
-            <div className="text-sm">Total: {totalItems} items</div>
+            <div className="text-sm">
+              {t("cart.totalItems", { count: totalItems })}
+            </div>
             <div className="space-y-1">
               <div className="">
-                <div className="text-sm">Subtotal:</div>
+                <div className="text-sm">{t("cart.subtotalLabel")}</div>
                 <div className="font-semibold">${subtotal.toFixed(2)}</div>
               </div>
               <div className="">
                 <div className="text-xs text-body-subtle">
-                  Taxes, discounts and shipping calculated at checkout.
+                  {t("cart.checkoutNote")}
                 </div>
               </div>
             </div>
@@ -81,21 +85,21 @@ export function Subtotal({
         <div className="flex flex-col gap-3 py-3">
           <div className="flex items-center gap-4">
             <Button variant="outline" onClick={() => toggleCartDrawer(true)}>
-              View Cart
+              {t("cart.viewCart")}
             </Button>
             <RemoveAllFromCartButton lineIds={existingLineIds} />
           </div>
           <div className="flex items-start gap-6">
             <div className="flex flex-1 items-end self-stretch text-base text-body-subtle">
-              Total: {totalItems} items
+              {t("cart.totalItems", { count: totalItems })}
             </div>
             <div className="flex flex-1 flex-col items-end gap-1 text-right">
-              <div className="text-base">Subtotal:</div>
+              <div className="text-base">{t("cart.subtotalLabel")}</div>
               <div className="font-semibold text-base">
                 ${subtotal.toFixed(2)}
               </div>
               <div className="text-[12px] text-body-subtle">
-                Taxes, discounts and shipping calculated at checkout.
+                {t("cart.checkoutNote")}
               </div>
             </div>
           </div>
@@ -112,21 +116,21 @@ export function Subtotal({
         >
           <div className="flex items-center gap-4">
             <Button variant="outline" onClick={() => toggleCartDrawer(true)}>
-              View Cart
+              {t("cart.viewCart")}
             </Button>
             <RemoveAllFromCartButton lineIds={existingLineIds} />
           </div>
           {hasPurchaseMethod && <div />}
           <div className="text-center text-base text-body-subtle">
-            Total: {totalItems} items
+            {t("cart.totalItems", { count: totalItems })}
           </div>
           <div className="col-span-2 flex flex-col items-end gap-1 text-right">
-            <div className="text-base">Subtotal:</div>
+            <div className="text-base">{t("cart.subtotalLabel")}</div>
             <div className="font-semibold text-base">
               ${subtotal.toFixed(2)}
             </div>
             <div className="text-[12px] text-body-subtle">
-              Taxes, discounts and shipping calculated at checkout.
+              {t("cart.checkoutNote")}
             </div>
           </div>
         </div>
@@ -136,6 +140,7 @@ export function Subtotal({
 }
 
 function RemoveAllFromCartButton({ lineIds }: { lineIds: string[] }) {
+  const { t } = useTranslation();
   const fetcher = useFetcher({
     key: "variant-list",
   });
@@ -166,7 +171,7 @@ function RemoveAllFromCartButton({ lineIds }: { lineIds: string[] }) {
           disabled={fetcher.state !== "idle"}
         >
           <TrashIcon className="size-4" aria-hidden="true" />
-          <span>Remove All</span>
+          <span>{t("product.removeAll")}</span>
         </Button>
       )}
     </CartForm>

@@ -45,7 +45,7 @@ export function PredictiveSearchButton() {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between gap-2 px-5 pb-6">
             <Dialog.Title asChild className="text-base">
-              <span className="font-medium">Search</span>
+              <span className="font-medium">{t("search.label")}</span>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button

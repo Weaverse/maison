@@ -28,10 +28,15 @@
     "freeShippingProgress": "You're {{amount}} away from free shipping!",
     "removeDiscount": "Remove discount code {{code}}",
     "removeItem": "Remove",
-    "closeDialog": "Close"
+    "closeDialog": "Close",
+    "removeFromCart": "Remove from cart",
+    "totalItems": "Total: {{count}} items",
+    "checkoutNote": "Taxes, discounts and shipping calculated at checkout.",
+    "subtotalLabel": "Subtotal:"
   },
   "navigation": {
-    "menu": "MENU"
+    "menu": "MENU",
+    "home": "Home"
   },
   "notFound": {
     "featuredProducts": "Featured products"
@@ -51,7 +56,17 @@
     "zoomMedia": "Zoom product media",
     "zoomDialog": "Product media zoom",
     "zoomImage": "Product image zoom",
-    "noProductData": "No product data..."
+    "noProductData": "No product data...",
+    "variant": "Variant",
+    "quickShopModal": "Quick shop modal",
+    "price": "Price",
+    "variantPrice": "Variant Price",
+    "purchaseMethod": "Purchase Method",
+    "quantity": "Quantity",
+    "products": "PRODUCTS",
+    "lowInStock": "Low in Stock",
+    "bundledProducts": "Bundled Products",
+    "removeAll": "Remove All"
   },
   "collection": {
     "filters": "Filters",
@@ -85,7 +100,8 @@
     "noResultsFor": "No results found for",
     "seeAll": "See All Results",
     "inStock": "In Stock",
-    "closeDrawer": "Close search drawer"
+    "closeDrawer": "Close search drawer",
+    "pages": "pages"
   },
   "account": {
     "title": "Account",
@@ -165,5 +181,19 @@
     "phoneNumber": "Phone Number",
     "loading": "Loading...",
     "loadPrevious": "Load previous"
+  },
+  "accessibility": {
+    "close": "Close"
+  },
+  "system": {
+    "error": "Error",
+    "tryAgain": "Try Again",
+    "policies": "Policies",
+    "orderRedirectError": "Error redirecting to the order status URL",
+    "backToPolicies": "Back to Policies"
+  },
+  "newsletter": {
+    "title": "Newsletter Signup",
+    "emailPlaceholder": "Enter your email"
   }
 }

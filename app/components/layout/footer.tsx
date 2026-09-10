@@ -6,7 +6,7 @@ import {
 } from "@phosphor-icons/react";
 
 import * as Accordion from "@radix-ui/react-accordion";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
 import { useFetcher, useRouteLoaderData } from "react-router";
@@ -108,6 +108,7 @@ function StarDividerIcon() {
 }
 
 export function Footer() {
+  const { t } = useTranslation();
   const { shopName } = useShopMenu();
   const {
     footerWidth,
@@ -294,7 +295,9 @@ export function Footer() {
                 <div className="min-h-8">
                   {error && (
                     <div className="flex w-fit gap-1 bg-red-100 px-2 py-1 text-red-700">
-                      <p className="font-semibold">ERROR:</p>
+                      <p className="font-semibold uppercase">
+                        {t("system.error")}:
+                      </p>
                       <p>{error}</p>
                     </div>
                   )}

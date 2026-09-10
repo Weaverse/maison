@@ -9,6 +9,7 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
+  useTranslation,
   type WeaverseProduct,
 } from "@weaverse/hydrogen";
 import { useState } from "react";
@@ -48,6 +49,7 @@ type SingleProductProps = HydrogenComponentProps<
   };
 
 export default function SingleProduct(props: SingleProductProps) {
+  const { t } = useTranslation();
   const {
     ref,
     loaderData,
@@ -182,7 +184,7 @@ export default function SingleProduct(props: SingleProductProps) {
               />
               {isBundle && (
                 <div className="space-y-3">
-                  <h4 className="text-2xl">Bundled Products</h4>
+                  <h4 className="text-2xl">{t("product.bundledProducts")}</h4>
                   <BundledVariants
                     variants={bundledVariants as ProductVariantComponent[]}
                   />

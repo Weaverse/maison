@@ -1,6 +1,7 @@
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
@@ -13,6 +14,7 @@ import { useB2BLocation } from "./b2b-location-provider";
 const B2B_UPDATE_KEY = "b2b-location-update";
 
 export function B2BLocationSelector() {
+  const { t } = useTranslation();
   const { company, modalOpen, setModalOpen, companyLocationId } =
     useB2BLocation();
   const fetcher = useFetcher({ key: B2B_UPDATE_KEY });
@@ -78,7 +80,7 @@ export function B2BLocationSelector() {
                   type="button"
                   onClick={() => setModalOpen(false)}
                   className="text-body transition-opacity hover:opacity-70"
-                  aria-label="Close"
+                  aria-label={t("accessibility.close")}
                 >
                   <XIcon className="size-4" />
                 </button>

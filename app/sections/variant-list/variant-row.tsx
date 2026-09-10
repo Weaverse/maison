@@ -10,7 +10,7 @@ import {
   type OptimisticCart,
   useOptimisticCart,
 } from "@shopify/hydrogen";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import type {
@@ -44,6 +44,7 @@ export function VariantRow({
   cart: resolvedCart,
   sellingPlanGroups,
 }: VariantRowProps) {
+  const { t } = useTranslation();
   const { bundleBadgeColor } = useThemeSettings();
 
   const initialCartLine = resolvedCart?.lines?.nodes?.find(
@@ -113,7 +114,7 @@ export function VariantRow({
             ) : isLowStock ? (
               <div className="flex items-center gap-1 text-sm text-orange-600">
                 <InfoIcon size={14} />
-                <span>Low in Stock</span>
+                <span>{t("product.lowInStock")}</span>
               </div>
             ) : (
               <div
@@ -124,7 +125,7 @@ export function VariantRow({
                   className="size-2 rounded-full"
                   style={{ backgroundColor: bundleBadgeColor }}
                 />
-                <span>In Stock</span>
+                <span>{t("search.inStock")}</span>
               </div>
             )}
             <div className="text-sm">
@@ -200,7 +201,7 @@ export function VariantRow({
               ) : isLowStock ? (
                 <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
                   <InfoIcon size={14} />
-                  <span>Low in Stock</span>
+                  <span>{t("product.lowInStock")}</span>
                 </div>
               ) : (
                 <div
@@ -211,7 +212,7 @@ export function VariantRow({
                     className="size-1.5 rounded-full"
                     style={{ backgroundColor: bundleBadgeColor }}
                   />
-                  <span>In Stock</span>
+                  <span>{t("search.inStock")}</span>
                 </div>
               )}
             </div>
@@ -268,7 +269,7 @@ export function VariantRow({
             ) : isLowStock ? (
               <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
                 <InfoIcon size={14} />
-                <span>Low in Stock</span>
+                <span>{t("product.lowInStock")}</span>
               </div>
             ) : (
               <div
@@ -279,7 +280,7 @@ export function VariantRow({
                   className="size-1.5 rounded-full"
                   style={{ backgroundColor: bundleBadgeColor }}
                 />
-                <span>In Stock</span>
+                <span>{t("search.inStock")}</span>
               </div>
             )}
           </div>
@@ -325,6 +326,7 @@ function QuantityUpdateButtons({
   cart: originalCart,
   selectedPlanId,
 }: QuantityUpdateButtonsProps) {
+  const { t } = useTranslation();
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
   const isOutOfStock = !variant.availableForSale;
@@ -489,7 +491,7 @@ function QuantityUpdateButtons({
       <div className="flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base">
         <button
           type="button"
-          aria-label="Decrease quantity"
+          aria-label={t("product.decreaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
           disabled={displayQuantity <= 0}
           onClick={handleDecrement}
@@ -510,7 +512,7 @@ function QuantityUpdateButtons({
 
         <button
           type="button"
-          aria-label="Increase quantity"
+          aria-label={t("product.increaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
           disabled={isOutOfStock}
           onClick={handleIncrement}
@@ -521,11 +523,11 @@ function QuantityUpdateButtons({
       {showTrashButton ? (
         <button
           type="button"
-          aria-label="Remove from cart"
+          aria-label={t("cart.removeFromCart")}
           className="flex h-4 w-4 items-center justify-center border-none hover:text-red-600 transition"
           onClick={handleRemove}
         >
-          <span className="sr-only">Remove</span>
+          <span className="sr-only">{t("cart.removeItem")}</span>
           <TrashIcon aria-hidden="true" className="h-4 w-4" />
         </button>
       ) : (

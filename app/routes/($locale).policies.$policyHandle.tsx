@@ -1,3 +1,4 @@
+import { useTranslation } from "@weaverse/hydrogen";
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData } from "react-router";
 import type { PoliciesHandleQuery } from "storefront-api.generated";
@@ -45,14 +46,15 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
 }
 
 export default function Policies() {
+  const { t } = useTranslation();
   const { policy } = useLoaderData<typeof loader>();
 
   return (
     <Section verticalPadding="medium" width="fixed">
-      <BreadCrumb page="Policies" className="mb-4" />
-      <h4 className="mb-4 font-medium">Policies</h4>
+      <BreadCrumb page={t("system.policies")} className="mb-4" />
+      <h4 className="mb-4 font-medium">{t("system.policies")}</h4>
       <Link variant="underline" to="/policies">
-        &larr; Back to Policies
+        &larr; {t("system.backToPolicies")}
       </Link>
       <div className="mt-8 lg:mt-20">
         <div

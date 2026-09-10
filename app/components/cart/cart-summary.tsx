@@ -151,11 +151,13 @@ export function CartSummary({
         </div>
       ) : (
         <>
-          <h2 className="sr-only">Order Summary</h2>
+          <h2 className="sr-only">{t("cart.orderSummary")}</h2>
           <div className="grid gap-3">
             <dl className="grid gap-2.5 text-sm">
               <div className="flex items-center justify-between">
-                <dt className="font-semibold text-base uppercase">Subtotal</dt>
+                <dt className="font-semibold text-base uppercase">
+                  {t("cart.subtotal")}
+                </dt>
                 {isCartUpdating ? (
                   <Skeleton className="h-4 w-20 rounded" />
                 ) : (
