@@ -148,7 +148,7 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
                 data.averageRating,
                 data.totalReviews,
               )
-            : noReviewsText}
+            : noReviewsText || t("product.noReviews")}
         </span>
       </div>
     </div>
