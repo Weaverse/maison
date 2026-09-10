@@ -75,11 +75,10 @@ export async function createHydrogenRouterContext(
     components,
   });
 
-  // Add weaverse directly to the hydrogenContext instance
-  // This preserves the RouterContextProvider class instance
-  Object.assign(hydrogenContext, { weaverse, localization });
-
-  return hydrogenContext;
+  // `Object.assign` mutates and returns the same instance, so returning it
+  // directly keeps the RouterContextProvider intact while letting the added
+  // properties reach the context type.
+  return Object.assign(hydrogenContext, { weaverse, localization });
 }
 
 class AppSession implements HydrogenSession {
