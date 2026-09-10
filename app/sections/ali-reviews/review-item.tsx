@@ -1,4 +1,5 @@
 import { SealCheckIcon, XIcon } from "@phosphor-icons/react";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useState } from "react";
 import ReactCountryFlag from "react-country-flag";
@@ -47,6 +48,7 @@ type ReviewItemProps = ReviewItemData & {
 };
 
 export function ReviewItem(props: ReviewItemProps) {
+  const { t } = useTranslation();
   const {
     review,
     showCountry,
@@ -115,7 +117,7 @@ export function ReviewItem(props: ReviewItemProps) {
               <Image
                 className="h-full w-full object-cover object-center"
                 src={media.url}
-                alt="Review media"
+                alt={t("reviews.media")}
               />
             </div>
           ))}
@@ -133,6 +135,7 @@ function ReviewMediaPreview(props: {
   media: ReviewMedia | null;
   closePreview: () => void;
 }) {
+  const { t } = useTranslation();
   const { media, closePreview } = props;
   if (media) {
     return (
@@ -141,7 +144,7 @@ function ReviewMediaPreview(props: {
           <Image
             className="max-h-full max-w-full object-cover"
             src={media.url}
-            alt="Review media preview"
+            alt={t("reviews.mediaPreview")}
           />
         </div>
         <XIcon

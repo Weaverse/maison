@@ -2,6 +2,7 @@ import {
   createSchema,
   type HydrogenComponentProps,
   useParentInstance,
+  useTranslation,
 } from "@weaverse/hydrogen";
 import { StarRating } from "~/components/star-rating";
 import type { AliReviewsLoaderData } from ".";
@@ -19,6 +20,7 @@ interface AliReviewsData extends ReviewItemData {
 }
 
 function ReviewList(props: AliReviewsData & HydrogenComponentProps) {
+  const { t } = useTranslation();
   const {
     children,
     showAvgRating,
@@ -102,7 +104,7 @@ function ReviewList(props: AliReviewsData & HydrogenComponentProps) {
   }
   return (
     <div ref={ref} {...rest}>
-      <div className="p-8 text-center">No reviews available</div>
+      <div className="p-8 text-center">{t("reviews.noneAvailable")}</div>
     </div>
   );
 }

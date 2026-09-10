@@ -199,5 +199,37 @@
   "newsletter": {
     "title": "Newsletter Signup",
     "emailPlaceholder": "Enter your email"
+  },
+  "reviews": {
+    "submitted": "Review Submitted Successfully!",
+    "submittedNote": "Thank you for your feedback. Your review is being processed in the background, it will be published shortly in a few minutes.",
+    "writeAnother": "Write Another Review",
+    "submissionFailed": "Submission Failed",
+    "submissionFailedNote": "There was an error submitting your review. Please try again.",
+    "writeYourReview": "Write Your Review",
+    "writeYourReviewNote": "Share your experience with other customers",
+    "yourName": "Your Name",
+    "namePlaceholder": "Enter your name",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "Enter your email",
+    "reviewTitle": "Review Title",
+    "titlePlaceholder": "Give your review a title",
+    "yourReview": "Your Review",
+    "bodyPlaceholder": "Share your experience with this product",
+    "submitting": "Submitting...",
+    "submitReview": "Submit Review",
+    "noneAvailable": "No reviews available",
+    "media": "Review media",
+    "mediaPreview": "Review media preview",
+    "image": "Review image",
+    "gallery": "Review image gallery",
+    "closeImage": "Close image",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "view": "View",
+    "countLabel": "reviews"
+  },
+  "actions": {
+    "cancel": "Cancel"
   }
 }
