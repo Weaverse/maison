@@ -52,5 +52,39 @@
     "zoomDialog": "Product media zoom",
     "zoomImage": "Product image zoom",
     "noProductData": "No product data..."
+  },
+  "collection": {
+    "filters": "Filters",
+    "filter": "Filter",
+    "applyFilters": "Apply Filters",
+    "closeFilters": "Close filters drawer",
+    "clearAll": "Clear all filters",
+    "clearAllLabel": "Clear all applied filters",
+    "noProductsMatched": "No products matched your filters.",
+    "sortBy": "Sort by:",
+    "minPrice": "Min price",
+    "maxPrice": "Max price",
+    "increaseMin": "Increase min price",
+    "decreaseMin": "Decrease min price",
+    "increaseMax": "Increase max price",
+    "decreaseMax": "Decrease max price"
+  },
+  "sort": {
+    "featured": "Featured",
+    "relevance": "Relevance",
+    "priceLowHigh": "Price, (low to high)",
+    "priceHighLow": "Price, (high to low)",
+    "bestSelling": "Best selling",
+    "newest": "Newest"
+  },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search our store...",
+    "popular": "Popular searches:",
+    "trending": "Trending Products",
+    "noResultsFor": "No results found for",
+    "seeAll": "See All Results",
+    "inStock": "In Stock",
+    "closeDrawer": "Close search drawer"
   }
 }

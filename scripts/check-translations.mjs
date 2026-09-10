@@ -22,6 +22,13 @@ for (const file of walk("app")) {
   for (const match of source.matchAll(/\bt\(\s*["']([^"']+)["']/g)) {
     usedKeys.add(match[1]);
   }
+  // Keys can also be held in data and passed to `t()` later — the sort
+  // options do this. Count any string literal that names a catalogue key.
+  for (const match of source.matchAll(/["']([a-z][\w]*(?:\.[\w]+)+)["']/g)) {
+    if (catalogKeys.has(match[1])) {
+      usedKeys.add(match[1]);
+    }
+  }
 }
 
 const missing = [...usedKeys].filter((key) => !catalogKeys.has(key)).sort();
