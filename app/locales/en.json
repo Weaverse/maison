@@ -35,5 +35,22 @@
   },
   "notFound": {
     "featuredProducts": "Featured products"
+  },
+  "product": {
+    "addToCart": "Add to cart",
+    "from": "From",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "learnMore": "Learn more",
+    "noReviews": "No reviews",
+    "reviewsUnavailable": "Unable to load reviews",
+    "oneTimePurchase": "One time purchase",
+    "volumePricing": "Volume pricing available",
+    "imageAlt": "Product image",
+    "videoAlt": "Product video",
+    "zoomMedia": "Zoom product media",
+    "zoomDialog": "Product media zoom",
+    "zoomImage": "Product image zoom",
+    "noProductData": "No product data..."
   }
 }

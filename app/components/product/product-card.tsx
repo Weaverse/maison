@@ -1,6 +1,6 @@
 import { Money, mapSelectedProductOptionToObject } from "@shopify/hydrogen";
 import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useState } from "react";
 import { useViewTransitionState } from "react-router";
@@ -34,6 +34,7 @@ export function ProductCard({
   product: ProductCardFragment;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const {
     pcardBorderRadius,
     pcardBackgroundColor,
@@ -218,7 +219,7 @@ export function ProductCard({
           </Link>
           {pcardShowLowestPrice || isCombinedListing(product) ? (
             <div className="flex gap-1">
-              <span>From</span>
+              <span>{t("product.from")}</span>
               <Money withoutTrailingZeros data={minVariantPrice} />
               {isCombinedListing(product) && (
                 <>
@@ -256,7 +257,7 @@ export function ProductCard({
         0 ? (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1">
             <span className="block size-1.5 bg-line rounded-full" />
-            <span>Volume pricing available</span>
+            <span>{t("product.volumePricing")}</span>
           </div>
         ) : (
           <div className="h-3" />

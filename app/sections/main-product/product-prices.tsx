@@ -3,7 +3,11 @@ import {
   Money,
   useOptimisticVariant,
 } from "@shopify/hydrogen";
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import { useLoaderData, useSearchParams } from "react-router";
 import { VariantPrices } from "~/components/product/variant-prices";
 import type { loader as productRouteLoader } from "~/routes/($locale).products.$productHandle";
@@ -73,6 +77,7 @@ function SellingPlanPrice({
 }
 
 export default function ProductPrices(props: ProductPricesProps) {
+  const { t } = useTranslation();
   const { ref, showCompareAtPrice, ...rest } = props;
   const { product } = useLoaderData<typeof productRouteLoader>();
   const [searchParams] = useSearchParams();
@@ -133,7 +138,7 @@ export default function ProductPrices(props: ProductPricesProps) {
           {product.priceRange?.minVariantPrice?.amount !==
           product.priceRange?.maxVariantPrice?.amount ? (
             <span className="flex gap-2 items-baseline">
-              <span className="text-sm">From</span>
+              <span className="text-sm">{t("product.from")}</span>
               <VariantPrices
                 variant={selectedVariant}
                 showCompareAtPrice={showCompareAtPrice}

@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 import { useLoaderData } from "react-router";
 import {
   ProductMedia,
@@ -16,6 +16,7 @@ interface ProductInformationData
 export default function ProductInformation(
   props: ProductInformationData & SectionProps,
 ) {
+  const { t } = useTranslation();
   const {
     ref,
     mediaLayout,
@@ -87,7 +88,7 @@ export default function ProductInformation(
   }
   return (
     <div ref={ref} {...rest}>
-      No product data...
+      {t("product.noProductData")}
     </div>
   );
 }
