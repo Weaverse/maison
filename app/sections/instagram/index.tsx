@@ -152,7 +152,7 @@ export const schema = createSchema({
           defaultValue: "@maison_ig",
         },
         {
-          type: "text",
+          type: "url",
           name: "profileUrl",
           label: "Profile link",
           defaultValue: "https://www.instagram.com/",
