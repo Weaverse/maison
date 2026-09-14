@@ -1,5 +1,6 @@
 import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
-import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
+import { CartForm, Money, useOptimisticCart } from "@shopify/hydrogen";
+import type { CurrencyCode } from "@shopify/hydrogen/storefront-api-types";
 import { useTranslation } from "@weaverse/hydrogen";
 import { type FetcherWithComponents, useFetcher } from "react-router";
 import type {
@@ -8,6 +9,7 @@ import type {
 } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import { desktopVariantGrid } from "~/sections/variant-list/grid";
 import { cn } from "~/utils/cn";
 
@@ -24,8 +26,10 @@ export function Subtotal({
   hasPurchaseMethod = false,
 }: SubtotalProps) {
   const { t } = useTranslation();
+  const locale = useSelectedLocale();
   let totalItems = 0;
   let subtotal = 0;
+  let currencyCode: CurrencyCode = locale.currency as CurrencyCode;
   let existingLineIds: string[] = [];
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
 
@@ -45,6 +49,8 @@ export function Subtotal({
       const amount = Number.parseFloat(line.cost?.totalAmount.amount || "0");
       return sum + amount;
     }, 0);
+    currencyCode =
+      currentProductLines[0]?.cost?.totalAmount?.currencyCode ?? currencyCode;
   }
   return (
     <>
@@ -68,7 +74,9 @@ export function Subtotal({
             <div className="space-y-1">
               <div className="">
                 <div className="text-sm">{t("cart.subtotalLabel")}</div>
-                <div className="font-semibold">${subtotal.toFixed(2)}</div>
+                <div className="font-semibold">
+                  <Money data={{ amount: String(subtotal), currencyCode }} />
+                </div>
               </div>
               <div className="">
                 <div className="text-xs text-body-subtle">
@@ -96,7 +104,7 @@ export function Subtotal({
             <div className="flex flex-1 flex-col items-end gap-1 text-right">
               <div className="text-base">{t("cart.subtotalLabel")}</div>
               <div className="font-semibold text-base">
-                ${subtotal.toFixed(2)}
+                <Money data={{ amount: String(subtotal), currencyCode }} />
               </div>
               <div className="text-[12px] text-body-subtle">
                 {t("cart.checkoutNote")}
@@ -127,7 +135,7 @@ export function Subtotal({
           <div className="col-span-2 flex flex-col items-end gap-1 text-right">
             <div className="text-base">{t("cart.subtotalLabel")}</div>
             <div className="font-semibold text-base">
-              ${subtotal.toFixed(2)}
+              <Money data={{ amount: String(subtotal), currencyCode }} />
             </div>
             <div className="text-[12px] text-body-subtle">
               {t("cart.checkoutNote")}
