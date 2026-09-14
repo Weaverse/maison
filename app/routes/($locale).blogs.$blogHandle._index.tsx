@@ -15,7 +15,7 @@ export const headers = routeHeaders;
 export const loader = async (args: LoaderFunctionArgs) => {
   const { params, request, context } = args;
   const storefront = context.storefront;
-  const { language, country } = storefront.i18n;
+  const { language } = storefront.i18n;
 
   invariant(params.blogHandle, "Missing blog handle");
 
@@ -42,17 +42,9 @@ export const loader = async (args: LoaderFunctionArgs) => {
     data: blog,
   });
 
-  const articles = flattenConnection(blog.articles).map((article) => {
-    const { publishedAt } = article;
-    return {
-      ...article,
-      publishedAt: new Intl.DateTimeFormat(`${language}-${country}`, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(new Date(publishedAt)),
-    };
-  });
+  // `publishedAt` stays the raw timestamp. `ArticleCard` formats it at render,
+  // and the article route hands it the same shape, so both callers agree.
+  const articles = flattenConnection(blog.articles);
 
   const seo = seoPayload.blog({ blog, url: request.url });
 

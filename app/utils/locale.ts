@@ -145,9 +145,14 @@ export function formatDate(
     day: "numeric",
   },
 ) {
-  return new Intl.DateTimeFormat(intlLocale(locale), options).format(
-    value instanceof Date ? value : new Date(value),
-  );
+  const date = value instanceof Date ? value : new Date(value);
+  // `Intl.format` throws on an invalid date, which would take down the whole
+  // page. Show the raw value instead: wrong-looking text beats a 500.
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat(intlLocale(locale), options).format(date);
 }
 
 /**
