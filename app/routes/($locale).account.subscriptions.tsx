@@ -162,8 +162,7 @@ export default function AccountSubscriptions() {
               {t("account.noSubscriptions")}
             </h3>
             <p className="text-body-subtle max-w-md mx-auto">
-              You don't have any active subscriptions yet. Subscribe to your
-              favorite products to get regular deliveries and savings.
+              {t("account.noSubscriptionsNote")}
             </p>
           </div>
           <Link to="/products">

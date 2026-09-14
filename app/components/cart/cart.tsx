@@ -598,10 +598,7 @@ function CartEmpty({
       hidden={hidden}
     >
       <div className={clsx(layout === "page" && "text-center")}>
-        <p className="mb-4">
-          Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-          started!
-        </p>
+        <p className="mb-4">{t("cart.emptyMessage")}</p>
         <Link
           variant="outline"
           to={layout === "page" ? "/products" : ""}
