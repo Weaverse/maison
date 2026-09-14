@@ -307,10 +307,11 @@ function resolveToFromType(
 
 const LAYOUT_QUERY = `#graphql
   query layout(
+    $country: CountryCode
     $language: LanguageCode
     $headerMenuHandle: String!
     $footerMenuHandle: String!
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     shop {
       ...Shop
     }

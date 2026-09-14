@@ -25,7 +25,6 @@ export const loader = async (args: LoaderFunctionArgs) => {
       variables: {
         blogHandle: params.blogHandle,
         pageBy: PAGINATION_SIZE,
-        language,
       },
     }),
     context.weaverse.loadPage({
@@ -66,11 +65,12 @@ export default function Blogs() {
 
 const BLOGS_QUERY = `#graphql
   query blog(
+    $country: CountryCode
     $language: LanguageCode
     $blogHandle: String!
     $pageBy: Int!
     $cursor: String
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     blog(handle: $blogHandle) {
       title
       handle

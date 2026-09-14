@@ -77,12 +77,13 @@ const POLICY_CONTENT_QUERY = `#graphql
   }
 
   query PoliciesHandle(
+    $country: CountryCode
     $language: LanguageCode
     $privacyPolicy: Boolean!
     $shippingPolicy: Boolean!
     $termsOfService: Boolean!
     $refundPolicy: Boolean!
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     shop {
       privacyPolicy @include(if: $privacyPolicy) {
         ...PolicyHandle
