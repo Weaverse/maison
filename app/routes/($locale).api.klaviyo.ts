@@ -87,7 +87,11 @@ export const action: ActionFunction = async ({
     if (res.status === 400) {
       return data({ ok: false, error: INVALID_EMAIL_ERROR }, 400);
     }
-    return data({ ok: false, error: GENERIC_ERROR }, res.status);
+    // Klaviyo's status describes our call, not the visitor's. Passing a 401
+    // straight through would tell them their own request was unauthorized;
+    // answer like the missing-token branch above, because from the visitor's
+    // side those are the same failure.
+    return data({ ok: false, error: GENERIC_ERROR }, 503);
   } catch (error) {
     console.error("Klaviyo signup request failed:", error);
     return data({ ok: false, error: GENERIC_ERROR }, 500);
