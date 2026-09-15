@@ -21,11 +21,21 @@ const EMPTY_RATING: JudgemeStarsRatingData = {
   badge: "",
 };
 
+/** Judge.me paging. The cap keeps one request from asking for everything. */
+const DEFAULT_PER_PAGE = 5;
+const MAX_PER_PAGE = 50;
+
+/** Returns the parsed value only when it is a whole number above zero. */
+function readPositiveInt(value: string | null, fallback: number) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 const EMPTY_REVIEWS = {
   reviews: [] as JudgeMeReviewType[],
   totalPage: 0,
   currentPage: 1,
-  perPage: 5,
+  perPage: DEFAULT_PER_PAGE,
   averageRating: 0,
   totalReviews: 0,
   ratingDistribution: [],
@@ -90,8 +100,14 @@ export const loader: LoaderFunction = async ({ request, context, params }) => {
       return data(EMPTY_REVIEWS);
     }
 
-    const page = Number.parseInt(searchParams.get("page") || "1", 10);
-    const perPage = Number.parseInt(searchParams.get("per_page") || "5", 10);
+    // Both values are handed straight to Judge.me, so junk and out-of-range
+    // input stops here: `page=abc` would otherwise arrive as NaN, and
+    // `per_page=100000` would ask Judge.me for the whole review table.
+    const page = readPositiveInt(searchParams.get("page"), 1);
+    const perPage = Math.min(
+      readPositiveInt(searchParams.get("per_page"), DEFAULT_PER_PAGE),
+      MAX_PER_PAGE,
+    );
 
     let reviewSummary: JudgemeWidgetData | null = null;
     let totalPage = 0;
@@ -110,9 +126,7 @@ export const loader: LoaderFunction = async ({ request, context, params }) => {
 
     if (widgetResponse?.widget) {
       reviewSummary = parseJudgemeWidgetHTML(widgetResponse.widget);
-      totalPage = Math.ceil(
-        reviewSummary.totalReviews / (perPage > 0 ? perPage : 5),
-      );
+      totalPage = Math.ceil(reviewSummary.totalReviews / perPage);
     }
 
     const reviewsData = await fetchWithCache<{
