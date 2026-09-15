@@ -155,6 +155,10 @@ export const action: ActionFunction = async ({ request, context, params }) => {
 
     const { JUDGEME_PRIVATE_API_TOKEN, PUBLIC_STORE_DOMAIN } = env;
     const formData = await request.formData();
+    // Name the fields the form sends instead of spreading everything, and put
+    // the server's own values last, so a crafted request can neither override
+    // them nor smuggle extra fields to Judge.me under our private token.
+    const { id, rating, name, email, title, body } = formDataToObject(formData);
     const response = await fetch(
       constructURL(JUDGEME_REVIEWS_API, {
         api_token: JUDGEME_PRIVATE_API_TOKEN,
@@ -164,9 +168,14 @@ export const action: ActionFunction = async ({ request, context, params }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id,
+          rating,
+          name,
+          email,
+          title,
+          body,
           shop_domain: PUBLIC_STORE_DOMAIN,
           platform: "shopify",
-          ...formDataToObject(formData),
         }),
       },
     );

@@ -19,8 +19,10 @@ export function constructURL(
   return _url.toString();
 }
 
-export function formDataToObject(formData: FormData) {
-  const data = {};
+export function formDataToObject(
+  formData: FormData,
+): Record<string, FormDataEntryValue> {
+  const data: Record<string, FormDataEntryValue> = {};
   for (const [key, value] of formData.entries()) {
     data[key] = value;
   }
