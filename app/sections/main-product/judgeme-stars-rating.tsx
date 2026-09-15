@@ -2,9 +2,11 @@ import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useRouteLoaderData } from "react-router";
 import { StarRating } from "~/components/star-rating";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
+import { useWeaverseStudioCheck } from "~/hooks/use-weaverse-studio-check";
+import type { RootLoader } from "~/root";
 import type { loader as productRouteLoader } from "~/routes/($locale).products.$productHandle";
 import type { JudgemeStarsRatingData } from "~/types/judgeme";
 
@@ -41,6 +43,12 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
   );
   const [data, setData] = useState<JudgemeStarsRatingData | null>(null);
   const { product } = useLoaderData<typeof productRouteLoader>();
+  // Without a Judge.me token the API answers with an empty rating, so every
+  // product would show zero stars. Hide it as the newsletter form does, while
+  // leaving it visible in Studio so the section stays editable.
+  const rootData = useRouteLoaderData<RootLoader>("root");
+  const judgemeConfigured = Boolean(rootData?.integrations?.judgeme);
+  const isDesignMode = useWeaverseStudioCheck();
   const handle = productHandle || product?.handle;
   const ratingAPI = usePrefixPathWithLocale(
     `/api/product/${handle}/reviews?type=rating`,
@@ -81,7 +89,7 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
       });
   }, [handle, inView]);
 
-  if (!handle) {
+  if (!(handle && (judgemeConfigured || isDesignMode))) {
     return null;
   }
 
