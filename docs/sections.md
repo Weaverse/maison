@@ -303,9 +303,11 @@ They are not available in Studio and are not covered by this guide.
   built for wholesale and B2B ordering.
 - **Available on:** Product pages only.
 - **Required:** Nothing beyond placement; it reads the current product.
-- **Layout:** Five columns on desktop, four on tablet, and stacked cards on
-  mobile. The variant column is flexible while the others are fixed, so the
-  table adapts to the theme's page width.
+- **Layout:** On desktop, five columns for a product with selling plans and
+  four without, since the purchase method column only exists when there is a
+  plan to pick. Tablet drops to three, and mobile becomes stacked cards. The
+  variant column is flexible while the others are fixed, so the table adapts to
+  the theme's page width.
 - **Mobile:** Each variant becomes a card with its own quantity stepper.
 - **Avoid:** Adding it to a product with only one variant, and pairing it with
   Main product's own quantity selector on the same page — two steppers for one
