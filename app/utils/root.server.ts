@@ -46,6 +46,12 @@ export async function loadCriticalData({
     weaverseTheme,
     googleGtmID: env.PUBLIC_GOOGLE_GTM_ID,
     swatchesConfigs,
+    integrations: {
+      klaviyo: Boolean(env.KLAVIYO_PRIVATE_API_TOKEN),
+      judgeme: Boolean(
+        env.JUDGEME_PRIVATE_API_TOKEN && env.PUBLIC_STORE_DOMAIN,
+      ),
+    },
   };
 }
 

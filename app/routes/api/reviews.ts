@@ -1,0 +1,211 @@
+import type { ActionFunction, LoaderFunction } from "react-router";
+import { data } from "react-router";
+import type {
+  JudgeMeReviewType,
+  JudgemeProduct,
+  JudgemeStarsRatingData,
+  JudgemeWidgetData,
+} from "~/types/judgeme";
+import { parseBadgeHtml, parseJudgemeWidgetHTML } from "~/utils/judgeme";
+import { constructURL, formDataToObject } from "~/utils/misc";
+
+const JUDGEME_PRODUCT_API = "https://judge.me/api/v1/products/-1";
+const JUDGEME_BADGE_API = "https://api.judge.me/api/v1/widgets/preview_badge";
+const JUDGEME_WIDGET_API = "https://api.judge.me/api/v1/widgets/product_review";
+const JUDGEME_REVIEWS_API = "https://api.judge.me/api/v1/reviews";
+const GENERIC_ERROR = "Reviews are unavailable.";
+
+const EMPTY_RATING: JudgemeStarsRatingData = {
+  totalReviews: 0,
+  averageRating: 0,
+  badge: "",
+};
+
+/** Judge.me paging. The cap keeps one request from asking for everything. */
+const DEFAULT_PER_PAGE = 5;
+const MAX_PER_PAGE = 50;
+
+/** Returns the parsed value only when it is a whole number above zero. */
+function readPositiveInt(value: string | null, fallback: number) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const EMPTY_REVIEWS = {
+  reviews: [] as JudgeMeReviewType[],
+  totalPage: 0,
+  currentPage: 1,
+  perPage: DEFAULT_PER_PAGE,
+  averageRating: 0,
+  totalReviews: 0,
+  ratingDistribution: [],
+};
+
+function isJudgemeConfigured(env: Env) {
+  return Boolean(env.JUDGEME_PRIVATE_API_TOKEN && env.PUBLIC_STORE_DOMAIN);
+}
+
+/**
+ * Judge.me reviews API.
+ *
+ * GET  `/api/product/{handle}/reviews` — review list + summary
+ * GET  `/api/product/{handle}/reviews?type=rating` — star rating badge
+ * POST `/api/product/{handle}/reviews` — submit a review
+ *
+ * The private API token stays on the server. Missing/invalid config returns
+ * empty data so product pages keep rendering.
+ */
+export const loader: LoaderFunction = async ({ request, context, params }) => {
+  try {
+    const { weaverse, env } = context;
+    const { fetchWithCache } = weaverse;
+    const { searchParams } = new URL(request.url);
+    const { productHandle } = params;
+    const type = searchParams.get("type");
+
+    if (!productHandle || !isJudgemeConfigured(env)) {
+      return data(type === "rating" ? EMPTY_RATING : EMPTY_REVIEWS);
+    }
+
+    const { JUDGEME_PRIVATE_API_TOKEN, PUBLIC_STORE_DOMAIN } = env;
+
+    if (type === "rating") {
+      const badgeResponse = await fetchWithCache<{
+        product_external_id: number;
+        badge: string;
+      }>(
+        constructURL(JUDGEME_BADGE_API, {
+          api_token: JUDGEME_PRIVATE_API_TOKEN,
+          shop_domain: PUBLIC_STORE_DOMAIN,
+          handle: productHandle,
+        }),
+      );
+
+      if (!badgeResponse?.badge) {
+        return data(EMPTY_RATING);
+      }
+      return data(parseBadgeHtml(badgeResponse.badge));
+    }
+
+    const judgemeProductRes = await fetchWithCache<{
+      product: JudgemeProduct;
+    }>(
+      constructURL(JUDGEME_PRODUCT_API, {
+        handle: productHandle,
+        shop_domain: PUBLIC_STORE_DOMAIN,
+        api_token: JUDGEME_PRIVATE_API_TOKEN,
+      }),
+    );
+    if (!judgemeProductRes?.product?.id) {
+      return data(EMPTY_REVIEWS);
+    }
+
+    // Both values are handed straight to Judge.me, so junk and out-of-range
+    // input stops here: `page=abc` would otherwise arrive as NaN, and
+    // `per_page=100000` would ask Judge.me for the whole review table.
+    const page = readPositiveInt(searchParams.get("page"), 1);
+    const perPage = Math.min(
+      readPositiveInt(searchParams.get("per_page"), DEFAULT_PER_PAGE),
+      MAX_PER_PAGE,
+    );
+
+    let reviewSummary: JudgemeWidgetData | null = null;
+    let totalPage = 0;
+    const widgetResponse = await fetchWithCache<{
+      product_external_id: number;
+      widget: string;
+    }>(
+      constructURL(JUDGEME_WIDGET_API, {
+        api_token: JUDGEME_PRIVATE_API_TOKEN,
+        shop_domain: PUBLIC_STORE_DOMAIN,
+        handle: productHandle,
+        per_page: perPage,
+        page,
+      }),
+    );
+
+    if (widgetResponse?.widget) {
+      reviewSummary = parseJudgemeWidgetHTML(widgetResponse.widget);
+      totalPage = Math.ceil(reviewSummary.totalReviews / perPage);
+    }
+
+    const reviewsData = await fetchWithCache<{
+      reviews: JudgeMeReviewType[];
+      current_page: number;
+      per_page: number;
+    }>(
+      constructURL(JUDGEME_REVIEWS_API, {
+        api_token: JUDGEME_PRIVATE_API_TOKEN,
+        shop_domain: PUBLIC_STORE_DOMAIN,
+        product_id: judgemeProductRes.product.id,
+        per_page: perPage,
+        page,
+      }),
+    );
+
+    return data({
+      reviews: reviewsData?.reviews || [],
+      totalPage,
+      currentPage: reviewsData?.current_page || 1,
+      perPage: reviewsData?.per_page || perPage || 5,
+      ...reviewSummary,
+    });
+  } catch (err) {
+    console.error("[Error in reviews API loader]", err);
+    const type = new URL(request.url).searchParams.get("type");
+    return data(type === "rating" ? EMPTY_RATING : EMPTY_REVIEWS);
+  }
+};
+
+export const action: ActionFunction = async ({ request, context, params }) => {
+  try {
+    const { env } = context;
+    const { productHandle } = params;
+
+    if (!productHandle || !isJudgemeConfigured(env)) {
+      console.error("Judge.me review submit unavailable: token is not set");
+      return data({ review: null, error: GENERIC_ERROR }, { status: 503 });
+    }
+
+    const { JUDGEME_PRIVATE_API_TOKEN, PUBLIC_STORE_DOMAIN } = env;
+    const formData = await request.formData();
+    // Name the fields the form sends instead of spreading everything, and put
+    // the server's own values last, so a crafted request can neither override
+    // them nor smuggle extra fields to Judge.me under our private token.
+    const { id, rating, name, email, title, body } = formDataToObject(formData);
+    const response = await fetch(
+      constructURL(JUDGEME_REVIEWS_API, {
+        api_token: JUDGEME_PRIVATE_API_TOKEN,
+        shop_domain: PUBLIC_STORE_DOMAIN,
+      }),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          rating,
+          name,
+          email,
+          title,
+          body,
+          shop_domain: PUBLIC_STORE_DOMAIN,
+          platform: "shopify",
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      console.error(
+        `[Error in reviews API action] Judge.me responded ${response.status}`,
+      );
+      await response.body?.cancel();
+      return data({ review: null, error: GENERIC_ERROR }, { status: 502 });
+    }
+
+    const payload = await response.json<JudgeMeReviewType>();
+    return data({ review: payload }, { status: 201 });
+  } catch (err) {
+    console.error("[Error in reviews API action]", err);
+    return data({ review: null, error: GENERIC_ERROR }, { status: 500 });
+  }
+};

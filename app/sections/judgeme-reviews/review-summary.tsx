@@ -1,7 +1,10 @@
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import { useState } from "react";
+import { useRouteLoaderData } from "react-router";
 import { Button } from "~/components/button";
 import { StarRating } from "~/components/star-rating";
+import { useWeaverseStudioCheck } from "~/hooks/use-weaverse-studio-check";
+import type { RootLoader } from "~/root";
 import { useJudgemeStore } from ".";
 import { RatingProgressBar } from "./rating-progress-bar";
 import { ReviewForm } from "./review-form";
@@ -36,8 +39,12 @@ export default function JudgemeReviewSummary(props: JudgemeReviewSummaryProps) {
     errorText = "Error loading reviews.",
     ...rest
   } = props;
-  let { status, data } = useJudgemeStore();
+  const { status, data } = useJudgemeStore();
   const [showForm, setShowForm] = useState(false);
+  const rootData = useRouteLoaderData<RootLoader>("root");
+  const isDesignMode = useWeaverseStudioCheck();
+  const canWriteReview =
+    Boolean(rootData?.integrations?.judgeme) || Boolean(isDesignMode);
 
   return (
     <div ref={ref} {...rest} className="py-4">
@@ -105,7 +112,7 @@ export default function JudgemeReviewSummary(props: JudgemeReviewSummaryProps) {
             {/* Column 2 - Ratings Breakdown */}
             <div className="border-gray-200 md:border-x px-8 md:px-12 py-2">
               <div className="w-full space-y-0.5">
-                {data.ratingDistribution.map(
+                {(data.ratingDistribution ?? []).map(
                   ({ rating, frequency, percentage }) => (
                     <div key={rating} className="w-full">
                       <RatingProgressBar
@@ -120,19 +127,23 @@ export default function JudgemeReviewSummary(props: JudgemeReviewSummaryProps) {
             </div>
 
             {/* Column 3 - Write Review Button */}
-            <div className="flex items-center justify-center px-8">
-              <Button
-                variant={showForm ? "outline" : "primary"}
-                onClick={() => setShowForm(!showForm)}
-                aria-expanded={showForm}
-                aria-controls="review-form"
-                className="w-full"
-              >
-                {showForm ? hideFormText : writeReviewText}
-              </Button>
-            </div>
+            {canWriteReview ? (
+              <div className="flex items-center justify-center px-8">
+                <Button
+                  variant={showForm ? "outline" : "primary"}
+                  onClick={() => setShowForm(!showForm)}
+                  aria-expanded={showForm}
+                  aria-controls="review-form"
+                  className="w-full"
+                >
+                  {showForm ? hideFormText : writeReviewText}
+                </Button>
+              </div>
+            ) : null}
           </div>
-          <ReviewForm showForm={showForm} setShowForm={setShowForm} />
+          {canWriteReview ? (
+            <ReviewForm showForm={showForm} setShowForm={setShowForm} />
+          ) : null}
         </div>
       ) : (
         // No reviews state
@@ -146,19 +157,23 @@ export default function JudgemeReviewSummary(props: JudgemeReviewSummaryProps) {
               </div>
             </div>
             {/* Column 3 - Write Review Button */}
-            <div className="flex items-center px-8">
-              <Button
-                variant={showForm ? "outline" : "primary"}
-                onClick={() => setShowForm(!showForm)}
-                aria-expanded={showForm}
-                aria-controls="review-form"
-                className="w-64"
-              >
-                {showForm ? hideFormText : writeReviewText}
-              </Button>
-            </div>
+            {canWriteReview ? (
+              <div className="flex items-center px-8">
+                <Button
+                  variant={showForm ? "outline" : "primary"}
+                  onClick={() => setShowForm(!showForm)}
+                  aria-expanded={showForm}
+                  aria-controls="review-form"
+                  className="w-64"
+                >
+                  {showForm ? hideFormText : writeReviewText}
+                </Button>
+              </div>
+            ) : null}
           </div>
-          <ReviewForm showForm={showForm} setShowForm={setShowForm} />
+          {canWriteReview ? (
+            <ReviewForm showForm={showForm} setShowForm={setShowForm} />
+          ) : null}
         </div>
       )}
     </div>
