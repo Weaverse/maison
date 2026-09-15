@@ -338,8 +338,9 @@ They are not available in Studio and are not covered by this guide.
 - **Blocks:** Heading, paragraph, Reviews summary, Reviews list.
 - **Required:** `JUDGEME_PRIVATE_API_TOKEN` in the environment. See
   [`docs/integrations.md`](integrations.md).
-- **Behaviour:** With no token the section renders an empty state rather than an
-  error. Studio still shows it so it can be designed before the token exists.
+- **Behaviour:** With no token the section does not render on the storefront, so
+  shoppers are never offered a review form that cannot submit. Studio still shows
+  it so it can be designed before the token exists.
 
 ### Main product
 

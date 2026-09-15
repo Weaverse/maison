@@ -144,8 +144,9 @@ verified.
 | `METAOBJECT_COLORS_TYPE` | Configuration | `<shopify-metaobject-type>` | Shopify metaobject type used for colour and image swatches. |
 | `CUSTOM_COLLECTION_BANNER_METAFIELD` | Configuration | `<namespace.key>` | Collection metafield used for custom banner media. |
 
-Both integrations fail closed. With no token the storefront still renders:
-reviews show an empty state and the newsletter surfaces are hidden. See
+Both integrations fail closed. With no token the storefront still renders, and
+the surfaces that would need one — the review section, the stars rating, the
+newsletter card and popup — are hidden rather than shown empty or broken. See
 `docs/integrations.md` for provider setup and behaviour.
 
 ### Reserved names
@@ -459,11 +460,12 @@ hosted by Shopify and does not stay on localhost.
 
 ### Reviews or newsletter surfaces are missing
 
-Both integrations fail closed. Without `JUDGEME_PRIVATE_API_TOKEN` the review
-list returns an empty state; without `KLAVIYO_PRIVATE_API_TOKEN` the footer card
-and popup are hidden. Studio still shows them so they can be designed. Set the
-token, restart locally or redeploy on Oxygen, and check the server log — the
-browser only ever receives a generic message.
+Both integrations fail closed, so a missing surface usually means a missing
+token. Without `JUDGEME_PRIVATE_API_TOKEN` the review section and stars rating
+are hidden; without `KLAVIYO_PRIVATE_API_TOKEN` the footer card and popup are.
+Studio still shows them all so they can be designed. Set the token, restart
+locally or redeploy on Oxygen, and check the server log — the browser only ever
+receives a generic message.
 
 ### `env pull` removed Weaverse or integration values
 
