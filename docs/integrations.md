@@ -94,16 +94,20 @@ manager, never from Git history.
 **Behaviour when unconfigured.** Maison fails closed rather than erroring. With
 no token:
 
-- `GET` returns `200` with an empty rating and an empty review list, so the
-  product page renders normally and the widget shows its empty state.
+- The review section and the stars rating do not render at all on the
+  storefront. Showing them would invite a write-up through a form that cannot
+  submit, so they are hidden the way the newsletter signup is.
+- The Studio editor still shows both, so they can be designed before the token
+  exists.
+- `GET` returns `200` with an empty rating and an empty review list, so nothing
+  errors if a surface does reach the API.
 - `POST` returns `503` with a generic message. The specific reason is logged
   server-side only; the browser never receives it.
-- The Studio editor still shows the section so it can be designed before the
-  token exists.
 
 **Testing the unconfigured state.** Comment out `JUDGEME_PRIVATE_API_TOKEN` in
-`.env`, restart `npm run dev`, and confirm a product page still renders with an
-empty review state and no console error.
+`.env`, restart `npm run dev`, and confirm the product page renders without the
+review section and without a console error, while the section is still visible
+in Studio.
 
 **Testing the configured state.** Set the token, restart, then open a product
 that has reviews in Judge.me. Confirm the summary shows the correct average and

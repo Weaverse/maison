@@ -26,6 +26,15 @@ These **Shopify (Plus)** brands built on top of Weaverse/Maison:
 - Customizing Maison on Weaverse Studio: https://studio.weaverse.io/demo?theme=maison
   ![maison.weaverse.dev](https://cdn.shopify.com/s/files/1/0838/0052/3057/files/maison.weavverse.dev_0b0b2f77-b79e-4524-8cf5-bc22d6ec4ba9.png?v=1744963684)
 
+## Documentation
+
+- [Setup and usage](docs/setup.md) — local setup, Shopify and Weaverse
+  connection, environment variables, customization, and Oxygen deployment.
+- [Sections](docs/sections.md) — composing pages in Weaverse Studio, section by
+  section.
+- [Third-party integrations](docs/integrations.md) — Judge.me and Klaviyo setup,
+  token handling, and what each surface does when a token is missing.
+
 ## What's included
 
 - Shopify Hydrogen / Oxygen / CLI
@@ -97,10 +106,10 @@ Maison ships Judge.me reviews and Klaviyo newsletter signup. Both use **private*
 
 - **Local:** copy placeholders from `.env.example` into `.env` (untracked) and restart `npm run dev`.
 - **Oxygen:** add the same variable names under Hydrogen → Environments and variables for Preview and Production, then redeploy.
-- **Unconfigured:** product pages still render. Reviews show an empty/no-reviews state. Newsletter forms are hidden until a Klaviyo token is set (Studio still shows them for design).
+- **Unconfigured:** product pages still render. Review and newsletter surfaces are hidden until their token is set (Studio still shows them for design).
 - **Configured:** open a product with reviews, and submit the footer/popup email form. Confirm the token never appears in page source or loader JSON.
 
-Theme-level setup docs: [GitHub issue #56](https://github.com/Weaverse/maison/issues/56).
+For per-integration setup, token handling, and what each surface does when a token is missing, see the [Maison third-party integration guide](docs/integrations.md).
 
 ## Features overview
 
@@ -384,7 +393,7 @@ Key configuration files:
 
 ## License
 
-This project is provided under the [MIT License](LICENSE).
+This project is provided under the [MIT License](LICENSE.md).
 
 ---
 

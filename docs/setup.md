@@ -4,6 +4,9 @@ This guide is the operational reference for developers, interns, and merchants
 working on Maison. It covers a fresh local setup, Shopify and Weaverse
 connections, customization, validation, and deployment to Shopify Oxygen.
 
+For composing pages in Weaverse Studio see [`docs/sections.md`](sections.md).
+For third-party app configuration see [`docs/integrations.md`](integrations.md).
+
 ## 1. What Maison is
 
 Maison is a Shopify Hydrogen theme for premium bedding, home goods, and B2B
