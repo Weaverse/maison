@@ -5,7 +5,10 @@ import { hydrogenRoutes } from "@shopify/hydrogen";
 // Manual route definitions can be added to this array, in addition to or instead of using the `flatRoutes` file-based routing convention.
 // See https://remix.run/docs/en/main/guides/routing for more details
 export default hydrogenRoutes([
-  // APIs
+  // APIs. Keep reviews on its own path rather than folding it into the product
+  // route as an optional `/reviews?` segment: a dynamic segment never matches
+  // across a slash, so as two distinct paths neither can swallow the other's
+  // URL, whatever order they appear in.
   route(
     "/:locale?/api/product/:productHandle/reviews",
     "routes/api/reviews.ts",
