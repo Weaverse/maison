@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/hydrogen";
 import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useRouteLoaderData } from "react-router";
 import { create } from "zustand";
 import { layoutInputs, Section, type SectionProps } from "~/components/section";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
+import { useWeaverseStudioCheck } from "~/hooks/use-weaverse-studio-check";
+import type { RootLoader } from "~/root";
 import type { loader as productRouteLoader } from "~/routes/($locale).products.$productHandle";
 import type { JudgemeReviewsData } from "~/types/judgeme";
 import { constructURL } from "~/utils/misc";
@@ -46,6 +48,12 @@ interface JudgemeReviewSectionProps extends SectionProps {
 export default function JudgemeReviewSection(props: JudgemeReviewSectionProps) {
   const { ref, children, sectionId, ...rest } = props;
   const { product } = useLoaderData<typeof productRouteLoader>();
+  // Without a Judge.me token the API answers empty, so this would invite a
+  // review through a form that cannot submit. Gate it the way the newsletter
+  // signup is gated, and keep it visible in Studio so it stays editable.
+  const rootData = useRouteLoaderData<RootLoader>("root");
+  const judgemeConfigured = Boolean(rootData?.integrations?.judgeme);
+  const isDesignMode = useWeaverseStudioCheck();
   const { paging, data, setStatus, setData, setPaging } = useJudgemeStore();
   const reviewsAPI = usePrefixPathWithLocale(
     `/api/product/${product?.handle}/reviews`,
@@ -120,7 +128,7 @@ export default function JudgemeReviewSection(props: JudgemeReviewSectionProps) {
     };
   }, []);
 
-  if (!product) {
+  if (!(product && (judgemeConfigured || isDesignMode))) {
     return null;
   }
 
