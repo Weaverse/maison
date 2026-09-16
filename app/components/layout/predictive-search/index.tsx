@@ -210,7 +210,7 @@ function PredictiveSearchResults() {
   ].filter((tab) => tab.items?.length > 0);
 
   const currentTab =
-    tabs.find((t) => t.value === activeTab)?.value ?? tabs[0]?.value;
+    tabs.find((tab) => tab.value === activeTab)?.value ?? tabs[0]?.value;
 
   return (
     <Tabs.Root value={currentTab} onValueChange={setActiveTab}>
