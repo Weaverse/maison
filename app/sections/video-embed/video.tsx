@@ -64,36 +64,52 @@ export function toEmbedUrl(url: string): string {
     return url;
   }
 
+  const value = fromIframeTag(url.trim());
+
   let parsed: URL;
   try {
-    parsed = new URL(url.trim());
+    parsed = new URL(value);
   } catch {
-    return url;
+    return value;
   }
 
   const host = parsed.hostname.replace(/^www\./, "");
   const segments = parsed.pathname.split("/").filter(Boolean);
 
   if (host === "youtu.be") {
-    return segments[0] ? youtubeEmbed(segments[0], parsed) : url;
+    return segments[0] ? youtubeEmbed(segments[0], parsed) : value;
   }
 
   if (host.endsWith("youtube.com") || host === "youtube-nocookie.com") {
     if (segments[0] === "embed") {
-      return url;
+      return value;
     }
     const id =
       parsed.searchParams.get("v") ||
       (["shorts", "live", "v"].includes(segments[0]) ? segments[1] : "");
-    return id ? youtubeEmbed(id, parsed) : url;
+    return id ? youtubeEmbed(id, parsed) : value;
   }
 
   if (host === "vimeo.com") {
     const id = segments.find((part) => /^\d+$/.test(part));
-    return id ? `https://player.vimeo.com/video/${id}` : url;
+    return id ? `https://player.vimeo.com/video/${id}` : value;
   }
 
-  return url;
+  return value;
+}
+
+/**
+ * The field used to be labelled "Embed URL" and its help text linked YouTube's
+ * instructions for getting an embed *code*, which hands you a whole `<iframe>`
+ * tag. Stores that followed it have markup saved in this field, so read the src
+ * back out rather than dropping the tag into another iframe's src.
+ */
+function fromIframeTag(value: string): string {
+  if (!value.startsWith("<")) {
+    return value;
+  }
+  const src = value.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+  return src ? src[1].trim() : value;
 }
 
 function youtubeEmbed(id: string, source: URL): string {
@@ -145,7 +161,7 @@ export const schema = createSchema({
           defaultValue: "https://www.youtube.com/embed/Su-x4Mo5xmU",
           placeholder: "https://youtu.be/Su-x4Mo5xmU",
           helpText:
-            "Paste the link from Share on YouTube or Vimeo. Watch, youtu.be and Shorts links all work. Ignored when a video is selected above.",
+            "Paste the link from Share on YouTube or Vimeo — watch, youtu.be and Shorts links all work, as does a full embed code. Ignored when a video is selected above.",
         },
         {
           type: "select",
