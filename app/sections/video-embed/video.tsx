@@ -52,6 +52,61 @@ interface VideoItemProps
   videoUrl: string;
 }
 
+/**
+ * YouTube and Vimeo only allow their `/embed/` URLs inside an iframe. A
+ * youtu.be or watch?v= link answers with `X-Frame-Options: SAMEORIGIN`, which
+ * the browser refuses to frame, so the section renders an empty box. Merchants
+ * copy the Share link, so accept it and rewrite it rather than asking them to
+ * hand-build an embed URL.
+ */
+export function toEmbedUrl(url: string): string {
+  if (!url) {
+    return url;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url.trim());
+  } catch {
+    return url;
+  }
+
+  const host = parsed.hostname.replace(/^www\./, "");
+  const segments = parsed.pathname.split("/").filter(Boolean);
+
+  if (host === "youtu.be") {
+    return segments[0] ? youtubeEmbed(segments[0], parsed) : url;
+  }
+
+  if (host.endsWith("youtube.com") || host === "youtube-nocookie.com") {
+    if (segments[0] === "embed") {
+      return url;
+    }
+    const id =
+      parsed.searchParams.get("v") ||
+      (["shorts", "live", "v"].includes(segments[0]) ? segments[1] : "");
+    return id ? youtubeEmbed(id, parsed) : url;
+  }
+
+  if (host === "vimeo.com") {
+    const id = segments.find((part) => /^\d+$/.test(part));
+    return id ? `https://player.vimeo.com/video/${id}` : url;
+  }
+
+  return url;
+}
+
+function youtubeEmbed(id: string, source: URL): string {
+  const embed = new URL(`https://www.youtube.com/embed/${id}`);
+  // Carry a start offset across; drop share tracking such as `si`.
+  const start =
+    source.searchParams.get("t") || source.searchParams.get("start");
+  if (start) {
+    embed.searchParams.set("start", start.replace(/[^\d]/g, ""));
+  }
+  return embed.toString();
+}
+
 export default function VideoEmbedItem(props: VideoItemProps) {
   const { t } = useTranslation();
   const { ref, video, videoUrl, size, borderRadius, ...rest } = props;
@@ -60,7 +115,7 @@ export default function VideoEmbedItem(props: VideoItemProps) {
       ref={ref}
       {...rest}
       className={variants({ size, borderRadius })}
-      src={video?.url || videoUrl}
+      src={toEmbedUrl(video?.url || videoUrl)}
       allowFullScreen
       title={t("video.youtubePlayer")}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -86,11 +141,11 @@ export const schema = createSchema({
         {
           type: "text",
           name: "videoUrl",
-          label: "Embed URL",
+          label: "Video URL",
           defaultValue: "https://www.youtube.com/embed/Su-x4Mo5xmU",
-          placeholder: "https://www.youtube.com/embed/Su-x4Mo5xmU",
+          placeholder: "https://youtu.be/Su-x4Mo5xmU",
           helpText:
-            'How to get YouTube <a target="_blank" href="https://support.google.com/youtube/answer/171780?hl=en#:~:text=On%20a%20computer%2C%20go%20to,appears%2C%20copy%20the%20HTML%20code.">embed code</a>.',
+            "Paste the link from Share on YouTube or Vimeo. Watch, youtu.be and Shorts links all work. Ignored when a video is selected above.",
         },
         {
           type: "select",
