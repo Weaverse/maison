@@ -7,6 +7,7 @@ import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Banner } from "~/components/banner";
 import { Button } from "~/components/button";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { cn } from "~/utils/cn";
 
 export function NoteDialog({
@@ -17,6 +18,7 @@ export function NoteDialog({
   layout?: "page" | "drawer";
 }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const [note, setNote] = useState(currentNote);
   const [submitted, setSubmitted] = useState(false);
   const fetcher = useFetcher();
@@ -39,7 +41,7 @@ export function NoteDialog({
             inputs: { cartNote: formCartNote },
           }),
         },
-        { method: "POST", action: "/cart" },
+        { method: "POST", action: cartAction },
       );
       setNote(formCartNote);
     }
@@ -115,6 +117,7 @@ export function DiscountDialog({
   layout?: "page" | "drawer";
 }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const [code, setCode] = useState("");
   const fetcher = useFetcher();
   const submitted = Boolean(code && fetcher.state === "idle" && fetcher.data);
@@ -141,7 +144,7 @@ export function DiscountDialog({
             },
           }),
         },
-        { method: "POST", action: "/cart" },
+        { method: "POST", action: cartAction },
       );
     }
   }
@@ -220,6 +223,7 @@ export function GiftCardDialog({
   layout?: "page" | "drawer";
 }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const appliedGiftCardCodes = useRef<string[]>([]);
   const [code, setCode] = useState("");
   const fetcher = useFetcher();
@@ -254,7 +258,7 @@ export function GiftCardDialog({
             },
           }),
         },
-        { method: "POST", action: "/cart" },
+        { method: "POST", action: cartAction },
       );
       saveAppliedCode(giftCardCode);
     }

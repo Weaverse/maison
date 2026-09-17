@@ -9,12 +9,14 @@ import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
 } from "~/graphql/customer-locations-query.account";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { useB2BLocation } from "./b2b-location-provider";
 
 const B2B_UPDATE_KEY = "b2b-location-update";
 
 export function B2BLocationSelector() {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const { company, modalOpen, setModalOpen, companyLocationId } =
     useB2BLocation();
   const fetcher = useFetcher({ key: B2B_UPDATE_KEY });
@@ -128,7 +130,7 @@ export function B2BLocationSelector() {
               {/* Confirm Button */}
               <CartForm
                 key={selectedLocationId}
-                route="/cart"
+                route={cartAction}
                 action={CartForm.ACTIONS.BuyerIdentityUpdate}
                 fetcherKey={B2B_UPDATE_KEY}
                 inputs={{

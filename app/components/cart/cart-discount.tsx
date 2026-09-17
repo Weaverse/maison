@@ -6,6 +6,7 @@ import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Banner } from "~/components/banner";
 import { Button } from "~/components/button";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts, getDiscountAmount } from "~/utils/cart-discounts";
 
 /**
@@ -21,6 +22,7 @@ export function CartDiscount({
   canApply: boolean;
 }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const discountCodes = cart?.discountCodes ?? [];
   const money = cart?.cost?.subtotalAmount;
   const { byCode } = getCartDiscounts(cart);
@@ -84,7 +86,7 @@ export function CartDiscount({
           },
         }),
       },
-      { method: "POST", action: "/cart" },
+      { method: "POST", action: cartAction },
     );
   }
 
@@ -149,7 +151,7 @@ export function CartDiscount({
                   )}
                 </span>
                 <CartForm
-                  route="/cart"
+                  route={cartAction}
                   action={CartForm.ACTIONS.DiscountCodesUpdate}
                   inputs={{ discountCodes: remainingCodes }}
                   fetcherKey="discount-code-remove"

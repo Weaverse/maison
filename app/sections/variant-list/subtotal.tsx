@@ -10,6 +10,7 @@ import type {
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 import { useSelectedLocale } from "~/hooks/use-locale";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { desktopVariantGrid } from "~/sections/variant-list/grid";
 import { cn } from "~/utils/cn";
 
@@ -149,6 +150,7 @@ export function Subtotal({
 
 function RemoveAllFromCartButton({ lineIds }: { lineIds: string[] }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const fetcher = useFetcher({
     key: "variant-list",
   });
@@ -166,7 +168,7 @@ function RemoveAllFromCartButton({ lineIds }: { lineIds: string[] }) {
 
   return (
     <CartForm
-      route="/cart"
+      route={cartAction}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds }}
       fetcherKey="variant-list"

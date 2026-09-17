@@ -1,8 +1,9 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { data } from "react-router";
+import { prefixPathWithLocale } from "~/utils/locale";
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
-  const { cart } = context;
+  const { cart, storefront } = context;
 
   try {
     const variantId = params.variantId;
@@ -20,7 +21,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
      */
     const cartId = result.cart.id;
     const headers = cart.setCartId(cartId);
-    headers.set("Location", "/cart");
+    headers.set("Location", prefixPathWithLocale("/cart", storefront.i18n));
 
     const { cart: cartResult, errors, userErrors } = result;
 

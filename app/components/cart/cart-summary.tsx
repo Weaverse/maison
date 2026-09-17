@@ -13,6 +13,7 @@ import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts } from "~/utils/cart-discounts";
 import {
   DiscountDialog,
@@ -32,6 +33,7 @@ export function CartSummary({
   layout: Layouts;
 }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const {
     enableCartNote,
     cartNoteButtonText,
@@ -204,7 +206,7 @@ export function CartSummary({
                   </span>
                 </div>
                 <CartForm
-                  route="/cart"
+                  route={cartAction}
                   action={CartForm.ACTIONS.GiftCardCodesRemove}
                   inputs={{
                     giftCardCodes: [giftCard.id],
@@ -256,7 +258,7 @@ export function CartSummary({
                   <TagIcon className="h-4.5 w-4.5" aria-hidden="true" />
                   <span className="leading-normal">{discount.code}</span>
                   <CartForm
-                    route="/cart"
+                    route={cartAction}
                     action={CartForm.ACTIONS.DiscountCodesUpdate}
                     inputs={{ discountCodes: updatedCodes || [] }}
                     fetcherKey="discount-code-remove"

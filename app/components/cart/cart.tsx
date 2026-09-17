@@ -25,6 +25,7 @@ import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import { ScrollArea } from "~/components/scroll-area";
 import { Section } from "~/components/section";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
 import { CartBestSellers } from "./cart-best-sellers";
@@ -338,9 +339,10 @@ function ItemRemoveButton({
   className?: string;
 }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   return (
     <CartForm
-      route="/cart"
+      route={cartAction}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds: [lineId] }}
       fetcherKey="cart-line-remove"
@@ -367,6 +369,7 @@ function CartLineQuantityAdjust({
   line: CartLine;
   layout: Layouts;
 }) {
+  const cartAction = usePrefixPathWithLocale("/cart");
   const optimisticId = line?.id;
   const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
   const [inputValue, setInputValue] = useState("");
@@ -422,7 +425,7 @@ function CartLineQuantityAdjust({
           inputs: { lines: [{ id: lineId, quantity: newQuantity }] },
         }),
       );
-      fetch("/cart", { method: "POST", body: formData });
+      fetch(cartAction, { method: "POST", body: formData });
     }
   }
 
@@ -514,9 +517,10 @@ function UpdateCartButton({
   children: React.ReactNode;
   lines: CartLineUpdateInput[];
 }) {
+  const cartAction = usePrefixPathWithLocale("/cart");
   return (
     <CartForm
-      route="/cart"
+      route={cartAction}
       action={CartForm.ACTIONS.LinesUpdate}
       fetcherKey={lines[0]?.id}
       inputs={{

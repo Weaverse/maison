@@ -21,6 +21,7 @@ import type {
 import { Image } from "~/components/image";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import {
   desktopVariantGrid,
   VARIANT_GRID_TABLET,
@@ -327,6 +328,7 @@ function QuantityUpdateButtons({
   selectedPlanId,
 }: QuantityUpdateButtonsProps) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
   const isOutOfStock = !variant.availableForSale;
@@ -350,7 +352,7 @@ function QuantityUpdateButtons({
   function submitCart(action: string, inputs: Record<string, unknown>) {
     const formData = new FormData();
     formData.append(CartForm.INPUT_NAME, JSON.stringify({ action, inputs }));
-    fetcher.submit(formData, { method: "POST", action: "/cart" });
+    fetcher.submit(formData, { method: "POST", action: cartAction });
   }
 
   // Latest-closure ref: reassigned every render so deferred callers (debounce

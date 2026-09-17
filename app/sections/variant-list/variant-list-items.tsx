@@ -19,6 +19,7 @@ import type {
 } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
@@ -262,9 +263,10 @@ function AddToCartAnalytics({
 
 function AddAllToCartButton({ lines }: { lines: OptimisticCartLineInput[] }) {
   const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   return (
     <CartForm
-      route="/cart"
+      route={cartAction}
       inputs={{ lines }}
       action={CartForm.ACTIONS.LinesAdd}
     >
