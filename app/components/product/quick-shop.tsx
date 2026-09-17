@@ -10,6 +10,7 @@ import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
 import { useSelectedLocale } from "~/hooks/use-locale";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { RootLoader } from "~/root";
 import {
   VARIANT_GRID_DESKTOP,
@@ -229,12 +230,20 @@ export function QuickShopTrigger({
     }
   }, [data, isFetching]);
 
+  // Fetch through the locale-prefixed path: the product API prices the
+  // variants in the market the request resolves to, so an unprefixed
+  // load answers in the default market's currency regardless of the
+  // page the dialog was opened from.
+  const productApiPath = usePrefixPathWithLocale(
+    `/api/product/${productHandle}`,
+  );
+
   const handleOpen = () => {
     if (data?.product) {
       setOpen(true);
     } else {
       setIsFetching(true);
-      load(`/api/product/${productHandle}`);
+      load(productApiPath);
     }
   };
 
