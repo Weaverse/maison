@@ -39,9 +39,6 @@ export function NewsletterPopup() {
     newsletterPopupAllowDismiss,
     newsletterPopupImage,
     newsletterPopupImagePosition = "left",
-    newsletterPopupHeading,
-    newsletterPopupDescription,
-    newsletterPopupButtonText,
     newsletterPopupPosition = "center",
   } = useThemeSettings();
 
@@ -92,9 +89,6 @@ export function NewsletterPopup() {
     newsletterPopupAllowDismiss,
     newsletterPopupImage,
     newsletterPopupImagePosition,
-    newsletterPopupHeading,
-    newsletterPopupDescription,
-    newsletterPopupButtonText,
     newsletterPopupPosition,
   ]);
 
@@ -182,10 +176,10 @@ export function NewsletterPopup() {
                 )}
               >
                 <h3 className="mb-4 font-semibold text-2xl">
-                  {newsletterPopupHeading}
+                  {t("newsletter.popup.heading")}
                 </h3>
                 <p className="mb-6 text-body-subtle">
-                  {newsletterPopupDescription}
+                  {t("newsletter.popup.description")}
                 </p>
 
                 <fetcher.Form
@@ -206,7 +200,7 @@ export function NewsletterPopup() {
                     className="w-full"
                     loading={fetcher.state === "submitting"}
                   >
-                    {newsletterPopupButtonText}
+                    {t("newsletter.popup.buttonText")}
                   </Button>
                 </fetcher.Form>
 

@@ -223,7 +223,12 @@
   "newsletter": {
     "title": "Newsletter Signup",
     "emailPlaceholder": "Enter your email",
-    "dismiss": "Don't show this again"
+    "dismiss": "Don't show this again",
+    "popup": {
+      "description": "Subscribe to our newsletter and get exclusive offers, new product updates, and more.",
+      "heading": "Stay in the loop!",
+      "buttonText": "Get 15% Off Your First Order"
+    }
   },
   "reviews": {
     "submitted": "Review Submitted Successfully!",
