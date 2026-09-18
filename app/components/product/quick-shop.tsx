@@ -205,7 +205,7 @@ export function QuickShopTrigger({
   productHandle,
   showOnHover = true,
   buttonType = "icon",
-  buttonText = "Quick shop",
+  buttonText,
   placement = "image",
 }: {
   productHandle: string;
@@ -215,6 +215,9 @@ export function QuickShopTrigger({
   placement?: "image" | "bottom";
 }) {
   const { t } = useTranslation();
+  // Explicit text (if a caller ever passes one) wins; otherwise the label
+  // comes from the catalogue, like every other translatable string.
+  const triggerLabel = buttonText || t("product.selectOptions");
   const [open, setOpen] = useState(false);
   const { load, data, state } = useFetcher<{
     product: ProductQuery["product"];
@@ -275,7 +278,7 @@ export function QuickShopTrigger({
             </span>
           </>
         ) : (
-          <span className="px-2">{buttonText}</span>
+          <span className="px-2">{triggerLabel}</span>
         )}
       </Button>
       <Dialog.Portal>

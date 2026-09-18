@@ -50,7 +50,6 @@ export function ProductCard({
     pcardShowQuickShopOnHover,
     pcardQuickShopButtonPlacement,
     pcardQuickShopButtonType,
-    pcardQuickShopButtonText,
     pcardQuickShopPanelType,
     pcardShowSaleBadge,
     pcardShowBundleBadge,
@@ -167,7 +166,6 @@ export function ProductCard({
             productHandle={product.handle}
             showOnHover={pcardShowQuickShopOnHover}
             buttonType={pcardQuickShopButtonType}
-            buttonText={pcardQuickShopButtonText}
             placement="image"
           />
         )}
@@ -269,7 +267,6 @@ export function ProductCard({
             productHandle={product.handle}
             showOnHover={pcardShowQuickShopOnHover}
             buttonType={pcardQuickShopButtonType}
-            buttonText={pcardQuickShopButtonText}
             placement="bottom"
           />
         </div>

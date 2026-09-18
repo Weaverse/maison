@@ -783,11 +783,10 @@ export const themeSchema: HydrogenThemeSchema = {
           condition: (theme) => theme.pcardEnableQuickShop === true,
         },
         {
-          type: "text",
+          type: "translation-key",
           label: "Quick shop button text",
-          name: "pcardQuickShopButtonText",
-          defaultValue: "Quick shop",
-          placeholder: "Quick shop",
+          name: "product.selectOptions",
+          placeholder: "Select options",
           condition: (theme) => {
             return (
               theme.pcardEnableQuickShop === true &&
