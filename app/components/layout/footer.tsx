@@ -116,23 +116,26 @@ export function Footer() {
     socialInstagram,
     socialLinkedIn,
     socialX,
-    bio,
     copyright,
     showNewsletterSignup,
-    footerBrandTitle,
     showFooterWordmark,
     footerWordmark,
     footerWordmarkScale,
-    newsletterTitle,
-    newsletterDescription,
-    newsletterPlaceholder,
-    newsletterButtonText,
     showVisaIcon,
     showMastercardIcon,
     showAmexIcon,
     showPaypalIcon,
     showDinersClubIcon,
   } = useThemeSettings();
+
+  // Footer copy lives in the catalogue: translation-key settings write
+  // straight into the translation store, so t() is the only reader.
+  const footerBrandTitle = t("footer.brandHeading");
+  const bio = t("footer.bio");
+  const newsletterTitle = t("footer.newsletterTitle");
+  const newsletterDescription = t("footer.newsletterDescription");
+  const newsletterPlaceholder = t("footer.newsletterPlaceholder");
+  const newsletterButtonText = t("footer.newsletterButton");
   const fetcher = useFetcher<{ ok: boolean; error: string }>();
   const rootData = useRouteLoaderData<RootLoader>("root");
   const isDesignMode = useWeaverseStudioCheck();

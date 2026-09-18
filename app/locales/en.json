@@ -233,6 +233,14 @@
       "buttonText": "Get 15% Off Your First Order"
     }
   },
+  "footer": {
+    "brandHeading": "Our shop",
+    "bio": "<p>We are a team of designers, developers, and creatives who are passionate about creating beautiful and functional products.</p>",
+    "newsletterTitle": "STAY IN TOUCH",
+    "newsletterDescription": "News and inspiration in your inbox, every week.",
+    "newsletterPlaceholder": "Please enter your email",
+    "newsletterButton": "Send"
+  },
   "reviews": {
     "submitted": "Review Submitted Successfully!",
     "submittedNote": "Thank you for your feedback. Your review is being processed in the background, it will be published shortly in a few minutes.",
