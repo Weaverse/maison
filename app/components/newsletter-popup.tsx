@@ -47,10 +47,10 @@ export function NewsletterPopup() {
   const isDesignMode = useWeaverseStudioCheck();
 
   // Compute message and error from fetcher data
-  const message = fetcher.data?.ok ? "Thank you for signing up! 🎉" : "";
+  const message = fetcher.data?.ok ? t("newsletter.success") : "";
   const error =
     fetcher.data && !fetcher.data.ok
-      ? fetcher.data.error || "An error occurred while signing up."
+      ? fetcher.data.error || t("newsletter.error")
       : "";
 
   // Close popup after successful submission

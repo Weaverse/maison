@@ -225,6 +225,8 @@
     "title": "Newsletter Signup",
     "emailPlaceholder": "Enter your email",
     "dismiss": "Don't show this again",
+    "success": "Thank you for signing up! 🎉",
+    "error": "An error occurred while signing up.",
     "popup": {
       "description": "Subscribe to our newsletter and get exclusive offers, new product updates, and more.",
       "heading": "Stay in the loop!",
