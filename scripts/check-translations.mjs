@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 
 /**
@@ -43,7 +43,9 @@ if (unused.length) {
   console.warn(`Unused keys in en.json: ${unused.join(", ")}`);
 }
 
-console.log(`Verified ${usedKeys.size} translation keys in app/locales/en.json`);
+console.log(
+  `Verified ${usedKeys.size} translation keys in app/locales/en.json`,
+);
 
 function flattenKeys(value, prefix = "") {
   return Object.entries(value).flatMap(([key, child]) => {
