@@ -80,7 +80,7 @@ export function toEmbedUrl(url: string): string {
     return segments[0] ? youtubeEmbed(segments[0], parsed) : value;
   }
 
-  if (host.endsWith("youtube.com") || host === "youtube-nocookie.com") {
+  if (YOUTUBE_HOSTS[host] || host === "youtube-nocookie.com") {
     if (segments[0] === "embed") {
       return value;
     }
@@ -97,6 +97,17 @@ export function toEmbedUrl(url: string): string {
 
   return value;
 }
+
+/**
+ * Match YouTube hosts exactly. `host.endsWith("youtube.com")` reads like a
+ * guard but accepts `evil-youtube.com`, and the `/embed/` early-return then
+ * frames that host verbatim — the check must be an allow-list.
+ */
+const YOUTUBE_HOSTS: Record<string, true> = {
+  "youtube.com": true,
+  "m.youtube.com": true,
+  "music.youtube.com": true,
+};
 
 /**
  * The field used to be labelled "Embed URL" and its help text linked YouTube's
