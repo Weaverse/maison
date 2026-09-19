@@ -4,6 +4,7 @@ import {
   Money,
   Pagination,
 } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import type {
   CustomerOrdersFragment,
   OrderItemFragment,
@@ -97,6 +98,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 export default function Orders() {
+  const { t } = useTranslation();
   const { customer } = useLoaderData<{ customer: CustomerOrdersFragment }>();
   const { orders } = customer;
   return (
@@ -109,10 +111,10 @@ export default function Orders() {
         </div>
       ) : (
         <div>
-          <p>You haven&apos;t placed any orders yet.</p>
+          <p>{t("account.noOrders")}</p>
           <br />
           <p>
-            <Link to="/collections">Start Shopping →</Link>
+            <Link to="/collections">{t("account.startShopping")} →</Link>
           </p>
         </div>
       )}
@@ -129,6 +131,8 @@ function PaginatedOrders<NodesType>({
   children: (props: { node: NodesType; index: number }) => React.ReactNode;
   resourcesClassName?: string;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Pagination connection={connection}>
       {({ nodes, isLoading, PreviousLink, NextLink }) => {
@@ -139,7 +143,11 @@ function PaginatedOrders<NodesType>({
         return (
           <div>
             <PreviousLink>
-              {isLoading ? "Loading..." : <span>↑ Load previous</span>}
+              {isLoading ? (
+                t("account.loading")
+              ) : (
+                <span>↑ {t("account.loadPrevious")}</span>
+              )}
             </PreviousLink>
             {resourcesClassName ? (
               <div className={resourcesClassName}>{resourcesMarkup}</div>
@@ -147,7 +155,11 @@ function PaginatedOrders<NodesType>({
               resourcesMarkup
             )}
             <NextLink>
-              {isLoading ? "Loading..." : <span>Load more ↓</span>}
+              {isLoading ? (
+                t("account.loading")
+              ) : (
+                <span>{t("account.loadMore")} ↓</span>
+              )}
             </NextLink>
           </div>
         );
@@ -157,6 +169,7 @@ function PaginatedOrders<NodesType>({
 }
 
 function OrderItem({ order }: { order: OrderItemFragment }) {
+  const { t } = useTranslation();
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
     <>
@@ -168,7 +181,9 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
         <p>{order.financialStatus}</p>
         {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
         <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
+        <Link to={`/account/orders/${btoa(order.id)}`}>
+          {t("account.viewOrder")} →
+        </Link>
       </fieldset>
       <br />
     </>

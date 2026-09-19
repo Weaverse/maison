@@ -1,5 +1,5 @@
 import type { HydrogenComponentProps } from "@weaverse/hydrogen";
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 
 interface CompanyStoryContactData {
   address?: string;
@@ -14,6 +14,7 @@ interface CompanyStoryContactProps
 }
 
 const CompanyStoryContact = (props: CompanyStoryContactProps) => {
+  const { t } = useTranslation();
   const { ref, address, contentBackgroundColor, gap, children, ...rest } =
     props;
 
@@ -40,7 +41,7 @@ const CompanyStoryContact = (props: CompanyStoryContactProps) => {
         <div className="overflow-hidden rounded-sm w-full md:w-1/3 ">
           <iframe
             className="size-full"
-            title="Google map embedded frame"
+            title={t("map.embeddedFrame")}
             src={`https://maps.google.com/maps?t=m&q=${encodeURIComponent(address)}&ie=UTF8&&output=embed`}
             loading="lazy"
           />

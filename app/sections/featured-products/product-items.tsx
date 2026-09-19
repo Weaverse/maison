@@ -1,4 +1,8 @@
-import { createSchema, useParentInstance } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  useParentInstance,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { useState } from "react";
@@ -60,6 +64,7 @@ interface ProductItemsProps
 }
 
 function ProductItems(props: ProductItemsProps) {
+  const { t } = useTranslation();
   const {
     gap,
     ref,
@@ -160,7 +165,7 @@ function ProductItems(props: ProductItemsProps) {
           onClick={handlePrev}
           className={arrowButtonVariants({ arrowsShape })}
           style={{ backgroundColor: arrowsBgColor }}
-          aria-label="Previous product"
+          aria-label={t("carousel.previousProduct")}
         >
           <ArrowLeft />
         </button>
@@ -170,7 +175,7 @@ function ProductItems(props: ProductItemsProps) {
           onClick={handleNext}
           className={arrowButtonVariants({ arrowsShape })}
           style={{ backgroundColor: arrowsBgColor }}
-          aria-label="Next product"
+          aria-label={t("carousel.nextProduct")}
         >
           <ArrowRight />
         </button>

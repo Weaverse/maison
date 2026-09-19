@@ -1,6 +1,8 @@
 // import * as Slider from "@radix-ui/react-slider";
+
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import type { ProductFilter } from "@shopify/hydrogen/storefront-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 // import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
@@ -17,6 +19,7 @@ export function PriceRangeFilter({
 }: {
   collection: CollectionQuery["collection"];
 }) {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -128,8 +131,8 @@ export function PriceRangeFilter({
         <span className="text-line text-sm">$</span>
         <div className="flex shrink items-center gap-2 rounded-lg border border-line bg-gray-50 px-4">
           <VisuallyHidden.Root asChild>
-            <label htmlFor="minPrice" aria-label="Min price">
-              Min price
+            <label htmlFor="minPrice" aria-label={t("collection.minPrice")}>
+              {t("collection.minPrice")}
             </label>
           </VisuallyHidden.Root>
           <input
@@ -137,7 +140,7 @@ export function PriceRangeFilter({
             type="number"
             value={minPrice ?? ""}
             min={minVariantPrice}
-            placeholder="From"
+            placeholder={t("collection.fromPrice")}
             onChange={(e) => {
               const { value } = e.target;
               const newMinPrice = Number.isNaN(Number.parseFloat(value))
@@ -153,7 +156,7 @@ export function PriceRangeFilter({
               type="button"
               onClick={handleIncrementMin}
               className="flex items-center justify-center"
-              aria-label="Increase min price"
+              aria-label={t("collection.increaseMin")}
             >
               <ChevronUp />
             </button>
@@ -161,7 +164,7 @@ export function PriceRangeFilter({
               type="button"
               onClick={handleDecrementMin}
               className="flex items-center justify-center"
-              aria-label="Decrease min price"
+              aria-label={t("collection.decreaseMin")}
             >
               <ChevronDown />
             </button>
@@ -170,8 +173,8 @@ export function PriceRangeFilter({
         <span className="text-line text-sm ml-6">$</span>
         <div className="flex items-center gap-2 rounded-lg border border-line bg-gray-50 px-4">
           <VisuallyHidden.Root asChild>
-            <label htmlFor="maxPrice" aria-label="Max price">
-              Max price
+            <label htmlFor="maxPrice" aria-label={t("collection.maxPrice")}>
+              {t("collection.maxPrice")}
             </label>
           </VisuallyHidden.Root>
           <input
@@ -195,7 +198,7 @@ export function PriceRangeFilter({
               type="button"
               onClick={handleIncrementMax}
               className="flex items-center justify-center"
-              aria-label="Increase max price"
+              aria-label={t("collection.increaseMax")}
             >
               <ChevronUp />
             </button>
@@ -203,7 +206,7 @@ export function PriceRangeFilter({
               type="button"
               onClick={handleDecrementMax}
               className="flex items-center justify-center"
-              aria-label="Decrease max price"
+              aria-label={t("collection.decreaseMax")}
             >
               <ChevronDown />
             </button>

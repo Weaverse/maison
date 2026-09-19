@@ -10,7 +10,7 @@ import {
   type OptimisticCart,
   useOptimisticCart,
 } from "@shopify/hydrogen";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import type {
@@ -21,6 +21,7 @@ import type {
 import { Image } from "~/components/image";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import {
   desktopVariantGrid,
   VARIANT_GRID_TABLET,
@@ -44,6 +45,7 @@ export function VariantRow({
   cart: resolvedCart,
   sellingPlanGroups,
 }: VariantRowProps) {
+  const { t } = useTranslation();
   const { bundleBadgeColor } = useThemeSettings();
 
   const initialCartLine = resolvedCart?.lines?.nodes?.find(
@@ -108,12 +110,12 @@ export function VariantRow({
             <div className="text-sm text-body/70">SKU: {variant.sku}</div>
             {isOutOfStock ? (
               <div className="text-sm text-red-600 font-medium">
-                Out of Stock
+                {t("product.outOfStock")}
               </div>
             ) : isLowStock ? (
               <div className="flex items-center gap-1 text-sm text-orange-600">
                 <InfoIcon size={14} />
-                <span>Low in Stock</span>
+                <span>{t("product.lowInStock")}</span>
               </div>
             ) : (
               <div
@@ -124,7 +126,7 @@ export function VariantRow({
                   className="size-2 rounded-full"
                   style={{ backgroundColor: bundleBadgeColor }}
                 />
-                <span>In Stock</span>
+                <span>{t("search.inStock")}</span>
               </div>
             )}
             <div className="text-sm">
@@ -195,12 +197,12 @@ export function VariantRow({
               <div className="text-base">SKU: {variant.sku}</div>
               {isOutOfStock ? (
                 <div className="font-medium text-[12px] text-red-600">
-                  Out of Stock
+                  {t("product.outOfStock")}
                 </div>
               ) : isLowStock ? (
                 <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
                   <InfoIcon size={14} />
-                  <span>Low in Stock</span>
+                  <span>{t("product.lowInStock")}</span>
                 </div>
               ) : (
                 <div
@@ -211,7 +213,7 @@ export function VariantRow({
                     className="size-1.5 rounded-full"
                     style={{ backgroundColor: bundleBadgeColor }}
                   />
-                  <span>In Stock</span>
+                  <span>{t("search.inStock")}</span>
                 </div>
               )}
             </div>
@@ -263,12 +265,12 @@ export function VariantRow({
             <div className="text-base">SKU: {variant.sku}</div>
             {isOutOfStock ? (
               <div className="font-medium text-[12px] text-red-600">
-                Out of Stock
+                {t("product.outOfStock")}
               </div>
             ) : isLowStock ? (
               <div className="flex items-center gap-1.5 text-[12px] text-orange-600">
                 <InfoIcon size={14} />
-                <span>Low in Stock</span>
+                <span>{t("product.lowInStock")}</span>
               </div>
             ) : (
               <div
@@ -279,7 +281,7 @@ export function VariantRow({
                   className="size-1.5 rounded-full"
                   style={{ backgroundColor: bundleBadgeColor }}
                 />
-                <span>In Stock</span>
+                <span>{t("search.inStock")}</span>
               </div>
             )}
           </div>
@@ -325,6 +327,8 @@ function QuantityUpdateButtons({
   cart: originalCart,
   selectedPlanId,
 }: QuantityUpdateButtonsProps) {
+  const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
   const isOutOfStock = !variant.availableForSale;
@@ -348,7 +352,7 @@ function QuantityUpdateButtons({
   function submitCart(action: string, inputs: Record<string, unknown>) {
     const formData = new FormData();
     formData.append(CartForm.INPUT_NAME, JSON.stringify({ action, inputs }));
-    fetcher.submit(formData, { method: "POST", action: "/cart" });
+    fetcher.submit(formData, { method: "POST", action: cartAction });
   }
 
   // Latest-closure ref: reassigned every render so deferred callers (debounce
@@ -489,7 +493,7 @@ function QuantityUpdateButtons({
       <div className="flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base">
         <button
           type="button"
-          aria-label="Decrease quantity"
+          aria-label={t("product.decreaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
           disabled={displayQuantity <= 0}
           onClick={handleDecrement}
@@ -510,7 +514,7 @@ function QuantityUpdateButtons({
 
         <button
           type="button"
-          aria-label="Increase quantity"
+          aria-label={t("product.increaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
           disabled={isOutOfStock}
           onClick={handleIncrement}
@@ -521,11 +525,11 @@ function QuantityUpdateButtons({
       {showTrashButton ? (
         <button
           type="button"
-          aria-label="Remove from cart"
+          aria-label={t("cart.removeFromCart")}
           className="flex h-4 w-4 items-center justify-center border-none hover:text-red-600 transition"
           onClick={handleRemove}
         >
-          <span className="sr-only">Remove</span>
+          <span className="sr-only">{t("cart.removeItem")}</span>
           <TrashIcon aria-hidden="true" className="h-4 w-4" />
         </button>
       ) : (

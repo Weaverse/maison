@@ -34,9 +34,10 @@ export default function Articles(props: ArticlesProps) {
 
 const BLOG_QUERY = `#graphql
 query BlogSingle(
+    $country: CountryCode
     $language: LanguageCode
     $blogHandle: String!
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     blog(handle: $blogHandle) {
       articles(first: 8) {
         nodes {

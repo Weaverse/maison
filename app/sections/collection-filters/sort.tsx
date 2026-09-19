@@ -1,35 +1,39 @@
 import { CaretDownIcon } from "@phosphor-icons/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { useTranslation } from "@weaverse/hydrogen";
 import { useLocation, useSearchParams } from "react-router";
 import Link from "~/components/link";
 import { cn } from "~/utils/cn";
 import { clearPaginationParams, type SortParam } from "~/utils/filter";
 
-const SORT_LIST: { label: string; key: SortParam }[] = [
-  { label: "Featured", key: "featured" },
+// Labels live as catalogue keys because this array sits outside the
+// component, where the translation hook is not available.
+const SORT_LIST: { labelKey: string; key: SortParam }[] = [
+  { labelKey: "sort.featured", key: "featured" },
   {
-    label: "Relevance",
+    labelKey: "sort.relevance",
     key: "relevance",
   },
   {
-    label: "Price, (low to high)",
+    labelKey: "sort.priceLowHigh",
     key: "price-low-high",
   },
   {
-    label: "Price, (high to low)",
+    labelKey: "sort.priceHighLow",
     key: "price-high-low",
   },
   {
-    label: "Best selling",
+    labelKey: "sort.bestSelling",
     key: "best-selling",
   },
   {
-    label: "Newest",
+    labelKey: "sort.newest",
     key: "newest",
   },
 ];
 
 export function Sort() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const currentSort =
@@ -41,7 +45,8 @@ export function Sort() {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 py-3 text-sm focus-visible:outline-hidden">
         <span>
-          Sort by: <span className="font-semibold">{currentSort.label}</span>
+          {t("collection.sortBy")}{" "}
+          <span className="font-semibold">{t(currentSort.labelKey)}</span>
         </span>
         <CaretDownIcon />
       </DropdownMenu.Trigger>
@@ -61,7 +66,7 @@ export function Sort() {
             } as React.CSSProperties
           }
         >
-          {SORT_LIST.map(({ key, label }) => {
+          {SORT_LIST.map(({ key, labelKey }) => {
             const sortParams = new URLSearchParams(params);
             sortParams.set("sort", key);
             clearPaginationParams(sortParams);
@@ -75,7 +80,7 @@ export function Sort() {
                   )}
                   preventScrollReset
                 >
-                  {label}
+                  {t(labelKey)}
                 </Link>
               </DropdownMenu.Item>
             );

@@ -1,5 +1,6 @@
 import { flattenConnection } from "@shopify/hydrogen";
 import type { FulfillmentStatus } from "@shopify/hydrogen/customer-account-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import type { OrderCardFragment } from "customer-account-api.generated";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
@@ -18,16 +19,18 @@ type OrderCardsProps = {
 };
 
 export function AccountOrderHistory({ orders }: OrderCardsProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <div className="font-bold">Orders</div>
+      <div className="font-bold">{t("account.orders")}</div>
       {orders?.length ? <Orders orders={orders} /> : <EmptyOrders />}
     </div>
   );
 }
 
 function EmptyOrders() {
-  return <div>You haven&apos;t placed any orders yet.</div>;
+  const { t } = useTranslation();
+  return <div>{t("account.noOrders")}</div>;
 }
 
 function Orders({ orders }: OrderCardsProps) {
@@ -41,6 +44,7 @@ function Orders({ orders }: OrderCardsProps) {
 }
 
 function OrderCard({ order }: { order: OrderCardFragment }) {
+  const { t } = useTranslation();
   if (!order?.id) {
     return null;
   }
@@ -60,7 +64,7 @@ function OrderCard({ order }: { order: OrderCardFragment }) {
             width={500}
             height={500}
             className="h-auto max-w-36"
-            alt={lineItems[0].image?.altText ?? "Order image"}
+            alt={lineItems[0].image?.altText ?? t("account.orderImage")}
             src={lineItems[0].image.url}
           />
         </Link>
@@ -76,11 +80,11 @@ function OrderCard({ order }: { order: OrderCardFragment }) {
             : lineItems[0].title}
         </div>
         <dl className="mt-2 flex flex-col">
-          <dt className="sr-only">Order ID</dt>
+          <dt className="sr-only">{t("account.orderId")}</dt>
           <dd>
             <p className="text-body-subtle">Order No. {order.number}</p>
           </dd>
-          <dt className="sr-only">Order Date</dt>
+          <dt className="sr-only">{t("account.orderDate")}</dt>
           <dd>
             <p className="text-body-subtle">
               {new Date(order.processedAt).toDateString()}
@@ -88,7 +92,7 @@ function OrderCard({ order }: { order: OrderCardFragment }) {
           </dd>
           {fulfillmentStatus && (
             <>
-              <dt className="sr-only">Fulfillment Status</dt>
+              <dt className="sr-only">{t("account.fulfillmentStatus")}</dt>
               <dd className="mt-3">
                 <span className="border bg-gray-100 px-2.5 py-1 font-medium text-xs">
                   {ORDER_STATUS[fulfillmentStatus] || fulfillmentStatus}
@@ -102,7 +106,7 @@ function OrderCard({ order }: { order: OrderCardFragment }) {
             variant="underline"
             className="mt-3 w-fit text-body-subtle after:bg-body-subtle"
           >
-            View details
+            {t("account.viewDetails")}
           </Link>
         </dl>
       </div>

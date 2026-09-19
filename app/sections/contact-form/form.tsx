@@ -1,4 +1,8 @@
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
@@ -38,6 +42,7 @@ interface ContactFormProps
 }
 
 const ContactForm = (props: ContactFormProps) => {
+  const { t } = useTranslation();
   const {
     ref,
     gap,
@@ -77,7 +82,7 @@ const ContactForm = (props: ContactFormProps) => {
       >
         <input
           type="text"
-          placeholder="Your name *"
+          placeholder={t("form.nameRequired")}
           className={inputVariants({ borderRadius })}
           style={{
             border: `1px solid ${inputBorderColor}`,
@@ -87,7 +92,7 @@ const ContactForm = (props: ContactFormProps) => {
         />
         <input
           type="text"
-          placeholder="Company name"
+          placeholder={t("form.company")}
           className={inputVariants({ borderRadius })}
           style={{
             border: `1px solid ${inputBorderColor}`,
@@ -103,7 +108,7 @@ const ContactForm = (props: ContactFormProps) => {
       >
         <input
           type="email"
-          placeholder="Contact email*"
+          placeholder={t("form.email")}
           className={inputVariants({ borderRadius })}
           style={{
             border: `1px solid ${inputBorderColor}`,
@@ -113,7 +118,7 @@ const ContactForm = (props: ContactFormProps) => {
         />
         <input
           type="url"
-          placeholder="Website"
+          placeholder={t("form.website")}
           className={inputVariants({ borderRadius })}
           style={{
             border: `1px solid ${inputBorderColor}`,
@@ -126,7 +131,7 @@ const ContactForm = (props: ContactFormProps) => {
       <textarea
         name=""
         id=""
-        placeholder="Message"
+        placeholder={t("form.message")}
         className={`${inputVariants({ borderRadius })} h-[116px] resize-none`}
         style={
           {

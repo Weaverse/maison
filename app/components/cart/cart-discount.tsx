@@ -1,10 +1,12 @@
 import { CircleNotchIcon, TagIcon, XIcon } from "@phosphor-icons/react";
 import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Banner } from "~/components/banner";
 import { Button } from "~/components/button";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts, getDiscountAmount } from "~/utils/cart-discounts";
 
 /**
@@ -19,6 +21,8 @@ export function CartDiscount({
   cart: OptimisticCart<CartApiQueryFragment>;
   canApply: boolean;
 }) {
+  const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const discountCodes = cart?.discountCodes ?? [];
   const money = cart?.cost?.subtotalAmount;
   const { byCode } = getCartDiscounts(cart);
@@ -82,7 +86,7 @@ export function CartDiscount({
           },
         }),
       },
-      { method: "POST", action: "/cart" },
+      { method: "POST", action: cartAction },
     );
   }
 
@@ -91,14 +95,14 @@ export function CartDiscount({
       {canApply && (
         <form onSubmit={handleSubmit} className="flex items-start gap-3">
           <label htmlFor="cart-discount-code" className="sr-only">
-            Promo code
+            {t("cart.promoCode")}
           </label>
           <input
             id="cart-discount-code"
             type="text"
             name="discountCode"
             value={code}
-            placeholder="Promo code"
+            placeholder={t("cart.promoCode")}
             onChange={(event) => setCode(event.target.value)}
             className="min-w-0 grow rounded-(--btn-border-radius) border border-(--color-line) px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
           />
@@ -109,12 +113,12 @@ export function CartDiscount({
             loading={isApplying}
             disabled={isApplying}
           >
-            Apply
+            {t("cart.apply")}
           </Button>
         </form>
       )}
 
-      {rejected && <Banner variant="error">Invalid discount code.</Banner>}
+      {rejected && <Banner variant="error">{t("cart.invalidDiscount")}</Banner>}
 
       {appliedCodes.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -147,7 +151,7 @@ export function CartDiscount({
                   )}
                 </span>
                 <CartForm
-                  route="/cart"
+                  route={cartAction}
                   action={CartForm.ACTIONS.DiscountCodesUpdate}
                   inputs={{ discountCodes: remainingCodes }}
                   fetcherKey="discount-code-remove"
@@ -155,7 +159,9 @@ export function CartDiscount({
                   <button
                     type="submit"
                     className="relative size-3.5 transition-colors hover:text-red-600"
-                    aria-label={`Remove discount code ${discount.code}`}
+                    aria-label={t("cart.removeDiscount", {
+                      code: discount.code,
+                    })}
                     onClick={() => setRemovingCode(discount.code)}
                   >
                     {isRemoving ? (

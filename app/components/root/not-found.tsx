@@ -1,3 +1,4 @@
+import { useTranslation } from "@weaverse/hydrogen";
 import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { BreadCrumb } from "~/components/breadcrumb";
@@ -9,6 +10,7 @@ import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { FeaturedData } from "~/routes/($locale).api.featured-items";
 
 export function NotFound({ type = "page" }: { type?: string }) {
+  const { t } = useTranslation();
   return (
     <Section width="fixed" verticalPadding="medium">
       <div className="flex flex-col items-center justify-center gap-10 py-20 lg:py-32 translate-y-[-10%]">
@@ -23,7 +25,7 @@ export function NotFound({ type = "page" }: { type?: string }) {
         </div>
         <div className="">
           <Link variant="secondary" to="/">
-            Visit Homepage
+            {t("notFound.visitHomepage")}
           </Link>
         </div>
       </div>
@@ -33,6 +35,7 @@ export function NotFound({ type = "page" }: { type?: string }) {
 }
 
 export function FeaturedProducts() {
+  const { t } = useTranslation();
   const { load, data } = useFetcher<FeaturedData>();
   const api = usePrefixPathWithLocale("/api/featured-items");
 
@@ -49,7 +52,7 @@ export function FeaturedProducts() {
 
   return (
     <div className="space-y-8 pt-20">
-      <h5>Featured products</h5>
+      <h5>{t("notFound.featuredProducts")}</h5>
       <Swimlane className="gap-4">
         {featuredProducts.nodes.map((product) => (
           <ProductCard

@@ -1,6 +1,7 @@
 import { CaretRightIcon, ListIcon, XIcon } from "@phosphor-icons/react";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import * as Dialog from "@radix-ui/react-dialog";
+import { useTranslation } from "@weaverse/hydrogen";
 import Link from "~/components/link";
 import { ScrollArea } from "~/components/scroll-area";
 import { useShopMenu } from "~/hooks/use-shop-menu";
@@ -8,6 +9,7 @@ import type { SingleMenuItem } from "~/types/menu";
 import { cn } from "~/utils/cn";
 
 export function MobileMenu() {
+  const { t } = useTranslation();
   const { headerMenu } = useShopMenu();
 
   if (!headerMenu) {
@@ -30,7 +32,9 @@ export function MobileMenu() {
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <Dialog.Title asChild>
-            <div className="px-4 py-4 font-semibold text-sm">MENU</div>
+            <div className="px-4 py-4 font-semibold text-sm">
+              {t("navigation.menu")}
+            </div>
           </Dialog.Title>
           <Dialog.Close asChild>
             <XIcon className="fixed top-[26px] right-4 h-5 w-5" />

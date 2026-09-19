@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useLoaderData } from "react-router";
 import type { CollectionQuery } from "storefront-api.generated";
@@ -35,6 +35,7 @@ interface CollectionFiltersProps extends SectionProps, CollectionFiltersData {
 }
 
 export default function CollectionFilters(props: CollectionFiltersProps) {
+  const { t } = useTranslation();
   const {
     ref,
     showBreadcrumb,
@@ -105,7 +106,7 @@ export default function CollectionFilters(props: CollectionFiltersProps) {
                 className="sticky flex h-[calc(100vh-var(--height-nav)-20px)] flex-col gap-4 overflow-y-auto pr-2"
                 style={{ top: "calc(var(--height-nav))" }}
               >
-                <div className="font-bold">Filters</div>
+                <div className="font-bold">{t("collection.filters")}</div>
                 <Filters />
               </div>
             </div>

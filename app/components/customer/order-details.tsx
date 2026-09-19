@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, TagIcon } from "@phosphor-icons/react";
 import { Money } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useLoaderData } from "react-router";
 import { Image } from "~/components/image";
@@ -9,6 +10,7 @@ import type { loader as orderDetailsLoader } from "~/routes/($locale).account.or
 import { ORDER_STATUS } from "./orders";
 
 export function OrderDetails() {
+  const { t } = useTranslation();
   const { order, lineItems, fulfillmentStatus } =
     useLoaderData<typeof orderDetailsLoader>();
 
@@ -29,14 +31,14 @@ export function OrderDetails() {
     <Section width="fixed" verticalPadding="medium">
       <div className="w-full lg:py-6">
         <div className="mb-8 flex flex-col gap-4">
-          <h1 className="h4 font-medium">Order Detail</h1>
+          <h1 className="h4 font-medium">{t("account.orderDetail")}</h1>
           <Link
             to="/account"
             className="w-fit items-center gap-2 text-body-subtle after:bg-body-subtle"
             variant="underline"
           >
             <ArrowLeftIcon className="h-4 w-4" />
-            <span>Return to My Account</span>
+            <span>{t("account.returnToAccount")}</span>
           </Link>
         </div>
         <div>
@@ -62,18 +64,18 @@ export function OrderDetails() {
                       </div>
                     )}
                     <dl className="flex flex-col">
-                      <dt className="sr-only">Product</dt>
+                      <dt className="sr-only">{t("account.product")}</dt>
                       <dd className="truncate">
                         <div className="">{lineItem.title}</div>
                         <div className="text-body-subtle text-sm">
                           {lineItem.variantTitle}
                         </div>
                       </dd>
-                      <dt className="sr-only">Quantity</dt>
+                      <dt className="sr-only">{t("account.quantity")}</dt>
                       <dd className="mt-1 grow truncate">
                         x{lineItem.quantity}
                       </dd>
-                      <dt className="sr-only">Discount</dt>
+                      <dt className="sr-only">{t("account.discount")}</dt>
                       <dd className="flex flex-wrap gap-2 truncate">
                         {lineItem.discountAllocations.map((discount, index) => {
                           const discountApp =
@@ -95,7 +97,7 @@ export function OrderDetails() {
                           );
                         })}
                       </dd>
-                      <dt className="sr-only">Current Price</dt>
+                      <dt className="sr-only">{t("account.currentPrice")}</dt>
                       <dd className="mt-2 flex gap-2 truncate">
                         {hasDiscount && (
                           <span className="text-body-subtle line-through">
@@ -111,26 +113,26 @@ export function OrderDetails() {
               <hr className="border-line-subtle border-t" />
               <div className="ml-auto space-y-4">
                 <div className="flex justify-between gap-4">
-                  <span className="font-bold">Subtotal</span>
+                  <span className="font-bold">{t("account.subtotal")}</span>
                   <span>
                     <Money data={order.subtotal} />
                   </span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span>Tax</span>
+                  <span>{t("account.tax")}</span>
                   <span>
                     <Money data={order.totalTax} />
                   </span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span>Shipping</span>
+                  <span>{t("account.shipping")}</span>
                   <span>
                     <Money data={order.totalShipping} />
                   </span>
                 </div>
                 <hr className="border-line-subtle border-t pb-2" />
                 <div className="flex justify-between gap-4">
-                  <span className="font-bold">Total</span>
+                  <span className="font-bold">{t("account.total")}</span>
                   <span className="text-xl">
                     <Money data={order.totalPrice} />
                   </span>
@@ -139,7 +141,7 @@ export function OrderDetails() {
                   <div className="flex items-center gap-2">
                     <TagIcon className="h-4 w-4" />
                     <span className="font-bold text-sm uppercase leading-none">
-                      Total savings
+                      {t("account.totalSavings")}
                     </span>
                   </div>
                   <span>
@@ -149,7 +151,7 @@ export function OrderDetails() {
               </div>
             </div>
             <div className="mt-4 shrink-0 pt-10 md:m-0 md:border-none md:pt-0">
-              <div className="font-bold">Shipping Address</div>
+              <div className="font-bold">{t("account.shippingAddress")}</div>
               {order?.shippingAddress ? (
                 <ul className="mt-3">
                   <li>{order.shippingAddress.name}</li>
@@ -162,9 +164,9 @@ export function OrderDetails() {
                     : null}
                 </ul>
               ) : (
-                <p className="mt-3">No shipping address defined</p>
+                <p className="mt-3">{t("account.noShippingAddress")}</p>
               )}
-              <div className="mt-6 font-bold">Status</div>
+              <div className="mt-6 font-bold">{t("account.status")}</div>
               {fulfillmentStatus && (
                 <div
                   className={clsx(

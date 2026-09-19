@@ -2,6 +2,7 @@ import type {
   Product,
   ProductSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useId, useMemo } from "react";
 import { useFetcher } from "react-router";
@@ -87,6 +88,7 @@ function CartBestSellersContent({
   count: CartBestSellersProps["count"];
   products: Product[] | undefined;
 }) {
+  const { t } = useTranslation();
   const id = useId();
 
   if (!products) {
@@ -103,7 +105,7 @@ function CartBestSellersContent({
   }
 
   if (products?.length === 0) {
-    return <div>No products found.</div>;
+    return <div>{t("cart.noProducts")}</div>;
   }
 
   return products

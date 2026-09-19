@@ -1,7 +1,7 @@
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
@@ -19,6 +19,7 @@ export let toggleSearchDrawer = (_open: boolean) => {
 };
 
 export function PredictiveSearchButton() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const params = useParams();
@@ -44,13 +45,13 @@ export function PredictiveSearchButton() {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between gap-2 px-5 pb-6">
             <Dialog.Title asChild className="text-base">
-              <span className="font-medium">Search</span>
+              <span className="font-medium">{t("search.label")}</span>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"
                 className="p-2"
-                aria-label="Close search drawer"
+                aria-label={t("search.closeDrawer")}
               >
                 <XIcon className="h-5 w-5" />
               </button>
@@ -74,6 +75,7 @@ export function PredictiveSearchButton() {
 }
 
 function AnimatedSearchDrawer({ open, children }) {
+  const { t } = useTranslation();
   return (
     <Dialog.Portal forceMount>
       <AnimatePresence>
@@ -115,6 +117,7 @@ function AnimatedSearchDrawer({ open, children }) {
 }
 
 function SearchContent({ fetchResults, inputRef, params }) {
+  const { t } = useTranslation();
   const { results } = usePredictiveSearch();
   const queries = results?.find(({ type }) => type === "queries");
   const suggestions = queries?.items || [];
@@ -139,7 +142,7 @@ function SearchContent({ fetchResults, inputRef, params }) {
                 }
               }
             }}
-            placeholder="Search"
+            placeholder={t("search.label")}
             ref={inputRef}
             autoComplete="off"
             className="h-full w-full bg-transparent py-3 text-sm focus-visible:outline-hidden"
@@ -177,6 +180,7 @@ function SearchContent({ fetchResults, inputRef, params }) {
 }
 
 function PredictiveSearchResults() {
+  const { t } = useTranslation();
   const { results, totalResults, searchTerm } = usePredictiveSearch();
   const [activeTab, setActiveTab] = useState("products");
   const params = useParams();
@@ -189,7 +193,7 @@ function PredictiveSearchResults() {
     return (
       <div className="flex items-center justify-center px-5 py-8">
         <p className="text-sm text-gray-500">
-          No results found for <q>{searchTerm.current}</q>
+          {t("search.noResultsFor")} <q>{searchTerm.current}</q>
         </p>
       </div>
     );
@@ -206,7 +210,7 @@ function PredictiveSearchResults() {
   ].filter((tab) => tab.items?.length > 0);
 
   const currentTab =
-    tabs.find((t) => t.value === activeTab)?.value ?? tabs[0]?.value;
+    tabs.find((tab) => tab.value === activeTab)?.value ?? tabs[0]?.value;
 
   return (
     <Tabs.Root value={currentTab} onValueChange={setActiveTab}>
@@ -237,7 +241,7 @@ function PredictiveSearchResults() {
               to={`${params.locale ? `/${params.locale}` : ""}/search?q=${encodeURIComponent(searchTerm.current)}`}
               className="mt-6 block w-full rounded-sm bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
             >
-              See All Results
+              {t("search.seeAll")}
             </Link>
           </div>
         </Tabs.Content>
@@ -267,6 +271,7 @@ function ProductResultItem({
 }: {
   item: NormalizedPredictiveSearchResultItem;
 }) {
+  const { t } = useTranslation();
   if (item.__typename !== "Product") {
     return null;
   }
@@ -297,7 +302,7 @@ function ProductResultItem({
         )}
         <p className="flex items-center gap-1 text-xs text-green-600">
           <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
-          In Stock
+          {t("search.inStock")}
         </p>
       </div>
     </Link>
@@ -309,6 +314,7 @@ function CollectionResultItem({
 }: {
   item: NormalizedPredictiveSearchResultItem;
 }) {
+  const { t } = useTranslation();
   if (item.__typename !== "Collection") {
     return null;
   }

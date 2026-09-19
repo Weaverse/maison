@@ -10,10 +10,12 @@ import {
   CART_MUTATION_FRAGMENT,
   CART_QUERY_FRAGMENT,
 } from "~/graphql/cart-fragments";
-import type { I18nLocale } from "~/types/locale";
-import { COUNTRIES } from "~/utils/const";
+import {
+  getRequestI18n,
+  loadStoreLocalization,
+} from "~/utils/localization.server";
 import { components } from "~/weaverse/components";
-import { themeSchema } from "~/weaverse/schema.server";
+import { getThemeSchema } from "~/weaverse/schema.server";
 
 const additionalContext = {} as const;
 
@@ -45,7 +47,7 @@ export async function createHydrogenRouterContext(
       cache,
       waitUntil,
       session,
-      i18n: getLocaleFromRequest(request),
+      i18n: getRequestI18n(request),
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
         mutateFragment: CART_MUTATION_FRAGMENT,
@@ -57,19 +59,26 @@ export async function createHydrogenRouterContext(
     additionalContext,
   );
 
+  // Shopify Markets decides what is live; the theme decides what it has a
+  // catalog for. This needs the Storefront client, so it runs after the
+  // context exists rather than inside it.
+  const localization = await loadStoreLocalization(
+    hydrogenContext.storefront,
+    request,
+  );
+
   const weaverse = new WeaverseClient({
     ...hydrogenContext,
     request,
     cache,
-    themeSchema,
+    themeSchema: getThemeSchema(localization),
     components,
   });
 
-  // Add weaverse directly to the hydrogenContext instance
-  // This preserves the RouterContextProvider class instance
-  Object.assign(hydrogenContext, { weaverse });
-
-  return hydrogenContext;
+  // `Object.assign` mutates and returns the same instance, so returning it
+  // directly keeps the RouterContextProvider intact while letting the added
+  // properties reach the context type.
+  return Object.assign(hydrogenContext, { weaverse, localization });
 }
 
 class AppSession implements HydrogenSession {
@@ -130,20 +139,4 @@ class AppSession implements HydrogenSession {
     this.isPending = false;
     return this.#sessionStorage.commitSession(this.#session);
   }
-}
-
-function getLocaleFromRequest(request: Request): I18nLocale {
-  const url = new URL(request.url);
-  let firstPathPart = `/${url.pathname.substring(1).split("/")[0].toLowerCase()}`;
-  firstPathPart = firstPathPart.replace(".data", "");
-
-  return COUNTRIES[firstPathPart]
-    ? {
-        ...COUNTRIES[firstPathPart],
-        pathPrefix: firstPathPart,
-      }
-    : {
-        ...COUNTRIES.default,
-        pathPrefix: "",
-      };
 }

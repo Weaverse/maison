@@ -1,6 +1,7 @@
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { useTranslation } from "@weaverse/hydrogen";
 import { clsx } from "clsx";
 import Link from "~/components/link";
 
@@ -11,6 +12,7 @@ export function OutletModal({
   children: React.ReactNode;
   cancelLink: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog.Root defaultOpen>
       <Dialog.Portal>
@@ -34,14 +36,14 @@ export function OutletModal({
         >
           <div className="relative w-[500px] max-w-[90vw] bg-(--color-background) px-6 py-3">
             <VisuallyHidden.Root asChild>
-              <Dialog.Title>Account modal</Dialog.Title>
+              <Dialog.Title>{t("account.modalTitle")}</Dialog.Title>
             </VisuallyHidden.Root>
             {children}
             <Dialog.Close asChild>
               <Link
                 to={cancelLink}
                 className="absolute top-5 right-4 p-2"
-                aria-label="Close account modal"
+                aria-label={t("account.closeModal")}
               >
                 <XIcon className="h-4 w-4" />
               </Link>

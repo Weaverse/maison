@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 import { useLoaderData } from "react-router";
 import type { PageDetailsQuery } from "storefront-api.generated";
 import { Link } from "~/components/link";
@@ -9,6 +9,7 @@ interface PageProps extends SectionProps {
 }
 
 export default function Page(props: PageProps) {
+  const { t } = useTranslation();
   const { ref, ...rest } = props;
   const { page } = useLoaderData<PageDetailsQuery>();
 
@@ -17,10 +18,10 @@ export default function Page(props: PageProps) {
       <Section ref={ref} {...rest}>
         <div className="mb-4 flex items-center justify-center gap-2 text-body-subtle">
           <Link to="/" className="underline-offset-4 hover:underline">
-            Home
+            {t("navigation.home")}
           </Link>
           <span>/</span>
-          <span>pages</span>
+          <span>{t("search.pages")}</span>
           <span>/</span>
           <span>{page.title}</span>
         </div>

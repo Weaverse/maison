@@ -1,7 +1,7 @@
 import { HandbagSimpleIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Await, useFetcher, useRouteLoaderData } from "react-router";
@@ -9,6 +9,8 @@ import type { ProductQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
+import { useSelectedLocale } from "~/hooks/use-locale";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { RootLoader } from "~/root";
 import {
   VARIANT_GRID_DESKTOP,
@@ -17,6 +19,7 @@ import {
 } from "~/sections/variant-list/grid";
 import { Subtotal } from "~/sections/variant-list/subtotal";
 import { VariantRow } from "~/sections/variant-list/variant-row";
+import { formatNumber } from "~/utils/locale";
 
 interface QuickViewData {
   product: NonNullable<ProductQuery["product"]>;
@@ -29,6 +32,8 @@ export function QuickShop({
   data: QuickViewData;
   panelType?: "modal" | "drawer";
 }) {
+  const locale = useSelectedLocale();
+  const { t } = useTranslation();
   const { bundleBadgeColor } = useThemeSettings();
   const { product } = data || {};
   const rootData = useRouteLoaderData<RootLoader>("root");
@@ -43,10 +48,10 @@ export function QuickShop({
   const currencyCode = priceRange?.minVariantPrice?.currencyCode || "USD";
 
   const formatPrice = (amount: string) => {
-    return new Intl.NumberFormat("en-US", {
+    return formatNumber(Number.parseFloat(amount), locale, {
       style: "currency",
       currency: currencyCode,
-    }).format(Number.parseFloat(amount));
+    });
   };
 
   return (
@@ -68,7 +73,7 @@ export function QuickShop({
               {product.title}
             </h3>
             <div className="flex items-center gap-2 text-body-subtle">
-              <span className="text-sm">From</span>
+              <span className="text-sm">{t("product.from")}</span>
               <span>
                 {minPrice === maxPrice
                   ? formatPrice(minPrice)
@@ -80,7 +85,9 @@ export function QuickShop({
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: bundleBadgeColor }}
               />
-              <span className="text-xs text-body-subtle">In Stock</span>
+              <span className="text-xs text-body-subtle">
+                {t("search.inStock")}
+              </span>
             </div>
           </div>
           <Link
@@ -89,7 +96,7 @@ export function QuickShop({
             variant="underline"
             className="w-fit text-sm text-body-subtle"
           >
-            View full details
+            {t("product.viewFullDetails")}
           </Link>
         </div>
       </div>
@@ -99,7 +106,7 @@ export function QuickShop({
           {/* mobile header */}
           <div className="border-b border-line-subtle py-3 md:hidden">
             <div className="text-sm font-semibold uppercase text-body-subtle">
-              Products
+              {t("product.products")}
             </div>
           </div>
           {/* tablet header — same template as `VariantRow`'s tablet grid. */}
@@ -109,12 +116,14 @@ export function QuickShop({
               VARIANT_GRID_TABLET,
             )}
           >
-            <div className="font-semibold text-base uppercase">Variant</div>
+            <div className="font-semibold text-base uppercase">
+              {t("product.variant")}
+            </div>
             <div className="font-semibold text-base uppercase text-center">
-              Price
+              {t("product.price")}
             </div>
             <div className="font-semibold text-base uppercase text-right">
-              Variant Price
+              {t("product.variantPrice")}
             </div>
           </div>
 
@@ -126,18 +135,20 @@ export function QuickShop({
                 VARIANT_GRID_DESKTOP,
               )}
             >
-              <div className="font-semibold text-base uppercase">Variant</div>
-              <div className="font-semibold text-base uppercase text-center">
-                Purchase Method
+              <div className="font-semibold text-base uppercase">
+                {t("product.variant")}
               </div>
               <div className="font-semibold text-base uppercase text-center">
-                Quantity
+                {t("product.purchaseMethod")}
               </div>
               <div className="font-semibold text-base uppercase text-center">
-                Price
+                {t("product.quantity")}
+              </div>
+              <div className="font-semibold text-base uppercase text-center">
+                {t("product.price")}
               </div>
               <div className="font-semibold text-base uppercase text-right">
-                Variant Price
+                {t("product.variantPrice")}
               </div>
             </div>
           ) : (
@@ -147,15 +158,17 @@ export function QuickShop({
                 VARIANT_GRID_DESKTOP_COMPACT,
               )}
             >
-              <div className="font-semibold text-base uppercase">Variant</div>
-              <div className="font-semibold text-base uppercase text-center">
-                Quantity
+              <div className="font-semibold text-base uppercase">
+                {t("product.variant")}
               </div>
               <div className="font-semibold text-base uppercase text-center">
-                Price
+                {t("product.quantity")}
+              </div>
+              <div className="font-semibold text-base uppercase text-center">
+                {t("product.price")}
               </div>
               <div className="font-semibold text-base uppercase text-right">
-                Variant Price
+                {t("product.variantPrice")}
               </div>
             </div>
           )}
@@ -192,7 +205,7 @@ export function QuickShopTrigger({
   productHandle,
   showOnHover = true,
   buttonType = "icon",
-  buttonText = "Quick shop",
+  buttonText,
   placement = "image",
 }: {
   productHandle: string;
@@ -201,6 +214,10 @@ export function QuickShopTrigger({
   buttonText?: string;
   placement?: "image" | "bottom";
 }) {
+  const { t } = useTranslation();
+  // Explicit text (if a caller ever passes one) wins; otherwise the label
+  // comes from the catalogue, like every other translatable string.
+  const triggerLabel = buttonText || t("product.selectOptions");
   const [open, setOpen] = useState(false);
   const { load, data, state } = useFetcher<{
     product: ProductQuery["product"];
@@ -216,12 +233,20 @@ export function QuickShopTrigger({
     }
   }, [data, isFetching]);
 
+  // Fetch through the locale-prefixed path: the product API prices the
+  // variants in the market the request resolves to, so an unprefixed
+  // load answers in the default market's currency regardless of the
+  // page the dialog was opened from.
+  const productApiPath = usePrefixPathWithLocale(
+    `/api/product/${productHandle}`,
+  );
+
   const handleOpen = () => {
     if (data?.product) {
       setOpen(true);
     } else {
       setIsFetching(true);
-      load(`/api/product/${productHandle}`);
+      load(productApiPath);
     }
   };
 
@@ -249,11 +274,11 @@ export function QuickShopTrigger({
           <>
             <HandbagSimpleIcon size={16} className="h-4 w-4" />
             <span className="w-0 overflow-hidden pl-0 text-base transition-all group-hover/quick-shop:w-9.5 group-hover/quick-shop:pl-2">
-              Add
+              {t("product.add")}
             </span>
           </>
         ) : (
-          <span className="px-2">{buttonText}</span>
+          <span className="px-2">{triggerLabel}</span>
         )}
       </Button>
       <Dialog.Portal>
@@ -296,7 +321,7 @@ export function QuickShopTrigger({
             )}
           >
             <VisuallyHidden.Root asChild>
-              <Dialog.Title>Quick shop modal</Dialog.Title>
+              <Dialog.Title>{t("product.quickShopModal")}</Dialog.Title>
             </VisuallyHidden.Root>
             {data?.product && <QuickShop data={data as QuickViewData} />}
           </div>

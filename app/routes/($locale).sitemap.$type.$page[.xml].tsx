@@ -10,7 +10,7 @@ export async function loader({
     storefront,
     request,
     params,
-    locales: ["EN-US", "EN-CA", "FR-CA"],
+    locales: ["EN-US", "EN-CA", "FR-CA", "VI-VN"],
     getLink: ({ type, baseUrl, handle, locale }) => {
       if (!locale) {
         return `${baseUrl}/${type}/${handle}`;

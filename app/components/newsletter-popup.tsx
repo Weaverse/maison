@@ -1,7 +1,7 @@
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useState } from "react";
 import { useFetcher, useLocation, useRouteLoaderData } from "react-router";
 import { Button } from "~/components/button";
@@ -33,14 +33,12 @@ export function useShouldRenderNewsletterPopup() {
 }
 
 export function NewsletterPopup() {
+  const { t } = useTranslation();
   const {
     newsletterPopupDelay,
     newsletterPopupAllowDismiss,
     newsletterPopupImage,
     newsletterPopupImagePosition = "left",
-    newsletterPopupHeading,
-    newsletterPopupDescription,
-    newsletterPopupButtonText,
     newsletterPopupPosition = "center",
   } = useThemeSettings();
 
@@ -49,10 +47,10 @@ export function NewsletterPopup() {
   const isDesignMode = useWeaverseStudioCheck();
 
   // Compute message and error from fetcher data
-  const message = fetcher.data?.ok ? "Thank you for signing up! 🎉" : "";
+  const message = fetcher.data?.ok ? t("newsletter.success") : "";
   const error =
     fetcher.data && !fetcher.data.ok
-      ? fetcher.data.error || "An error occurred while signing up."
+      ? fetcher.data.error || t("newsletter.error")
       : "";
 
   // Close popup after successful submission
@@ -91,9 +89,6 @@ export function NewsletterPopup() {
     newsletterPopupAllowDismiss,
     newsletterPopupImage,
     newsletterPopupImagePosition,
-    newsletterPopupHeading,
-    newsletterPopupDescription,
-    newsletterPopupButtonText,
     newsletterPopupPosition,
   ]);
 
@@ -136,13 +131,13 @@ export function NewsletterPopup() {
               <button
                 type="button"
                 className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur transition-colors hover:bg-gray-100 focus-visible:outline-0"
-                aria-label="Close"
+                aria-label={t("accessibility.close")}
               >
                 <XIcon size={16} />
               </button>
             </Dialog.Close>
             <VisuallyHidden.Root asChild>
-              <Dialog.Title>Newsletter Signup</Dialog.Title>
+              <Dialog.Title>{t("newsletter.title")}</Dialog.Title>
             </VisuallyHidden.Root>
 
             <div
@@ -181,10 +176,10 @@ export function NewsletterPopup() {
                 )}
               >
                 <h3 className="mb-4 font-semibold text-2xl">
-                  {newsletterPopupHeading}
+                  {t("newsletter.popup.heading")}
                 </h3>
                 <p className="mb-6 text-body-subtle">
-                  {newsletterPopupDescription}
+                  {t("newsletter.popup.description")}
                 </p>
 
                 <fetcher.Form
@@ -197,7 +192,7 @@ export function NewsletterPopup() {
                     name="email"
                     type="email"
                     required
-                    placeholder="Enter your email"
+                    placeholder={t("newsletter.emailPlaceholder")}
                     className="w-full border border-gray-300 px-4 py-2.5 focus:border-gray-500 focus:outline-hidden rounded"
                   />
                   <Button
@@ -205,7 +200,7 @@ export function NewsletterPopup() {
                     className="w-full"
                     loading={fetcher.state === "submitting"}
                   >
-                    {newsletterPopupButtonText}
+                    {t("newsletter.popup.buttonText")}
                   </Button>
                 </fetcher.Form>
 
@@ -229,7 +224,7 @@ export function NewsletterPopup() {
                     }}
                     className="mt-4 text-body-subtle text-sm underline underline-offset-4 hover:text-body"
                   >
-                    Don't show this again
+                    {t("newsletter.dismiss")}
                   </button>
                 )}
               </div>
