@@ -227,5 +227,16 @@ export function getCanonicalLocaleRedirect(
     return null;
   }
 
-  return `${stripLocalePrefix(url.pathname)}${url.search}`;
+  // `//evil.com` is a protocol-relative URL, not a path: resolving it against
+  // our own origin hands back someone else's, which would turn this redirect
+  // into an open one. Only hand back a destination that stayed here.
+  const destination = new URL(
+    `${stripLocalePrefix(url.pathname)}${url.search}`,
+    url.origin,
+  );
+  if (destination.origin !== url.origin) {
+    return null;
+  }
+
+  return `${destination.pathname}${destination.search}`;
 }

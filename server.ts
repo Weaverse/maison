@@ -27,7 +27,10 @@ export default {
         hydrogenContext.localization,
       );
       if (localeRedirect) {
-        return Response.redirect(new URL(localeRedirect, request.url), 302);
+        // Build against the request's own origin rather than its full URL, so
+        // the destination cannot be talked into pointing somewhere else.
+        const { origin } = new URL(request.url);
+        return Response.redirect(new URL(localeRedirect, origin), 302);
       }
 
       /**
