@@ -13,12 +13,8 @@ export function FreeShippingProgressBar({
   className,
 }: FreeShippingProgressBarProps) {
   const { t } = useTranslation();
-  const {
-    enableFreeShippingProgressBar,
-    freeShippingThreshold,
-    freeShippingProgressMessage,
-    freeShippingSuccessMessage,
-  } = useThemeSettings();
+  const { enableFreeShippingProgressBar, freeShippingThreshold } =
+    useThemeSettings();
 
   if (!(enableFreeShippingProgressBar && freeShippingThreshold)) {
     return null;
@@ -32,17 +28,11 @@ export function FreeShippingProgressBar({
   const progress = Math.min(100, (subtotalAmount / threshold) * 100);
   const hasReachedFreeShipping = remaining <= 0;
 
-  const getMessage = () => {
-    if (hasReachedFreeShipping) {
-      return freeShippingSuccessMessage || t("cart.freeShippingReached");
-    }
-
-    const message =
-      freeShippingProgressMessage || t("cart.freeShippingProgress");
-    return message;
-  };
-
-  const message = getMessage();
+  // Both strings are edited per locale through `translation-key` settings, so
+  // they come from the catalogue rather than a shared theme setting.
+  const message = hasReachedFreeShipping
+    ? t("cart.freeShippingReached")
+    : t("cart.freeShippingProgress");
 
   return (
     <div className={clsx("space-y-2", className)}>
