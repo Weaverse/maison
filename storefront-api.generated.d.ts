@@ -2652,6 +2652,33 @@ export type SearchQuery = {
   };
 };
 
+export type SitemapBlogsQueryVariables = StorefrontAPI.Exact<{
+  first: StorefrontAPI.Scalars['Int']['input'];
+  after?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']['input']>;
+}>;
+
+export type SitemapBlogsQuery = {
+  blogs: {
+    nodes: Array<Pick<StorefrontAPI.Blog, 'handle'>>;
+    pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage' | 'endCursor'>;
+  };
+};
+
+export type SitemapBlogArticlesQueryVariables = StorefrontAPI.Exact<{
+  blogHandle: StorefrontAPI.Scalars['String']['input'];
+  first: StorefrontAPI.Scalars['Int']['input'];
+  after?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']['input']>;
+}>;
+
+export type SitemapBlogArticlesQuery = {
+  blog?: StorefrontAPI.Maybe<{
+    articles: {
+      nodes: Array<Pick<StorefrontAPI.Article, 'handle' | 'publishedAt'>>;
+      pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage' | 'endCursor'>;
+    };
+  }>;
+};
+
 export type StoreRobotsQueryVariables = StorefrontAPI.Exact<{
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
@@ -4071,6 +4098,14 @@ interface GeneratedQueryTypes {
   '#graphql\n  query search(\n    $buyer: BuyerInput\n    $country: CountryCode\n    $endCursor: String\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $searchTerm: String!\n    $startCursor: String\n    $filters: [ProductFilter!]\n    $sortKey: SearchSortKeys\n    $reverse: Boolean\n  ) @inContext(buyer: $buyer, country: $country, language: $language) {\n      search(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor,\n        sortKey: $sortKey,\n        reverse: $reverse,\n        query: $searchTerm\n        productFilters: $filters\n        types: [PRODUCT]\n      ) {\n        productFilters {\n          id\n          label\n          type\n          values {\n            id\n            label\n            count\n            input\n          }\n        }\n        nodes {\n          ... on Product {\n             ...ProductCard\n          }\n        }\n        pageInfo {\n          startCursor\n          endCursor\n          hasNextPage\n          hasPreviousPage\n        }\n        totalCount\n      }\n      lowestPriceProduct: search(\n        first: 1\n        sortKey: PRICE\n        reverse: false\n        query: $searchTerm\n        productFilters: $filters\n        types: [PRODUCT]\n      ) {\n        nodes {\n           ... on Product {\n              priceRange {\n                minVariantPrice {\n                  amount\n                  currencyCode\n                }\n              }\n           }\n        }\n      }\n      highestPriceProduct: search(\n        first: 1\n        sortKey: PRICE\n        reverse: true\n        query: $searchTerm\n        productFilters: $filters\n        types: [PRODUCT]\n      ) {\n         nodes {\n           ... on Product {\n              priceRange {\n                maxVariantPrice {\n                  amount\n                  currencyCode\n                }\n              }\n           }\n        }\n      }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    title\n    publishedAt\n    handle\n    vendor\n    tags\n    images(first: 50) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    options {\n      ...ProductOption\n    }\n    badges: metafields(identifiers: [\n      { namespace: "custom", key: "best_seller" }\n    ]) {\n      key\n      namespace\n      value\n    }\n    priceRange {\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    selectedOrFirstAvailableVariant(\n      selectedOptions: []\n      ignoreUnknownOptions: true\n      caseInsensitiveMatch: true\n    ) {\n      ...ProductVariant\n    }\n    # Check if the product is a bundle\n    isBundle: selectedOrFirstAvailableVariant(ignoreUnknownOptions: true, selectedOptions: { name: "", value: ""}) {\n      ...on ProductVariant {\n        requiresComponents\n      }\n    }\n  }\n  #graphql\n  fragment ProductOption on ProductOption {\n    name\n    optionValues {\n      name\n      firstSelectableVariant {\n        ...ProductVariant\n      }\n      swatch {\n        color\n        image {\n          previewImage {\n            url\n            altText\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    id\n    availableForSale\n    quantityAvailable\n    quantityRule {\n          increment\n          maximum\n          minimum\n        }\n        quantityPriceBreaks (first: 10) {\n          nodes {\n            price {\n              amount\n              currencyCode\n            }\n            minimumQuantity\n          }\n        }\n    selectedOptions {\n      name\n      value\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    requiresComponents\n    components(first: 10) {\n      nodes {\n        productVariant {\n          id\n          title\n          product {\n            handle\n          }\n        }\n        quantity\n      }\n    }\n    groupedBy(first: 10) {\n      nodes {\n        id\n        title\n        product {\n          handle\n        }\n      }\n    }\n  }\n\n\n\n': {
     return: SearchQuery;
     variables: SearchQueryVariables;
+  };
+  '#graphql\n  query SitemapBlogs($first: Int!, $after: String) {\n    blogs(first: $first, after: $after) {\n      nodes {\n        handle\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n': {
+    return: SitemapBlogsQuery;
+    variables: SitemapBlogsQueryVariables;
+  };
+  '#graphql\n  query SitemapBlogArticles(\n    $blogHandle: String!\n    $first: Int!\n    $after: String\n  ) {\n    blog(handle: $blogHandle) {\n      articles(\n        first: $first\n        after: $after\n        sortKey: PUBLISHED_AT\n        reverse: true\n      ) {\n        nodes {\n          handle\n          publishedAt\n        }\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n      }\n    }\n  }\n': {
+    return: SitemapBlogArticlesQuery;
+    variables: SitemapBlogArticlesQueryVariables;
   };
   '#graphql\n  query StoreRobots($country: CountryCode, $language: LanguageCode)\n   @inContext(country: $country, language: $language) {\n    shop {\n      id\n    }\n  }\n': {
     return: StoreRobotsQuery;
