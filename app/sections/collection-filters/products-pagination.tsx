@@ -1,5 +1,6 @@
 import { FunnelXIcon, XIcon } from "@phosphor-icons/react";
 import { Pagination } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -33,6 +34,7 @@ export function ProductsPagination({
   loadPrevText: string;
   loadMoreText: string;
 }) {
+  const { t } = useTranslation();
   const { collection, appliedFilters } = useLoaderData<
     CollectionQuery & {
       collections: Array<{ handle: string; title: string }>;
@@ -69,10 +71,10 @@ export function ProductsPagination({
             <Link
               to={pathname}
               variant="underline"
-              aria-label="Clear all applied filters"
+              aria-label={t("collection.clearAllLabel")}
               preventScrollReset
             >
-              Clear all filters
+              {t("collection.clearAll")}
             </Link>
           ) : null}
         </div>
@@ -125,7 +127,7 @@ export function ProductsPagination({
       ) : (
         <div className="flex flex-col items-center justify-center gap-3 pt-20">
           <FunnelXIcon size={50} weight="light" />
-          <div className="text-lg">No products matched your filters.</div>
+          <div className="text-lg">{t("collection.noProductsMatched")}</div>
         </div>
       )}
     </div>

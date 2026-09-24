@@ -2,6 +2,7 @@ import { CheckIcon } from "@phosphor-icons/react";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import * as Dialog from "@radix-ui/react-dialog";
 import { flattenConnection } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import {
   Form,
@@ -15,6 +16,7 @@ import Link from "~/components/link";
 import type { AccountOutletContext } from "~/routes/($locale).account.edit";
 
 export function AccountEditAddressForm() {
+  const { t } = useTranslation();
   const { id: addressId } = useParams();
   const isNewAddress = addressId === "add";
   const actionData = useActionData<{ formError?: string }>();
@@ -35,7 +37,7 @@ export function AccountEditAddressForm() {
   return (
     <div className="space-y-2">
       <div className="py-2.5 text-xl">
-        {isNewAddress ? "Add new address" : "Edit address"}
+        {isNewAddress ? t("account.newAddress") : t("account.editAddress")}
       </div>
       <Form method="post" className="space-y-3">
         <input
@@ -55,8 +57,8 @@ export function AccountEditAddressForm() {
           required
           type="text"
           autoComplete="given-name"
-          placeholder="First name"
-          aria-label="First name"
+          placeholder={t("account.firstName")}
+          aria-label={t("account.firstName")}
           defaultValue={address?.firstName ?? ""}
         />
         <input
@@ -66,8 +68,8 @@ export function AccountEditAddressForm() {
           required
           type="text"
           autoComplete="family-name"
-          placeholder="Last name"
-          aria-label="Last name"
+          placeholder={t("account.lastName")}
+          aria-label={t("account.lastName")}
           defaultValue={address?.lastName ?? ""}
         />
         <input
@@ -76,8 +78,8 @@ export function AccountEditAddressForm() {
           name="company"
           type="text"
           autoComplete="organization"
-          placeholder="Company"
-          aria-label="Company"
+          placeholder={t("account.company")}
+          aria-label={t("account.company")}
           defaultValue={address?.company ?? ""}
         />
         <input
@@ -86,9 +88,9 @@ export function AccountEditAddressForm() {
           name="address1"
           type="text"
           autoComplete="address-line1"
-          placeholder="Address line 1*"
+          placeholder={t("account.address1")}
           required
-          aria-label="Address line 1"
+          aria-label={t("account.address1")}
           defaultValue={address?.address1 ?? ""}
         />
         <input
@@ -97,8 +99,8 @@ export function AccountEditAddressForm() {
           name="address2"
           type="text"
           autoComplete="address-line2"
-          placeholder="Address line 2"
-          aria-label="Address line 2"
+          placeholder={t("account.address2")}
+          aria-label={t("account.address2")}
           defaultValue={address?.address2 ?? ""}
         />
         <input
@@ -108,8 +110,8 @@ export function AccountEditAddressForm() {
           type="text"
           required
           autoComplete="address-level2"
-          placeholder="City"
-          aria-label="City"
+          placeholder={t("account.city")}
+          aria-label={t("account.city")}
           defaultValue={address?.city ?? ""}
         />
         <input
@@ -118,9 +120,9 @@ export function AccountEditAddressForm() {
           name="zoneCode"
           type="text"
           autoComplete="address-level1"
-          placeholder="State / Province (zoneCode)"
+          placeholder={t("account.province")}
           required
-          aria-label="State / Province (zoneCode)"
+          aria-label={t("account.province")}
           defaultValue={address?.zoneCode ?? ""}
         />
         <input
@@ -129,9 +131,9 @@ export function AccountEditAddressForm() {
           name="zip"
           type="text"
           autoComplete="postal-code"
-          placeholder="Zip / Postal Code"
+          placeholder={t("account.zip")}
           required
-          aria-label="Zip"
+          aria-label={t("account.zip")}
           defaultValue={address?.zip ?? ""}
         />
         <input
@@ -140,9 +142,9 @@ export function AccountEditAddressForm() {
           name="territoryCode"
           type="text"
           autoComplete="country"
-          placeholder="Country (Territory) Code"
+          placeholder={t("account.countryCode")}
           required
-          aria-label="Country (Territory) Code"
+          aria-label={t("account.countryCode")}
           defaultValue={address?.territoryCode ?? ""}
         />
         <input
@@ -151,8 +153,8 @@ export function AccountEditAddressForm() {
           name="phoneNumber"
           type="tel"
           autoComplete="tel"
-          placeholder="Phone"
-          aria-label="Phone"
+          placeholder={t("account.phoneShort")}
+          aria-label={t("account.phoneShort")}
           defaultValue={address?.phoneNumber ?? ""}
         />
         <div className="flex items-center gap-2.5">
@@ -170,7 +172,7 @@ export function AccountEditAddressForm() {
               <CheckIcon className="h-4 w-4" weight="regular" />
             </Checkbox.Indicator>
           </Checkbox.Root>
-          <label htmlFor="defaultAddress">Set as default address</label>
+          <label htmlFor="defaultAddress">{t("account.setDefault")}</label>
         </div>
         <div className="flex items-center justify-end gap-6">
           <Dialog.Close asChild>
@@ -178,7 +180,7 @@ export function AccountEditAddressForm() {
               to="/account/address"
               className="underline-offset-4 hover:underline"
             >
-              Cancel
+              {t("account.cancel")}
             </Link>
           </Dialog.Close>
           <Button

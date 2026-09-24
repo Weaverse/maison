@@ -1,5 +1,6 @@
 import { ArrowLeft, CircleNotchIcon, TagIcon, X } from "@phosphor-icons/react";
 import { Image } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import type { SubscriptionsContractsQueryQuery } from "customer-account-api.generated";
 import {
   type ActionFunctionArgs,
@@ -15,7 +16,9 @@ import { Button } from "~/components/button";
 import { Section } from "~/components/section";
 import { SUBSCRIPTION_CANCEL_MUTATION } from "~/graphql/customer-account/CustomerSubscriptionsMutations.account";
 import { SUBSCRIPTIONS_CONTRACTS_QUERY } from "~/graphql/customer-account/CustomerSubscriptionsQuery.account";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import { routeHeaders } from "~/utils/cache";
+import { formatDate } from "~/utils/locale";
 
 export const headers = routeHeaders;
 
@@ -67,14 +70,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
   return data({ success: true });
 }
 
-function getIntervalLabel(interval: string, count: number): string {
-  const intervalLabels: Record<string, string> = {
-    DAY: count === 1 ? "day" : "days",
-    WEEK: count === 1 ? "week" : "weeks",
-    MONTH: count === 1 ? "month" : "months",
-    YEAR: count === 1 ? "year" : "years",
-  };
-  return `${count} ${intervalLabels[interval] || interval.toLowerCase()}`;
+/**
+ * Weaverse's `t()` only substitutes `{{vars}}` — it has no plural selection —
+ * so singular and plural are separate keys and the choice is made here.
+ */
+const INTERVAL_KEYS: Record<string, [singular: string, plural: string]> = {
+  DAY: ["account.intervalDay", "account.intervalDays"],
+  WEEK: ["account.intervalWeek", "account.intervalWeeks"],
+  MONTH: ["account.intervalMonth", "account.intervalMonths"],
+  YEAR: ["account.intervalYear", "account.intervalYears"],
+};
+
+const STATUS_KEYS: Record<string, string> = {
+  ACTIVE: "account.statusActive",
+  PAUSED: "account.statusPaused",
+  CANCELLED: "account.statusCancelled",
+};
+
+function getIntervalLabel(
+  interval: string,
+  count: number,
+  t: (key: string, variables?: Record<string, string | number>) => string,
+): string {
+  const keys = INTERVAL_KEYS[interval];
+  if (!keys) {
+    return `${count} ${interval.toLowerCase()}`;
+  }
+  return t(count === 1 ? keys[0] : keys[1], { count });
 }
 
 function getStatusBadgeClass(status: string): string {
@@ -91,6 +113,8 @@ function getStatusBadgeClass(status: string): string {
 }
 
 export default function AccountSubscriptions() {
+  const locale = useSelectedLocale();
+  const { t } = useTranslation();
   const { subscriptions } = useLoaderData<LoaderData>();
   const actionData = useActionData<{ error?: string; success?: boolean }>();
   const navigation = useNavigation();
@@ -107,15 +131,13 @@ export default function AccountSubscriptions() {
           className="flex items-center gap-2 text-body-subtle hover:text-body transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
-          <span>Back to Account</span>
+          <span>{t("account.backToAccount")}</span>
         </Link>
       </div>
 
       <div className="space-y-2">
-        <h1 className="h3 font-medium">My Subscriptions</h1>
-        <p className="text-body-subtle">
-          Manage your active subscriptions and recurring orders.
-        </p>
+        <h1 className="h3 font-medium">{t("account.mySubscriptions")}</h1>
+        <p className="text-body-subtle">{t("account.subscriptionsIntro")}</p>
       </div>
 
       {actionData?.error && (
@@ -126,7 +148,7 @@ export default function AccountSubscriptions() {
 
       {actionData?.success && (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-sm">
-          Subscription cancelled successfully.
+          {t("account.subscriptionCancelled")}
         </div>
       )}
 
@@ -136,14 +158,15 @@ export default function AccountSubscriptions() {
             <CircleNotchIcon className="w-8 h-8 text-body-subtle" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-medium">No active subscriptions</h3>
+            <h3 className="text-lg font-medium">
+              {t("account.noSubscriptions")}
+            </h3>
             <p className="text-body-subtle max-w-md mx-auto">
-              You don't have any active subscriptions yet. Subscribe to your
-              favorite products to get regular deliveries and savings.
+              {t("account.noSubscriptionsNote")}
             </p>
           </div>
           <Link to="/products">
-            <Button>Start Shopping</Button>
+            <Button>{t("account.startShopping")}</Button>
           </Link>
         </div>
       ) : (
@@ -157,26 +180,30 @@ export default function AccountSubscriptions() {
               <div className="p-5 border-b border-line-subtle bg-gray-50/50 flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <div className="text-xs text-body-subtle font-medium uppercase tracking-wider">
-                    Status
+                    {t("account.status")}
                   </div>
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${getStatusBadgeClass(
                       subscription.status,
                     )}`}
                   >
-                    {subscription.status}
+                    {STATUS_KEYS[subscription.status]
+                      ? t(STATUS_KEYS[subscription.status])
+                      : subscription.status}
                   </span>
                 </div>
                 <div className="text-right space-y-1">
                   <div className="text-xs text-body-subtle font-medium uppercase tracking-wider">
-                    Frequency
+                    {t("account.frequency")}
                   </div>
                   <div className="text-sm font-medium">
-                    Every{" "}
-                    {getIntervalLabel(
-                      subscription.billingPolicy.interval,
-                      subscription.billingPolicy.intervalCount.count,
-                    )}
+                    {t("account.frequencyEvery", {
+                      interval: getIntervalLabel(
+                        subscription.billingPolicy.interval,
+                        subscription.billingPolicy.intervalCount.count,
+                        t,
+                      ),
+                    })}
                   </div>
                 </div>
               </div>
@@ -186,7 +213,7 @@ export default function AccountSubscriptions() {
                 {/* Products */}
                 <div className="space-y-3">
                   <h4 className="text-xs text-body-subtle font-medium uppercase tracking-wider">
-                    Product
+                    {t("account.product")}
                   </h4>
                   <ul className="space-y-3">
                     {subscription.lines.nodes.map((line) => (
@@ -214,11 +241,11 @@ export default function AccountSubscriptions() {
                 <div className="pt-2 space-y-3">
                   {subscription.nextBillingDate && (
                     <div className="flex justify-between items-baseline text-sm">
-                      <span className="text-body-subtle">Next Billing</span>
+                      <span className="text-body-subtle">
+                        {t("account.nextBilling")}
+                      </span>
                       <span className="font-semibold">
-                        {new Date(
-                          subscription.nextBillingDate,
-                        ).toLocaleDateString(undefined, {
+                        {formatDate(subscription.nextBillingDate, locale, {
                           year: "numeric",
                           month: "short",
                           day: "numeric",
@@ -227,16 +254,15 @@ export default function AccountSubscriptions() {
                     </div>
                   )}
                   <div className="flex justify-between items-baseline text-sm">
-                    <span className="text-body-subtle">Started</span>
+                    <span className="text-body-subtle">
+                      {t("account.started")}
+                    </span>
                     <span>
-                      {new Date(subscription.createdAt).toLocaleDateString(
-                        undefined,
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        },
-                      )}
+                      {formatDate(subscription.createdAt, locale, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                 </div>
@@ -288,7 +314,7 @@ export default function AccountSubscriptions() {
                       )}
                       {navigation.state === "submitting"
                         ? "Cancelling..."
-                        : "Cancel Subscription"}
+                        : t("account.cancelSubscription")}
                     </Button>
                   </Form>
                 </div>

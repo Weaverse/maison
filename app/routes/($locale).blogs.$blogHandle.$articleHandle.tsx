@@ -86,10 +86,11 @@ export default function Article() {
 
 const ARTICLE_QUERY = `#graphql
   query article(
+    $country: CountryCode
     $language: LanguageCode
     $blogHandle: String!
     $articleHandle: String!
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     blog(handle: $blogHandle) {
       title
       handle

@@ -6,13 +6,14 @@ import {
 } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts } from "~/utils/cart-discounts";
 import {
   DiscountDialog,
@@ -31,6 +32,8 @@ export function CartSummary({
   cart: OptimisticCart<CartApiQueryFragment>;
   layout: Layouts;
 }) {
+  const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const {
     enableCartNote,
     cartNoteButtonText,
@@ -95,10 +98,10 @@ export function CartSummary({
     >
       {layout === "page" ? (
         <div className="grid gap-6">
-          <h2 className="font-semibold text-base">Order Summary</h2>
+          <h2 className="font-semibold text-base">{t("cart.orderSummary")}</h2>
           <div className="h-px w-full bg-line-subtle" />
           <dl className="flex items-start gap-2.5 text-base leading-none">
-            <dt className="min-w-0 grow">Subtotal</dt>
+            <dt className="min-w-0 grow">{t("cart.subtotal")}</dt>
             <dd className="shrink-0 whitespace-nowrap">
               {isCartUpdating ? (
                 <Skeleton className="h-4 w-20 rounded" />
@@ -111,7 +114,7 @@ export function CartSummary({
           </dl>
           {discountTotal > 0 && cost?.subtotalAmount && (
             <dl className="flex items-start gap-2.5 text-base leading-none">
-              <dt className="min-w-0 grow">Discount</dt>
+              <dt className="min-w-0 grow">{t("cart.discount")}</dt>
               <dd className="shrink-0 whitespace-nowrap">
                 {isCartUpdating ? (
                   <Skeleton className="h-4 w-20 rounded" />
@@ -132,11 +135,11 @@ export function CartSummary({
             </dl>
           )}
           <p className="text-base text-body-subtle/80 leading-[1.6]">
-            Shipping and taxes will be calculated at checkout.
+            {t("cart.taxNote")}
           </p>
           <div className="h-px w-full bg-line-subtle" />
           <dl className="flex items-start gap-2.5 font-semibold text-base leading-[1.6]">
-            <dt className="min-w-0 grow">Total</dt>
+            <dt className="min-w-0 grow">{t("cart.total")}</dt>
             <dd className="shrink-0 whitespace-nowrap">
               {isCartUpdating ? (
                 <Skeleton className="h-4 w-20 rounded" />
@@ -150,11 +153,13 @@ export function CartSummary({
         </div>
       ) : (
         <>
-          <h2 className="sr-only">Order Summary</h2>
+          <h2 className="sr-only">{t("cart.orderSummary")}</h2>
           <div className="grid gap-3">
             <dl className="grid gap-2.5 text-sm">
               <div className="flex items-center justify-between">
-                <dt className="font-semibold text-base uppercase">Subtotal</dt>
+                <dt className="font-semibold text-base uppercase">
+                  {t("cart.subtotal")}
+                </dt>
                 {isCartUpdating ? (
                   <Skeleton className="h-4 w-20 rounded" />
                 ) : (
@@ -175,9 +180,7 @@ export function CartSummary({
                 )}
               </div>
             </dl>
-            <p className="text-body-subtle/80 text-sm">
-              Shipping and taxes will be calculated at checkout.
-            </p>
+            <p className="text-body-subtle/80 text-sm">{t("cart.taxNote")}</p>
           </div>
         </>
       )}
@@ -203,7 +206,7 @@ export function CartSummary({
                   </span>
                 </div>
                 <CartForm
-                  route="/cart"
+                  route={cartAction}
                   action={CartForm.ACTIONS.GiftCardCodesRemove}
                   inputs={{
                     giftCardCodes: [giftCard.id],
@@ -255,7 +258,7 @@ export function CartSummary({
                   <TagIcon className="h-4.5 w-4.5" aria-hidden="true" />
                   <span className="leading-normal">{discount.code}</span>
                   <CartForm
-                    route="/cart"
+                    route={cartAction}
                     action={CartForm.ACTIONS.DiscountCodesUpdate}
                     inputs={{ discountCodes: updatedCodes || [] }}
                     fetcherKey="discount-code-remove"

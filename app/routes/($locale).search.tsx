@@ -17,7 +17,7 @@ import type {
   ProductFilter,
   SearchSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { clsx } from "clsx";
 import { Suspense, useEffect, useState } from "react";
 import type { LoaderFunctionArgs, MetaArgs } from "react-router";
@@ -191,6 +191,7 @@ export const meta = ({ matches }: MetaArgs<typeof loader>) => {
 };
 
 export default function Search() {
+  const { t } = useTranslation();
   const { searchTerm, products, recommendations } =
     useLoaderData<typeof loader>();
   const [searchKey, setSearchKey] = useState(searchTerm);
@@ -218,7 +219,7 @@ export default function Search() {
           value={searchKey}
           onChange={(e) => setSearchKey(e.target.value)}
           name="q"
-          placeholder="Search our store..."
+          placeholder={t("search.placeholder")}
           type="search"
         />
         <button
@@ -300,6 +301,7 @@ function SearchFilterToolbar() {
 }
 
 function SearchFiltersDrawer() {
+  const { t } = useTranslation();
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
@@ -309,7 +311,7 @@ function SearchFiltersDrawer() {
           animate={false}
         >
           <SlidersIcon size={18} />
-          <span>Filter</span>
+          <span>{t("collection.filter")}</span>
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -327,13 +329,13 @@ function SearchFiltersDrawer() {
         >
           <div className="flex items-center justify-between gap-2 px-4 py-3">
             <Dialog.Title asChild className="py-2.5 font-bold">
-              <span>Filters</span>
+              <span>{t("collection.filters")}</span>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"
                 className="translate-x-2 p-2"
-                aria-label="Close filters drawer"
+                aria-label={t("collection.closeFilters")}
               >
                 <XIcon className="h-4 w-4" />
               </button>
@@ -345,7 +347,7 @@ function SearchFiltersDrawer() {
           <div className="border-line-subtle border-t px-4 py-4 md:hidden">
             <Dialog.Close asChild>
               <Button className="w-full" variant="primary">
-                Apply Filters
+                {t("collection.applyFilters")}
               </Button>
             </Dialog.Close>
           </div>
@@ -432,6 +434,7 @@ function SearchFilters({ className }: { className?: string }) {
 }
 
 function PopularKeywords() {
+  const { t } = useTranslation();
   const { popularSearchKeywords } = useThemeSettings();
   if (!popularSearchKeywords?.length) {
     return null;
@@ -443,7 +446,7 @@ function PopularKeywords() {
 
   return (
     <div className="mb-8 flex flex-wrap items-center justify-center gap-1 text-body-subtle">
-      <span>Popular searches:</span>
+      <span>{t("search.popular")}</span>
       {popularKeywords.map((search, ind) => (
         <span key={search} className="inline-flex items-center">
           <Link
@@ -466,6 +469,7 @@ function NoResults({
   searchTerm: string;
   recommendations: Promise<null | FeaturedData>;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       {searchTerm && (
@@ -485,7 +489,7 @@ function NoResults({
             const { featuredProducts } = data;
             return (
               <div className="space-y-6 pt-20">
-                <h5>Trending Products</h5>
+                <h5>{t("search.trending")}</h5>
                 <Swimlane className="gap-4">
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard

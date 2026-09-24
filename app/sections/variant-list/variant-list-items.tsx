@@ -9,6 +9,7 @@ import {
   getClientBrowserParameters,
   sendShopifyAnalytics,
 } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useMemo } from "react";
 import type { FetcherWithComponents } from "react-router";
 import { Await, useMatches, useRouteLoaderData } from "react-router";
@@ -18,6 +19,7 @@ import type {
 } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
@@ -41,6 +43,7 @@ interface VariantQuantity {
 }
 
 export function VariantListItems({ variants, product }: VariantListItemsProps) {
+  const { t } = useTranslation();
   const rootData = useRouteLoaderData<RootLoader>("root");
   const sellingPlanGroups = product.sellingPlanGroups || { nodes: [] };
 
@@ -51,7 +54,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
           {/* mobile layout */}
           <div className="space-y-6 md:hidden">
             <div className="border-b border-line-subtle py-3">
-              <p className="font-semibold text-sm">PRODUCTS</p>
+              <p className="font-semibold text-sm">{t("product.products")}</p>
             </div>
             <div className="space-y-6">
               {variants.map((variant) => (
@@ -88,13 +91,13 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                 )}
               >
                 <div className="font-semibold text-base text-body-subtle uppercase">
-                  Variant
+                  {t("product.variant")}
                 </div>
                 <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                  Price
+                  {t("product.price")}
                 </div>
                 <div className="font-semibold text-base text-body-subtle uppercase text-right">
-                  Variant Price
+                  {t("product.variantPrice")}
                 </div>
               </div>
               <div className="space-y-6">
@@ -127,19 +130,19 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                   )}
                 >
                   <div className="font-semibold text-base text-body-subtle uppercase">
-                    Variant
+                    {t("product.variant")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    Purchase Method
+                    {t("product.purchaseMethod")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    Quantity
+                    {t("product.quantity")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    Price
+                    {t("product.price")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-right">
-                    Variant Price
+                    {t("product.variantPrice")}
                   </div>
                 </div>
               ) : (
@@ -150,16 +153,16 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                   )}
                 >
                   <div className="font-semibold text-base text-body-subtle uppercase">
-                    Variant
+                    {t("product.variant")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    Quantity
+                    {t("product.quantity")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    Price
+                    {t("product.price")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-right">
-                    Variant Price
+                    {t("product.variantPrice")}
                   </div>
                 </div>
               )}
@@ -259,9 +262,11 @@ function AddToCartAnalytics({
 }
 
 function AddAllToCartButton({ lines }: { lines: OptimisticCartLineInput[] }) {
+  const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   return (
     <CartForm
-      route="/cart"
+      route={cartAction}
       inputs={{ lines }}
       action={CartForm.ACTIONS.LinesAdd}
     >
@@ -274,7 +279,7 @@ function AddAllToCartButton({ lines }: { lines: OptimisticCartLineInput[] }) {
               disabled={fetcher.state !== "idle"}
               onClick={() => toggleCartDrawer(true)}
             >
-              View Cart
+              {t("cart.viewCart")}
             </Button>
           </AddToCartAnalytics>
         );

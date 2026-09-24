@@ -4,6 +4,7 @@ import {
   flattenConnection,
   generateCacheControlHeader,
 } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import type {
   CustomerDetailsFragment,
   CustomerDetailsQuery,
@@ -56,11 +57,10 @@ export async function loader({ context }: LoaderFunctionArgs) {
   }
 
   const customer = d?.customer;
-  const heading = customer ? "My Account" : "Account Details";
   const featuredData = getFeaturedData(context.storefront);
 
   return data(
-    { customer, heading, featuredData },
+    { customer, featuredData },
     { headers: { "Cache-Control": generateCacheControlHeader(CacheNone()) } },
   );
 }
@@ -98,10 +98,12 @@ export default function Authenticated() {
 interface AccountType {
   customer: CustomerDetailsFragment;
   featuredData: Promise<FeaturedData>;
-  heading: string;
 }
 
-function Account({ customer, heading, featuredData }: AccountType) {
+function Account({ customer, featuredData }: AccountType) {
+  const { t } = useTranslation();
+  // `customer` is guaranteed by the loader, which logs out when it is missing.
+  const heading = customer ? t("account.myAccount") : t("account.details");
   const orders = flattenConnection(customer.orders);
   const addresses = flattenConnection(customer.addresses);
 
@@ -120,7 +122,7 @@ function Account({ customer, heading, featuredData }: AccountType) {
           >
             <SignOutIcon className="h-4 w-4" />
             <span className="underline-offset-4 group-hover:underline">
-              Sign out
+              {t("account.signOut")}
             </span>
           </button>
         </Form>
@@ -137,7 +139,7 @@ function Account({ customer, heading, featuredData }: AccountType) {
           >
             {({ featuredProducts }) => (
               <div className="space-y-8 pt-20">
-                <h5>Featured products</h5>
+                <h5>{t("notFound.featuredProducts")}</h5>
                 <Swimlane className="gap-4">
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard

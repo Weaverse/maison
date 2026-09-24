@@ -1,6 +1,7 @@
 import { FileTextIcon } from "@phosphor-icons/react";
 import type { SeoConfig } from "@shopify/hydrogen";
 import { getSeoMeta } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import type { PoliciesIndexQuery } from "storefront-api.generated";
@@ -46,12 +47,13 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function Policies() {
+  const { t } = useTranslation();
   const { policies } = useLoaderData<typeof loader>();
 
   return (
     <Section width="fixed" verticalPadding="medium">
-      <BreadCrumb page="Policies" className="mb-4" />
-      <h4 className="mb-8 font-medium lg:mb-20">Policies</h4>
+      <BreadCrumb page={t("system.policies")} className="mb-4" />
+      <h4 className="mb-8 font-medium lg:mb-20">{t("system.policies")}</h4>
       <div className="flex flex-col gap-3">
         {policies.map((policy) => {
           if (policy) {

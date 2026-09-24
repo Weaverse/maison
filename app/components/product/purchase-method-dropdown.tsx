@@ -1,4 +1,5 @@
 import { CaretDown } from "@phosphor-icons/react";
+import { useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useRef, useState } from "react";
 import type { SellingPlanGroupFragment } from "storefront-api.generated";
 import { cn } from "~/utils/cn";
@@ -20,6 +21,7 @@ export function PurchaseMethodDropdown({
   onPlanChange,
   disabled = false,
 }: PurchaseMethodDropdownProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +53,7 @@ export function PurchaseMethodDropdown({
 
   const displayText = selectedPlan
     ? formatSellingPlanName(selectedPlan)
-    : "One time purchase";
+    : t("product.oneTimePurchase");
 
   return (
     <div ref={dropdownRef} className="relative w-full">
@@ -88,7 +90,7 @@ export function PurchaseMethodDropdown({
                 role="option"
                 aria-selected={!selectedPlanId}
               >
-                One time purchase
+                {t("product.oneTimePurchase")}
               </button>
             </li>
 

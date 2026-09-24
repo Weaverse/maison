@@ -10,7 +10,7 @@ import type {
 } from "@shopify/hydrogen";
 import type { WeaverseClient } from "@weaverse/hydrogen";
 import type { createHydrogenRouterContext } from "./app/.server/context";
-import type { I18nLocale } from "./app/types/locale";
+import type { I18nLocale, StoreLocalization } from "./app/types/locale";
 
 declare global {
   /**
@@ -45,6 +45,8 @@ declare module "react-router" {
       i18n: I18nLocale;
     };
     weaverse: WeaverseClient;
+    /** Locales this request may serve, resolved from Shopify Markets. */
+    localization: StoreLocalization;
     additionalContext: HydrogenAdditionalContext;
   }
 

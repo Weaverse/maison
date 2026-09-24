@@ -1,4 +1,8 @@
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
@@ -27,14 +31,15 @@ function formatRatingText(text: string, rating: number, totalReviews: number) {
 }
 
 export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
+  const { t } = useTranslation();
   const {
     ref,
     productHandle,
     onClickEvent = "do-nothing",
     sectionId,
     ratingText = "{{rating}}/5 - ({{total_reviews}} reviews)",
-    noReviewsText = "No reviews",
-    errorText = "Unable to load reviews",
+    noReviewsText,
+    errorText,
     ...rest
   } = props;
 
@@ -108,7 +113,7 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
     return (
       <div {...rest} ref={ref}>
         <div className={clsx("text-gray-500", !errorText && "hidden")}>
-          {errorText}
+          {errorText || t("product.reviewsUnavailable")}
         </div>
       </div>
     );
@@ -143,7 +148,7 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
                 data.averageRating,
                 data.totalReviews,
               )
-            : noReviewsText}
+            : noReviewsText || t("product.noReviews")}
         </span>
       </div>
     </div>

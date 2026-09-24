@@ -1,80 +1,39 @@
-import type { I18nLocale, Localizations } from "~/types/locale";
+import type { I18nLocale } from "~/types/locale";
 
-export const COUNTRIES: Localizations = {
-  default: {
-    label: "United States (USD $)",
-    language: "EN",
-    country: "US",
-    currency: "USD",
-  },
-  "/en-au": {
-    label: "Australia (AUD $)",
-    language: "EN",
-    country: "AU",
-    currency: "AUD",
-  },
-  "/en-ca": {
-    label: "Canada (CAD $)",
-    language: "EN",
-    country: "CA",
-    currency: "CAD",
-  },
-  "/en-cn": {
-    label: "China (CNY ¥)",
-    language: "EN",
-    country: "CN",
-    currency: "CNY",
-  },
-  "/en-de": {
-    label: "Germany (EUR €)",
-    language: "EN",
-    country: "DE",
-    currency: "EUR",
-  },
-  "/en-es": {
-    label: "Spain (EUR €)",
-    language: "EN",
-    country: "ES",
-    currency: "EUR",
-  },
-  "/en-fr": {
-    label: "France (EUR €)",
-    language: "EN",
-    country: "FR",
-    currency: "EUR",
-  },
-  "/en-gb": {
-    label: "United Kingdom (GBP £)",
-    language: "EN",
-    country: "GB",
-    currency: "GBP",
-  },
-  "/en-it": {
-    label: "Italy (EUR €)",
-    language: "EN",
-    country: "IT",
-    currency: "EUR",
-  },
-  "/en-jp": {
-    label: "Japan (JPY ¥)",
-    language: "EN",
-    country: "JP",
-    currency: "JPY",
-  },
+/**
+ * Canada is the store's default market and is served from the unprefixed root.
+ */
+export const DEFAULT_LOCALE: I18nLocale = Object.freeze({
+  label: "Canada · English · USD",
+  language: "EN",
+  country: "CA",
+  currency: "USD",
+  pathPrefix: "",
+  countryName: "Canada",
+  languageName: "English",
+});
 
-  "/en-nl": {
-    label: "Netherlands (EUR €)",
-    language: "EN",
-    country: "NL",
-    currency: "EUR",
-  },
-  "/en-vn": {
-    label: "Vietnam (VND ₫)",
-    language: "EN",
-    country: "VN",
-    currency: "VND",
-  },
-};
+export const VIETNAM_LOCALE: I18nLocale = Object.freeze({
+  label: "Việt Nam · Tiếng Việt · VND",
+  language: "VI",
+  country: "VN",
+  currency: "VND",
+  pathPrefix: "/vi-vn",
+  countryName: "Việt Nam",
+  languageName: "Tiếng Việt",
+});
+
+/**
+ * Only publish locales whose storefront translation catalog is complete.
+ * Shopify Markets must also have the locale live before it reaches the
+ * production selector — `loadStoreLocalization` intersects this list with what
+ * Shopify actually serves. Add a locale here only once its UI catalog and
+ * locale navigation have been checked.
+ */
+export const SUPPORTED_LOCALES: readonly I18nLocale[] = Object.freeze([
+  DEFAULT_LOCALE,
+  VIETNAM_LOCALE,
+]);
 
 export const PAGINATION_SIZE = 16;
 
@@ -88,8 +47,3 @@ export const PAGINATION_SIZE = 16;
  * two different numbers.
  */
 export const COLLECTION_PRODUCT_COUNT_LIMIT = 250;
-
-export const DEFAULT_LOCALE: I18nLocale = Object.freeze({
-  ...COUNTRIES.default,
-  pathPrefix: "",
-});

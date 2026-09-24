@@ -2,6 +2,7 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
+  useTranslation,
 } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useLoaderData } from "react-router";
@@ -51,6 +52,7 @@ interface RelatedArticlesItemsProps
 }
 
 function RelatedArticlesItems(props: RelatedArticlesItemsProps) {
+  const { t } = useTranslation();
   const {
     ref,
     gap,
@@ -91,10 +93,12 @@ function RelatedArticlesItems(props: RelatedArticlesItemsProps) {
               />
             </div>
             <div className="flex flex-col gap-4">
-              <h6 className="text-2xl leading-8 font-normal">Title here</h6>
+              <h6 className="text-2xl leading-8 font-normal">
+                {t("blog.titlePlaceholder")}
+              </h6>
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm text-body-subtle">
-                <span className="text-sm">Date here —</span>
-                <span className="text-sm">Author here</span>
+                <span className="text-sm">{t("blog.datePlaceholder")} —</span>
+                <span className="text-sm">{t("blog.authorPlaceholder")}</span>
               </div>
             </div>
           </div>

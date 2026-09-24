@@ -1,6 +1,7 @@
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm } from "@shopify/hydrogen";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
@@ -8,11 +9,14 @@ import type {
   CustomerCompanyLocation,
   CustomerCompanyLocationConnection,
 } from "~/graphql/customer-locations-query.account";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { useB2BLocation } from "./b2b-location-provider";
 
 const B2B_UPDATE_KEY = "b2b-location-update";
 
 export function B2BLocationSelector() {
+  const { t } = useTranslation();
+  const cartAction = usePrefixPathWithLocale("/cart");
   const { company, modalOpen, setModalOpen, companyLocationId } =
     useB2BLocation();
   const fetcher = useFetcher({ key: B2B_UPDATE_KEY });
@@ -70,7 +74,7 @@ export function B2BLocationSelector() {
             <div className="flex w-full items-start gap-4 bg-[#EBEAE5] px-10 py-4">
               <div className="flex min-w-0 flex-1 items-start py-2.5">
                 <Dialog.Title className="whitespace-nowrap font-semibold text-base text-body leading-none tracking-[0.28px]">
-                  Select company location
+                  {t("b2b.selectLocation")}
                 </Dialog.Title>
               </div>
               <div className="flex items-center self-stretch">
@@ -78,7 +82,7 @@ export function B2BLocationSelector() {
                   type="button"
                   onClick={() => setModalOpen(false)}
                   className="text-body transition-opacity hover:opacity-70"
-                  aria-label="Close"
+                  aria-label={t("accessibility.close")}
                 >
                   <XIcon className="size-4" />
                 </button>
@@ -87,9 +91,7 @@ export function B2BLocationSelector() {
 
             <div className="flex w-full flex-col gap-8 px-10 pb-10">
               <Dialog.Description className="w-full text-base text-body leading-[1.6] tracking-[0.28px]">
-                Select your location to shop with your company&rsquo;s custom
-                pricing, specific product availability, and authorized checkout
-                settings.
+                {t("b2b.selectLocationNote")}
               </Dialog.Description>
 
               {/* Radio List */}
@@ -128,7 +130,7 @@ export function B2BLocationSelector() {
               {/* Confirm Button */}
               <CartForm
                 key={selectedLocationId}
-                route="/cart"
+                route={cartAction}
                 action={CartForm.ACTIONS.BuyerIdentityUpdate}
                 fetcherKey={B2B_UPDATE_KEY}
                 inputs={{

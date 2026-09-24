@@ -6,6 +6,7 @@ import {
   useOptimisticCart,
 } from "@shopify/hydrogen";
 import type { CartCost } from "@shopify/hydrogen/storefront-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
@@ -59,6 +60,7 @@ function CartDrawerContent({
   setOpen: (open: boolean) => void;
 }) {
   const { publish } = useAnalytics();
+  const { t } = useTranslation();
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
 
   return (
@@ -85,13 +87,13 @@ function CartDrawerContent({
         <div className="flex h-full flex-col space-y-6">
           <div className="flex items-center justify-between gap-2 px-5">
             <Dialog.Title asChild className="text-base">
-              <span className="font-bold">Cart</span>
+              <span className="font-bold">{t("cart.title")}</span>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"
                 className="translate-x-2 p-2"
-                aria-label="Close cart drawer"
+                aria-label={t("cart.close")}
               >
                 <XIcon className="h-4 w-4" />
               </button>

@@ -1,4 +1,5 @@
 import type { CustomerAddress } from "@shopify/hydrogen/customer-account-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import type { CustomerDetailsFragment } from "customer-account-api.generated";
 import { Form } from "react-router";
 import { Button } from "~/components/button";
@@ -11,16 +12,15 @@ export function AccountAddressBook({
   customer: CustomerDetailsFragment;
   addresses: CustomerAddress[];
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <div className="font-bold">Address Book</div>
+      <div className="font-bold">{t("account.addressBook")}</div>
       <div className="space-y-3">
-        {!addresses?.length && (
-          <div>You haven&apos;t saved any addresses yet.</div>
-        )}
+        {!addresses?.length && <div>{t("account.noAddresses")}</div>}
         <div className="">
           <Link to="address/add" className="mb-5" variant="outline">
-            Add an Address
+            {t("account.addAddress")}
           </Link>
         </div>
         {addresses?.length > 0 ? (
@@ -47,12 +47,13 @@ function Address({
   address: CustomerAddress;
   defaultAddress?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col border border-line-subtle p-5">
       {defaultAddress && (
         <div className="mb-3 flex flex-row">
           <span className="bg-body-subtle px-3 py-1 font-medium text-body-inverse text-sm">
-            Default
+            {t("account.defaultAddress")}
           </span>
         </div>
       )}
@@ -76,7 +77,7 @@ function Address({
           prefetch="intent"
           variant="underline"
         >
-          Edit
+          {t("account.edit")}
         </Link>
         <Form action="address/delete" method="delete">
           <input type="hidden" name="addressId" value={address.id} />
@@ -85,7 +86,7 @@ function Address({
             className="ml-6 text-body-subtle after:bg-body-subtle"
             animate={false}
           >
-            Remove
+            {t("account.remove")}
           </Button>
         </Form>
       </div>

@@ -14,6 +14,7 @@ import type { FetcherWithComponents } from "react-router";
 import { useMatches } from "react-router";
 import { Button } from "~/components/button";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
+import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { cn } from "~/utils/cn";
 import { DEFAULT_LOCALE } from "~/utils/const";
 
@@ -34,9 +35,10 @@ export function AddToCartButton({
   analytics?: unknown;
   [key: string]: any;
 }) {
+  const cartAction = usePrefixPathWithLocale("/cart");
   return (
     <CartForm
-      route="/cart"
+      route={cartAction}
       inputs={{ lines }}
       action={CartForm.ACTIONS.LinesAdd}
     >

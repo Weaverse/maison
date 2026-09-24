@@ -1,10 +1,12 @@
 import { StarIcon } from "@phosphor-icons/react";
+import { useTranslation } from "@weaverse/hydrogen";
 
 export function ReviewBar(review: {
   rating: number;
   count: number;
   avg: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2">
       <p className="w-2 shrink-0 text-start font-medium text-gray-900 text-sm leading-none">
@@ -18,7 +20,8 @@ export function ReviewBar(review: {
         />
       </div>
       <div className="w-8 shrink-0 text-right font-medium text-body-700 text-sm leading-none sm:w-auto sm:text-left">
-        {review.count} <span className="hidden sm:inline">reviews</span>
+        {review.count}{" "}
+        <span className="hidden sm:inline">{t("reviews.countLabel")}</span>
       </div>
     </div>
   );

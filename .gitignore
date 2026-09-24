@@ -19,7 +19,9 @@ pnpm-lock.yaml
 .claude/
 .github/copilot-instructions.md
 memory/
-scripts/
+scripts/*
+# Checked in: this one runs in CI alongside typecheck and lint.
+!scripts/check-translations.mjs
 templates/
 specs/
 .wrangler/

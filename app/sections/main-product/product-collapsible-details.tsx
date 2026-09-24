@@ -1,5 +1,9 @@
 import * as Accordion from "@radix-ui/react-accordion";
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { Link, useLoaderData } from "react-router";
 import type { loader as productLoader } from "~/routes/($locale).products.$productHandle";
@@ -17,6 +21,7 @@ interface CollapsibleDetailsProps extends HydrogenComponentProps {
 }
 
 export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
+  const { t } = useTranslation();
   const { ref, showShippingPolicy, showRefundPolicy, ...rest } = props;
   const { shop, product } = useLoaderData<typeof productLoader>();
   const { description } = product;
@@ -81,7 +86,7 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
                   className="border-line-subtle border-b pb-px text-body-subtle"
                   to={learnMore}
                 >
-                  Learn more
+                  {t("product.learnMore")}
                 </Link>
               )}
             </Accordion.Content>

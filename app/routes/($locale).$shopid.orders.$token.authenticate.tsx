@@ -1,3 +1,4 @@
+import { useTranslation } from "@weaverse/hydrogen";
 import { type LoaderFunctionArgs, redirect } from "react-router";
 import type { GetShopPrimaryDomainQuery } from "storefront-api.generated";
 import invariant from "tiny-invariant";
@@ -29,13 +30,16 @@ export default function () {
 }
 
 export function ErrorBoundary() {
+  const { t } = useTranslation();
   return (
     <Section width="fixed" verticalPadding="medium">
       <h4 className="mb-8 text-center font-medium text-red-600 lg:mb-20">
-        Error redirecting to the order status URL
+        {t("system.orderRedirectError")}
       </h4>
       <div className="mt-8 flex w-full items-baseline justify-between">
-        <Button onClick={() => window.location.reload()}>Try Again</Button>
+        <Button onClick={() => window.location.reload()}>
+          {t("system.tryAgain")}
+        </Button>
       </div>
     </Section>
   );
