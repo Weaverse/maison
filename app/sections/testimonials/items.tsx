@@ -1,4 +1,8 @@
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { Children, useRef } from "react";
@@ -29,6 +33,7 @@ interface TestimonialsItemsProps
 }
 
 function TestimonialsItems(props: TestimonialsItemsProps) {
+  const { t } = useTranslation();
   const {
     ref,
     gap = 32,
@@ -90,7 +95,7 @@ function TestimonialsItems(props: TestimonialsItemsProps) {
           placement waits for `2xl`. */}
       <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 -left-2 -right-2 z-[1] flex justify-between md:left-4 md:right-4 2xl:-left-16 2xl:-right-16">
         <button
-          aria-label="Previous testimonial"
+          aria-label={t("testimonial.previous")}
           className={arrowButtonVariants({ arrowsShape })}
           onClick={() => handleScroll(-1)}
           style={{ backgroundColor: arrowsBgColor }}
@@ -99,7 +104,7 @@ function TestimonialsItems(props: TestimonialsItemsProps) {
           <ArrowLeft />
         </button>
         <button
-          aria-label="Next testimonial"
+          aria-label={t("testimonial.next")}
           className={arrowButtonVariants({ arrowsShape })}
           onClick={() => handleScroll(1)}
           style={{ backgroundColor: arrowsBgColor }}

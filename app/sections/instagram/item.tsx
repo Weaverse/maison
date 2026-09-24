@@ -67,7 +67,7 @@ export const schema = createSchema({
           label: "Image",
         },
         {
-          type: "text",
+          type: "url",
           name: "link",
           label: "Post link",
           placeholder: "https://www.instagram.com/p/...",

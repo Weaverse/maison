@@ -1,10 +1,12 @@
 import { SealCheckIcon, XIcon } from "@phosphor-icons/react";
+import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 import { Image } from "~/components/image";
 import { StarRating } from "~/components/star-rating";
-import { formatDate } from "~/utils/misc";
+import { useSelectedLocale } from "~/hooks/use-locale";
+import { formatDateTime } from "~/utils/locale";
 
 export type AliReview = {
   id: number;
@@ -47,6 +49,8 @@ type ReviewItemProps = ReviewItemData & {
 };
 
 export function ReviewItem(props: ReviewItemProps) {
+  const locale = useSelectedLocale();
+  const { t } = useTranslation();
   const {
     review,
     showCountry,
@@ -74,7 +78,7 @@ export function ReviewItem(props: ReviewItemProps) {
           </div>
           {showDate && (
             <p className="font-normal text-gray-500 text-sm">
-              {formatDate(review.created_at)}
+              {formatDateTime(review.created_at, locale)}
             </p>
           )}
         </div>
@@ -115,7 +119,7 @@ export function ReviewItem(props: ReviewItemProps) {
               <Image
                 className="h-full w-full object-cover object-center"
                 src={media.url}
-                alt="Review media"
+                alt={t("reviews.media")}
               />
             </div>
           ))}
@@ -133,6 +137,7 @@ function ReviewMediaPreview(props: {
   media: ReviewMedia | null;
   closePreview: () => void;
 }) {
+  const { t } = useTranslation();
   const { media, closePreview } = props;
   if (media) {
     return (
@@ -141,7 +146,7 @@ function ReviewMediaPreview(props: {
           <Image
             className="max-h-full max-w-full object-cover"
             src={media.url}
-            alt="Review media preview"
+            alt={t("reviews.mediaPreview")}
           />
         </div>
         <XIcon

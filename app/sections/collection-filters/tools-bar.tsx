@@ -1,5 +1,6 @@
 import { SlidersIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { useTranslation } from "@weaverse/hydrogen";
 import { useLoaderData } from "react-router";
 import type { CollectionQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";
@@ -23,6 +24,7 @@ export function ToolsBar({
   filtersPosition,
   showProductsCount,
 }: ToolsBarProps) {
+  const { t } = useTranslation();
   const { collection } = useLoaderData<CollectionQuery>();
   return (
     <div className="space-y-3">
@@ -56,6 +58,7 @@ function FiltersDrawer({
 }: {
   filtersPosition: ToolsBarProps["filtersPosition"];
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
@@ -68,7 +71,7 @@ function FiltersDrawer({
           animate={false}
         >
           <SlidersIcon size={18} />
-          <span>Filter</span>
+          <span>{t("collection.filter")}</span>
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -79,13 +82,13 @@ function FiltersDrawer({
         >
           <div className="flex items-center justify-between gap-2 px-5 py-3">
             <Dialog.Title asChild className="pt-2.5 font-bold">
-              <span>Filters</span>
+              <span>{t("collection.filters")}</span>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"
                 className="translate-x-2 p-2"
-                aria-label="Close filters drawer"
+                aria-label={t("collection.closeFilters")}
               >
                 <XIcon className="h-4 w-4" />
               </button>
@@ -97,7 +100,7 @@ function FiltersDrawer({
           <div className="mt-auto border-line-subtle border-t px-5 py-4 md:hidden">
             <Dialog.Close asChild>
               <Button className="w-full" variant="primary">
-                Apply Filters
+                {t("collection.applyFilters")}
               </Button>
             </Dialog.Close>
           </div>

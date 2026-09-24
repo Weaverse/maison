@@ -1,4 +1,5 @@
 import type { CustomerUpdateInput } from "@shopify/hydrogen/customer-account-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import type { CustomerUpdateMutation } from "customer-account-api.generated";
 import {
   type ActionFunctionArgs,
@@ -105,6 +106,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function AccountProfile() {
+  const { t } = useTranslation();
   const account = useOutletContext<{
     customer: CustomerUpdateMutation["customerUpdate"]["customer"];
   }>();
@@ -114,30 +116,30 @@ export default function AccountProfile() {
 
   return (
     <div className="account-profile">
-      <h2>My profile</h2>
+      <h2>{t("account.myProfile")}</h2>
       <br />
       <Form method="PUT">
-        <legend>Personal information</legend>
+        <legend>{t("account.personalInfo")}</legend>
         <fieldset>
-          <label htmlFor="firstName">First name</label>
+          <label htmlFor="firstName">{t("account.firstName")}</label>
           <input
             id="firstName"
             name="firstName"
             type="text"
             autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
+            placeholder={t("account.firstName")}
+            aria-label={t("account.firstName")}
             defaultValue={customer.firstName ?? ""}
             minLength={2}
           />
-          <label htmlFor="lastName">Last name</label>
+          <label htmlFor="lastName">{t("account.lastName")}</label>
           <input
             id="lastName"
             name="lastName"
             type="text"
             autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
+            placeholder={t("account.lastName")}
+            aria-label={t("account.lastName")}
             defaultValue={customer.lastName ?? ""}
             minLength={2}
           />

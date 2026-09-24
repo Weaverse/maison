@@ -3,7 +3,11 @@ import {
   ShopPayButton,
   useOptimisticVariant,
 } from "@shopify/hydrogen";
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import { useLoaderData, useSearchParams } from "react-router";
 // import { AddToCartButton } from "~/components/product/add-to-cart-button";
 import { SellingPlanSelector } from "~/components/product/selling-plan-selector";
@@ -20,6 +24,7 @@ interface ProductATCButtonsProps extends HydrogenComponentProps {
 }
 
 export default function ProductATCButtons(props: ProductATCButtonsProps) {
+  const { t } = useTranslation();
   const {
     ref,
     addToCartText,
@@ -45,7 +50,7 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
     return null;
   }
 
-  let atcButtonText = "Add to cart";
+  let atcButtonText = t("product.addToCart");
   if (selectedVariant.availableForSale) {
     atcButtonText = isBundle ? addBundleToCartText : addToCartText;
   } else {

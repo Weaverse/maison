@@ -1,4 +1,8 @@
-import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
+import {
+  createSchema,
+  type HydrogenComponentProps,
+  useTranslation,
+} from "@weaverse/hydrogen";
 import { forwardRef, useState } from "react";
 import { Form, useFetcher } from "react-router";
 import { Button } from "~/components/button";
@@ -14,6 +18,7 @@ interface B2BSignupProps extends HydrogenComponentProps {
 }
 
 const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
+  const { t } = useTranslation();
   const formKey = "b2b-form";
   const {
     heading,
@@ -64,10 +69,8 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
 
         {isSuccess ? (
           <div className="rounded-lg border border-green-600 bg-green-50 p-6 text-center text-green-800">
-            <p className="text-lg font-semibold">
-              Thank you for your interest!
-            </p>
-            <p className="mt-2">We'll get back to you shortly.</p>
+            <p className="text-lg font-semibold">{t("form.thankYou")}</p>
+            <p className="mt-2">{t("form.willReply")}</p>
           </div>
         ) : (
           <Form
@@ -87,7 +90,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
               <input
                 type="text"
                 name="name"
-                placeholder="Your name*"
+                placeholder={t("form.nameRequired")}
                 required
                 value={formState.name}
                 onChange={handleChange}
@@ -99,7 +102,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
               <input
                 type="text"
                 name="company"
-                placeholder="Company name"
+                placeholder={t("form.company")}
                 value={formState.company}
                 onChange={handleChange}
                 className="w-full rounded-xl border border-line px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
@@ -110,7 +113,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
               <input
                 type="email"
                 name="email"
-                placeholder="Contact email*"
+                placeholder={t("form.email")}
                 required
                 value={formState.email}
                 onChange={handleChange}
@@ -122,7 +125,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
               <input
                 type="url"
                 name="website"
-                placeholder="Website"
+                placeholder={t("form.website")}
                 value={formState.website}
                 onChange={handleChange}
                 className="w-full rounded-xl border border-line px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
@@ -132,7 +135,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
             <div>
               <textarea
                 name="message"
-                placeholder="Message"
+                placeholder={t("form.message")}
                 rows={5}
                 value={formState.message}
                 onChange={handleChange}

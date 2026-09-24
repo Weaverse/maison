@@ -3,7 +3,7 @@ import {
   PinterestLogoIcon,
   XLogoIcon,
 } from "@phosphor-icons/react";
-import { createSchema, isBrowser } from "@weaverse/hydrogen";
+import { createSchema, isBrowser, useTranslation } from "@weaverse/hydrogen";
 import { useLoaderData, useRouteLoaderData } from "react-router";
 import {
   FacebookShareButton,
@@ -22,6 +22,7 @@ interface BlogPostProps extends SectionProps {
 }
 
 export default function BlogPost(props: BlogPostProps) {
+  const { t } = useTranslation();
   const { ref, showTags, showShareButtons, ...rest } = props;
   const { layout } = useRouteLoaderData<RootLoader>("root");
   const { article, blog, formattedDate } = useLoaderData<{
@@ -82,13 +83,13 @@ export default function BlogPost(props: BlogPostProps) {
                   <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
                     {showTags && (
                       <div>
-                        <strong>Tags:</strong>
+                        <strong>{t("blog.tags")}:</strong>
                         <span className="ml-2">{tags.join(", ")}</span>
                       </div>
                     )}
                     {showShareButtons && (
                       <div className="flex items-center gap-2">
-                        <strong>Share:</strong>
+                        <strong>{t("blog.share")}:</strong>
                         <FacebookShareButton url={articleUrl}>
                           <FacebookLogoIcon size={24} />
                         </FacebookShareButton>

@@ -1,3 +1,4 @@
+import { useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useState } from "react";
 
 interface QuantityProps {
@@ -7,6 +8,7 @@ interface QuantityProps {
 }
 
 export function Quantity(props: QuantityProps) {
+  const { t } = useTranslation();
   const { value, onChange, label = "Quantity" } = props;
   const [inputValue, setInputValue] = useState(String(value));
 
@@ -47,7 +49,7 @@ export function Quantity(props: QuantityProps) {
         <button
           type="button"
           name="decrease-quantity"
-          aria-label="Decrease quantity"
+          aria-label={t("product.decreaseQuantity")}
           className="h-10 w-10 transition disabled:cursor-not-allowed disabled:opacity-50"
           disabled={value <= 1}
           onClick={() => onChange(value - 1)}
@@ -67,7 +69,7 @@ export function Quantity(props: QuantityProps) {
           type="button"
           className="h-10 w-10 text-body transition hover:text-body"
           name="increase-quantity"
-          aria-label="Increase quantity"
+          aria-label={t("product.increaseQuantity")}
           onClick={() => onChange(value + 1)}
         >
           <span>&#43;</span>

@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/hydrogen";
+import { createSchema, useTranslation } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import Link, {
   type LinkProps,
@@ -43,6 +43,7 @@ interface MapSectionProps
 }
 
 export default function MapSection(props: MapSectionProps) {
+  const { t } = useTranslation();
   const {
     ref,
     height,
@@ -162,7 +163,7 @@ export default function MapSection(props: MapSectionProps) {
 
       <iframe
         className={variants({ height })}
-        title="Google map embedded frame"
+        title={t("map.embeddedFrame")}
         src={`https://maps.google.com/maps?t=m&q=${address}&ie=UTF8&&output=embed`}
       />
     </Section>

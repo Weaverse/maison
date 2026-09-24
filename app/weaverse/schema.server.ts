@@ -1,5 +1,7 @@
 import type { HydrogenThemeSchema } from "@weaverse/hydrogen";
-import { COUNTRIES } from "~/utils/const";
+import enUS from "~/locales/en.json";
+import type { StoreLocalization } from "~/types/locale";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "~/utils/const";
 import { version } from "../../package.json";
 
 export const themeSchema: HydrogenThemeSchema = {
@@ -14,23 +16,13 @@ export const themeSchema: HydrogenThemeSchema = {
   },
   i18n: {
     urlStructure: "url-path",
-    defaultLocale: {
-      pathPrefix: "",
-      label: "United States (USD $)",
-      language: "EN",
-      country: "US",
-      currency: "USD",
-    },
-    shopLocales: Object.entries(COUNTRIES).map(
-      ([pathPrefix, { label, language, country }]) => {
-        return {
-          pathPrefix: pathPrefix === "default" ? "" : pathPrefix,
-          label,
-          language,
-          country,
-        };
-      },
-    ),
+    defaultLocale: DEFAULT_LOCALE,
+    shopLocales: [...SUPPORTED_LOCALES],
+    // The theme ships one catalogue, for the default locale. Every other
+    // locale is translated by the merchant in Studio, and `translation` is
+    // what puts that UI in front of them.
+    staticContent: enUS,
+    translation: true,
   },
   settings: [
     {
@@ -791,11 +783,10 @@ export const themeSchema: HydrogenThemeSchema = {
           condition: (theme) => theme.pcardEnableQuickShop === true,
         },
         {
-          type: "text",
+          type: "translation-key",
           label: "Quick shop button text",
-          name: "pcardQuickShopButtonText",
-          defaultValue: "Quick shop",
-          placeholder: "Quick shop",
+          name: "product.selectOptions",
+          placeholder: "Select options",
           condition: (theme) => {
             return (
               theme.pcardEnableQuickShop === true &&
@@ -931,28 +922,24 @@ export const themeSchema: HydrogenThemeSchema = {
             theme.newsletterPopupEnabled === true && theme.newsletterPopupImage,
         },
         {
-          type: "text",
+          type: "translation-key",
           label: "Heading",
-          name: "newsletterPopupHeading",
-          defaultValue: "Stay in the loop!",
+          name: "newsletter.popup.heading",
           placeholder: "Stay in the loop!",
           condition: (theme) => theme.newsletterPopupEnabled === true,
         },
         {
-          type: "textarea",
+          type: "translation-key",
           label: "Description",
-          name: "newsletterPopupDescription",
-          defaultValue:
-            "Subscribe to our newsletter and get exclusive offers, new product updates, and more.",
+          name: "newsletter.popup.description",
           placeholder: "Subscribe to our newsletter...",
           condition: (theme) => theme.newsletterPopupEnabled === true,
         },
         {
-          type: "text",
+          type: "translation-key",
           label: "Button text",
-          name: "newsletterPopupButtonText",
-          defaultValue: "Get 15% Off Your First Order",
-          placeholder: "Subscribe",
+          name: "newsletter.popup.buttonText",
+          placeholder: "Get 15% Off Your First Order",
           condition: (theme) => theme.newsletterPopupEnabled === true,
         },
         {
@@ -1010,19 +997,17 @@ export const themeSchema: HydrogenThemeSchema = {
           condition: (theme) => theme.enableFreeShippingProgressBar === true,
         },
         {
-          type: "text",
+          type: "translation-key",
           label: "Progress message",
-          name: "freeShippingProgressMessage",
-          defaultValue: "You're {{amount}} away from free shipping!",
+          name: "cart.freeShippingProgress",
           placeholder: "You're {{amount}} away from free shipping!",
           helpText: "Use {{amount}} as placeholder for remaining amount",
           condition: (theme) => theme.enableFreeShippingProgressBar === true,
         },
         {
-          type: "text",
+          type: "translation-key",
           label: "Success message",
-          name: "freeShippingSuccessMessage",
-          defaultValue: "Congratulations! You've got free shipping!",
+          name: "cart.freeShippingReached",
           placeholder: "Congratulations! You've got free shipping!",
           condition: (theme) => theme.enableFreeShippingProgressBar === true,
         },
@@ -1113,17 +1098,17 @@ export const themeSchema: HydrogenThemeSchema = {
           condition: (theme) => theme.showFooterWordmark === true,
         },
         {
-          type: "text",
-          name: "footerBrandTitle",
+          type: "translation-key",
+          name: "footer.brandHeading",
           label: "Brand heading",
-          defaultValue: "Our shop",
+          placeholder: "Our shop",
         },
         {
-          type: "richtext",
-          name: "bio",
+          type: "translation-key",
+          name: "footer.bio",
           label: "Store bio",
-          defaultValue:
-            "<p>We are a team of designers, developers, and creatives who are passionate about creating beautiful and functional products.</p>",
+          placeholder:
+            "We are a team of designers, developers, and creatives...",
         },
         {
           type: "heading",
@@ -1164,30 +1149,27 @@ export const themeSchema: HydrogenThemeSchema = {
           defaultValue: true,
         },
         {
-          type: "text",
-          name: "newsletterTitle",
+          type: "translation-key",
+          name: "footer.newsletterTitle",
           label: "Title",
-          defaultValue: "STAY IN TOUCH",
           placeholder: "Stay in touch",
         },
         {
-          type: "text",
-          name: "newsletterDescription",
+          type: "translation-key",
+          name: "footer.newsletterDescription",
           label: "Description",
-          defaultValue: "News and inspiration in your inbox, every week.",
+          placeholder: "News and inspiration in your inbox, every week.",
         },
         {
-          type: "text",
-          name: "newsletterPlaceholder",
+          type: "translation-key",
+          name: "footer.newsletterPlaceholder",
           label: "Input placeholder",
-          defaultValue: "Please enter your email",
           placeholder: "Please enter your email",
         },
         {
-          type: "text",
-          name: "newsletterButtonText",
+          type: "translation-key",
+          name: "footer.newsletterButton",
           label: "Button text",
-          defaultValue: "Send",
           placeholder: "Send",
         },
         {
@@ -1234,3 +1216,25 @@ export const themeSchema: HydrogenThemeSchema = {
     },
   ],
 };
+
+/**
+ * Narrow the declared locales to those Shopify actually has live, so the
+ * Studio locale picker and the storefront selector agree.
+ */
+export function getThemeSchema({
+  availableLocales,
+  defaultLocale,
+}: StoreLocalization): HydrogenThemeSchema {
+  return {
+    ...themeSchema,
+    i18n: {
+      ...(themeSchema.i18n ?? {
+        urlStructure: "url-path" as const,
+        defaultLocale,
+        shopLocales: availableLocales,
+      }),
+      defaultLocale,
+      shopLocales: availableLocales,
+    },
+  };
+}

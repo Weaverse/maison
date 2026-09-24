@@ -1,5 +1,6 @@
 import { VideoCameraIcon } from "@phosphor-icons/react";
 import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
@@ -65,6 +66,7 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
 }
 
 export function ProductMedia(props: ProductMediaProps) {
+  const { t } = useTranslation();
   const {
     mediaLayout: initialMediaLayout,
     gridSize: initialGridSize,
@@ -387,7 +389,7 @@ export function ProductMedia(props: ProductMediaProps) {
                     <Image
                       data={{
                         ...previewImage,
-                        altText: alt || "Product image",
+                        altText: alt || t("product.imageAlt"),
                       }}
                       loading="lazy"
                       width={200}
@@ -432,11 +434,12 @@ function Media({
   index: number;
   className?: string;
 }) {
+  const { t } = useTranslation();
   if (media.mediaContentType === "IMAGE") {
     const { image, alt } = media as Media_MediaImage_Fragment;
     return (
       <Image
-        data={{ ...image, altText: alt || "Product image" }}
+        data={{ ...image, altText: alt || t("product.imageAlt") }}
         loading={index === 0 ? "eager" : "lazy"}
         className={cn("h-auto w-full object-cover", className)}
         width={2048}
@@ -450,7 +453,7 @@ function Media({
     return (
       <video
         controls
-        aria-label={mediaVideo.alt || "Product video"}
+        aria-label={mediaVideo.alt || t("product.videoAlt")}
         className={cn("h-auto w-full object-cover", className)}
         style={{ aspectRatio: imageAspectRatio }}
         onError={console.error}

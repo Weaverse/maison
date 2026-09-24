@@ -1,6 +1,6 @@
 import { Money } from "@shopify/hydrogen";
 import type { CartCost } from "@shopify/hydrogen/storefront-api-types";
-import { useThemeSettings } from "@weaverse/hydrogen";
+import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 
 interface FreeShippingProgressBarProps {
@@ -12,12 +12,9 @@ export function FreeShippingProgressBar({
   cost,
   className,
 }: FreeShippingProgressBarProps) {
-  const {
-    enableFreeShippingProgressBar,
-    freeShippingThreshold,
-    freeShippingProgressMessage,
-    freeShippingSuccessMessage,
-  } = useThemeSettings();
+  const { t } = useTranslation();
+  const { enableFreeShippingProgressBar, freeShippingThreshold } =
+    useThemeSettings();
 
   if (!(enableFreeShippingProgressBar && freeShippingThreshold)) {
     return null;
@@ -31,21 +28,11 @@ export function FreeShippingProgressBar({
   const progress = Math.min(100, (subtotalAmount / threshold) * 100);
   const hasReachedFreeShipping = remaining <= 0;
 
-  const getMessage = () => {
-    if (hasReachedFreeShipping) {
-      return (
-        freeShippingSuccessMessage ||
-        "Congratulations! You've got free shipping!"
-      );
-    }
-
-    const message =
-      freeShippingProgressMessage ||
-      "You're {{amount}} away from free shipping!";
-    return message;
-  };
-
-  const message = getMessage();
+  // Both strings are edited per locale through `translation-key` settings, so
+  // they come from the catalogue rather than a shared theme setting.
+  const message = hasReachedFreeShipping
+    ? t("cart.freeShippingReached")
+    : t("cart.freeShippingProgress");
 
   return (
     <div className={clsx("space-y-2", className)}>

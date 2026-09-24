@@ -3,6 +3,7 @@ import {
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
   useParentInstance,
+  useTranslation,
 } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ArticleFragment } from "storefront-api.generated";
@@ -10,9 +11,11 @@ import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import { RevealUnderline } from "~/components/reveal-underline";
 import { useAnimation } from "~/hooks/use-animation";
+import { useSelectedLocale } from "~/hooks/use-locale";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
+import { formatDate } from "~/utils/locale";
 import type { ArticlesLoaderData } from ".";
 
 const variants = cva("grid", {
@@ -60,6 +63,7 @@ interface ArticlesItemsProps
 }
 
 function ArticlesItems(props: ArticlesItemsProps) {
+  const { t } = useTranslation();
   const {
     ref,
     gap,
@@ -95,10 +99,12 @@ function ArticlesItems(props: ArticlesItemsProps) {
               />
             </div>
             <div className="flex flex-col gap-4">
-              <h6 className="text-2xl leading-8 font-normal">Title here</h6>
+              <h6 className="text-2xl leading-8 font-normal">
+                {t("blog.titlePlaceholder")}
+              </h6>
               <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
-                <span>Date here —</span>
-                <span>Author here</span>
+                <span>{t("blog.datePlaceholder")} —</span>
+                <span>{t("blog.authorPlaceholder")}</span>
               </div>
             </div>
           </div>
@@ -145,6 +151,7 @@ function ArticleCard({
   showDate: boolean;
   imageBorderRadius: number;
 }) {
+  const locale = useSelectedLocale();
   return (
     <div className="group flex flex-col gap-5">
       {article.image && (
@@ -176,11 +183,7 @@ function ArticleCard({
           <div className="flex flex-wrap gap-1 text-sm text-body-subtle">
             {showDate && (
               <span>
-                {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {formatDate(article.publishedAt, locale)}
                 {showAuthor && " —"}
               </span>
             )}

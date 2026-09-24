@@ -1,4 +1,5 @@
 import { CheckIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { useTranslation } from "@weaverse/hydrogen";
 import type React from "react";
 import { useRef, useState } from "react";
 import { useLoaderData } from "react-router";
@@ -20,6 +21,7 @@ export function ReviewForm({
   setShowForm,
   className,
 }: ReviewFormProps) {
+  const { t } = useTranslation();
   const { product } = useLoaderData<typeof productRouteLoader>();
   const [rating, setRating] = useState(0);
   const [formState, setFormState] = useState<FormState>("idle");
@@ -86,14 +88,11 @@ export function ReviewForm({
           <CheckIcon className="h-8 w-8 text-green-600" />
         </div>
         <h3 className="mb-2 font-semibold text-green-900 text-xl">
-          Review Submitted Successfully!
+          {t("reviews.submitted")}
         </h3>
-        <p className="text-gray-600">
-          Thank you for your feedback. Your review is being processed in the
-          background, it will be published shortly in a few minutes.
-        </p>
+        <p className="text-gray-600">{t("reviews.submittedNote")}</p>
         <Button type="button" onClick={resetForm} className="mt-4">
-          Write Another Review
+          {t("reviews.writeAnother")}
         </Button>
       </div>
       <div
@@ -108,17 +107,15 @@ export function ReviewForm({
           <WarningCircleIcon className="h-8 w-8 text-red-600" />
         </div>
         <h3 className="mb-2 font-semibold text-red-900 text-xl">
-          Submission Failed
+          {t("reviews.submissionFailed")}
         </h3>
-        <p className="text-gray-600">
-          There was an error submitting your review. Please try again.
-        </p>
+        <p className="text-gray-600">{t("reviews.submissionFailedNote")}</p>
         <Button
           type="button"
           onClick={() => setFormState("idle")}
           className="mt-4"
         >
-          Try Again
+          {t("system.tryAgain")}
         </Button>
       </div>
       <form
@@ -134,10 +131,10 @@ export function ReviewForm({
       >
         <div className="space-y-2">
           <h2 className="text-center font-bold text-2xl text-gray-900">
-            Write Your Review
+            {t("reviews.writeYourReview")}
           </h2>
           <p className="text-center text-gray-600">
-            Share your experience with other customers
+            {t("reviews.writeYourReviewNote")}
           </p>
         </div>
 
@@ -163,7 +160,7 @@ export function ReviewForm({
             htmlFor="judgeme-reviewer-name"
             className="block font-medium text-gray-700 text-sm"
           >
-            Your Name
+            {t("reviews.yourName")}
             <span className="ml-1 text-red-500">*</span>
           </label>
           <input
@@ -171,7 +168,7 @@ export function ReviewForm({
             name="name"
             id="judgeme-reviewer-name"
             defaultValue=""
-            placeholder="Enter your name"
+            placeholder={t("reviews.namePlaceholder")}
             required
             className="w-full border border-gray-300 px-4 py-3 text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
           />
@@ -183,7 +180,7 @@ export function ReviewForm({
             htmlFor="judgeme-reviewer-email"
             className="block font-medium text-gray-700 text-sm"
           >
-            Email Address
+            {t("reviews.emailAddress")}
             <span className="ml-1 text-red-500">*</span>
           </label>
           <input
@@ -191,7 +188,7 @@ export function ReviewForm({
             name="email"
             id="judgeme-reviewer-email"
             defaultValue=""
-            placeholder="Enter your email"
+            placeholder={t("reviews.emailPlaceholder")}
             required
             className="w-full border border-gray-300 px-4 py-3 text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
           />
@@ -203,14 +200,14 @@ export function ReviewForm({
             htmlFor="judgeme-review-title"
             className="block font-medium text-gray-700 text-sm"
           >
-            Review Title
+            {t("reviews.reviewTitle")}
           </label>
           <input
             type="text"
             name="title"
             id="judgeme-review-title"
             defaultValue=""
-            placeholder="Give your review a title"
+            placeholder={t("reviews.titlePlaceholder")}
             className="w-full border border-gray-300 px-4 py-3 text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
           />
         </div>
@@ -221,7 +218,7 @@ export function ReviewForm({
             htmlFor="judgeme-review-body"
             className="block font-medium text-gray-700 text-sm"
           >
-            Your Review
+            {t("reviews.yourReview")}
             <span className="ml-1 text-red-500">*</span>
           </label>
           <textarea
@@ -229,7 +226,7 @@ export function ReviewForm({
             id="judgeme-review-body"
             defaultValue=""
             required
-            placeholder="Share your experience with this product"
+            placeholder={t("reviews.bodyPlaceholder")}
             rows={5}
             className="w-full border border-gray-300 px-4 py-3 text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
           />
@@ -242,10 +239,12 @@ export function ReviewForm({
             type="button"
             onClick={() => setShowForm(false)}
           >
-            Cancel
+            {t("actions.cancel")}
           </Button>
           <Button type="submit" disabled={formState === "submitting"}>
-            {formState === "submitting" ? "Submitting..." : "Submit Review"}
+            {formState === "submitting"
+              ? t("reviews.submitting")
+              : t("reviews.submitReview")}
           </Button>
         </div>
       </form>

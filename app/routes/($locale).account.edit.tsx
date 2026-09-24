@@ -2,6 +2,7 @@ import type {
   Customer,
   CustomerUpdateInput,
 } from "@shopify/hydrogen/customer-account-api-types";
+import { useTranslation } from "@weaverse/hydrogen";
 import type { CustomerUpdateMutation } from "customer-account-api.generated";
 import {
   type ActionFunction,
@@ -107,13 +108,14 @@ export const action: ActionFunction = async ({ request, context, params }) => {
  * - use the presence of outlet data (in `account.tsx`) to open/close the modal (no useState)
  */
 export default function AccountDetailsEdit() {
+  const { t } = useTranslation();
   const actionData = useActionData<ActionData>();
   const { customer } = useOutletContext<AccountOutletContext>();
   const { state } = useNavigation();
 
   return (
     <div className="space-y-2">
-      <div className="py-2.5 text-xl">Edit account</div>
+      <div className="py-2.5 text-xl">{t("account.editAccount")}</div>
       <Form method="post" className="space-y-3">
         {actionData?.formError && (
           <div className="flex items-center justify-center bg-red-100 p-3 text-red-900">
@@ -126,8 +128,8 @@ export default function AccountDetailsEdit() {
           className="w-full appearance-none border border-line p-3 focus:outline-hidden"
           type="text"
           autoComplete="given-name"
-          placeholder="First name"
-          aria-label="First name"
+          placeholder={t("account.firstName")}
+          aria-label={t("account.firstName")}
           defaultValue={customer.firstName ?? ""}
         />
         <input
@@ -136,13 +138,13 @@ export default function AccountDetailsEdit() {
           className="w-full appearance-none border border-line p-3 focus:outline-hidden"
           type="text"
           autoComplete="family-name"
-          placeholder="Last name"
-          aria-label="Last name"
+          placeholder={t("account.lastName")}
+          aria-label={t("account.lastName")}
           defaultValue={customer.lastName ?? ""}
         />
         <div className="flex items-center justify-end gap-6 py-2.5">
           <Link to="/account" className="underline-offset-4 hover:underline">
-            Cancel
+            {t("account.cancel")}
           </Link>
           <Button type="submit" variant="primary" disabled={state !== "idle"}>
             {state !== "idle" ? "Saving" : "Save"}

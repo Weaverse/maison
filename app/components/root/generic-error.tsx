@@ -1,3 +1,4 @@
+import { useTranslation } from "@weaverse/hydrogen";
 import Link from "~/components/link";
 import { Section } from "~/components/section";
 
@@ -6,6 +7,7 @@ export function GenericError({
 }: {
   error: { message: string; stack?: string } | unknown;
 }) {
+  const { t } = useTranslation();
   const heading = "Something’s wrong here.";
   let description = "We found an error while loading this page.";
 
@@ -42,7 +44,7 @@ export function GenericError({
           />
         )}
       <Link variant="outline" to="/" className="w-fit">
-        Take me to the home page
+        {t("system.takeMeHome")}
       </Link>
     </Section>
   );

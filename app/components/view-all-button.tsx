@@ -67,7 +67,7 @@ export const schema = createSchema({
           defaultValue: "VIEW ALL",
         },
         {
-          type: "text",
+          type: "url",
           name: "link",
           label: "Button link",
           defaultValue: "/",

@@ -6,6 +6,7 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
+  useTranslation,
   type WeaverseImage,
   type WeaverseProduct,
 } from "@weaverse/hydrogen";
@@ -63,6 +64,7 @@ export default function ImageWithProductCard(props: ImageWithProductCardProps) {
     loaderData,
     ...rest
   } = props;
+  const { t } = useTranslation();
   const product = loaderData?.product;
   const background = resolveImage(backgroundImage);
   const image = product?.featuredImage || {
@@ -176,7 +178,7 @@ export default function ImageWithProductCard(props: ImageWithProductCardProps) {
                   color: buttonTextColor,
                 }}
               >
-                {buttonText || "Select options"}
+                {buttonText || t("product.selectOptions")}
               </Link>
             </div>
           </div>

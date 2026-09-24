@@ -1692,6 +1692,7 @@ export type ApiAllProductsQuery = {
 };
 
 export type ArticleQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   blogHandle: StorefrontAPI.Scalars['String']['input'];
   articleHandle: StorefrontAPI.Scalars['String']['input'];
@@ -1764,6 +1765,7 @@ export type ArticleFragment = Pick<
 };
 
 export type BlogQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   blogHandle: StorefrontAPI.Scalars['String']['input'];
   pageBy: StorefrontAPI.Scalars['Int']['input'];
@@ -2149,6 +2151,7 @@ export type CollectionsQuery = {
 };
 
 export type PageDetailsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   handle: StorefrontAPI.Scalars['String']['input'];
 }>;
@@ -2169,6 +2172,7 @@ export type PolicyHandleFragment = Pick<
 >;
 
 export type PoliciesHandleQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   privacyPolicy: StorefrontAPI.Scalars['Boolean']['input'];
   shippingPolicy: StorefrontAPI.Scalars['Boolean']['input'];
@@ -2648,6 +2652,33 @@ export type SearchQuery = {
   };
 };
 
+export type SitemapBlogsQueryVariables = StorefrontAPI.Exact<{
+  first: StorefrontAPI.Scalars['Int']['input'];
+  after?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']['input']>;
+}>;
+
+export type SitemapBlogsQuery = {
+  blogs: {
+    nodes: Array<Pick<StorefrontAPI.Blog, 'handle'>>;
+    pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage' | 'endCursor'>;
+  };
+};
+
+export type SitemapBlogArticlesQueryVariables = StorefrontAPI.Exact<{
+  blogHandle: StorefrontAPI.Scalars['String']['input'];
+  first: StorefrontAPI.Scalars['Int']['input'];
+  after?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']['input']>;
+}>;
+
+export type SitemapBlogArticlesQuery = {
+  blog?: StorefrontAPI.Maybe<{
+    articles: {
+      nodes: Array<Pick<StorefrontAPI.Article, 'handle' | 'publishedAt'>>;
+      pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage' | 'endCursor'>;
+    };
+  }>;
+};
+
 export type StoreRobotsQueryVariables = StorefrontAPI.Exact<{
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
@@ -2656,6 +2687,7 @@ export type StoreRobotsQueryVariables = StorefrontAPI.Exact<{
 export type StoreRobotsQuery = {shop: Pick<StorefrontAPI.Shop, 'id'>};
 
 export type BlogSingleQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   blogHandle: StorefrontAPI.Scalars['String']['input'];
 }>;
@@ -3324,6 +3356,30 @@ export type OurTeamQuery = {
   };
 };
 
+export type StoreLocalizationQueryVariables = StorefrontAPI.Exact<{
+  [key: string]: never;
+}>;
+
+export type StoreLocalizationQuery = {
+  localization: {
+    country: Pick<StorefrontAPI.Country, 'isoCode' | 'name'> & {
+      currency: Pick<StorefrontAPI.Currency, 'isoCode'>;
+    };
+    language: Pick<StorefrontAPI.Language, 'isoCode' | 'name' | 'endonymName'>;
+    availableLanguages: Array<
+      Pick<StorefrontAPI.Language, 'isoCode' | 'name' | 'endonymName'>
+    >;
+    availableCountries: Array<
+      Pick<StorefrontAPI.Country, 'isoCode' | 'name'> & {
+        currency: Pick<StorefrontAPI.Currency, 'isoCode'>;
+        availableLanguages: Array<
+          Pick<StorefrontAPI.Language, 'isoCode' | 'name' | 'endonymName'>
+        >;
+      }
+    >;
+  };
+};
+
 export type ProductRecommendationsQueryVariables = StorefrontAPI.Exact<{
   buyer?: StorefrontAPI.InputMaybe<StorefrontAPI.BuyerInput>;
   productId: StorefrontAPI.Scalars['ID']['input'];
@@ -3693,6 +3749,7 @@ export type ProductRecommendationsQuery = {
 };
 
 export type LayoutQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   headerMenuHandle: StorefrontAPI.Scalars['String']['input'];
   footerMenuHandle: StorefrontAPI.Scalars['String']['input'];
@@ -4006,11 +4063,11 @@ interface GeneratedQueryTypes {
     return: ApiAllProductsQuery;
     variables: ApiAllProductsQueryVariables;
   };
-  '#graphql\n  query article(\n    $language: LanguageCode\n    $blogHandle: String!\n    $articleHandle: String!\n  ) @inContext(language: $language) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      articleByHandle(handle: $articleHandle) {\n        title\n        handle\n        contentHtml\n        publishedAt\n        tags\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n      articles (first: 20) {\n        nodes {\n            ...Article\n        }\n      }\n    }\n  }\n  fragment Article on Article {\n    author: authorV2 {\n      name\n    }\n    contentHtml\n    excerpt\n    excerptHtml\n    handle\n    id\n    image {\n      id\n      altText\n      url\n      width\n      height\n    }\n    publishedAt\n    title\n  }\n': {
+  '#graphql\n  query article(\n    $country: CountryCode\n    $language: LanguageCode\n    $blogHandle: String!\n    $articleHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      articleByHandle(handle: $articleHandle) {\n        title\n        handle\n        contentHtml\n        publishedAt\n        tags\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n      articles (first: 20) {\n        nodes {\n            ...Article\n        }\n      }\n    }\n  }\n  fragment Article on Article {\n    author: authorV2 {\n      name\n    }\n    contentHtml\n    excerpt\n    excerptHtml\n    handle\n    id\n    image {\n      id\n      altText\n      url\n      width\n      height\n    }\n    publishedAt\n    title\n  }\n': {
     return: ArticleQuery;
     variables: ArticleQueryVariables;
   };
-  '#graphql\n  query blog(\n    $language: LanguageCode\n    $blogHandle: String!\n    $pageBy: Int!\n    $cursor: String\n  ) @inContext(language: $language) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      seo {\n        title\n        description\n      }\n      articles(first: $pageBy, after: $cursor) {\n        edges {\n          node {\n            ...Article\n          }\n        }\n      }\n    }\n  }\n\n  fragment Article on Article {\n    author: authorV2 {\n      name\n    }\n    contentHtml\n    excerpt\n    excerptHtml\n    handle\n    id\n    image {\n      id\n      altText\n      url\n      width\n      height\n    }\n    publishedAt\n    title\n  }\n': {
+  '#graphql\n  query blog(\n    $country: CountryCode\n    $language: LanguageCode\n    $blogHandle: String!\n    $pageBy: Int!\n    $cursor: String\n  ) @inContext(country: $country, language: $language) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      seo {\n        title\n        description\n      }\n      articles(first: $pageBy, after: $cursor) {\n        edges {\n          node {\n            ...Article\n          }\n        }\n      }\n    }\n  }\n\n  fragment Article on Article {\n    author: authorV2 {\n      name\n    }\n    contentHtml\n    excerpt\n    excerptHtml\n    handle\n    id\n    image {\n      id\n      altText\n      url\n      width\n      height\n    }\n    publishedAt\n    title\n  }\n': {
     return: BlogQuery;
     variables: BlogQueryVariables;
   };
@@ -4022,11 +4079,11 @@ interface GeneratedQueryTypes {
     return: CollectionsQuery;
     variables: CollectionsQueryVariables;
   };
-  '#graphql\n  query PageDetails($language: LanguageCode, $handle: String!)\n  @inContext(language: $language) {\n    page(handle: $handle) {\n      id\n      title\n      handle\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
+  '#graphql\n  query PageDetails(\n    $country: CountryCode\n    $language: LanguageCode\n    $handle: String!\n  ) @inContext(country: $country, language: $language) {\n    page(handle: $handle) {\n      id\n      title\n      handle\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageDetailsQuery;
     variables: PageDetailsQueryVariables;
   };
-  '#graphql\n  fragment PolicyHandle on ShopPolicy {\n    body\n    handle\n    id\n    title\n    url\n  }\n\n  query PoliciesHandle(\n    $language: LanguageCode\n    $privacyPolicy: Boolean!\n    $shippingPolicy: Boolean!\n    $termsOfService: Boolean!\n    $refundPolicy: Boolean!\n  ) @inContext(language: $language) {\n    shop {\n      privacyPolicy @include(if: $privacyPolicy) {\n        ...PolicyHandle\n      }\n      shippingPolicy @include(if: $shippingPolicy) {\n        ...PolicyHandle\n      }\n      termsOfService @include(if: $termsOfService) {\n        ...PolicyHandle\n      }\n      refundPolicy @include(if: $refundPolicy) {\n        ...PolicyHandle\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment PolicyHandle on ShopPolicy {\n    body\n    handle\n    id\n    title\n    url\n  }\n\n  query PoliciesHandle(\n    $country: CountryCode\n    $language: LanguageCode\n    $privacyPolicy: Boolean!\n    $shippingPolicy: Boolean!\n    $termsOfService: Boolean!\n    $refundPolicy: Boolean!\n  ) @inContext(country: $country, language: $language) {\n    shop {\n      privacyPolicy @include(if: $privacyPolicy) {\n        ...PolicyHandle\n      }\n      shippingPolicy @include(if: $shippingPolicy) {\n        ...PolicyHandle\n      }\n      termsOfService @include(if: $termsOfService) {\n        ...PolicyHandle\n      }\n      refundPolicy @include(if: $refundPolicy) {\n        ...PolicyHandle\n      }\n    }\n  }\n': {
     return: PoliciesHandleQuery;
     variables: PoliciesHandleQueryVariables;
   };
@@ -4042,11 +4099,19 @@ interface GeneratedQueryTypes {
     return: SearchQuery;
     variables: SearchQueryVariables;
   };
+  '#graphql\n  query SitemapBlogs($first: Int!, $after: String) {\n    blogs(first: $first, after: $after) {\n      nodes {\n        handle\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n': {
+    return: SitemapBlogsQuery;
+    variables: SitemapBlogsQueryVariables;
+  };
+  '#graphql\n  query SitemapBlogArticles(\n    $blogHandle: String!\n    $first: Int!\n    $after: String\n  ) {\n    blog(handle: $blogHandle) {\n      articles(\n        first: $first\n        after: $after\n        sortKey: PUBLISHED_AT\n        reverse: true\n      ) {\n        nodes {\n          handle\n          publishedAt\n        }\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n      }\n    }\n  }\n': {
+    return: SitemapBlogArticlesQuery;
+    variables: SitemapBlogArticlesQueryVariables;
+  };
   '#graphql\n  query StoreRobots($country: CountryCode, $language: LanguageCode)\n   @inContext(country: $country, language: $language) {\n    shop {\n      id\n    }\n  }\n': {
     return: StoreRobotsQuery;
     variables: StoreRobotsQueryVariables;
   };
-  '#graphql\nquery BlogSingle(\n    $language: LanguageCode\n    $blogHandle: String!\n  ) @inContext(language: $language) {\n    blog(handle: $blogHandle) {\n      articles(first: 8) {\n        nodes {\n          author: authorV2 {\n            name\n          }\n          contentHtml\n          excerpt\n          excerptHtml\n          handle\n          id\n          image {\n            id\n            altText\n            url\n            width\n            height\n          }\n          publishedAt\n          title\n          blog {\n            handle\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\nquery BlogSingle(\n    $country: CountryCode\n    $language: LanguageCode\n    $blogHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    blog(handle: $blogHandle) {\n      articles(first: 8) {\n        nodes {\n          author: authorV2 {\n            name\n          }\n          contentHtml\n          excerpt\n          excerptHtml\n          handle\n          id\n          image {\n            id\n            altText\n            url\n            width\n            height\n          }\n          publishedAt\n          title\n          blog {\n            handle\n          }\n        }\n      }\n    }\n  }\n': {
     return: BlogSingleQuery;
     variables: BlogSingleQueryVariables;
   };
@@ -4070,11 +4135,15 @@ interface GeneratedQueryTypes {
     return: OurTeamQuery;
     variables: OurTeamQueryVariables;
   };
+  '#graphql\n  query storeLocalization {\n    localization {\n      country {\n        isoCode\n        name\n        currency { isoCode }\n      }\n      language {\n        isoCode\n        name\n        endonymName\n      }\n      availableLanguages {\n        isoCode\n        name\n        endonymName\n      }\n      availableCountries {\n        isoCode\n        name\n        currency { isoCode }\n        availableLanguages {\n          isoCode\n          name\n          endonymName\n        }\n      }\n    }\n  }\n': {
+    return: StoreLocalizationQuery;
+    variables: StoreLocalizationQueryVariables;
+  };
   '#graphql\n  query productRecommendations(\n    $buyer: BuyerInput\n    $productId: ID!\n    $count: Int\n    $country: CountryCode\n    $language: LanguageCode\n    $query: String\n  ) @inContext(buyer: $buyer, country: $country, language: $language) {\n    recommended: productRecommendations(productId: $productId) {\n      ...ProductCard\n    }\n    additional: products(first: $count, sortKey: BEST_SELLING, query: $query) {\n      nodes {\n        ...ProductCard\n      }\n    }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    title\n    publishedAt\n    handle\n    vendor\n    tags\n    images(first: 50) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    options {\n      ...ProductOption\n    }\n    badges: metafields(identifiers: [\n      { namespace: "custom", key: "best_seller" }\n    ]) {\n      key\n      namespace\n      value\n    }\n    priceRange {\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    selectedOrFirstAvailableVariant(\n      selectedOptions: []\n      ignoreUnknownOptions: true\n      caseInsensitiveMatch: true\n    ) {\n      ...ProductVariant\n    }\n    # Check if the product is a bundle\n    isBundle: selectedOrFirstAvailableVariant(ignoreUnknownOptions: true, selectedOptions: { name: "", value: ""}) {\n      ...on ProductVariant {\n        requiresComponents\n      }\n    }\n  }\n  #graphql\n  fragment ProductOption on ProductOption {\n    name\n    optionValues {\n      name\n      firstSelectableVariant {\n        ...ProductVariant\n      }\n      swatch {\n        color\n        image {\n          previewImage {\n            url\n            altText\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    id\n    availableForSale\n    quantityAvailable\n    quantityRule {\n          increment\n          maximum\n          minimum\n        }\n        quantityPriceBreaks (first: 10) {\n          nodes {\n            price {\n              amount\n              currencyCode\n            }\n            minimumQuantity\n          }\n        }\n    selectedOptions {\n      name\n      value\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    requiresComponents\n    components(first: 10) {\n      nodes {\n        productVariant {\n          id\n          title\n          product {\n            handle\n          }\n        }\n        quantity\n      }\n    }\n    groupedBy(first: 10) {\n      nodes {\n        id\n        title\n        product {\n          handle\n        }\n      }\n    }\n  }\n\n\n\n': {
     return: ProductRecommendationsQuery;
     variables: ProductRecommendationsQueryVariables;
   };
-  '#graphql\n  query layout(\n    $language: LanguageCode\n    $headerMenuHandle: String!\n    $footerMenuHandle: String!\n  ) @inContext(language: $language) {\n    shop {\n      ...Shop\n    }\n    headerMenu: menu(handle: $headerMenuHandle) {\n      ...Menu\n    }\n    footerMenu: menu(handle: $footerMenuHandle) {\n      ...Menu\n    }\n  }\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain {\n      url\n    }\n    brand {\n      logo {\n        image {\n          url\n        }\n      }\n    }\n  }\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    resource {\n      ... on Collection {\n        image {\n          altText\n          height\n          id\n          url\n          width\n        }\n      }\n      ... on Product {\n        image: featuredImage {\n          altText\n          height\n          id\n          url\n          width\n        }\n      }\n    }\n    tags\n    title\n    type\n    url\n  }\n\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem2 on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ParentMenuItem2\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n': {
+  '#graphql\n  query layout(\n    $country: CountryCode\n    $language: LanguageCode\n    $headerMenuHandle: String!\n    $footerMenuHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    shop {\n      ...Shop\n    }\n    headerMenu: menu(handle: $headerMenuHandle) {\n      ...Menu\n    }\n    footerMenu: menu(handle: $footerMenuHandle) {\n      ...Menu\n    }\n  }\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain {\n      url\n    }\n    brand {\n      logo {\n        image {\n          url\n        }\n      }\n    }\n  }\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    resource {\n      ... on Collection {\n        image {\n          altText\n          height\n          id\n          url\n          width\n        }\n      }\n      ... on Product {\n        image: featuredImage {\n          altText\n          height\n          id\n          url\n          width\n        }\n      }\n    }\n    tags\n    title\n    type\n    url\n  }\n\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem2 on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ParentMenuItem2\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n': {
     return: LayoutQuery;
     variables: LayoutQueryVariables;
   };

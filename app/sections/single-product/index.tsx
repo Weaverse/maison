@@ -9,6 +9,7 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
+  useTranslation,
   type WeaverseProduct,
 } from "@weaverse/hydrogen";
 import { useState } from "react";
@@ -48,6 +49,7 @@ type SingleProductProps = HydrogenComponentProps<
   };
 
 export default function SingleProduct(props: SingleProductProps) {
+  const { t } = useTranslation();
   const {
     ref,
     loaderData,
@@ -84,7 +86,7 @@ export default function SingleProduct(props: SingleProductProps) {
             <div className="flex flex-col items-start justify-start gap-4">
               <SoldOutBadge />
               <h3 data-motion="fade-up" className="tracking-tight">
-                EXAMPLE PRODUCT TITLE
+                {t("product.exampleTitle")}
               </h3>
               <Money
                 withoutTrailingZeros
@@ -103,7 +105,7 @@ export default function SingleProduct(props: SingleProductProps) {
                 className="w-full cursor-not-allowed"
                 disabled
               >
-                SOLD OUT
+                {t("product.soldOut")}
               </Button>
               <Link
                 to="#"
@@ -112,7 +114,7 @@ export default function SingleProduct(props: SingleProductProps) {
                 className="w-fit cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                View full details →
+                {t("product.viewFullDetails")} →
               </Link>
             </div>
           </div>
@@ -123,13 +125,13 @@ export default function SingleProduct(props: SingleProductProps) {
 
   const isBundle = Boolean(product?.isBundle?.requiresComponents);
   const bundledVariants = isBundle ? product?.isBundle?.components.nodes : null;
-  let atcText = "Add to Cart";
+  let atcText = t("product.addToCart");
   if (selectedVariant?.availableForSale) {
-    atcText = isBundle ? "Add bundle to cart" : "Add to Cart";
+    atcText = isBundle ? t("product.addBundleToCart") : t("product.addToCart");
   } else if (selectedVariant?.quantityAvailable === -1) {
-    atcText = "Unavailable";
+    atcText = t("product.unavailable");
   } else {
-    atcText = "Sold Out";
+    atcText = t("product.soldOut");
   }
 
   return (
@@ -182,7 +184,7 @@ export default function SingleProduct(props: SingleProductProps) {
               />
               {isBundle && (
                 <div className="space-y-3">
-                  <h4 className="text-2xl">Bundled Products</h4>
+                  <h4 className="text-2xl">{t("product.bundledProducts")}</h4>
                   <BundledVariants
                     variants={bundledVariants as ProductVariantComponent[]}
                   />
@@ -230,7 +232,7 @@ export default function SingleProduct(props: SingleProductProps) {
               variant="underline"
               className="w-fit"
             >
-              View full details →
+              {t("product.viewFullDetails")} →
             </Link>
           </div>
         </div>

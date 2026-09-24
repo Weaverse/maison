@@ -7,6 +7,7 @@ import type {
 } from "storefront-api.generated";
 import invariant from "tiny-invariant";
 import type { EnhancedMenu } from "~/types/menu";
+import { getLocaleSegment, localeCode } from "~/utils/locale";
 import { seoPayload } from "~/utils/seo.server";
 
 /**
@@ -17,6 +18,20 @@ export async function loadCriticalData({
   request,
   context,
 }: LoaderFunctionArgs) {
+  const { localization } = context;
+
+  // A prefix that is not a live locale must 404 rather than silently render
+  // the default one, which would give every unknown path a 200.
+  const requestedLocale = getLocaleSegment(new URL(request.url).pathname);
+  if (
+    requestedLocale &&
+    !localization.availableLocales.some(
+      (locale) => localeCode(locale) === requestedLocale,
+    )
+  ) {
+    throw new Response("Unsupported locale", { status: 404 });
+  }
+
   const [layout, swatchesConfigs, weaverseTheme] = await Promise.all([
     getLayoutData(context),
     getSwatchesConfigs(context),
@@ -27,6 +42,7 @@ export async function loadCriticalData({
   const seo = seoPayload.root({ shop: layout.shop, url: request.url });
 
   const { storefront, env } = context;
+
   return {
     layout,
     seo,
@@ -42,7 +58,11 @@ export async function loadCriticalData({
       country: storefront.i18n.country,
       language: storefront.i18n.language,
     },
-    selectedLocale: storefront.i18n,
+    // From the context rather than `storefront.i18n`: that one is resolved
+    // from the URL alone, before Shopify has confirmed the locale is live.
+    selectedLocale: localization.selectedLocale,
+    availableLocales: localization.availableLocales,
+    defaultLocale: localization.defaultLocale,
     weaverseTheme,
     googleGtmID: env.PUBLIC_GOOGLE_GTM_ID,
     swatchesConfigs,
@@ -287,10 +307,11 @@ function resolveToFromType(
 
 const LAYOUT_QUERY = `#graphql
   query layout(
+    $country: CountryCode
     $language: LanguageCode
     $headerMenuHandle: String!
     $footerMenuHandle: String!
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     shop {
       ...Shop
     }
