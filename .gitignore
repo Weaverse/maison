@@ -22,6 +22,7 @@ memory/
 scripts/*
 # Checked in: this one runs in CI alongside typecheck and lint.
 !scripts/check-translations.mjs
+!scripts/b2bridge-probe.mjs
 templates/
 specs/
 .wrangler/
