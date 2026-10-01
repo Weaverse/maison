@@ -48,9 +48,13 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
         {details.map(({ title, content, learnMore }) => (
           <Accordion.Item key={title} value={title}>
             <Accordion.Header>
+              {/* `font-sans` because Radix renders this header as a bare <h3>,
+                  which the global heading rule in app.css styles with the serif
+                  face. The <h3> is here for screen readers, not as a visual
+                  heading. Same reason as in app/sections/accordion/accordion-item.tsx. */}
               <Accordion.Trigger
                 className={clsx([
-                  "group flex w-full justify-between font-bold py-[24px]",
+                  "group flex w-full justify-between font-sans font-bold py-[24px]",
                   "border-line-subtle border-t",
                 ])}
               >
