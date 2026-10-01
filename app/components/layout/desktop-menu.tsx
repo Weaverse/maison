@@ -97,7 +97,7 @@ function MegaMenu({ items }: { items: SingleMenuItem[] }) {
         resource?.image && children.length === 0 ? (
           <SlideIn
             key={id}
-            className="group/item relative aspect-square w-72 max-w-72 grow overflow-hidden bg-gray-100"
+            className="group/item relative aspect-square w-72 max-w-72 grow overflow-hidden rounded-[16px] bg-gray-100"
             style={{ "--idx": idx } as React.CSSProperties}
           >
             <Image
