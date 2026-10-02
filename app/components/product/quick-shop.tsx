@@ -258,8 +258,12 @@ export function QuickShopTrigger({
         onClick={handleOpen}
         loading={isLoading}
         className={clsx(
-          "group/quick-shop h-10.5 p-3 leading-4",
+          "group/quick-shop",
           placement === "image" && [
+            // Compact only where it floats over the image. Under the card it
+            // keeps the outline variant's own `px-6 py-[18px]`, which is the
+            // height the design specifies.
+            "h-10.5 p-3 leading-4",
             "absolute bottom-4",
             buttonType === "icon"
               ? "right-4 rounded-full shadow-xl"
