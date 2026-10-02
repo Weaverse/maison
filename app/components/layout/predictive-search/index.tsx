@@ -58,7 +58,11 @@ export function PredictiveSearchButton() {
             </Dialog.Close>
           </div>
           <div className="flex-1 overflow-hidden">
-            <PredictiveSearchForm>
+            {/* The form is a plain <form> with no height of its own, so without
+                this the drawer's height stops here and nothing below it can
+                size against the panel — which is what kept the results from
+                scrolling. */}
+            <PredictiveSearchForm className="predictive-search-form h-full">
               {({ fetchResults, inputRef }) => (
                 <SearchContent
                   fetchResults={fetchResults}
@@ -204,17 +208,33 @@ function PredictiveSearchResults() {
   const pages = results?.find(({ type }) => type === "articles");
 
   const tabs = [
-    { value: "products", label: "Products", items: products?.items },
-    { value: "collections", label: "Collections", items: collections?.items },
-    { value: "pages", label: "Page", items: pages?.items },
+    {
+      value: "products",
+      label: t("search.tabProducts"),
+      items: products?.items,
+    },
+    {
+      value: "collections",
+      label: t("search.tabCollections"),
+      items: collections?.items,
+    },
+    { value: "pages", label: t("search.tabPages"), items: pages?.items },
   ].filter((tab) => tab.items?.length > 0);
 
   const currentTab =
     tabs.find((tab) => tab.value === activeTab)?.value ?? tabs[0]?.value;
 
   return (
-    <Tabs.Root value={currentTab} onValueChange={setActiveTab}>
-      <Tabs.List className="flex gap-8 border-b border-line-subtle px-5">
+    // The whole panel is height-bound, so the tab strip keeps its size and the
+    // results take the rest and scroll. `ScrollArea` puts `className` on its
+    // viewport, so the sizing has to go on `rootClassName` or the scroll
+    // container has no height to scroll within.
+    <Tabs.Root
+      value={currentTab}
+      onValueChange={setActiveTab}
+      className="flex h-full flex-col"
+    >
+      <Tabs.List className="flex shrink-0 gap-8 border-b border-line-subtle px-5">
         {tabs.map((tab) => (
           <Tabs.Trigger
             key={tab.value}
@@ -231,7 +251,18 @@ function PredictiveSearchResults() {
         ))}
       </Tabs.List>
 
-      <ScrollArea className="h-full">
+      {/* The component's default scrollbar is a black track with a grey thumb,
+          which is heavier than anything else in this panel. A bare track and a
+          thumb on `--color-line` keeps it in the theme's palette. */}
+      <ScrollArea
+        rootClassName="min-h-0 flex-1"
+        className="scroll-smooth"
+        size="sm"
+        type="scroll"
+        scrollHideDelay={800}
+        scrollbarClassName="bg-transparent transition-opacity duration-300"
+        thumbClassName="rounded-full bg-line"
+      >
         <Tabs.Content value="products" className="p-5">
           <div className="space-y-2.5">
             {products?.items?.map((item) => (
@@ -239,7 +270,11 @@ function PredictiveSearchResults() {
             ))}
             <Link
               to={`${params.locale ? `/${params.locale}` : ""}/search?q=${encodeURIComponent(searchTerm.current)}`}
-              className="mt-6 block w-full rounded-(--btn-border-radius) bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
+              // Darkens its own background on hover rather than inverting to
+              // the dark button colour: the result rows above it do the same,
+              // and going through opacity keeps it tied to whatever
+              // `--btn-secondary-bg` the theme is set to.
+              className="mt-6 block w-full rounded-(--btn-border-radius) bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-opacity hover:opacity-90"
             >
               {t("search.seeAll")}
             </Link>
@@ -385,7 +420,7 @@ function KeywordsDisplay({
     // One row that scrolls sideways rather than wrapping: the suggestions grow
     // with whatever the shopper has typed, and a second line pushed the results
     // down the panel. `hidden-scroll` keeps the rail itself out of sight.
-    <div className="hidden-scroll mt-3 flex gap-2 overflow-x-auto">
+    <div className="hidden-scroll mt-3 flex gap-4 overflow-x-auto">
       {keywords.map((item) => (
         <button
           key={item.title}
