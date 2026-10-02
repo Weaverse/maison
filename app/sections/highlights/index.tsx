@@ -25,7 +25,17 @@ export const schema = createSchema({
   settings: [
     {
       group: "Layout",
-      inputs: [...layoutInputs.filter((i) => i.name !== "borderRadius")],
+      inputs: [
+        ...layoutInputs.filter((i) => i.name !== "borderRadius"),
+        {
+          type: "switch",
+          name: "borderTop",
+          label: "Top border",
+          defaultValue: false,
+          helpText:
+            "Draws a rule above the content to separate this section from the one before it",
+        },
+      ],
     },
     {
       group: "Background",
@@ -41,6 +51,7 @@ export const schema = createSchema({
   ],
   presets: {
     backgroundColor: "#F9F8F7",
+    borderTop: true,
     children: [
       {
         type: "highlights--item",
