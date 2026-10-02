@@ -239,7 +239,7 @@ function PredictiveSearchResults() {
             ))}
             <Link
               to={`${params.locale ? `/${params.locale}` : ""}/search?q=${encodeURIComponent(searchTerm.current)}`}
-              className="mt-6 block w-full rounded-sm bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
+              className="mt-6 block w-full rounded-(--btn-border-radius) bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-colors"
             >
               {t("search.seeAll")}
             </Link>
@@ -382,13 +382,16 @@ function KeywordsDisplay({
   }
 
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
+    // One row that scrolls sideways rather than wrapping: the suggestions grow
+    // with whatever the shopper has typed, and a second line pushed the results
+    // down the panel. `hidden-scroll` keeps the rail itself out of sight.
+    <div className="hidden-scroll mt-3 flex gap-2 overflow-x-auto">
       {keywords.map((item) => (
         <button
           key={item.title}
           type="button"
           onClick={() => onKeywordClick(item.title)}
-          className="text-sm"
+          className="shrink-0 whitespace-nowrap text-sm"
         >
           <RevealUnderline>
             <span
