@@ -54,9 +54,9 @@ export interface ProductMediaProps extends VariantProps<typeof variants> {
   showCollectionBadge?: boolean;
   showSaleBadge?: boolean;
   viewTransitionHandle?: string;
-  /** Overrides the default `rounded` (4px) on the main image. */
+  /** Overrides the default `rounded-2xl` (16px) on the main image. */
   imageBorderRadius?: number;
-  /** Overrides the default `rounded` (4px) on each thumbnail. */
+  /** Overrides the default `rounded-xl` (12px) on each thumbnail. */
   thumbnailBorderRadius?: number;
   /**
    * Inset of the prev/next buttons from the image edge, in px. Omitted keeps
@@ -202,7 +202,7 @@ export function ProductMedia(props: ProductMediaProps) {
                       imageAspectRatio={imageAspectRatio}
                       index={idx}
                       className={cn(
-                        "w-full max-w-none object-cover lg:h-full lg:w-full rounded",
+                        "w-full max-w-none object-cover lg:h-full lg:w-full rounded-2xl",
                         idx === 0 &&
                           hasSharedTransition &&
                           "[&_img]:[view-transition-name:image-expand]",
@@ -263,7 +263,7 @@ export function ProductMedia(props: ProductMediaProps) {
               return (
                 <SwiperSlide
                   key={med.id}
-                  className="group bg-gray-100 rounded overflow-hidden"
+                  className="group bg-gray-100 rounded-2xl overflow-hidden"
                   style={imageRadiusStyle}
                 >
                   <div
@@ -381,7 +381,7 @@ export function ProductMedia(props: ProductMediaProps) {
                     key={id}
                     className={cn(
                       "relative",
-                      "h-auto! cursor-pointer rounded overflow-hidden",
+                      "h-auto! cursor-pointer rounded-xl overflow-hidden",
                       "[&.swiper-slide-thumb-active]:border-[3px] [&.swiper-slide-thumb-active]:border-line [&.swiper-slide-thumb-active]:p-0",
                     )}
                     style={thumbnailRadiusStyle}
