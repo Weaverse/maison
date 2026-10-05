@@ -303,7 +303,7 @@ export function CartSummary({
                 <Button
                   variant="secondary"
                   className={clsx(
-                    "px-3 py-2 text-sm font-normal rounded border-0",
+                    "px-3 py-2 text-sm font-normal border-0",
                     layout === "page" && "w-full",
                   )}
                 >
@@ -318,7 +318,7 @@ export function CartSummary({
               <Dialog.Trigger asChild>
                 <Button
                   variant="secondary"
-                  className="rounded border-0 px-3 py-2 font-normal text-sm"
+                  className="border-0 px-3 py-2 font-normal text-sm"
                 >
                   {discountCodeButtonText}
                 </Button>
@@ -332,7 +332,7 @@ export function CartSummary({
                 <Button
                   variant="secondary"
                   className={clsx(
-                    "px-3 py-2 text-sm font-normal rounded border-0",
+                    "px-3 py-2 text-sm font-normal border-0",
                     layout === "page" && "w-full",
                   )}
                 >

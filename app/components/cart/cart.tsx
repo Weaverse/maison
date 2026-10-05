@@ -161,16 +161,21 @@ function CartCheckoutActions({
   return (
     <div className="flex flex-col gap-2.5">
       {layout === "drawer" && (
+        // Both buttons go through the shared variants rather than restating
+        // the colours and padding by hand. That is what keeps them the same
+        // height — the hand-rolled checkout dropped its border and so sat 2px
+        // shorter — and it is what gives them a hover state at all.
         <Link
           to="/cart"
+          variant="outline"
           onClick={() => toggleCartDrawer(false)}
-          className="w-full flex items-center justify-center gap-2 py-[18px] px-6 border border-line text-(--btn-outline-text) rounded-(--btn-border-radius) text-base font-normal"
+          className="w-full font-normal"
         >
           {t("cart.viewCart")}
         </Link>
       )}
       <a href={checkoutUrl} target="_self" className="w-full">
-        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal">
+        <Button variant="primary" className="w-full font-normal">
           {t("cart.checkout")}
         </Button>
       </a>
@@ -448,7 +453,11 @@ function CartLineQuantityAdjust({
       </label>
       <div
         className={clsx(
-          "flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base",
+          // Stretch, not centre: `divide-x` draws its rule on each child's own
+          // edge, so a child shorter than the row leaves a short rule. The
+          // minus sits inside a <form> with no height of its own, which is why
+          // its divider stopped halfway while the input's ran the full height.
+          "flex h-[45px] w-[180px] max-w-full items-stretch divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base",
           layout === "page" && "shrink-0",
           layout === "drawer" && "min-w-0",
         )}

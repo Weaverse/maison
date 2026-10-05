@@ -290,7 +290,9 @@ function PredictiveSearchResults() {
         </Tabs.Content>
 
         <Tabs.Content value="pages" className="p-5">
-          <div className="space-y-4">
+          {/* 4px here plus 6px of padding on each row keeps 16px between
+              titles, now that the rows have padding for the hover highlight. */}
+          <div className="space-y-1">
             {pages?.items?.map((item) => (
               <PageResultItem key={item.id} item={item} />
             ))}
@@ -385,11 +387,16 @@ function PageResultItem({
   }
 
   return (
-    // No vertical padding: the list already spaces its items, and the padding
-    // on top of that added up to 32px between titles. The product and
-    // collection results carry none either.
-    <Link to={item.url} className="block rounded-lg transition-colors">
-      <RevealUnderline className="text-sm">{item.title}</RevealUnderline>
+    // Highlights on hover like the product and collection results, rather than
+    // the underline effect: that one paints below an inline box and never
+    // surfaced reliably at this text size. The negative margin lets the
+    // highlight breathe past the text while the text itself stays lined up
+    // with the other tabs.
+    <Link
+      to={item.url}
+      className="-mx-2 block rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-gray-50"
+    >
+      {item.title}
     </Link>
   );
 }
