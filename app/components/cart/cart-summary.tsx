@@ -88,6 +88,113 @@ export function CartSummary({
     gcRemoveFetcher.state !== "idle" ||
     lineRemoveFetcher.state !== "idle";
 
+  // Both chip groups in one place so the drawer can show them above the
+  // subtotal, as the design has them, while the cart page keeps them below.
+  const appliedCodes = (
+    <>
+      {/* applied gift cards display */}
+      {appliedGiftCards?.length > 0 && (
+        <div className="flex flex-wrap justify-end gap-2">
+          {appliedGiftCards.map((giftCard) => {
+            const isGCRemoving =
+              gcRemoveFetcher.state !== "idle" &&
+              removingGiftCard === giftCard.lastCharacters;
+            return (
+              <div
+                key={giftCard.id}
+                className="flex items-center justify-center gap-2 rounded-lg bg-gray-200 px-2 py-1.5 [&>form]:flex"
+              >
+                <GiftIcon className="h-4.5 w-4.5" aria-hidden="true" />
+                <div className="flex items-center gap-1 leading-normal">
+                  <span>***{giftCard.lastCharacters}</span>
+                  <span className="inline-flex items-center">
+                    (-
+                    <Money data={giftCard.amountUsed} />)
+                  </span>
+                </div>
+                <CartForm
+                  route={cartAction}
+                  action={CartForm.ACTIONS.GiftCardCodesRemove}
+                  inputs={{
+                    giftCardCodes: [giftCard.id],
+                  }}
+                  fetcherKey="gift-card-remove"
+                >
+                  <button
+                    type="submit"
+                    className="relative ml-1 size-4 transition-colors hover:text-red-600"
+                    aria-label={`Remove gift card code ${giftCard.id}`}
+                    onClick={() => setRemovingGiftCard(giftCard.lastCharacters)}
+                  >
+                    {isGCRemoving ? (
+                      <CircleNotchIcon size={16} className="animate-spin" />
+                    ) : (
+                      <XIcon
+                        className="size-4"
+                        weight="regular"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                </CartForm>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* applied discount codes display */}
+      {layout === "drawer" && discountCodes?.length > 0 && (
+        <div className="flex flex-wrap justify-end gap-2">
+          {discountCodes
+            .filter((discount) => discount.applicable)
+            .map((discount) => {
+              const codes = discountCodes
+                .filter((d) => d.applicable)
+                .map((d) => d.code);
+              const updatedCodes = codes.filter((c) => c !== discount.code);
+              const isDCRemoving =
+                dcRemoveFetcher.state !== "idle" &&
+                removingDiscountCode === discount.code;
+
+              return (
+                <div
+                  key={discount.code}
+                  className="flex items-center justify-center gap-2 px-2 py-1 rounded-lg bg-(--color-header-bg) [&>form]:flex"
+                >
+                  <TagIcon className="h-4.5 w-4.5" aria-hidden="true" />
+                  <span className="leading-normal">{discount.code}</span>
+                  <CartForm
+                    route={cartAction}
+                    action={CartForm.ACTIONS.DiscountCodesUpdate}
+                    inputs={{ discountCodes: updatedCodes || [] }}
+                    fetcherKey="discount-code-remove"
+                  >
+                    <button
+                      type="submit"
+                      className="relative ml-1 size-4 transition-colors hover:text-red-600"
+                      aria-label={`Remove discount code ${discount.code}`}
+                      onClick={() => setRemovingDiscountCode(discount.code)}
+                    >
+                      {isDCRemoving ? (
+                        <CircleNotchIcon size={16} className="animate-spin" />
+                      ) : (
+                        <XIcon
+                          className="size-4"
+                          weight="regular"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </button>
+                  </CartForm>
+                </div>
+              );
+            })}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div
       className={clsx(
@@ -96,6 +203,7 @@ export function CartSummary({
           "z-[1] grid h-fit w-full gap-5 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav)",
       )}
     >
+      {layout === "drawer" && appliedCodes}
       {layout === "page" ? (
         <div className="grid gap-6">
           <h2 className="font-semibold text-base">{t("cart.orderSummary")}</h2>
@@ -185,106 +293,7 @@ export function CartSummary({
         </>
       )}
 
-      {/* applied gift cards display */}
-      {appliedGiftCards?.length > 0 && (
-        <div className="flex flex-wrap justify-end gap-2">
-          {appliedGiftCards.map((giftCard) => {
-            const isGCRemoving =
-              gcRemoveFetcher.state !== "idle" &&
-              removingGiftCard === giftCard.lastCharacters;
-            return (
-              <div
-                key={giftCard.id}
-                className="flex items-center justify-center gap-2 rounded-md bg-gray-200 px-2 py-1.5 [&>form]:flex"
-              >
-                <GiftIcon className="h-4.5 w-4.5" aria-hidden="true" />
-                <div className="flex items-center gap-1 leading-normal">
-                  <span>***{giftCard.lastCharacters}</span>
-                  <span className="inline-flex items-center">
-                    (-
-                    <Money data={giftCard.amountUsed} />)
-                  </span>
-                </div>
-                <CartForm
-                  route={cartAction}
-                  action={CartForm.ACTIONS.GiftCardCodesRemove}
-                  inputs={{
-                    giftCardCodes: [giftCard.id],
-                  }}
-                  fetcherKey="gift-card-remove"
-                >
-                  <button
-                    type="submit"
-                    className="relative ml-1 size-4 transition-colors hover:text-red-600"
-                    aria-label={`Remove gift card code ${giftCard.id}`}
-                    onClick={() => setRemovingGiftCard(giftCard.lastCharacters)}
-                  >
-                    {isGCRemoving ? (
-                      <CircleNotchIcon size={16} className="animate-spin" />
-                    ) : (
-                      <XIcon
-                        className="size-4"
-                        weight="regular"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </button>
-                </CartForm>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* applied discount codes display */}
-      {layout === "drawer" && discountCodes?.length > 0 && (
-        <div className="flex flex-wrap justify-end gap-2">
-          {discountCodes
-            .filter((discount) => discount.applicable)
-            .map((discount) => {
-              const codes = discountCodes
-                .filter((d) => d.applicable)
-                .map((d) => d.code);
-              const updatedCodes = codes.filter((c) => c !== discount.code);
-              const isDCRemoving =
-                dcRemoveFetcher.state !== "idle" &&
-                removingDiscountCode === discount.code;
-
-              return (
-                <div
-                  key={discount.code}
-                  className="flex items-center justify-center gap-2 px-2 py-1 rounded-md bg-(--color-header-bg) [&>form]:flex"
-                >
-                  <TagIcon className="h-4.5 w-4.5" aria-hidden="true" />
-                  <span className="leading-normal">{discount.code}</span>
-                  <CartForm
-                    route={cartAction}
-                    action={CartForm.ACTIONS.DiscountCodesUpdate}
-                    inputs={{ discountCodes: updatedCodes || [] }}
-                    fetcherKey="discount-code-remove"
-                  >
-                    <button
-                      type="submit"
-                      className="relative ml-1 size-4 transition-colors hover:text-red-600"
-                      aria-label={`Remove discount code ${discount.code}`}
-                      onClick={() => setRemovingDiscountCode(discount.code)}
-                    >
-                      {isDCRemoving ? (
-                        <CircleNotchIcon size={16} className="animate-spin" />
-                      ) : (
-                        <XIcon
-                          className="size-4"
-                          weight="regular"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </button>
-                  </CartForm>
-                </div>
-              );
-            })}
-        </div>
-      )}
+      {layout === "page" && appliedCodes}
 
       {/* action buttons */}
       {actionCount > 0 && (

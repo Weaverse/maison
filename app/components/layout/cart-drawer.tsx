@@ -141,7 +141,12 @@ function AnimatedDrawer({ open, children }) {
                   damping: 25,
                   stiffness: 150,
                 }}
-                className="w-screen max-w-[461px] bg-background pt-3 h-full relative"
+                // The bottom keeps its own space: the panel ends flush with the
+                // screen edge, and on a tablet the checkout button sat jammed
+                // against it — under the home indicator once one shows up.
+                // Padding-bottom of the safe inset (with a 12px floor) lifts
+                // the buttons clear on every device.
+                className="relative h-full w-screen max-w-[461px] bg-background pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"
               >
                 {children}
               </motion.div>
