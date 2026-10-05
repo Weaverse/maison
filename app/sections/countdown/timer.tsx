@@ -11,7 +11,14 @@ const ONE_MIN = ONE_SEC * 60;
 const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 
-function calculateRemainingTime(endTime: number) {
+export interface RemainingTime {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+function calculateRemainingTime(endTime: number): RemainingTime {
   const now = Date.now();
   const diff = endTime - now;
   if (diff <= 0) {
@@ -34,11 +41,18 @@ interface CountDownTimerData {
 function CountdownTimer(props: CountDownTimerData & HydrogenComponentProps) {
   const { t } = useTranslation();
   const { textColor, endTime, ref, ...rest } = props;
-  const [remainingTime, setRemainingTime] = useState(
-    calculateRemainingTime(endTime),
+  // `calculateRemainingTime` reads the clock at render, so seeding state
+  // with it made the server and client disagree whenever a second ticked
+  // between them — a text mismatch React answers by throwing away the
+  // server tree and re-rendering the whole page. Seed empty instead: both
+  // sides render the zeros, and the effect fills the real digits in on
+  // mount.
+  const [remainingTime, setRemainingTime] = useState<RemainingTime | null>(
+    null,
   );
 
   useEffect(() => {
+    setRemainingTime(calculateRemainingTime(endTime));
     const intervalId = setInterval(() => {
       const updatedTimeRemaining = calculateRemainingTime(endTime);
       setRemainingTime(updatedTimeRemaining);
