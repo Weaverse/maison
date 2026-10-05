@@ -385,7 +385,10 @@ function PageResultItem({
   }
 
   return (
-    <Link to={item.url} className="block rounded-lg py-2 transition-colors">
+    // No vertical padding: the list already spaces its items, and the padding
+    // on top of that added up to 32px between titles. The product and
+    // collection results carry none either.
+    <Link to={item.url} className="block rounded-lg transition-colors">
       <RevealUnderline className="text-sm">{item.title}</RevealUnderline>
     </Link>
   );
