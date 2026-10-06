@@ -490,7 +490,11 @@ function QuantityUpdateButtons({
   return (
     <div className="flex items-center gap-3">
       <VolumePricingInfo variant={variant} />
-      <div className="flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base">
+      {/* Hover doubles the frame and both dividers with an inset shadow
+          rather than a wider border: growing the border eats into the content
+          box and shoves the stepper 2px sideways, which reads as a flicker.
+          A shadow paints over the same pixels, costs no layout, and fades. */}
+      <div className="flex h-[45px] w-[180px] max-w-full items-center divide-x divide-(--color-line) rounded-(--btn-border-radius) border border-(--color-line) text-base transition-shadow duration-200 ease-out [&>*]:transition-shadow [&>*]:duration-200 [&>*]:ease-out hover:shadow-[inset_0_0_0_1px_var(--color-line)] hover:[&>*:not(:last-child)]:shadow-[inset_-1px_0_0_var(--color-line)]">
         <button
           type="button"
           aria-label={t("product.decreaseQuantity")}
