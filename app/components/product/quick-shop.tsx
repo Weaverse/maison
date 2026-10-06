@@ -57,7 +57,7 @@ export function QuickShop({
   return (
     <div className="bg-background p-6 md:p-10">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
-        <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded bg-gray-100">
+        <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
           {firstImage && (
             <ProductMedia
               mediaLayout="slider"
