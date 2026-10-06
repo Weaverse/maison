@@ -117,9 +117,14 @@ export function ProductCard({
             <Image
               className={clsx([
                 "absolute inset-0",
+                // The zoom is keyed off the card, not the image, so it also
+                // fires when the cursor is on the quick shop button below.
+                // Tailwind v4 compiles `scale-105` to the `scale` property,
+                // not `transform`, so that is what has to be transitioned.
+                "transition-[opacity,scale] duration-300 group-hover:scale-105",
                 pcardShowImageOnHover &&
                   secondImage &&
-                  "transition-opacity duration-300 group-hover:opacity-50",
+                  "group-hover:opacity-50",
                 isTransitioning &&
                   "[&_img]:[view-transition-name:image-expand]",
               ])}
@@ -134,7 +139,8 @@ export function ProductCard({
               <Image
                 className={clsx([
                   "absolute inset-0",
-                  "opacity-0 transition-opacity duration-300 group-hover:opacity-100",
+                  "opacity-0 transition-[opacity,scale] duration-300",
+                  "group-hover:scale-105 group-hover:opacity-100",
                 ])}
                 sizes="auto"
                 width={700}
@@ -209,9 +215,9 @@ export function ProductCard({
           <Link
             to={`/products/${product.handle}?${params.toString()}`}
             prefetch="intent"
-            className="font-semibold line-clamp-2"
+            className="pb-1 font-semibold line-clamp-2"
           >
-            <RevealUnderline className="bg-position-[left_calc(1em+3px)] leading-normal group-hover:bg-size-[100%_1px]">
+            <RevealUnderline className="leading-normal group-hover:bg-size-[100%_1px]">
               {product.title}
             </RevealUnderline>
           </Link>
