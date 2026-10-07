@@ -278,10 +278,10 @@
   },
   "form": {
     "nameRequired": "Your name*",
-    "company": "Company name",
+    "companyRequired": "Company name*",
     "email": "Contact email*",
     "website": "Website",
-    "message": "Message",
+    "messageRequired": "Message*",
     "thankYou": "Thank you for your interest!",
     "willReply": "We'll get back to you shortly."
   },
