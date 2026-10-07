@@ -30,13 +30,6 @@ declare global {
     // Private — server-only. Never prefix with PUBLIC_ or return from loaders.
     KLAVIYO_PRIVATE_API_TOKEN: string;
     PUBLIC_SHOPIFY_INBOX_SHOP_ID: string;
-    // Private — server-only. Never prefix with PUBLIC_ or return from loaders.
-    // B2Bridge Public API key, read only by app/utils/b2bridge/client.server.ts.
-    HEADLESS_B2B_TOKEN: string;
-    // Local testing only — prices every product page as this customer so the
-    // wholesale view can be checked without Customer Account OAuth. Ignored
-    // when NODE_ENV is production.
-    B2BRIDGE_DEV_CUSTOMER_ID?: string;
     WEAVERSE_HOST?: string;
     WEAVERSE_API_KEY: string;
   }

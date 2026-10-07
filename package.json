@@ -32,7 +32,6 @@
     "preview": "shopify hydrogen preview --build",
     "start": "shopify hydrogen preview",
     "i18n:check": "node scripts/check-translations.mjs",
-    "b2bridge:check": "node scripts/b2bridge-probe.mjs",
     "typecheck": "react-router typegen && tsc --noEmit",
     "lint": "biome check",
     "codegen": "shopify hydrogen codegen",
