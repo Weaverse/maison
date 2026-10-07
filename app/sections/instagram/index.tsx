@@ -46,7 +46,9 @@ export default function Instagram(props: InstagramProps) {
     "flex aspect-square w-full items-center justify-center rounded-[16px] bg-background p-4 text-center";
 
   const viewMoreLabel = (
-    <span className="font-serif text-[24px] text-body-subtle leading-normal">
+    // The design sets this style's line height to 100%, so the two lines
+    // sit a full 24px apart rather than the 36px `leading-normal` gives.
+    <span className="font-serif text-[24px] text-body-subtle leading-none">
       {t("instagram.viewMoreIn")}
       <br />
       <span className="text-body">{handle}</span>
