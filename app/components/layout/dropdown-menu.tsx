@@ -28,7 +28,7 @@ export function DropdownMenu({ menuItem }: { menuItem: SingleMenuItem }) {
         </Trigger>
         <Content
           align="start"
-          className="flex min-w-48 animate-fade-in flex-col gap-1.5 bg-(--color-header-bg) p-6 shadow-lg"
+          className="flex min-w-48 animate-fade-in flex-col gap-1.5 rounded-lg bg-(--color-header-bg) p-6 shadow-lg"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           {childItems.map(
@@ -37,7 +37,9 @@ export function DropdownMenu({ menuItem }: { menuItem: SingleMenuItem }) {
                 <Link
                   to={itemTo}
                   prefetch="intent"
-                  className="group items-center gap-2 outline-hidden transition-none"
+                  // `Link` centres its content by default; in a stacked menu the items
+                  // have to share a left edge.
+                  className="group items-center justify-start gap-2 outline-hidden transition-none"
                 >
                   <RevealUnderline>{itemTitle}</RevealUnderline>
                   {isExternal && (
