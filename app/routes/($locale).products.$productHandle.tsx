@@ -12,13 +12,6 @@ import type { ProductQuery } from "storefront-api.generated";
 import invariant from "tiny-invariant";
 import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query.account";
 import { PRODUCT_QUERY } from "~/graphql/queries";
-import { applyOverlays } from "~/utils/b2bridge/apply";
-import {
-  customerIdFromGid,
-  devCustomerIdOverride,
-  isB2BridgeConfigured,
-  resolveB2BridgeOverlays,
-} from "~/utils/b2bridge/client.server";
 import { routeHeaders } from "~/utils/cache";
 import {
   COMBINED_LISTINGS_CONFIGS,
@@ -81,57 +74,6 @@ export async function loadB2BCustomerData(args: LoaderFunctionArgs) {
   return {};
 }
 
-/**
- * Resolves this buyer's B2Bridge prices, or `null` when B2Bridge should not
- * price the request.
- *
- * Runs alongside the product query rather than after it: the lookup needs only
- * the signed-in customer, not the product, so serialising the two would add a
- * round trip to every wholesale page view.
- */
-async function loadB2BridgePricing(
-  context: LoaderFunctionArgs["context"],
-  isLoggedIn: boolean,
-) {
-  const { env, weaverse, customerAccount, storefront } = context;
-  if (!isB2BridgeConfigured(env)) {
-    return null;
-  }
-
-  // The dev override stands in for a signed-in buyer so the rendered page can
-  // be checked without going through Customer Account OAuth. It is inert in
-  // production — see `devCustomerIdOverride`.
-  let customerId = devCustomerIdOverride(env);
-  if (!customerId) {
-    if (!isLoggedIn) {
-      return null;
-    }
-    try {
-      const result = await customerAccount.query(CUSTOMER_LOCATIONS_QUERY);
-      customerId = customerIdFromGid(result.data?.customer?.id);
-    } catch (err) {
-      console.warn(
-        "[B2Bridge] customer lookup failed:",
-        (err as Error)?.message,
-      );
-      return null;
-    }
-  }
-
-  return resolveB2BridgeOverlays({
-    env,
-    fetchWithCache: weaverse.fetchWithCache,
-    customerId,
-    // The Customer Account API's `Customer` type has no `tags` field, so the
-    // `customer_tags` half of B2Bridge's group binding is unreachable from a
-    // headless storefront without an Admin API call. Only `customer_ids` is
-    // usable here — worth confirming with B2Bridge that it is authoritative.
-    customerTags: [],
-    country: storefront.i18n.country,
-    currencyCode: storefront.i18n.currency,
-  });
-}
-
 export async function loader(args: LoaderFunctionArgs) {
   const { request, context, params } = args;
   const { productHandle: handle } = params;
@@ -158,45 +100,24 @@ export async function loader(args: LoaderFunctionArgs) {
 
   const selectedOptions = getSelectedProductOptions(request);
 
-  const [{ shop, product }, weaverseData, b2bridgeOverlays] = await Promise.all(
-    [
-      storefront.query<ProductQuery>(PRODUCT_QUERY, {
-        variables: {
-          handle,
-          ...buyerVariables,
-          selectedOptions,
-          country: storefront.i18n.country,
-          language: storefront.i18n.language,
-        },
-      }),
-      weaverse.loadPage({ type: "PRODUCT", handle }),
-      loadB2BridgePricing(context, isLoggedIn),
-      // Add other queries here, so that they are loaded in parallel
-    ],
-  );
+  const [{ shop, product }, weaverseData] = await Promise.all([
+    storefront.query<ProductQuery>(PRODUCT_QUERY, {
+      variables: {
+        handle,
+        ...buyerVariables,
+        selectedOptions,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
+      },
+    }),
+    weaverse.loadPage({ type: "PRODUCT", handle }),
+    // Add other queries here, so that they are loaded in parallel
+  ]);
 
   if (!product?.id) {
     throw new Response("product", { status: 404 });
   }
   redirectIfHandleIsLocalized(request, { handle, data: product });
-
-  // B2Bridge prices are written onto the Shopify variants rather than passed
-  // down as separate props, because no section receives props — each one
-  // re-reads this loader and takes `variant.price` straight off the object.
-  if (b2bridgeOverlays) {
-    const applied = applyOverlays(product, b2bridgeOverlays);
-    if (applied === 0) {
-      console.warn(
-        `[B2Bridge] rule matched the buyer but priced no variant of "${handle}"`,
-      );
-    } else if (process.env.NODE_ENV !== "production") {
-      // Makes "did it actually fire?" answerable from the dev server output,
-      // without having to read prices off the rendered page.
-      console.log(
-        `[B2Bridge] repriced ${applied} variant node(s) of "${handle}" in ${storefront.i18n.country}`,
-      );
-    }
-  }
 
   if (COMBINED_LISTINGS_CONFIGS.redirectToFirstVariant) {
     redirectIfCombinedListing(request, product);
