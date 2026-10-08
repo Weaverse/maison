@@ -37,7 +37,8 @@
   },
   "navigation": {
     "menu": "MENU",
-    "home": "Home"
+    "home": "Home",
+    "closeMenu": "Close menu"
   },
   "notFound": {
     "featuredProducts": "Featured products",
