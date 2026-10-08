@@ -161,7 +161,7 @@ export const schema = createSchema({
         imageAspectRatio: "1/1",
         showAuthor: true,
         showDate: true,
-        imageBorderRadius: 4,
+        imageBorderRadius: 16,
       },
     ],
   },

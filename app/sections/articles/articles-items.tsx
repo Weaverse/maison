@@ -91,7 +91,12 @@ function ArticlesItems(props: ArticlesItemsProps) {
       >
         {Array.from({ length: itemsToShow }).map((_, i) => (
           <div key={i} className="flex flex-col gap-5">
-            <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
+            {/* The placeholder follows the same setting as a real card;
+                it used to hardcode 8px and disagree with it. */}
+            <div
+              className="w-full overflow-hidden bg-gray-100"
+              style={{ borderRadius: `${imageBorderRadius}px` }}
+            >
               <Image
                 data={{ url: IMAGES_PLACEHOLDERS.image }}
                 aspectRatio="1/1"
@@ -280,7 +285,7 @@ export const schema = createSchema({
           type: "range",
           name: "imageBorderRadius",
           label: "Image border radius",
-          defaultValue: 4,
+          defaultValue: 16,
           configs: {
             min: 0,
             max: 50,
