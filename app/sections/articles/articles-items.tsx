@@ -18,7 +18,10 @@ import { calculateAspectRatio } from "~/utils/image";
 import { formatDate } from "~/utils/locale";
 import type { ArticlesLoaderData } from ".";
 
-const variants = cva("grid", {
+// Rows need more air than columns: `gap-y-10` matches the blog listing grid
+// in `blogs.tsx`, which this section sits beside. The Items gap setting keeps
+// the columns, where it is the one that matters.
+const variants = cva("grid gap-y-10", {
   variants: {
     mobileGridSize: {
       "1": "grid-cols-1",
@@ -32,17 +35,17 @@ const variants = cva("grid", {
       "6": "md:grid-cols-6",
     },
     gap: {
-      0: "gap-0",
-      4: "gap-1",
-      8: "gap-2",
-      12: "gap-3",
-      16: "gap-4",
-      20: "gap-5",
-      24: "gap-6",
-      28: "gap-7",
-      32: "gap-8",
-      36: "gap-9",
-      40: "gap-10",
+      0: "gap-x-0",
+      4: "gap-x-1",
+      8: "gap-x-2",
+      12: "gap-x-3",
+      16: "gap-x-4",
+      20: "gap-x-5",
+      24: "gap-x-6",
+      28: "gap-x-7",
+      32: "gap-x-8",
+      36: "gap-x-9",
+      40: "gap-x-10",
     },
   },
   defaultVariants: {
