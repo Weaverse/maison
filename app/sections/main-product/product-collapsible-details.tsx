@@ -54,7 +54,7 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
                   heading. Same reason as in app/sections/accordion/accordion-item.tsx. */}
               <Accordion.Trigger
                 className={clsx([
-                  "group flex w-full justify-between font-sans font-bold py-[24px]",
+                  "group flex w-full items-center justify-between font-sans font-bold py-[24px]",
                   "border-line-subtle border-t",
                 ])}
               >
