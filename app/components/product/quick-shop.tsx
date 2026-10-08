@@ -57,7 +57,11 @@ export function QuickShop({
   return (
     <div className="bg-background p-6 md:p-10">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
-        <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+        <div // On a phone the media runs the full width, so it has to start below the
+          // close button rather than beside it — the button spans 24px to 44px
+          // from the top of the panel.
+          className="mt-8 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100"
+        >
           {firstImage && (
             <ProductMedia
               mediaLayout="slider"
@@ -308,26 +312,32 @@ export function QuickShopTrigger({
           }
           aria-describedby={undefined}
         >
-          <Dialog.Close asChild>
-            <Button
-              className="absolute top-3 right-3 rounded-full p-2"
-              variant="secondary"
+          {/* The close button belongs to this wrapper, not to the panel and
+              not to the dialog. Anchored to the dialog it sat in the corner of
+              the viewport, which only lined up with the panel on a wide
+              screen; inside the panel it would scroll away with the content. */}
+          <div className="relative mx-auto w-full max-w-7xl">
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="absolute top-6 right-6 z-10 flex items-center"
+                aria-label={t("product.closeQuickShop")}
+              >
+                <XIcon size={20} />
+              </button>
+            </Dialog.Close>
+            <div
+              style={{ maxHeight: "90vh" }}
+              className={clsx(
+                "h-auto w-full overflow-y-auto",
+                "animate-slide-up bg-white shadow-sm rounded-[4px]",
+              )}
             >
-              <XIcon size={18} />
-            </Button>
-          </Dialog.Close>
-          <div
-            style={{ maxHeight: "90vh" }}
-            className={clsx(
-              "relative mx-auto h-auto w-full overflow-y-auto",
-              "animate-slide-up bg-white shadow-sm rounded-[4px]",
-              "max-w-7xl",
-            )}
-          >
-            <VisuallyHidden.Root asChild>
-              <Dialog.Title>{t("product.quickShopModal")}</Dialog.Title>
-            </VisuallyHidden.Root>
-            {data?.product && <QuickShop data={data as QuickViewData} />}
+              <VisuallyHidden.Root asChild>
+                <Dialog.Title>{t("product.quickShopModal")}</Dialog.Title>
+              </VisuallyHidden.Root>
+              {data?.product && <QuickShop data={data as QuickViewData} />}
+            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
