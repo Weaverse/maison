@@ -333,7 +333,7 @@ export function QuickShopTrigger({
               style={{ maxHeight: "90vh" }}
               className={clsx(
                 "h-auto w-full overflow-y-auto",
-                "animate-slide-up bg-white shadow-sm rounded-[4px]",
+                "animate-slide-up rounded-2xl bg-white shadow-sm",
               )}
             >
               <VisuallyHidden.Root asChild>
