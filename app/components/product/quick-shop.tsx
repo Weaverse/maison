@@ -211,12 +211,15 @@ export function QuickShopTrigger({
   buttonType = "icon",
   buttonText,
   placement = "image",
+  variant,
 }: {
   productHandle: string;
   showOnHover?: boolean;
   buttonType?: "icon" | "text";
   buttonText?: string;
   placement?: "image" | "bottom";
+  /** Overrides the variant each placement picks for itself. */
+  variant?: "primary" | "secondary" | "outline";
 }) {
   const { t } = useTranslation();
   // Explicit text (if a caller ever passes one) wins; otherwise the label
@@ -258,7 +261,7 @@ export function QuickShopTrigger({
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Button
         animate={false}
-        variant={placement === "image" ? "secondary" : "outline"}
+        variant={variant ?? (placement === "image" ? "secondary" : "outline")}
         onClick={handleOpen}
         loading={isLoading}
         className={clsx(
