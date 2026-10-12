@@ -344,7 +344,7 @@ export const schema = createSchema({
           type: "range",
           name: "imageBorderRadius",
           label: "Image border radius",
-          defaultValue: 4,
+          defaultValue: 16,
           configs: {
             min: 0,
             max: 50,

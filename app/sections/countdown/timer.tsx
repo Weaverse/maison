@@ -11,7 +11,14 @@ const ONE_MIN = ONE_SEC * 60;
 const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 
-function calculateRemainingTime(endTime: number) {
+export interface RemainingTime {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+function calculateRemainingTime(endTime: number): RemainingTime {
   const now = Date.now();
   const diff = endTime - now;
   if (diff <= 0) {
@@ -34,11 +41,18 @@ interface CountDownTimerData {
 function CountdownTimer(props: CountDownTimerData & HydrogenComponentProps) {
   const { t } = useTranslation();
   const { textColor, endTime, ref, ...rest } = props;
-  const [remainingTime, setRemainingTime] = useState(
-    calculateRemainingTime(endTime),
+  // `calculateRemainingTime` reads the clock at render, so seeding state
+  // with it made the server and client disagree whenever a second ticked
+  // between them — a text mismatch React answers by throwing away the
+  // server tree and re-rendering the whole page. Seed empty instead: both
+  // sides render the zeros, and the effect fills the real digits in on
+  // mount.
+  const [remainingTime, setRemainingTime] = useState<RemainingTime | null>(
+    null,
   );
 
   useEffect(() => {
+    setRemainingTime(calculateRemainingTime(endTime));
     const intervalId = setInterval(() => {
       const updatedTimeRemaining = calculateRemainingTime(endTime);
       setRemainingTime(updatedTimeRemaining);
@@ -59,17 +73,30 @@ function CountdownTimer(props: CountDownTimerData & HydrogenComponentProps) {
     "--timer-color": textColor,
   } as CSSProperties;
 
+  // Two things used to shift the row as the clock ran: proportional digits,
+  // where "1" is narrower than "0", and the step from one digit to two.
+  // `tabular-nums` fixes the first. For the second, an invisible "00" shares
+  // the grid cell with the value, so the cell is always as wide as two digits
+  // measured in the real font at the real size — no unit guessing, and a
+  // three-digit day count still grows on its own.
   return (
     <div
       ref={ref}
       {...rest}
-      className="countdown--timer flex py-3 text-(--timer-color) sm:py-0"
+      className="countdown--timer flex py-3 text-(--timer-color) tabular-nums sm:py-0"
       data-motion="fade-up"
       style={timerStyle}
     >
       <div className="space-y-1">
         <div className="flex items-center font-medium text-4xl leading-tight md:text-5xl">
-          <div className="px-6">{remainingTime?.days || 0}</div>
+          <div className="grid px-6 text-center">
+            <span aria-hidden className="invisible col-start-1 row-start-1">
+              00
+            </span>
+            <span className="col-start-1 row-start-1">
+              {remainingTime?.days || 0}
+            </span>
+          </div>
           <div className="h-6 border-(--timer-color) border-r" />
         </div>
         <div className="text-center text-sm capitalize md:text-base">
@@ -78,7 +105,14 @@ function CountdownTimer(props: CountDownTimerData & HydrogenComponentProps) {
       </div>
       <div className="space-y-1">
         <div className="flex items-center font-medium text-4xl leading-tight md:text-5xl">
-          <div className="px-6">{remainingTime?.hours || 0}</div>
+          <div className="grid px-6 text-center">
+            <span aria-hidden className="invisible col-start-1 row-start-1">
+              00
+            </span>
+            <span className="col-start-1 row-start-1">
+              {remainingTime?.hours || 0}
+            </span>
+          </div>
           <div className="h-6 border-(--timer-color) border-r" />
         </div>
         <div className="text-center text-sm capitalize md:text-base">
@@ -87,7 +121,14 @@ function CountdownTimer(props: CountDownTimerData & HydrogenComponentProps) {
       </div>
       <div className="space-y-1">
         <div className="flex items-center font-medium text-4xl leading-tight md:text-5xl">
-          <div className="px-6">{remainingTime?.minutes || 0}</div>
+          <div className="grid px-6 text-center">
+            <span aria-hidden className="invisible col-start-1 row-start-1">
+              00
+            </span>
+            <span className="col-start-1 row-start-1">
+              {remainingTime?.minutes || 0}
+            </span>
+          </div>
           <div className="h-6 border-(--timer-color) border-r" />
         </div>
         <div className="text-center text-sm capitalize md:text-base">
@@ -96,7 +137,14 @@ function CountdownTimer(props: CountDownTimerData & HydrogenComponentProps) {
       </div>
       <div className="space-y-1">
         <div className="flex items-center font-medium text-4xl leading-tight md:text-5xl">
-          <div className="px-6">{remainingTime?.seconds || 0}</div>
+          <div className="grid px-6 text-center">
+            <span aria-hidden className="invisible col-start-1 row-start-1">
+              00
+            </span>
+            <span className="col-start-1 row-start-1">
+              {remainingTime?.seconds || 0}
+            </span>
+          </div>
         </div>
         <div className="text-center text-sm capitalize md:text-base">
           {t("countdown.seconds")}

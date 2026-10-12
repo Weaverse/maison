@@ -1,8 +1,4 @@
-import {
-  getAdjacentAndFirstAvailableVariants,
-  Money,
-  ShopPayButton,
-} from "@shopify/hydrogen";
+import { Money } from "@shopify/hydrogen";
 import type { ProductVariantComponent } from "@shopify/hydrogen/storefront-api-types";
 import {
   type ComponentLoaderArgs,
@@ -12,22 +8,16 @@ import {
   useTranslation,
   type WeaverseProduct,
 } from "@weaverse/hydrogen";
-import { useState } from "react";
-import type {
-  ProductQuery,
-  ProductVariantFragment,
-} from "storefront-api.generated";
+import type { ProductQuery } from "storefront-api.generated";
 import { backgroundInputs } from "~/components/background-image";
 import { Button } from "~/components/button";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
-import { AddToCartButton } from "~/components/product/add-to-cart-button";
 import { ProductBadges, SoldOutBadge } from "~/components/product/badges";
 import { BundledVariants } from "~/components/product/bundled-variants";
 import { ProductMedia } from "~/components/product/product-media";
-import { Quantity } from "~/components/product/quantity";
+import { QuickShopTrigger } from "~/components/product/quick-shop";
 import { VariantPrices } from "~/components/product/variant-prices";
-import { VariantSelector } from "~/components/product/variant-selector";
 import { layoutInputs, Section } from "~/components/section";
 import { PRODUCT_QUERY } from "~/graphql/queries";
 import { useAnimation } from "~/hooks/use-animation";
@@ -59,12 +49,11 @@ export default function SingleProduct(props: SingleProductProps) {
     thumbnailBorderRadius,
     ...rest
   } = props;
-  const { storeDomain, product } = loaderData || {};
-  const [quantity, setQuantity] = useState<number>(1);
-  const [selectedVariant, setSelectedVariant] =
-    useState<ProductVariantFragment | null>(
-      product?.selectedOrFirstAvailableVariant,
-    );
+  const { product } = loaderData || {};
+  // Read straight from the loader, the way `main-product` does. Holding the
+  // variant in state meant it was seeded once and never caught up when the
+  // merchant picked a different product.
+  const currentVariant = product?.selectedOrFirstAvailableVariant;
   const [scope] = useAnimation();
 
   if (!product) {
@@ -125,15 +114,6 @@ export default function SingleProduct(props: SingleProductProps) {
 
   const isBundle = Boolean(product?.isBundle?.requiresComponents);
   const bundledVariants = isBundle ? product?.isBundle?.components.nodes : null;
-  let atcText = t("product.addToCart");
-  if (selectedVariant?.availableForSale) {
-    atcText = isBundle ? t("product.addBundleToCart") : t("product.addToCart");
-  } else if (selectedVariant?.quantityAvailable === -1) {
-    atcText = t("product.unavailable");
-  } else {
-    atcText = t("product.soldOut");
-  }
-
   return (
     // `overflow="unset"` — the gallery's prev/next buttons sit outside the
     // image column, and Section clips them by default.
@@ -149,7 +129,7 @@ export default function SingleProduct(props: SingleProductProps) {
             mediaLayout="slider"
             imageAspectRatio="1/1"
             media={product?.media.nodes}
-            selectedVariant={selectedVariant}
+            selectedVariant={currentVariant}
             showThumbnails={showThumbnails}
             imageBorderRadius={imageBorderRadius}
             thumbnailBorderRadius={thumbnailBorderRadius}
@@ -162,14 +142,14 @@ export default function SingleProduct(props: SingleProductProps) {
             <div className="space-y-4">
               <ProductBadges
                 product={product}
-                selectedVariant={selectedVariant}
+                selectedVariant={currentVariant}
                 className="[&_span:nth-child(n+3)]:hidden"
               />
               <h3 data-motion="fade-up" className="tracking-tight">
                 {product?.title}
               </h3>
               <VariantPrices
-                variant={selectedVariant}
+                variant={currentVariant}
                 className="font-serif text-[26px] text-body-subtle leading-[1.1] tracking-[-0.52px]"
               />
               <JudgemeStarsRating
@@ -190,42 +170,16 @@ export default function SingleProduct(props: SingleProductProps) {
                   />
                 </div>
               )}
-              <VariantSelector
-                product={product}
-                selectedVariant={selectedVariant}
-                setSelectedVariant={setSelectedVariant}
-                variants={getAdjacentAndFirstAvailableVariants(product)}
-              />
             </div>
-            <Quantity value={quantity} onChange={setQuantity} />
-            <AddToCartButton
-              disabled={!selectedVariant?.availableForSale}
-              lines={[
-                {
-                  merchandiseId: selectedVariant?.id,
-                  quantity,
-                  selectedVariant,
-                },
-              ]}
+            {/* Options, quantity and checkout live in the quick shop dialog
+                now, so this section stays a summary and the buyer picks a
+                variant in one place. */}
+            <QuickShopTrigger
+              productHandle={product.handle}
+              buttonType="text"
+              placement="bottom"
               variant="primary"
-              className="-mt-2 w-full"
-              data-test="add-to-cart"
-            >
-              {atcText}
-            </AddToCartButton>
-            {selectedVariant?.availableForSale && (
-              <ShopPayButton
-                width="100%"
-                variantIdsAndQuantities={[
-                  {
-                    id: selectedVariant?.id,
-                    quantity,
-                  },
-                ]}
-                storeDomain={storeDomain}
-                className="-mt-2"
-              />
-            )}
+            />
             <Link
               to={`/products/${product.handle}`}
               prefetch="intent"

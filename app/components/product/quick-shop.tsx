@@ -57,7 +57,11 @@ export function QuickShop({
   return (
     <div className="bg-background p-6 md:p-10">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
-        <div className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded bg-gray-100">
+        <div // On a phone the media runs the full width, so it has to start below the
+          // close button rather than beside it — the button spans 24px to 44px
+          // from the top of the panel.
+          className="mt-8 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100"
+        >
           {firstImage && (
             <ProductMedia
               mediaLayout="slider"
@@ -207,12 +211,15 @@ export function QuickShopTrigger({
   buttonType = "icon",
   buttonText,
   placement = "image",
+  variant,
 }: {
   productHandle: string;
   showOnHover?: boolean;
   buttonType?: "icon" | "text";
   buttonText?: string;
   placement?: "image" | "bottom";
+  /** Overrides the variant each placement picks for itself. */
+  variant?: "primary" | "secondary" | "outline";
 }) {
   const { t } = useTranslation();
   // Explicit text (if a caller ever passes one) wins; otherwise the label
@@ -254,12 +261,16 @@ export function QuickShopTrigger({
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Button
         animate={false}
-        variant={placement === "image" ? "secondary" : "outline"}
+        variant={variant ?? (placement === "image" ? "secondary" : "outline")}
         onClick={handleOpen}
         loading={isLoading}
         className={clsx(
-          "group/quick-shop h-10.5 p-3 leading-4",
+          "group/quick-shop",
           placement === "image" && [
+            // Compact only where it floats over the image. Under the card it
+            // keeps the outline variant's own `px-6 py-[18px]`, which is the
+            // height the design specifies.
+            "h-10.5 p-3 leading-4",
             "absolute bottom-4",
             buttonType === "icon"
               ? "right-4 rounded-full shadow-xl"
@@ -304,26 +315,32 @@ export function QuickShopTrigger({
           }
           aria-describedby={undefined}
         >
-          <Dialog.Close asChild>
-            <Button
-              className="absolute top-3 right-3 rounded-full p-2"
-              variant="secondary"
+          {/* The close button belongs to this wrapper, not to the panel and
+              not to the dialog. Anchored to the dialog it sat in the corner of
+              the viewport, which only lined up with the panel on a wide
+              screen; inside the panel it would scroll away with the content. */}
+          <div className="relative mx-auto w-full max-w-7xl">
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="absolute top-6 right-6 z-10 flex items-center"
+                aria-label={t("product.closeQuickShop")}
+              >
+                <XIcon size={20} />
+              </button>
+            </Dialog.Close>
+            <div
+              style={{ maxHeight: "90vh" }}
+              className={clsx(
+                "h-auto w-full overflow-y-auto",
+                "animate-slide-up rounded-2xl bg-white shadow-sm",
+              )}
             >
-              <XIcon size={18} />
-            </Button>
-          </Dialog.Close>
-          <div
-            style={{ maxHeight: "90vh" }}
-            className={clsx(
-              "relative mx-auto h-auto w-full overflow-y-auto",
-              "animate-slide-up bg-white shadow-sm rounded-[4px]",
-              "max-w-7xl",
-            )}
-          >
-            <VisuallyHidden.Root asChild>
-              <Dialog.Title>{t("product.quickShopModal")}</Dialog.Title>
-            </VisuallyHidden.Root>
-            {data?.product && <QuickShop data={data as QuickViewData} />}
+              <VisuallyHidden.Root asChild>
+                <Dialog.Title>{t("product.quickShopModal")}</Dialog.Title>
+              </VisuallyHidden.Root>
+              {data?.product && <QuickShop data={data as QuickViewData} />}
+            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

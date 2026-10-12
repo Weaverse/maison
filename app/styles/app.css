@@ -1,4 +1,8 @@
 @import "swiper/css" layer(base);
+/* The fade effect lives in its own stylesheet. Without it the slides
+   stack with no opacity transition and no pointer-events handling, so
+   the hidden slide sits on top and swallows every click. */
+@import "swiper/css/effect-fade" layer(base);
 @import "tailwindcss" source("../../app");
 @plugin "@tailwindcss/typography";
 
@@ -496,3 +500,17 @@
 /* .animated-scope [data-motion] {
   opacity: 0;
 } */
+
+/* iOS Safari zooms the page whenever a form field smaller than 16px takes
+   focus. The page is then wider than the window, and a `position: fixed`
+   panel sized to `100vw` — the search drawer — hangs off the edge until the
+   reader pinches back out. The theme's body size is 14px, so `text-base` is
+   not enough on its own; this floor only applies to touch pointers, and it
+   sits outside every layer so it wins over the utility that set the size. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}

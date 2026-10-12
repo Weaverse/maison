@@ -104,6 +104,9 @@ export default function ProductPrices(props: ProductPricesProps) {
         .find((plan: { id: string }) => plan.id === sellingPlanId)
     : null;
 
+  // The price is set in the serif, like every other price in the theme —
+  // `single-product` renders the same component with the same colour that way.
+  // The "From"/"To" labels stay in the body font, as the design shows.
   return (
     <div ref={ref} {...rest}>
       {combinedListing ? (
@@ -111,6 +114,7 @@ export default function ProductPrices(props: ProductPricesProps) {
           <span className="flex gap-1">
             {t("product.from")}
             <VariantPrices
+              className="font-serif"
               variant={{ price: product.priceRange.minVariantPrice }}
               showCompareAtPrice={false}
             />
@@ -118,13 +122,14 @@ export default function ProductPrices(props: ProductPricesProps) {
           <span className="flex gap-1">
             To
             <VariantPrices
+              className="font-serif"
               variant={{ price: product.priceRange.maxVariantPrice }}
               showCompareAtPrice={false}
             />
           </span>
         </div>
       ) : selectedSellingPlan && selectedVariant?.price ? (
-        <div className="flex items-center gap-2 text-2xl/none text-body-subtle">
+        <div className="flex items-center gap-2 font-serif text-2xl/none text-body-subtle">
           <SellingPlanPrice
             price={selectedVariant.price}
             sellingPlan={selectedSellingPlan as any}
@@ -140,6 +145,7 @@ export default function ProductPrices(props: ProductPricesProps) {
             <span className="flex gap-2 items-baseline">
               <span className="text-sm">{t("product.from")}</span>
               <VariantPrices
+                className="font-serif"
                 variant={selectedVariant}
                 showCompareAtPrice={showCompareAtPrice}
               />
@@ -148,7 +154,7 @@ export default function ProductPrices(props: ProductPricesProps) {
             <VariantPrices
               variant={selectedVariant}
               showCompareAtPrice={showCompareAtPrice}
-              className="text-2xl/none text-body-subtle"
+              className="font-serif text-2xl/none text-body-subtle"
             />
           )}
         </div>
