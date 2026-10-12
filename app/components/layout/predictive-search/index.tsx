@@ -35,7 +35,11 @@ export function PredictiveSearchButton() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger
         asChild
-        className="hidden h-8 w-8 items-center justify-center focus-visible:outline-hidden lg:flex"
+        // `xl`, not `lg`: the header hands over to its desktop layout at `xl`
+        // — the hamburger, the desktop menu and the left-hand search button
+        // all switch there. Appearing at `lg` left two search icons between
+        // the two breakpoints.
+        className="hidden h-8 w-8 items-center justify-center focus-visible:outline-hidden xl:flex"
       >
         <button type="button">
           <MagnifyingGlassIcon className="h-5 w-5" />
