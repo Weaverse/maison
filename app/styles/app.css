@@ -1,4 +1,8 @@
 @import "swiper/css" layer(base);
+/* The fade effect lives in its own stylesheet. Without it the slides
+   stack with no opacity transition and no pointer-events handling, so
+   the hidden slide sits on top and swallows every click. */
+@import "swiper/css/effect-fade" layer(base);
 @import "tailwindcss" source("../../app");
 @plugin "@tailwindcss/typography";
 
@@ -496,3 +500,4 @@
 /* .animated-scope [data-motion] {
   opacity: 0;
 } */
+
