@@ -501,3 +501,16 @@
   opacity: 0;
 } */
 
+/* iOS Safari zooms the page whenever a form field smaller than 16px takes
+   focus. The page is then wider than the window, and a `position: fixed`
+   panel sized to `100vw` — the search drawer — hangs off the edge until the
+   reader pinches back out. The theme's body size is 14px, so `text-base` is
+   not enough on its own; this floor only applies to touch pointers, and it
+   sits outside every layer so it wins over the utility that set the size. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
