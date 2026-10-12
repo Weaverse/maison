@@ -206,7 +206,11 @@ export function CartSummary({
       {layout === "drawer" && appliedCodes}
       {layout === "page" ? (
         <div className="grid gap-6">
-          <h2 className="font-semibold text-base">{t("cart.orderSummary")}</h2>
+          {/* `h2` picks up the serif heading face from the global rule; at 14px
+              beside sans body text that reads as the wrong font. */}
+          <h2 className="font-sans font-semibold text-base">
+            {t("cart.orderSummary")}
+          </h2>
           <div className="h-px w-full bg-line-subtle" />
           <dl className="flex items-start gap-2.5 text-base leading-none">
             <dt className="min-w-0 grow">{t("cart.subtotal")}</dt>

@@ -92,8 +92,11 @@ export function CartDiscount({
 
   return (
     <div className="grid gap-4 rounded-2xl bg-white p-6">
+      {/* `items-stretch` rather than a matching height: the input then takes
+          whatever height the button has, instead of the two drifting apart
+          whenever the button padding changes. */}
       {canApply && (
-        <form onSubmit={handleSubmit} className="flex items-start gap-3">
+        <form onSubmit={handleSubmit} className="flex items-stretch gap-3">
           <label htmlFor="cart-discount-code" className="sr-only">
             {t("cart.promoCode")}
           </label>
@@ -104,7 +107,7 @@ export function CartDiscount({
             value={code}
             placeholder={t("cart.promoCode")}
             onChange={(event) => setCode(event.target.value)}
-            className="min-w-0 grow rounded-(--btn-border-radius) border border-(--color-line) px-3 py-[18px] text-base leading-none placeholder:text-body-subtle focus:outline-none"
+            className="min-w-0 grow rounded-(--btn-border-radius) border border-(--color-line) px-3 text-base leading-none placeholder:text-body-subtle focus:outline-none"
           />
           <Button
             type="submit"
