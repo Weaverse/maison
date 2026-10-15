@@ -181,6 +181,7 @@ export function QuickShop({
                       key={variant.id}
                       variant={variant}
                       cart={resolvedCart}
+                      productId={product.id}
                       sellingPlanGroups={sellingPlanGroups}
                     />
                   ))}
@@ -189,6 +190,7 @@ export function QuickShop({
                   <Subtotal
                     cart={resolvedCart}
                     variants={variants}
+                    productId={product.id}
                     hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
                   />
                 </div>

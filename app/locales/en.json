@@ -33,7 +33,15 @@
     "totalItems": "Total: {{count}} items",
     "checkoutNote": "Taxes, discounts and shipping calculated at checkout.",
     "subtotalLabel": "Subtotal:",
-    "emptyMessage": "Looks like you haven’t added anything yet, let’s get you started!"
+    "emptyMessage": "Looks like you haven’t added anything yet, let’s get you started!",
+    "b2bLimitMinQuantity": "{{name}} must be at least {{limit}} items to checkout",
+    "b2bLimitMaxQuantity": "{{name}} is limited to {{limit}} items",
+    "b2bLimitMinAmount": "{{name}} must total at least {{limit}}",
+    "b2bLimitMaxAmount": "{{name}} is limited to {{limit}}",
+    "b2bLimitOrder": "Your order",
+    "b2bFixQuantities": "Adjust the quantities below to continue.",
+    "b2bUnavailable": "Wholesale pricing is unavailable right now. Please try again in a moment.",
+    "b2bTradeDiscount": "Trade Discount"
   },
   "navigation": {
     "menu": "MENU",

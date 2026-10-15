@@ -2,6 +2,7 @@ import {
   CircleNotchIcon,
   MinusIcon,
   PlusIcon,
+  TagIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import {
@@ -12,7 +13,10 @@ import {
   useOptimisticCart,
   useOptimisticData,
 } from "@shopify/hydrogen";
-import type { CartLineUpdateInput } from "@shopify/hydrogen/storefront-api-types";
+import type {
+  CartLineUpdateInput,
+  CurrencyCode,
+} from "@shopify/hydrogen/storefront-api-types";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
@@ -20,11 +24,20 @@ import { useFetcher } from "react-router";
 import useScroll from "react-use/esm/useScroll";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
+import {
+  B2BPricingProvider,
+  useB2BLinePrice,
+  useB2BPricing,
+  useCheckoutGate,
+  useLimitMessages,
+  useProductRecalculating,
+} from "~/components/cart/b2b-cart-pricing";
 import { SubscriptionIcon } from "~/components/icons";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import { ScrollArea } from "~/components/scroll-area";
 import { Section } from "~/components/section";
+import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
@@ -49,14 +62,16 @@ export function Cart({
   const cartHasItems = Boolean(cart) && cart.totalQuantity > 0;
 
   return (
-    <>
+    // `originalCart`, not the optimistic one: pricing may only be asked for a
+    // cart the server has already accepted.
+    <B2BPricingProvider cart={originalCart}>
       {cartHasItems && <CartDetails cart={cart} layout={layout} />}
       <CartEmpty
         hidden={cartHasItems || linesCount}
         onClose={onClose}
         layout={layout}
       />
-    </>
+    </B2BPricingProvider>
   );
 }
 
@@ -154,6 +169,9 @@ function CartCheckoutActions({
   layout: Layouts;
 }) {
   const { t } = useTranslation();
+  const gate = useCheckoutGate();
+  const limitMessages = useLimitMessages();
+
   if (!checkoutUrl) {
     return null;
   }
@@ -169,11 +187,39 @@ function CartCheckoutActions({
           {t("cart.viewCart")}
         </Link>
       )}
-      <a href={checkoutUrl} target="_self" className="w-full">
-        <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal">
-          {t("cart.checkout")}
-        </Button>
-      </a>
+      {gate.blocked ? (
+        <div className="flex flex-col gap-2">
+          <div className="text-sm text-(--color-text-subtle)">
+            {gate.reason === "unavailable" ? (
+              <p>{t("cart.b2bUnavailable")}</p>
+            ) : (
+              <>
+                <p>{t("cart.b2bFixQuantities")}</p>
+                <ul className="list-disc pl-5">
+                  {limitMessages.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+          {/* Never a link to Shopify checkout while blocked: that page would
+              charge Shopify's price, which is the number this integration
+              exists to not charge. */}
+          <Button
+            disabled
+            className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal"
+          >
+            {t("cart.checkout")}
+          </Button>
+        </div>
+      ) : (
+        <a href={checkoutUrl} target="_self" className="w-full">
+          <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal">
+            {t("cart.checkout")}
+          </Button>
+        </a>
+      )}
       {/* @todo: <CartShopPayButton cart={cart} /> */}
     </div>
   );
@@ -287,6 +333,18 @@ function CartLineItem({
             <ItemRemoveButton lineId={id} className="-mt-1.5 -mr-2" />
           )}
         </div>
+        {/* The saving and the price on one line. `-mt-3` pulls the row up
+            against the variant: the column's own 16px gap is meant for the
+            blocks below, not for this. One price node for both layouts, so it
+            is never in the document twice. */}
+        <div className="-mt-3 flex items-start justify-between gap-4">
+          <CartLineSaving line={line} />
+          <CartLinePrice
+            line={line}
+            as="span"
+            className="ml-auto shrink-0 text-right"
+          />
+        </div>
         <div
           className={clsx(
             layout === "drawer" &&
@@ -311,20 +369,6 @@ function CartLineItem({
                 </div>
               )}
           </div>
-          {/* One node for both layouts, so the price is not in the document
-              twice. On the page at mobile widths the design groups it with the
-              variant, 8px below it and 16px above the stepper: `order-first`
-              moves it there, and the negative margin trims the column's 16px
-              gap to the 8px the design draws. */}
-          <CartLinePrice
-            line={line}
-            as="span"
-            className={clsx(
-              layout === "drawer" && "shrink-0",
-              layout === "page" &&
-                "-mt-2 order-first md:order-none md:mt-0 md:ml-auto",
-            )}
-          />
         </div>
       </div>
     </li>
@@ -433,7 +477,11 @@ function CartLineQuantityAdjust({
     e: React.KeyboardEvent<HTMLInputElement>,
   ) {
     if (e.key === "Enter") {
-      handleQuantityInputBlur();
+      // Blurring fires `handleQuantityInputBlur` on its own. Calling it here
+      // as well submitted the same quantity twice — `optimisticQuantity` has
+      // not updated by the time the second call reads it, so the guard against
+      // a no-op change does not catch it. Two cart mutations then follow one
+      // keystroke, and each one asks B2Bridge to price the cart again.
       (e.target as HTMLInputElement).blur();
     } else if (e.key === "Escape") {
       setInputValue(String(optimisticQuantity));
@@ -532,6 +580,75 @@ function UpdateCartButton({
   );
 }
 
+/**
+ * What this line's volume tier took off, named where the buyer can see it.
+ *
+ * The price alone shows a smaller number than the list price without saying
+ * why. Naming the saving beside its amount turns "that looks cheaper" into
+ * "my trade pricing applied", which is the whole point of showing the buyer a
+ * wholesale price in the first place.
+ */
+function CartLineSaving({ line }: { line: CartLine }) {
+  const { t } = useTranslation();
+  const { saleBadgeColor } = useThemeSettings();
+  const b2bPrice = useB2BLinePrice(line.id);
+  const { state } = useB2BPricing();
+  // This line's own product, so moving one product does not set every line in
+  // the cart spinning — but every line of that product does.
+  const stale = useProductRecalculating(line.merchandise?.product?.id ?? null);
+
+  // The amount taken off is exactly what a quantity change moves, so it holds
+  // the spinner for this line rather than showing a figure for the previous
+  // quantity as though it were settled.
+  if (
+    !b2bPrice ||
+    state?.status !== "priced" ||
+    b2bPrice.unitPrice >= b2bPrice.originalUnitPrice
+  ) {
+    return null;
+  }
+
+  // Only once a saving is already on screen. Showing the spinner on a line
+  // that has none would add a row that was not there a moment ago and take it
+  // away again, which moves everything below it twice per quantity change.
+  if (stale) {
+    return (
+      <div className="flex items-center gap-1 pt-1 text-sm">
+        <Skeleton
+          as="span"
+          className="h-4 w-40 rounded"
+          aria-label="Updating discount"
+        />
+      </div>
+    );
+  }
+
+  const saved =
+    (b2bPrice.originalUnitPrice - b2bPrice.unitPrice) * line.quantity;
+
+  return (
+    <div
+      className="flex items-center gap-1 text-sm"
+      style={{ color: saleBadgeColor }}
+    >
+      <TagIcon className="size-3.5 shrink-0" aria-hidden="true" />
+      <span>
+        &minus;
+        <Money
+          as="span"
+          withoutTrailingZeros
+          data={{
+            amount: String(saved),
+            currencyCode: state.currency as CurrencyCode,
+          }}
+        />
+        {" \u00b7 "}
+        {t("cart.b2bTradeDiscount")}
+      </span>
+    </div>
+  );
+}
+
 function CartLinePrice({
   line,
   priceType = "regular",
@@ -546,13 +663,108 @@ function CartLinePrice({
   let fetcher = useFetcher({
     key: line.id,
   });
+  const b2bPrice = useB2BLinePrice(line.id);
+  const { state: b2bState } = useB2BPricing();
+  const { saleBadgeColor } = useThemeSettings();
+  const recalculating = useProductRecalculating(
+    line.merchandise?.product?.id ?? null,
+  );
+  const pricedByB2Bridge = Boolean(b2bPrice) && b2bState?.status === "priced";
+
   if (!(line?.cost?.amountPerQuantity && line?.cost?.totalAmount)) {
     return null;
   }
 
-  if (fetcher.state !== "idle") {
+  // The theme's own spinner follows this line's fetcher, so it covers only the
+  // line the buyer touched and stops as soon as Shopify answers. Under B2B
+  // pricing that is the wrong shape twice over: the wait continues while
+  // B2Bridge reprices, and it reprices every variant of the product, not this
+  // line alone. One signal drives the whole line instead — otherwise this one
+  // fires first and the saving's placeholder follows it, which reads as two
+  // separate things loading.
+  if (!pricedByB2Bridge && fetcher.state !== "idle") {
     return (
       <CircleNotchIcon size={18} className={clsx("animate-spin", className)} />
+    );
+  }
+
+  // Showing Shopify's price under a "pricing unavailable" notice would put the
+  // exact number this integration exists not to charge in front of the buyer,
+  // next to a sentence saying it is not available. Show nothing instead.
+  if (b2bState?.status === "unavailable") {
+    return <span className={className}>&mdash;</span>;
+  }
+
+  // One priced line can cover several cart lines of the same variant, so the
+  // unit price is shared while the total stays this line's own.
+  if (pricedByB2Bridge) {
+    const unit =
+      priceType === "regular" ? b2bPrice.unitPrice : b2bPrice.originalUnitPrice;
+    if (priceType === "compareAt" && unit <= b2bPrice.unitPrice) {
+      return null;
+    }
+    // B2Bridge sends the shop currency as a plain string; Shopify's generated
+    // union is the stricter spelling of the same thing.
+    const currencyCode = b2bState.currency as CurrencyCode;
+    const money = (amount: number) => ({
+      amount: String(amount),
+      currencyCode,
+    });
+    // What this line costs without the buyer's tiers, struck through beside
+    // the price they pay. Only once a tier has taken effect.
+    const saved =
+      priceType === "regular" &&
+      b2bPrice.unitPrice < b2bPrice.originalUnitPrice;
+
+    const figures = (
+      <>
+        <Money
+          withoutTrailingZeros
+          {...passthroughProps}
+          data={money(unit * line.quantity)}
+          className="font-semibold"
+        />
+        {saved && (
+          <span
+            className="font-normal text-sm line-through"
+            style={{ color: saleBadgeColor }}
+          >
+            <Money
+              as="span"
+              withoutTrailingZeros
+              data={money(b2bPrice.originalUnitPrice * line.quantity)}
+            />
+          </span>
+        )}
+      </>
+    );
+
+    // Laid over the figures rather than swapped in, so the line keeps its
+    // height and nothing below it moves while the price is worked out.
+    if (recalculating) {
+      return (
+        <span
+          className={clsx("relative inline-flex flex-col items-end", className)}
+        >
+          <span
+            className="invisible flex flex-col items-end"
+            aria-hidden="true"
+          >
+            {figures}
+          </span>
+          <Skeleton
+            as="span"
+            className="absolute inset-0 rounded"
+            aria-label="Updating price"
+          />
+        </span>
+      );
+    }
+
+    return (
+      <span className={clsx("inline-flex flex-col items-end", className)}>
+        {figures}
+      </span>
     );
   }
 

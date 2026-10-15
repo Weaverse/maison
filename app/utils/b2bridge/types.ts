@@ -156,3 +156,157 @@ export interface VariantOverlay {
     increment: number;
   };
 }
+
+// --- Headless Cart & Checkout API ---------------------------------------------
+//
+// A second, newer set of endpoints, added after B2Bridge agreed on 2026-10-12
+// to support headless storefronts. Unlike the Price List API above, these
+// return prices that have already been evaluated, so nothing below needs
+// normalising — the shapes are what the wire actually carries, captured from
+// `maison-plus-2.myshopify.com` on 2026-10-13.
+
+/** The subset of a Shopify cart line that pricing depends on. */
+export interface CartLineForPricing {
+  /** Cart line id, kept so a priced line can be mapped back to the UI. */
+  id: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface HeadlessRequest {
+  /** The shop's `*.myshopify.com` domain. */
+  domain: string;
+  /** Shopify customer id, already verified through the Customer Account API. */
+  customerId: string;
+  /** One entry per variant — see `mergeLines` in `headless.ts`. */
+  lines: { variantId: string; quantity: number }[];
+  /**
+   * Sent whenever it is known. A rule can be scoped to specific markets, and
+   * leaving this out does not raise an error — it silently skips the market
+   * check and can price the buyer against a rule that does not apply to them.
+   */
+  market?: { id: string; countryCode: string };
+  /** Shopify B2B only: the company location the buyer is ordering for. */
+  companyLocationId?: string;
+}
+
+export interface PricedLine {
+  /** Always a GID in the response, whichever form was sent. */
+  variantId: string;
+  productId: string;
+  quantity: number;
+  /** Shopify's own price, for a strikethrough. Never charge this. */
+  originalUnitPrice: number;
+  /** The B2B unit price. This is the one to show. */
+  unitPrice: number;
+  lineTotal: number;
+  /** `false` means no rule applies and `unitPrice` is the Shopify price. */
+  hasRule: boolean;
+  minimum: number | null;
+  maximum: number | null;
+  /** Returned for the quantity selector. The API does not enforce it. */
+  increment: number;
+}
+
+/**
+ * An order-limit violation.
+ *
+ * These arrive on a perfectly successful `200` with `success: true` — a cart
+ * below its minimum is a state to render, not a failure to catch.
+ */
+export interface LimitError {
+  scope: "VARIANT" | "PRODUCT" | "PRICE_LIST";
+  code: "BELOW_MINIMUM" | "ABOVE_MAXIMUM";
+  limitBy: "QUANTITY" | "AMOUNT";
+  /** Present when `scope` is `VARIANT`. Bare id, not a GID. */
+  variantId?: string;
+  /** Present when `scope` is `PRODUCT`. */
+  productId?: string;
+  minimum: number | null;
+  maximum: number | null;
+  current: number;
+  /** Ready to display, English only. */
+  message: string;
+}
+
+export interface CartPricing {
+  success: true;
+  /** Shop currency, which is not necessarily the market's currency. */
+  currency: string;
+  lines: PricedLine[];
+  /** Sum of `lineTotal`. Excludes tax, shipping and Shopify discounts. */
+  subtotal: number;
+  errors: LimitError[];
+  /** `true` only when `errors` is empty. */
+  canCheckout: boolean;
+}
+
+export interface CheckoutResult extends CartPricing {
+  draftOrderId: string;
+  /** Where to send the buyer to pay. */
+  invoiceUrl: string;
+}
+
+/** What the storefront should do about a failed call. */
+export type FailureAction =
+  | "RETRY_BACKOFF"
+  | "RETRY_LATER"
+  | "SHOW_ERRORS"
+  | "DROP_LINES"
+  | "FIX_REQUEST"
+  | "BLOCK";
+
+export interface Failure {
+  action: FailureAction;
+  /** `null` for a rate limit and for the gateway's auth replies, which carry none. */
+  code: string | null;
+  /** `0` when the request never got an answer. */
+  status: number;
+  message: string;
+  details?: unknown;
+}
+
+/** One cart line, priced. Amounts are in `CartPricingState["currency"]`. */
+export interface PricedCartLine {
+  /** Bare variant id, so it can be looked up from `lineVariants`. */
+  variantId: string;
+  /** Bare product id. Tiers are reached on a product's combined quantity. */
+  productId: string;
+  /** The merged quantity across every cart line of this variant. */
+  quantity: number;
+  originalUnitPrice: number;
+  unitPrice: number;
+  /** For the merged quantity, not for any single cart line. */
+  lineTotal: number;
+  hasRule: boolean;
+  minimum: number | null;
+  maximum: number | null;
+  increment: number;
+}
+
+/**
+ * What the cart UI is told about B2Bridge pricing.
+ *
+ * Three states, and the difference between the last two is the whole point.
+ * `not-applicable` means B2Bridge should not price this cart — a guest, a
+ * buyer in no group, an unconfigured shop — and Shopify's own price is then
+ * the right one to show and to charge. `unavailable` means B2Bridge should
+ * have priced it and could not, which is the case where Shopify's price is
+ * the *wrong* number and checkout has to stop.
+ *
+ * Nothing here carries an internal error string: a failure reaches the browser
+ * as a state, not as a reason.
+ */
+export type CartPricingState =
+  | { status: "not-applicable" }
+  | { status: "unavailable"; retryable: boolean }
+  | {
+      status: "priced";
+      currency: string;
+      subtotal: number;
+      canCheckout: boolean;
+      lines: PricedCartLine[];
+      errors: LimitError[];
+      /** Cart line id → bare variant id, to map merged lines back to the UI. */
+      lineVariants: Record<string, string>;
+    };

@@ -6,12 +6,14 @@ import {
 } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
+import type { CurrencyCode } from "@shopify/hydrogen/storefront-api-types";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
+import { useB2BPricing } from "~/components/cart/b2b-cart-pricing";
 import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts } from "~/utils/cart-discounts";
@@ -68,6 +70,7 @@ export function CartSummary({
     enableGiftCard,
   ].filter(Boolean).length;
 
+  const { state: b2bState } = useB2BPricing();
   const { total: discountTotal, lineLevel } = getCartDiscounts(cart);
   // `cost.subtotalAmount` is already net of line-level discounts, so a code
   // scoped to specific products would otherwise be subtracted twice. Adding
@@ -75,10 +78,31 @@ export function CartSummary({
   // Subtotal - Discount = Total for cart-level and line-level codes alike.
   const subtotalValue = Number(cost?.subtotalAmount?.amount || 0) + lineLevel;
   const totalValue = Number(cost?.totalAmount?.amount || 0);
-  const hasDiscount = subtotalValue > totalValue && totalValue > 0;
-  const subtotalMoney = cost?.subtotalAmount
+  const shopifySubtotal = cost?.subtotalAmount
     ? { ...cost.subtotalAmount, amount: String(subtotalValue) }
     : null;
+
+  // When B2Bridge prices the cart it owns every money figure in this summary.
+  // Shopify's `cost` is still computed from Shopify's prices, so leaving any
+  // of it on screen puts two different arithmetics side by side — which is
+  // how a $4,550 line ends up under a $6,500 subtotal.
+  //
+  // B2Bridge's subtotal excludes tax, shipping and Shopify discount codes, so
+  // the subtotal and the total are the same number here. A cart-level discount
+  // code is not reflected while B2B pricing is on; the pilot does not cover
+  // them, and Shopify applies them at checkout.
+  const b2bMoney =
+    b2bState?.status === "priced"
+      ? {
+          amount: String(b2bState.subtotal),
+          currencyCode: b2bState.currency as CurrencyCode,
+        }
+      : null;
+  const subtotalMoney = b2bMoney ?? shopifySubtotal;
+  const totalMoney = b2bMoney ?? cost?.totalAmount ?? null;
+  // Comparing a B2B subtotal against a Shopify total would strike through a
+  // price that was never offered.
+  const hasDiscount = !b2bMoney && subtotalValue > totalValue && totalValue > 0;
 
   // show loading state for optimistic line item changes or pending cart actions
   const isCartUpdating =
@@ -143,8 +167,8 @@ export function CartSummary({
             <dd className="shrink-0 whitespace-nowrap">
               {isCartUpdating ? (
                 <Skeleton className="h-4 w-20 rounded" />
-              ) : cost?.totalAmount?.amount ? (
-                <Money data={cost.totalAmount} />
+              ) : totalMoney?.amount ? (
+                <Money data={totalMoney} />
               ) : (
                 "-"
               )}
@@ -170,11 +194,7 @@ export function CartSummary({
                       </span>
                     )}
                     <span className="font-semibold">
-                      {cost?.totalAmount?.amount ? (
-                        <Money data={cost?.totalAmount} />
-                      ) : (
-                        "-"
-                      )}
+                      {totalMoney?.amount ? <Money data={totalMoney} /> : "-"}
                     </span>
                   </dd>
                 )}

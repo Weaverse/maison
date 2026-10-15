@@ -14,8 +14,10 @@
  * 2. The B2Bridge API does not match its own documentation, so a way to look at
  *    the real payloads without booting the storefront is worth keeping around.
  *
- * The fixtures below are verbatim captures from
- * `maison-plus-2.myshopify.com`, rule 8985, on 2026-09-28.
+ * The fixtures below are captures from `maison-plus-2.myshopify.com`,
+ * rule 8985 and customer group 1213, on 2026-10-13. The rule prices 12
+ * variants live; the two kept here are all the pricing logic needs.
+ * Re-capture with `--live` whenever the dev store is reconfigured.
  */
 
 import assert from "node:assert/strict";
@@ -49,7 +51,7 @@ function loadModules() {
   const out = path.join(dir, "bundle.mjs");
   writeFileSync(
     entry,
-    ["normalize", "pricing", "apply", "buyer"]
+    ["normalize", "pricing", "apply", "buyer", "headless"]
       .map((m) => `export * from "${ROOT}/app/utils/b2bridge/${m}";`)
       .join("\n"),
   );
@@ -81,6 +83,26 @@ const VOLUME_TABLE = JSON.stringify([
   {
     volume_pricing_from: 10,
     volume_pricing_type: "PERCENT",
+    volume_pricing_value: 20,
+    unit_of_measure: "product",
+  },
+  {
+    volume_pricing_from: 20,
+    volume_pricing_type: "PERCENT",
+    volume_pricing_value: 30,
+    unit_of_measure: "product",
+  },
+]);
+
+/**
+ * The tiers in place when the stacking behaviour below was measured against
+ * B2Bridge's own draft order, on 2026-09-28. Kept so that measurement stays
+ * reproducible after the dev store's tiers were changed to 20/30.
+ */
+const MEASURED_VOLUME_TABLE = JSON.stringify([
+  {
+    volume_pricing_from: 10,
+    volume_pricing_type: "PERCENT",
     volume_pricing_value: 5,
     unit_of_measure: "product",
   },
@@ -98,7 +120,7 @@ function rawVariant(variantId, price) {
     product_id: "9028489281758",
     price,
     origin_price: price,
-    minimum: 0,
+    minimum: 5,
     maximum: null,
     increment_quantity: 1,
     order_limit_by: "QUANTITY",
@@ -123,12 +145,12 @@ const RAW_RULE_8985 = {
   volume_type: "QUANTITY",
   volume_apply: "EVERY_PRODUCT",
   volume_table: VOLUME_TABLE,
-  limit_type: "NO_LIMIT",
+  limit_type: "CUSTOMIZE",
   limit_apply: "EVERY_PRODUCT",
-  minimum: "0",
-  maximum: "0",
-  increment_quantity: 0,
-  start_date: "2026-09-28 04:30:33.269",
+  minimum: "1",
+  maximum: "100",
+  increment_quantity: 1,
+  start_date: "2026-09-26 21:30:00",
   end_date: null,
   enable_end_date: 0,
   pricingListVariants: [
@@ -138,12 +160,63 @@ const RAW_RULE_8985 = {
 };
 
 const RAW_GROUP = {
-  id: 1,
-  name: "cg1",
-  customer_tags: "b2b-cus1",
-  customer_ids: '["7875968794841","7881979887833"]',
+  id: 1213,
+  name: "customer group test 1",
+  customer_tags: "b2b-test-1",
+  customer_ids: '["9196237291742"]',
   pricing_rule_ids: "[8985]",
 };
+
+// --- Headless Cart & Checkout API captures ------------------------------------
+//
+// Verbatim responses from `cart-pricing` on 2026-10-13, buyer 9196237291742,
+// variant 47591719436510 of rule 8985, market CA.
+
+const CART_PRICING_QTY_5 = {
+  success: true,
+  currency: "USD",
+  lines: [
+    {
+      variantId: "gid://shopify/ProductVariant/47591719436510",
+      productId: "gid://shopify/Product/9028489281758",
+      quantity: 5,
+      originalUnitPrice: 325,
+      unitPrice: 325,
+      lineTotal: 1625,
+      hasRule: true,
+      minimum: 5,
+      maximum: null,
+      increment: 1,
+    },
+  ],
+  subtotal: 1625,
+  errors: [],
+  canCheckout: true,
+};
+
+/** Below the variant's minimum of 5 — still a 200, still `success: true`. */
+const CART_PRICING_QTY_3 = {
+  ...CART_PRICING_QTY_5,
+  lines: [{ ...CART_PRICING_QTY_5.lines[0], quantity: 3, lineTotal: 975 }],
+  subtotal: 975,
+  errors: [
+    {
+      scope: "VARIANT",
+      code: "BELOW_MINIMUM",
+      limitBy: "QUANTITY",
+      variantId: "47591719436510",
+      minimum: 5,
+      maximum: null,
+      current: 3,
+      message:
+        "Bold Stripe Linen Duvet - Queen / White Stripe must be at least 5 items to checkout",
+    },
+  ],
+  canCheckout: false,
+};
+
+/** What a wrong API key answers. HTTP 200, and no `success` anywhere. */
+const AUTH_FAILURE_BODY = { message: "Access key is not correct" };
 
 // --- Offline checks -----------------------------------------------------------
 
@@ -234,22 +307,22 @@ if (!LIVE) {
         n.price.amount,
       ]),
       [
-        [10, "308.75"],
-        [20, "292.50"],
+        [10, "260.00"],
+        [20, "227.50"],
       ],
+      "325 * 0.7 is 227.49999999999997 in binary — rounding must be explicit",
     );
 
     const king = overlays.get("47591720878302");
     assert.deepEqual(
       king.quantityPriceBreaks.nodes.map((n) => n.price.amount),
-      ["370.50", "351.00"],
-      "325 * 0.95 is not 308.75 in binary — rounding must be explicit",
+      ["312.00", "273.00"],
     );
 
-    assert.equal(
+    assert.deepEqual(
       queen.quantityRule,
-      undefined,
-      "limit_type NO_LIMIT sets no rule",
+      { minimum: 5, maximum: null, increment: 1 },
+      "limit_type CUSTOMIZE reads the variant's own minimum",
     );
   });
 
@@ -257,7 +330,15 @@ if (!LIVE) {
     // Measured, not assumed: B2Bridge's draft order for this exact rule sends
     // Shopify `priceOverride: { amount: 299.49 }` for the $325 variant.
     // 325 × 0.97 × 0.95 = 299.4875 ✓   325 × 0.95 = 308.75 ✗
-    const rule = b2b.normalizeRule({ ...RAW_RULE_8985, discount_value: "3" });
+    //
+    // Pinned to the tiers the measurement was taken against. The dev store has
+    // since moved to 20/30, and rewriting these numbers would throw away the
+    // one place B2Bridge's own arithmetic is pinned down.
+    const rule = b2b.normalizeRule({
+      ...RAW_RULE_8985,
+      discount_value: "3",
+      volume_table: MEASURED_VOLUME_TABLE,
+    });
     const queen = b2b.overlaysForRule(rule, "USD").get("47591719436510");
     assert.equal(queen.price.amount, "315.25", "325 × 0.97");
     assert.deepEqual(
@@ -286,9 +367,10 @@ if (!LIVE) {
   });
 
   test("rule dates are read as UTC, not as server-local time", () => {
-    // B2Bridge sends "2026-09-28 04:30:33.269" with no marker, but the
-    // created_at beside it is UTC and only two minutes later — so the dates
-    // are UTC spelled without the Z.
+    // B2Bridge sends start_date with no marker. In the 2026-09-28 capture it
+    // read "2026-09-28 04:30:33.269" while the created_at beside it was
+    // "2026-09-28T04:32:35.404Z" — two minutes later — so the dates are UTC
+    // spelled without the Z.
     const rule = b2b.normalizeRule({
       ...RAW_RULE_8985,
       start_date: "2026-09-28 04:30:00.000",
@@ -381,6 +463,9 @@ if (!LIVE) {
     const zeroed = b2b.normalizeRule({
       ...RAW_RULE_8985,
       limit_type: "QUANTITY",
+      minimum: "0",
+      maximum: "0",
+      increment_quantity: 0,
     });
     assert.deepEqual(
       b2b.overlaysForRule(zeroed, "USD").get("47591719436510").quantityRule,
@@ -406,9 +491,9 @@ if (!LIVE) {
     const group = b2b.normalizeGroup(RAW_GROUP);
     assert.deepEqual(group.pricingRuleIds, [8985]);
 
-    assert.equal(b2b.matchGroups([group], "7875968794841").length, 1, "by id");
+    assert.equal(b2b.matchGroups([group], "9196237291742").length, 1, "by id");
     assert.equal(
-      b2b.matchGroups([group], null, ["b2b-cus1"]).length,
+      b2b.matchGroups([group], null, ["b2b-test-1"]).length,
       1,
       "by tag",
     );
@@ -423,8 +508,8 @@ if (!LIVE) {
 
   test("customer GIDs reduce to the bare ids B2Bridge stores", () => {
     assert.equal(
-      b2b.customerIdFromGid("gid://shopify/Customer/7875968794841"),
-      "7875968794841",
+      b2b.customerIdFromGid("gid://shopify/Customer/9196237291742"),
+      "9196237291742",
     );
     assert.equal(b2b.customerIdFromGid(null), null);
     assert.equal(b2b.customerIdFromGid("gid://shopify/Product/1"), null);
@@ -517,6 +602,305 @@ if (!LIVE) {
     const product = { variants: { nodes: [] } };
     product.self = product;
     assert.equal(b2b.applyOverlays(product, new Map([["1", {}]])), 0);
+  });
+
+  // --- Headless Cart & Checkout API -------------------------------------------
+
+  test("cart lines are merged to one line per variant", () => {
+    // Two lines of the same variant is what engraving, delivery batches and
+    // selling plans all produce; B2Bridge rejects the cart outright.
+    const { lines, sources } = b2b.mergeLines([
+      { id: "line-1", variantId: "47591719436510", quantity: 20 },
+      { id: "line-2", variantId: "47591720878302", quantity: 2 },
+      {
+        id: "line-3",
+        variantId: "gid://shopify/ProductVariant/47591719436510",
+        quantity: 30,
+      },
+    ]);
+
+    assert.deepEqual(lines, [
+      { variantId: "47591719436510", quantity: 50 },
+      { variantId: "47591720878302", quantity: 2 },
+    ]);
+    // 20 and 30 sent apart would each price at their own tier; 50 reaches the
+    // one the merchant configured.
+    assert.deepEqual(sources.get("47591719436510"), ["line-1", "line-3"]);
+  });
+
+  test("merging drops quantities the API would reject", () => {
+    const { lines } = b2b.mergeLines([
+      { id: "line-1", variantId: "47591719436510", quantity: 0 },
+      { id: "line-2", variantId: "47591720878302", quantity: 1 },
+    ]);
+    assert.deepEqual(lines, [{ variantId: "47591720878302", quantity: 1 }]);
+  });
+
+  test("the dedupe key survives reordering and notices the market", () => {
+    const base = {
+      domain: "maison-plus-2.myshopify.com",
+      customerId: "gid://shopify/Customer/9196237291742",
+      lines: [
+        { variantId: "47591719436510", quantity: 5 },
+        { variantId: "47591720878302", quantity: 2 },
+      ],
+      market: { id: "gid://shopify/Market/30496850142", countryCode: "CA" },
+    };
+    // Removing an item and adding it back must not spend a request.
+    const reordered = { ...base, lines: [...base.lines].reverse() };
+    assert.equal(b2b.pricingKey(base), b2b.pricingKey(reordered));
+
+    // GIDs and bare ids are the same buyer.
+    const bareId = { ...base, customerId: "9196237291742" };
+    assert.equal(b2b.pricingKey(base), b2b.pricingKey(bareId));
+
+    // Rule 8985 is scoped to CA, so the country changes the price while the
+    // cart does not. The epic's own dedupe list leaves `market` out.
+    const inUs = { ...base, market: { ...base.market, countryCode: "US" } };
+    assert.notEqual(b2b.pricingKey(base), b2b.pricingKey(inUs));
+
+    const quantityChanged = {
+      ...base,
+      lines: [{ variantId: "47591719436510", quantity: 6 }, base.lines[1]],
+    };
+    assert.notEqual(b2b.pricingKey(base), b2b.pricingKey(quantityChanged));
+  });
+
+  test("success is read from the body, never from the status", () => {
+    assert.equal(b2b.isSuccess(CART_PRICING_QTY_5), true);
+    // The whole reason this gate exists: HTTP 200, and not a result.
+    assert.equal(b2b.isSuccess(AUTH_FAILURE_BODY), false);
+    assert.equal(b2b.isSuccess(null), false);
+    assert.equal(b2b.isSuccess(undefined), false);
+    assert.equal(b2b.isSuccess("Access key is not correct"), false);
+  });
+
+  test("an order-limit violation is a result, not a failure", () => {
+    // A cart below its minimum must reach the cart UI as errors to render.
+    assert.equal(b2b.isSuccess(CART_PRICING_QTY_3), true);
+    assert.equal(CART_PRICING_QTY_3.canCheckout, false);
+    assert.equal(CART_PRICING_QTY_3.errors[0].scope, "VARIANT");
+  });
+
+  test("failures are classified into what the storefront should do", () => {
+    // A rate limit carries no `code`, so only the status identifies it.
+    assert.equal(b2b.classifyFailure(429, {}).action, "RETRY_BACKOFF");
+    assert.equal(b2b.classifyFailure(503, {}).action, "RETRY_LATER");
+    // No answer at all.
+    assert.equal(b2b.classifyFailure(0, null).action, "RETRY_LATER");
+
+    assert.equal(
+      b2b.classifyFailure(422, { code: "ORDER_LIMIT_VIOLATION" }).action,
+      "SHOW_ERRORS",
+    );
+    assert.equal(
+      b2b.classifyFailure(404, { code: "VARIANT_NOT_FOUND" }).action,
+      "DROP_LINES",
+    );
+    assert.equal(
+      b2b.classifyFailure(400, { code: "INVALID_REQUEST" }).action,
+      "FIX_REQUEST",
+    );
+
+    // Plan and permission failures leave nothing to do but stop.
+    assert.equal(
+      b2b.classifyFailure(403, { code: "PLAN_INACTIVE" }).action,
+      "BLOCK",
+    );
+    // And the gateway's own auth reply, which arrives as a 200.
+    const auth = b2b.classifyFailure(200, AUTH_FAILURE_BODY);
+    assert.equal(auth.action, "BLOCK");
+    assert.equal(auth.code, null);
+    assert.equal(auth.message, "Access key is not correct");
+  });
+
+  test("the + then - walk does not spend a second request", () => {
+    const TTL = 30_000;
+    const ask = (over) =>
+      b2b.fetchDecision({
+        key: "A",
+        settled: true,
+        inFlight: null,
+        cachedAt: null,
+        now: 1000,
+        ttlMs: TTL,
+        ...over,
+      });
+
+    // Quantity 5, never priced before.
+    assert.equal(ask({}), "fetch");
+    // Clicking + walks the cart A -> B; B is new, so it is priced.
+    assert.equal(ask({ key: "B" }), "fetch");
+    // Clicking - walks it back to A, which was priced a moment ago. A guard
+    // that remembered only the latest key would call this new and refetch.
+    assert.equal(ask({ cachedAt: 900 }), "use-cache");
+    // Once the answer is old enough to distrust, ask again.
+    assert.equal(ask({ cachedAt: 900 - TTL }), "fetch");
+  });
+
+  test("nothing is priced while the cart is still moving", () => {
+    const base = {
+      key: "A",
+      settled: true,
+      inFlight: null,
+      cachedAt: null,
+      now: 1000,
+      ttlMs: 30_000,
+    };
+    // Four fast clicks on + leave the optimistic cart ahead of the server's.
+    // Pricing each step would spend four requests out of twenty a minute.
+    assert.equal(b2b.fetchDecision({ ...base, settled: false }), "wait");
+    // One request per key at a time.
+    assert.equal(b2b.fetchDecision({ ...base, inFlight: "A" }), "wait");
+    // A request for a different key does not block this one.
+    assert.equal(b2b.fetchDecision({ ...base, inFlight: "B" }), "fetch");
+    // An empty cart asks nothing.
+    assert.equal(b2b.fetchDecision({ ...base, key: "" }), "idle");
+  });
+
+  test("a bad moment is not cached into a broken quantity", () => {
+    // Caching a failure would make one rate-limited call look like "quantity
+    // 10 is broken" for the whole TTL, replayed on every return to it.
+    // These are the route's states, not B2Bridge's raw replies.
+    assert.equal(
+      b2b.shouldCache({ status: "priced", canCheckout: true }),
+      true,
+    );
+    assert.equal(
+      b2b.shouldCache({ status: "priced", canCheckout: false }),
+      true,
+      "a cart below its minimum is still priced",
+    );
+    assert.equal(
+      b2b.shouldCache({ status: "unavailable", retryable: true }),
+      false,
+    );
+    assert.equal(b2b.shouldCache({ status: "not-applicable" }), false);
+    assert.equal(b2b.shouldCache(null), false);
+  });
+
+  test("every mounted provider learns the answer, in any order", () => {
+    // The drawer and the product page's variant list share one request.
+    // Whichever handles the response first clears the in-flight key; the
+    // others must still be able to tell that their figures are current, or
+    // their spinners never stop.
+    assert.equal(b2b.answeredKeyFor("A", null), "A", "the one that asked");
+    assert.equal(b2b.answeredKeyFor(null, "A"), "A", "the ones that did not");
+    // A provider mounted after the answer landed is current, not stale.
+    assert.equal(b2b.answeredKeyFor(null, "B"), "B");
+    // Nothing has ever been answered, so nothing is current.
+    assert.equal(b2b.answeredKeyFor(null, null), null);
+  });
+
+  test("an answer overtaken by a newer cart is kept but not shown", () => {
+    // Click + (request goes out for B), click - before it lands (back to A,
+    // served from cache). B's answer then describes a cart the buyer left.
+    assert.equal(b2b.isAnswerCurrent("A", "A"), true);
+    assert.equal(
+      b2b.isAnswerCurrent("B", "A"),
+      false,
+      "applying it would show prices for a cart they are no longer looking at",
+    );
+    // And would mark the view out of date for a key that never comes round
+    // again, which is a spinner that never stops.
+    assert.equal(b2b.isAnswerCurrent(null, "A"), false);
+  });
+
+  test("only the variant the buyer moved is marked as recalculating", () => {
+    // The real shape, captured from the running storefront on 2026-10-15: a
+    // sorted `variantId:quantity` list and nothing else. An earlier version of
+    // this test invented a five-part key, so it kept passing while the parser
+    // read a field that was never there and always returned nothing.
+    const key = (lines) => lines;
+    const before = key("A:5,B:3");
+
+    // A `+` on A leaves B alone; one row spins, not the whole table.
+    assert.deepEqual([...b2b.changedVariants(before, key("A:6,B:3"))], ["A"]);
+    // Removing a line counts as a change to it.
+    assert.deepEqual([...b2b.changedVariants(before, key("A:5"))], ["B"]);
+    // Adding one too.
+    assert.deepEqual(
+      [...b2b.changedVariants(before, key("A:5,B:3,C:1"))],
+      ["C"],
+    );
+    // Nothing moved, so nothing spins — this is `+` then `-` back again.
+    assert.deepEqual([...b2b.changedVariants(before, before)], []);
+    // Before the first answer the buyer is looking at Shopify's prices, not
+    // at stale B2B ones, so nothing is marked.
+    assert.deepEqual([...b2b.changedVariants(null, before)], []);
+    // Real ids, so a parser that mistakes the separator cannot pass this.
+    assert.deepEqual(
+      [
+        ...b2b.changedVariants(
+          "47591719436510:1,47591722352862:1",
+          "47591719436510:1,47591722352862:2",
+        ),
+      ],
+      ["47591722352862"],
+    );
+  });
+
+  test("moving one variant marks its whole product, and nothing else", () => {
+    // Product A holds variants A1 and A2; product B holds B1. Measured on the
+    // dev store: adding A2 changed A1's price, because the tier is reached on
+    // the product's combined quantity.
+    const variantProducts = new Map([
+      ["A1", "A"],
+      ["A2", "A"],
+      ["B1", "B"],
+    ]);
+
+    // A1 moving reprices A2 as well, so the answer is the product, which every
+    // row of that table reads — including the variants sitting at zero.
+    assert.deepEqual(
+      [...b2b.changedProducts(new Set(["A1"]), variantProducts)],
+      ["A"],
+    );
+    assert.deepEqual(
+      [...b2b.changedProducts(new Set(["B1"]), variantProducts)],
+      ["B"],
+      "product B is reached by no rule here",
+    );
+    assert.deepEqual([...b2b.changedProducts(new Set(), variantProducts)], []);
+    // A variant that names no product reaches nothing.
+    assert.deepEqual(
+      [...b2b.changedProducts(new Set(["GONE"]), variantProducts)],
+      [],
+    );
+  });
+
+  test("a variant nobody has added still shows its product's rate", () => {
+    // Measured: one percentage per product, applied to each variant's own
+    // list price. 19 at 325 and 1 at 390 both priced at exactly 30% off.
+    const lines = [
+      { productId: "A", unitPrice: 227.5, originalUnitPrice: 325 },
+      { productId: "B", unitPrice: 135, originalUnitPrice: 135 },
+    ];
+    const rate = b2b.productDiscountRate(lines, "A");
+    // 1 - 227.5/325 is 0.30000000000000004, so the rate carries float noise
+    // and only the rounded figure is worth asserting — it is also the only
+    // one anybody sees.
+    assert.ok(Math.abs(rate - 0.3) < 1e-9);
+    // Any variant of A is shown at that rate off its own list price,
+    // including the ones at quantity zero — otherwise they read as excluded.
+    const shown = (list) =>
+      (Math.round(list * (1 - rate) * 100) / 100).toFixed(2);
+    assert.equal(shown(390), "273.00");
+    assert.equal(shown(325), "227.50");
+
+    // No tier reached, so nothing to show but the list price.
+    assert.equal(b2b.productDiscountRate(lines, "B"), null);
+    assert.equal(b2b.productDiscountRate(lines, "MISSING"), null);
+    assert.equal(b2b.productDiscountRate([], "A"), null);
+  });
+
+  test("failure details are carried through for the lines to drop", () => {
+    const failure = b2b.classifyFailure(404, {
+      code: "VARIANT_NOT_FOUND",
+      message: "Some variants were not found",
+      details: { variantIds: ["47591719436510"] },
+    });
+    assert.deepEqual(failure.details, { variantIds: ["47591719436510"] });
   });
 }
 
