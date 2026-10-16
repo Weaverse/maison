@@ -32,21 +32,35 @@ const DRAFT_ORDER_QUERY = `#graphql
   }
 `;
 
-export interface DraftOrderState {
-  /** `OPEN`, `INVOICE_SENT` or `COMPLETED`. */
-  status: string;
-  /** What the buyer actually paid for, to take back out of their cart. */
-  lines: { variantId: string; quantity: number }[];
-}
+/**
+ * Three answers, not two.
+ *
+ * `missing` is Shopify telling us the draft is not there — someone deleted
+ * it, and no amount of asking again will bring it back. `unreadable` is us
+ * failing to ask: a timeout, a permission change, a bad gateway. Treating
+ * them alike means either giving up on a cart whose order may well have been
+ * paid, or asking Shopify the same settled question on every cart view for a
+ * day.
+ */
+export type DraftOrderLookup =
+  | {
+      kind: "found";
+      /** `OPEN`, `INVOICE_SENT` or `COMPLETED`. */
+      status: string;
+      /** What the buyer actually paid for, to take back out of their cart. */
+      lines: { variantId: string; quantity: number }[];
+    }
+  | { kind: "missing" }
+  | { kind: "unreadable" };
 
-/** The draft's current state, or `null` when it cannot be read. */
+/** What became of a draft order, as far as Shopify can say. */
 export async function readDraftOrder(
   context: Context,
   draftOrderId: string,
-): Promise<DraftOrderState | null> {
+): Promise<DraftOrderLookup> {
   const { WEAVERSE_HOST, WEAVERSE_API_KEY } = context.env;
   if (!(WEAVERSE_HOST && WEAVERSE_API_KEY)) {
-    return null;
+    return { kind: "unreadable" };
   }
 
   try {
@@ -72,15 +86,19 @@ export async function readDraftOrder(
       error?: string;
     };
 
-    if (payload.error || !payload.draftOrder?.status) {
-      console.warn(
-        "[B2Bridge] draft order lookup failed:",
-        payload.error ?? "no draft order in response",
-      );
-      return null;
+    if (payload.error) {
+      console.warn("[B2Bridge] draft order lookup failed:", payload.error);
+      return { kind: "unreadable" };
+    }
+    // Shopify answers `null` for an id it has no draft for. A definite answer,
+    // not a failure to get one.
+    if (!payload.draftOrder?.status) {
+      console.warn("[B2Bridge] draft order no longer exists:", draftOrderId);
+      return { kind: "missing" };
     }
 
     return {
+      kind: "found",
       status: payload.draftOrder.status,
       lines: (payload.draftOrder.lineItems?.nodes ?? [])
         .filter((node) => node.variant?.id)
@@ -94,6 +112,6 @@ export async function readDraftOrder(
       "[B2Bridge] draft order lookup failed:",
       (error as Error)?.message,
     );
-    return null;
+    return { kind: "unreadable" };
   }
 }

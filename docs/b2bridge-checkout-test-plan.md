@@ -36,7 +36,7 @@ trả lời đó.
 Không cần biết code. Cần: chạy được dev server trên máy, mở được DevTools của
 trình duyệt, và có quyền vào Shopify admin của `maison-plus-2`.
 
-Toàn bộ bảy ca mất khoảng 30–45 phút.
+Toàn bộ chín ca mất khoảng 40–55 phút.
 
 ## Luồng được kiểm
 
@@ -125,7 +125,7 @@ F12 → tab **Network** → ô lọc gõ `b2b-`. Giữ mở suốt buổi test.
 
 ## Dữ liệu tham chiếu
 
-Trong cả bảy ca chỉ dùng hai sản phẩm dưới đây. Các sản phẩm khác không nằm
+Trong cả chín ca chỉ dùng hai sản phẩm dưới đây. Các sản phẩm khác không nằm
 trong bảng giá sỉ và sẽ không cho kết quả như mô tả.
 
 | Tên hiển trên web | Variant id | Giá lẻ | Tối thiểu |
@@ -310,6 +310,48 @@ thuộc hai sản phẩm khác nhau.
 
 Sau 60 giây thì bấm lại sẽ tạo hoá đơn mới — đó là đúng, không phải lỗi.
 
+### Ca 8 — Giỏ còn ít hơn số lượng đã trả
+
+*Giỏ rỗng trước khi bắt đầu.*
+
+1. Thêm **Queen** số lượng **10**
+2. **Checkout**, rồi **Back**
+3. Giảm Queen trong giỏ xuống **3** — nút Checkout khoá lại vì dưới mức tối
+   thiểu 5, đó là đúng
+4. **Tab B**: draft mới nhất → **Mark as paid**
+5. **Tab A**: tải lại, mở giỏ
+
+**Phải thấy:** `b2b-settle` trả `{"settled": true}` và giỏ **rỗng**.
+
+Hệ thống chỉ trừ được 3 món đang có; 7 món chênh lệch bị bỏ qua chứ không tạo
+ra số lượng âm. Lưu ý việc dọn vẫn chạy dù giỏ đang dưới mức tối thiểu — nó
+chỉ cần biết có hoá đơn đang chờ, không quan tâm giỏ có checkout được hay
+không.
+
+### Ca 9 — Draft bị xoá
+
+*Giỏ rỗng trước khi bắt đầu. Khác với ca 2: ở đó draft vẫn còn và đang `Open`.*
+
+1. Thêm **Queen** số lượng **10**
+2. **Checkout**, rồi **Back**
+3. **Tab B**: ghi lại số `#D` của draft mới nhất, rồi **Delete draft order** —
+   xoá hẳn, **không** đánh dấu đã trả
+4. **Tab A**: tải lại, mở giỏ
+5. Tải lại và mở giỏ **thêm một lần nữa**
+
+**Phải thấy:**
+
+- Lần đầu: `b2b-settle` trả `{"settled": false}`, giỏ vẫn có **Queen 10**
+- Terminal có dòng `[B2Bridge] draft order no longer exists: ...`
+- Lần thứ hai: **không còn gọi `b2b-settle`** nữa
+
+Shopify trả `{"draftOrder": null}` cho một draft đã xoá — đó là câu trả lời
+dứt khoát, không phải lỗi đọc. Nên hệ thống bỏ ghi chú chờ ngay thay vì hỏi
+lại suốt 24 giờ. Giỏ giữ nguyên vì chưa ai trả tiền cho nó.
+
+> Chỉ xoá đúng draft vừa tạo trong bước 2. Xoá nhầm draft của ca khác sẽ làm
+> hỏng kết quả ca đó.
+
 ## Ghi kết quả
 
 Điền trực tiếp vào bảng này. Cột cuối chỉ cần điền khi không đạt.
@@ -323,6 +365,8 @@ Sau 60 giây thì bấm lại sẽ tạo hoá đơn mới — đó là đúng, k
 | 5 | Không dọn lặp lại | | |
 | 6 | Hai sản phẩm khác nhau | | |
 | 7 | Bấm Checkout hai lần | | |
+| 8 | Giỏ còn ít hơn số lượng đã trả | | |
+| 9 | Draft bị xoá | | |
 
 ### Khi một ca không đạt
 

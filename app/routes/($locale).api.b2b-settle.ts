@@ -42,9 +42,17 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const draft = await readDraftOrder(context, pending.draftOrderId);
+
   // Unreadable is not the same as unpaid: keep the record and try again next
   // time rather than leave the cart holding goods that are already bought.
-  if (!draft) {
+  if (draft.kind === "unreadable") {
+    return data({ settled: false });
+  }
+  // Deleted. Nothing was ever paid against it and nothing ever will be, so
+  // the cart stands as it is and the note goes — keeping it would mean asking
+  // Shopify the same settled question on every cart view for a day.
+  if (draft.kind === "missing") {
+    clearCheckoutMark(context);
     return data({ settled: false });
   }
   if (draft.status !== "COMPLETED") {
