@@ -297,7 +297,7 @@ export interface PricedCartLine {
  * Nothing here carries an internal error string: a failure reaches the browser
  * as a state, not as a reason.
  */
-export type CartPricingState =
+export type CartPricingState = (
   | { status: "not-applicable" }
   | { status: "unavailable"; retryable: boolean }
   | {
@@ -309,4 +309,37 @@ export type CartPricingState =
       errors: LimitError[];
       /** Cart line id → bare variant id, to map merged lines back to the UI. */
       lineVariants: Record<string, string>;
-    };
+    }
+) & {
+  /**
+   * An invoice was raised for this session and has not been settled yet.
+   *
+   * Orthogonal to the pricing, which is why it rides alongside rather than
+   * inside it: a cart can be empty, unpriceable or perfectly priced and still
+   * have an unpaid invoice waiting behind it.
+   */
+  pendingDraft?: boolean;
+};
+
+/**
+ * What the cart is told after the buyer clicks checkout.
+ *
+ * `limits` is kept apart from `unavailable` because the buyer can fix it:
+ * their cart broke an order rule and the cart will say which. `unavailable`
+ * is ours or B2Bridge's problem and leaves them nothing to act on.
+ *
+ * `not-applicable` means B2Bridge should not price this cart at all, so
+ * Shopify's own checkout is the right place to send them.
+ */
+export type CheckoutState =
+  | {
+      status: "ok";
+      /** Where to send the buyer to pay. */
+      invoiceUrl: string;
+      /** Priced again at this moment; may differ from what the cart showed. */
+      subtotal: number;
+      currency: string;
+    }
+  | { status: "limits" }
+  | { status: "unavailable"; retryable: boolean }
+  | { status: "not-applicable" };

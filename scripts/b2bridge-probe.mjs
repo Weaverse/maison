@@ -894,6 +894,67 @@ if (!LIVE) {
     assert.equal(b2b.productDiscountRate([], "A"), null);
   });
 
+  test("one cart is recognised again, a different one is not", () => {
+    // Guards against a second draft order for a cart the buyer has already
+    // started paying for. Carts differ by buyer, market and every line, so
+    // the fingerprint has to follow all of them.
+    const cart = (q) =>
+      b2b.pricingKey({
+        domain: "maison-plus-2.myshopify.com",
+        customerId: "9196237291742",
+        lines: [{ variantId: "47591719436510", quantity: q }],
+        market: { id: "gid://shopify/Market/30496850142", countryCode: "CA" },
+      });
+
+    assert.equal(b2b.fingerprint(cart(10)), b2b.fingerprint(cart(10)));
+    assert.notEqual(b2b.fingerprint(cart(10)), b2b.fingerprint(cart(11)));
+
+    // Short enough that a draft never outlives the prices frozen into it.
+    assert.ok(b2b.CHECKOUT_REUSE_MS <= 60_000);
+  });
+
+  test("a paid order is subtracted from the cart, not emptied from it", () => {
+    const line = (id, variantId, quantity) => ({ id, variantId, quantity });
+
+    // Bought 10, then added a different product before coming back to pay.
+    // The second product was never invoiced and has to survive.
+    assert.deepEqual(
+      b2b.adjustmentForPaidLines(
+        [line("l1", "A", 10), line("l2", "B", 5)],
+        [{ variantId: "gid://shopify/ProductVariant/A", quantity: 10 }],
+      ),
+      { updates: [], removals: ["l1"] },
+    );
+
+    // Bought 10, then added 4 more of the same. Four are still unpaid.
+    assert.deepEqual(
+      b2b.adjustmentForPaidLines(
+        [line("l1", "A", 14)],
+        [{ variantId: "A", quantity: 10 }],
+      ),
+      { updates: [{ id: "l1", quantity: 4 }], removals: [] },
+    );
+
+    // One variant across two cart lines — engraving, a selling plan. The paid
+    // quantity comes off them in order until it runs out.
+    assert.deepEqual(
+      b2b.adjustmentForPaidLines(
+        [line("l1", "A", 6), line("l2", "A", 6)],
+        [{ variantId: "A", quantity: 10 }],
+      ),
+      { updates: [{ id: "l2", quantity: 2 }], removals: ["l1"] },
+    );
+
+    // Nothing in the order matches what is in the cart now.
+    assert.deepEqual(
+      b2b.adjustmentForPaidLines(
+        [line("l1", "B", 3)],
+        [{ variantId: "A", quantity: 1 }],
+      ),
+      { updates: [], removals: [] },
+    );
+  });
+
   test("failure details are carried through for the lines to drop", () => {
     const failure = b2b.classifyFailure(404, {
       code: "VARIANT_NOT_FOUND",

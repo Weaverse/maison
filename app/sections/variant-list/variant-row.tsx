@@ -610,7 +610,9 @@ function QuantityUpdateButtons({
     e: React.KeyboardEvent<HTMLInputElement>,
   ) {
     if (e.key === "Enter") {
-      handleQuantityInputBlur();
+      // Blurring runs `handleQuantityInputBlur` on its own; calling it here as
+      // well ran the whole commit twice off one keystroke. The same fix as in
+      // `cart.tsx` — kept identical so the two steppers cannot drift.
       (e.target as HTMLInputElement).blur();
     } else if (e.key === "Escape") {
       setInputValue(String(displayQuantity));

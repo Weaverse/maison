@@ -299,6 +299,26 @@ function B2BPricingRoot({
     return () => clearTimeout(timer);
   }, [state, key, path]);
 
+  // An invoice was raised and nobody has told us whether it was paid. Asking
+  // once per answer that reports one is enough: the route is cheap when there
+  // is nothing to settle, and it clears the record as soon as there is.
+  const settle = useFetcher<{ settled: boolean }>({ key: "b2b-settle" });
+  const settlePath = usePrefixPathWithLocale("/api/b2b-settle");
+  const asked = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!state?.pendingDraft || settle.state !== "idle") {
+      return;
+    }
+    // Once per cart. Settling changes the cart, which brings a new key here,
+    // and without this the two would chase each other.
+    if (asked.current === key) {
+      return;
+    }
+    asked.current = key;
+    settle.submit(null, { method: "post", action: settlePath });
+  }, [state?.pendingDraft, key, settlePath, settle.state, settle.submit]);
+
   // Both sources: the cart as it stands, and the answer on screen, so a
   // variant just removed still names the product it left.
   const variantProducts = new Map([

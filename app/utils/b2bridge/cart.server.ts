@@ -2,9 +2,24 @@ import type { LoaderFunctionArgs } from "react-router";
 import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query.account";
 import { MARKET_QUERY } from "~/graphql/queries";
 import { customerIdFromGid, devCustomerIdOverride } from "./client.server";
-import { mergeLines, normId } from "./headless";
-import { fetchCartPricing, isHeadlessConfigured } from "./headless.server";
-import type { CartLineForPricing, CartPricingState } from "./types";
+import {
+  CHECKOUT_REUSE_MS,
+  fingerprint,
+  mergeLines,
+  normId,
+  pricingKey,
+} from "./headless";
+import {
+  fetchCartPricing,
+  fetchCheckout,
+  isHeadlessConfigured,
+} from "./headless.server";
+import type {
+  CartLineForPricing,
+  CartPricingState,
+  CheckoutState,
+  HeadlessRequest,
+} from "./types";
 
 /**
  * Pricing the cart through B2Bridge.
@@ -73,13 +88,26 @@ async function loadMarket(
   }
 }
 
-/** Prices whatever is in the buyer's cart right now. */
-export async function loadCartPricing(
-  context: Context,
-): Promise<CartPricingState> {
+type Prepared =
+  | {
+      kind: "ready";
+      request: HeadlessRequest;
+      /** Bare variant id → the cart line ids merged into it. */
+      sources: Map<string, string[]>;
+    }
+  | { kind: "stop"; reason: "not-applicable" | "unavailable" };
+
+/**
+ * Everything both endpoints need before they can ask B2Bridge anything.
+ *
+ * Shared so pricing the cart and paying for it cannot drift apart: the same
+ * buyer, the same market and the same merged lines go to both, which is what
+ * makes the price in the cart the price on the invoice.
+ */
+async function prepare(context: Context): Promise<Prepared> {
   const { env } = context;
   if (!isHeadlessConfigured(env)) {
-    return { status: "not-applicable" };
+    return { kind: "stop", reason: "not-applicable" };
   }
 
   // Three independent lookups. Run in series they were three round trips the
@@ -91,7 +119,7 @@ export async function loadCartPricing(
   ]);
 
   if (!customerId) {
-    return { status: "not-applicable" };
+    return { kind: "stop", reason: "not-applicable" };
   }
 
   const cartLines: CartLineForPricing[] = (cart?.lines?.nodes ?? [])
@@ -103,11 +131,11 @@ export async function loadCartPricing(
     .filter((line) => line.variantId);
 
   if (cartLines.length === 0) {
-    return { status: "not-applicable" };
+    return { kind: "stop", reason: "not-applicable" };
   }
 
   if (!market) {
-    return { status: "unavailable", retryable: true };
+    return { kind: "stop", reason: "unavailable" };
   }
 
   const { lines, sources } = mergeLines(cartLines);
@@ -116,21 +144,49 @@ export async function loadCartPricing(
   // it would earn an `INVALID_REQUEST` and tell the buyer that wholesale
   // pricing is down when their cart is simply empty.
   if (lines.length === 0) {
-    return { status: "not-applicable" };
+    return { kind: "stop", reason: "not-applicable" };
   }
 
-  const result = await fetchCartPricing(env, {
-    domain: env.PUBLIC_STORE_DOMAIN,
-    customerId,
-    lines,
-    market,
-  });
+  return {
+    kind: "ready",
+    sources,
+    request: {
+      domain: env.PUBLIC_STORE_DOMAIN,
+      customerId,
+      lines,
+      market,
+    },
+  };
+}
+
+/** Prices whatever is in the buyer's cart right now. */
+export async function loadCartPricing(
+  context: Context,
+): Promise<CartPricingState> {
+  // Read, never acted on here: a loader that changed the cart would do it on
+  // a prefetch too. The cart is settled by `api.b2b-settle`, which this only
+  // tells the storefront to call.
+  const mark = readCheckoutMark(context);
+  const pendingDraft = Boolean(
+    mark?.draftOrderId && Date.now() - mark.at < CHECKOUT_PENDING_MS,
+  );
+
+  const prepared = await prepare(context);
+  if (prepared.kind === "stop") {
+    return prepared.reason === "unavailable"
+      ? { status: "unavailable", retryable: true, pendingDraft }
+      : { status: "not-applicable", pendingDraft };
+  }
+  const { sources } = prepared;
+
+  const result = await fetchCartPricing(context.env, prepared.request);
 
   if (result.kind === "failed") {
     const { action } = result.failure;
     return {
       status: "unavailable",
       retryable: action === "RETRY_BACKOFF" || action === "RETRY_LATER",
+      pendingDraft,
     };
   }
 
@@ -144,6 +200,7 @@ export async function loadCartPricing(
   const { data } = result;
   return {
     status: "priced",
+    pendingDraft,
     currency: data.currency,
     subtotal: data.subtotal,
     canCheckout: data.canCheckout,
@@ -161,5 +218,111 @@ export async function loadCartPricing(
       maximum: line.maximum,
       increment: line.increment,
     })),
+  };
+}
+
+const CHECKOUT_SESSION_KEY = "b2bridgeCheckout";
+
+interface CheckoutMark {
+  /** Fingerprint of the cart this invoice was made for. */
+  mark: string;
+  /** The draft order to ask Shopify about when the buyer comes back. */
+  draftOrderId: string;
+  invoiceUrl: string;
+  subtotal: number;
+  currency: string;
+  at: number;
+}
+
+export function readCheckoutMark(context: Context): CheckoutMark | null {
+  const stored = context.session.get(CHECKOUT_SESSION_KEY) as
+    | CheckoutMark
+    | undefined;
+  return stored?.mark && stored.invoiceUrl ? stored : null;
+}
+
+export function clearCheckoutMark(context: Context): void {
+  context.session.unset(CHECKOUT_SESSION_KEY);
+}
+
+/**
+ * How long a paid order is still worth looking for.
+ *
+ * The buyer has to come back to the storefront for the cart to be settled, so
+ * this is the window in which that still happens. Beyond it the record is of
+ * no use: the cart they would have been credited against has long since
+ * changed.
+ */
+export const CHECKOUT_PENDING_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Prices the cart again and creates the draft order to pay for it.
+ *
+ * Only ever from a buyer's click. Every call creates a draft order in the
+ * merchant's admin and B2Bridge offers no way to delete one, so a prefetch, a
+ * retry or a double submit each leave a real order behind.
+ *
+ * B2Bridge prices from scratch rather than trusting the figure the cart was
+ * showing, so the subtotal that comes back is the one that will be charged —
+ * and may differ from the one the buyer was looking at if the merchant edited
+ * a price list in between. It is returned for the cart to compare.
+ */
+export async function createCheckout(context: Context): Promise<CheckoutState> {
+  const prepared = await prepare(context);
+  if (prepared.kind === "stop") {
+    return prepared.reason === "unavailable"
+      ? { status: "unavailable", retryable: true }
+      : { status: "not-applicable" };
+  }
+
+  // Sequential duplicates — a second tab, a back button, a click after the
+  // first one has already landed — get the invoice that was already made for
+  // this exact cart rather than a second draft order the merchant has to go
+  // and tidy up. Two genuinely simultaneous clicks still race past this,
+  // because both read the session before either writes it; that case is the
+  // disabled button's to catch.
+  const mark = fingerprint(pricingKey(prepared.request));
+  const prior = readCheckoutMark(context);
+  if (
+    prior &&
+    prior.mark === mark &&
+    Date.now() - prior.at < CHECKOUT_REUSE_MS
+  ) {
+    return {
+      status: "ok",
+      invoiceUrl: prior.invoiceUrl,
+      subtotal: prior.subtotal,
+      currency: prior.currency,
+    };
+  }
+
+  const result = await fetchCheckout(context.env, prepared.request);
+  if (result.kind === "failed") {
+    const { action } = result.failure;
+    // The cart broke an order rule. Nothing was created, and the cart already
+    // knows how to say which rule — so this only has to send them back to it.
+    if (action === "SHOW_ERRORS") {
+      return { status: "limits" };
+    }
+    return {
+      status: "unavailable",
+      retryable: action === "RETRY_BACKOFF" || action === "RETRY_LATER",
+    };
+  }
+
+  context.session.set(CHECKOUT_SESSION_KEY, {
+    mark,
+    draftOrderId: result.data.draftOrderId,
+    invoiceUrl: result.data.invoiceUrl,
+    subtotal: result.data.subtotal,
+    currency: result.data.currency,
+    at: Date.now(),
+  } satisfies CheckoutMark);
+
+  return {
+    status: "ok",
+    invoiceUrl: result.data.invoiceUrl,
+    subtotal: result.data.subtotal,
+    currency: result.data.currency,
   };
 }

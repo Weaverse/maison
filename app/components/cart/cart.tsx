@@ -20,7 +20,7 @@ import type {
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
-import { useFetcher } from "react-router";
+import { useFetcher, useRevalidator } from "react-router";
 import useScroll from "react-use/esm/useScroll";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
@@ -39,6 +39,7 @@ import { ScrollArea } from "~/components/scroll-area";
 import { Section } from "~/components/section";
 import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
+import type { CheckoutState } from "~/utils/b2bridge/types";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
 import { CartBestSellers } from "./cart-best-sellers";
@@ -171,6 +172,36 @@ function CartCheckoutActions({
   const { t } = useTranslation();
   const gate = useCheckoutGate();
   const limitMessages = useLimitMessages();
+  const { state } = useB2BPricing();
+  const checkoutPath = usePrefixPathWithLocale("/api/b2b-checkout");
+  const fetcher = useFetcher<CheckoutState>({ key: "b2b-checkout" });
+  const result = fetcher.data;
+  const working = fetcher.state !== "idle";
+  const revalidator = useRevalidator();
+
+  // B2Bridge owns this cart's prices, so it must also own the order. Shopify's
+  // own checkout URL would charge the retail price it computed.
+  const payThroughB2Bridge = state?.status === "priced";
+  const shownSubtotal = state?.status === "priced" ? state.subtotal : null;
+  const repriced =
+    result?.status === "ok" &&
+    shownSubtotal !== null &&
+    result.subtotal !== shownSubtotal;
+
+  useEffect(() => {
+    // Straight through when the figure the buyer agreed to is the one that
+    // was charged. When it is not, they are told before they are sent.
+    if (result?.status === "ok" && !repriced) {
+      window.location.href = result.invoiceUrl;
+    }
+    // The cart broke a rule this page did not know about — it was changed
+    // somewhere else, in another tab or on another device. Reloading it is
+    // what makes the cart able to say which rule, since the figures on screen
+    // were worked out for a cart that no longer exists.
+    if (result?.status === "limits") {
+      revalidator.revalidate();
+    }
+  }, [result, repriced, revalidator.revalidate]);
 
   if (!checkoutUrl) {
     return null;
@@ -212,6 +243,54 @@ function CartCheckoutActions({
           >
             {t("cart.checkout")}
           </Button>
+        </div>
+      ) : payThroughB2Bridge ? (
+        <div className="flex flex-col gap-2">
+          {result?.status === "unavailable" && (
+            <p className="text-sm text-(--color-text-subtle)">
+              {t("cart.b2bCheckoutFailed")}
+            </p>
+          )}
+          {result?.status === "limits" && (
+            <p className="text-sm text-(--color-text-subtle)">
+              {t("cart.b2bCartChanged")}
+            </p>
+          )}
+          {repriced && result?.status === "ok" && (
+            <p className="text-sm text-(--color-text-subtle)">
+              {t("cart.b2bPriceChanged", {
+                total: new Intl.NumberFormat(undefined, {
+                  style: "currency",
+                  currency: result.currency,
+                }).format(result.subtotal),
+              })}
+            </p>
+          )}
+          {repriced && result?.status === "ok" ? (
+            // The draft order already exists and already carries this price;
+            // there is nothing to create again, only a buyer to inform.
+            <a href={result.invoiceUrl} target="_self" className="w-full">
+              <Button className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal">
+                {t("cart.b2bContinueToPayment")}
+              </Button>
+            </a>
+          ) : (
+            <fetcher.Form method="post" action={checkoutPath}>
+              <Button
+                type="submit"
+                // Each submission creates a draft order the merchant cannot
+                // delete, so the button closes the moment it is used and stays
+                // closed through the navigation that follows. The session
+                // guard covers the cases this cannot — a second tab, a back
+                // button — but two genuinely simultaneous clicks are its job.
+                disabled={working || result?.status === "ok"}
+                loading={working}
+                className="w-full bg-(--btn-primary-bg) text-(--btn-primary-text) border-0 py-[18px] px-6 font-normal"
+              >
+                {t("cart.checkout")}
+              </Button>
+            </fetcher.Form>
+          )}
         </div>
       ) : (
         <a href={checkoutUrl} target="_self" className="w-full">
@@ -416,6 +495,9 @@ function CartLineQuantityAdjust({
   const cartAction = usePrefixPathWithLocale("/cart");
   const optimisticId = line?.id;
   const optimisticData = useOptimisticData<OptimisticData>(optimisticId);
+  // Keyed to the line, like `UpdateCartButton`'s own form, so a typed quantity
+  // and a tapped one are the same kind of event to everything downstream.
+  const quantityFetcher = useFetcher({ key: optimisticId });
   const [inputValue, setInputValue] = useState("");
 
   const optimisticQuantity = optimisticData?.quantity || line?.quantity;
@@ -469,7 +551,20 @@ function CartLineQuantityAdjust({
           inputs: { lines: [{ id: lineId, quantity: newQuantity }] },
         }),
       );
-      fetch(cartAction, { method: "POST", body: formData });
+      // The same two fields `OptimisticInput` puts in the stepper's form, so
+      // the number on screen moves the moment it is typed rather than waiting
+      // for Shopify.
+      formData.append("optimistic-identifier", lineId);
+      formData.append(
+        "optimistic-data",
+        JSON.stringify({ quantity: newQuantity }),
+      );
+      // Through a fetcher, not a bare `fetch`. A bare one does reach Shopify,
+      // but React Router never learns of it: no revalidation, so the loaders
+      // keep serving the old cart, and no optimistic update, so the stepper
+      // keeps showing the old number. The quantity only appeared to apply
+      // after the drawer was closed and opened again.
+      quantityFetcher.submit(formData, { method: "POST", action: cartAction });
     }
   }
 
@@ -525,6 +620,9 @@ function CartLineQuantityAdjust({
 
         <input
           type="number"
+          // The label beside it is `sr-only` and points here by id. Without
+          // one, a screen reader announces an unlabelled number field.
+          id={`quantity-${lineId}`}
           value={inputValue}
           onChange={handleQuantityInputChange}
           onBlur={handleQuantityInputBlur}

@@ -413,3 +413,88 @@ export function productDiscountRate(
   }
   return null;
 }
+
+/**
+ * A short, stable fingerprint of a pricing key.
+ *
+ * Used to recognise a cart the buyer has already started paying for without
+ * carrying the whole key — which lists every variant and quantity — around in
+ * a cookie.
+ *
+ * FNV-1a, because this only has to tell two carts apart, not resist anyone
+ * trying to make them collide: the value it guards is the buyer's own invoice.
+ */
+export function fingerprint(key: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < key.length; i += 1) {
+    hash ^= key.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+/**
+ * How long a draft order is handed back instead of a new one being made.
+ *
+ * A duplicate guard, not a cache. Longer would start returning a buyer to an
+ * invoice whose prices have since moved — the draft froze them when it was
+ * created, and B2Bridge does not revisit it.
+ */
+export const CHECKOUT_REUSE_MS = 60_000;
+
+export interface PaidLine {
+  /** Bare variant id. */
+  variantId: string;
+  quantity: number;
+}
+
+export interface CartAdjustment {
+  /** Cart lines to reduce, with the quantity they should be left at. */
+  updates: { id: string; quantity: number }[];
+  /** Cart lines to take out entirely. */
+  removals: string[];
+}
+
+/**
+ * What to take out of the cart once an order has been paid for.
+ *
+ * Subtracts rather than empties. Between creating the draft order and coming
+ * back to pay it, a buyer can add more to their cart — those lines were never
+ * invoiced, and clearing the cart wholesale would throw them away. Buying ten
+ * and then adding four more leaves four, not nothing.
+ *
+ * A variant can sit on several cart lines at once (engraving, a selling plan),
+ * so the paid quantity is taken off them in order until it is used up.
+ */
+export function adjustmentForPaidLines(
+  cartLines: { id: string; variantId: string; quantity: number }[],
+  paid: PaidLine[],
+): CartAdjustment {
+  const owed = new Map<string, number>();
+  for (const line of paid) {
+    const variantId = normId(line.variantId);
+    owed.set(variantId, (owed.get(variantId) ?? 0) + line.quantity);
+  }
+
+  const updates: { id: string; quantity: number }[] = [];
+  const removals: string[] = [];
+
+  for (const line of cartLines) {
+    const variantId = normId(line.variantId);
+    const remaining = owed.get(variantId) ?? 0;
+    if (remaining <= 0) {
+      continue;
+    }
+    const taken = Math.min(remaining, line.quantity);
+    owed.set(variantId, remaining - taken);
+
+    const left = line.quantity - taken;
+    if (left > 0) {
+      updates.push({ id: line.id, quantity: left });
+    } else {
+      removals.push(line.id);
+    }
+  }
+
+  return { updates, removals };
+}

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Await, useFetcher, useRouteLoaderData } from "react-router";
 import type { ProductQuery } from "storefront-api.generated";
 import { Button } from "~/components/button";
+import { B2BPricingProvider } from "~/components/cart/b2b-cart-pricing";
 import { Link } from "~/components/link";
 import { ProductMedia } from "~/components/product/product-media";
 import { useSelectedLocale } from "~/hooks/use-locale";
@@ -174,7 +175,10 @@ export function QuickShop({
           )}
           <Await resolve={rootData?.cart}>
             {(resolvedCart) => (
-              <>
+              // Same prices as the product page's own variant list. Without
+              // this the dialog falls back to Shopify's retail figures while
+              // the page behind it shows the buyer's wholesale ones.
+              <B2BPricingProvider cart={resolvedCart}>
                 <div className="space-y-10 md:space-y-6">
                   {variants.map((variant) => (
                     <VariantRow
@@ -194,7 +198,7 @@ export function QuickShop({
                     hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
                   />
                 </div>
-              </>
+              </B2BPricingProvider>
             )}
           </Await>
         </div>
