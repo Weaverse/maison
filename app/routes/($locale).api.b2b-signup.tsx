@@ -1,10 +1,6 @@
 import type { ActionFunctionArgs } from "react-router";
 import { data } from "react-router";
-import {
-  assignCustomerToCompanyMutation,
-  companyCreateMutation,
-  customerCreateMutation,
-} from "~/graphql/customer.admin";
+import { companyCreateMutation } from "~/graphql/customer.admin";
 import { isSameOriginPost } from "~/utils/request-security.server";
 
 const MAX_LENGTHS = {
@@ -117,82 +113,66 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return response.json() as Promise<any>;
     };
 
-    // Step 1: Create Customer
+    // One mutation, so there is nothing to unwind.
+    //
+    // This ran as three — customer, company, assign — and each order had its
+    // own failure. Company first left an orphaned, contactless company behind
+    // whenever the customer step was refused. Customer first wrote the email
+    // before the company could be refused, which was worse: the retry died on
+    // "Email has already been taken" without ever reaching company creation
+    // again, so one transient failure locked that address out of the form for
+    // good.
+    //
+    // `companyCreate` accepts the contact, so Shopify creates the customer,
+    // the contact and the company together or does none of it. A failure
+    // leaves nothing behind and the buyer can simply submit again.
     const [firstName, ...lastNameParts] = name.split(" ");
     const lastName = lastNameParts.join(" ");
 
-    const customerResponse = await graphqlRequest(customerCreateMutation, {
-      input: {
-        email,
-        firstName: firstName || name,
-        lastName: lastName || "",
-      },
-    });
-
-    const customerErrors = customerResponse?.customerCreate?.userErrors;
-    if (customerErrors?.length > 0) {
-      // If customer already exists, we might want to proceed or handle it.
-      // For now, fail as per requirement to report errors.
-      // But typically check if error is "Email has already been taken" and query customer instead.
-      // Given the prompt examples don't handle that complexity, I'll stick to error reporting.
-      return data(
-        { error: `Customer creation failed: ${customerErrors[0].message}` },
-        { status: 400 },
-      );
-    }
-
-    const customerId = customerResponse?.customerCreate?.customer?.id;
-    if (!customerId) {
-      return data({ error: "Failed to create customer" }, { status: 500 });
-    }
-
-    // Step 2: Create the company. The customer goes first because it is the
-    // step that can be refused — a duplicate email, or a missing
-    // `write_customers` scope on the connected app. Creating the company
-    // first left an orphaned, contactless company behind on every failure.
     const companyResponse = await graphqlRequest(companyCreateMutation, {
       input: {
         company: {
           name: company,
           note: `Contact: ${name} (${email})\nWebsite: ${website}\nMessage: ${message}\nSubmitted at: ${new Date().toISOString()}`,
         },
+        companyContact: {
+          email,
+          firstName: firstName || name,
+          lastName: lastName || "",
+        },
       },
     });
 
     const companyErrors = companyResponse?.companyCreate?.userErrors;
     if (companyErrors?.length > 0) {
-      return data(
-        { error: `Company creation failed: ${companyErrors[0].message}` },
-        { status: 400 },
-      );
+      const [{ code, message: reason }] = companyErrors;
+      // A duplicate email is the one failure the buyer can act on, and
+      // Shopify's own wording does not say so. Everything else is reported as
+      // it came back. `code` rather than the message text, so this keeps
+      // working in a shop running another language.
+      if (code === "TAKEN") {
+        return data(
+          {
+            error:
+              "An account already exists for this email address. Please contact us directly.",
+          },
+          { status: 409 },
+        );
+      }
+      return data({ error: `Signup failed: ${reason}` }, { status: 400 });
     }
 
-    const companyId = companyResponse.companyCreate?.company?.id;
+    const createdCompany = companyResponse?.companyCreate?.company;
+    const companyId = createdCompany?.id;
+    const customerId = createdCompany?.mainContact?.customer?.id;
     if (!companyId) {
       return data({ error: "Failed to create company" }, { status: 500 });
     }
 
-    // Step 3: Assign Customer to Company
-    const assignResponse = await graphqlRequest(
-      assignCustomerToCompanyMutation,
-      {
-        companyId,
-        customerId,
-      },
+    return data(
+      { success: true, companyId, customerId: customerId ?? null },
+      { status: 200 },
     );
-
-    const assignErrors =
-      assignResponse?.companyAssignCustomerAsContact?.userErrors;
-    if (assignErrors?.length > 0) {
-      return data(
-        {
-          error: `Failed to assign customer to company: ${assignErrors[0].message}`,
-        },
-        { status: 400 },
-      );
-    }
-
-    return data({ success: true, companyId, customerId }, { status: 200 });
   } catch (error) {
     console.error("B2B signup error:", error);
     // The proxy answers a missing Admin API scope with 403 ACCESS_DENIED.
