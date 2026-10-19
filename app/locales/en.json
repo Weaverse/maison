@@ -282,9 +282,11 @@
   "form": {
     "nameRequired": "Your name*",
     "companyRequired": "Company name*",
+    "company": "Company name",
     "email": "Contact email*",
     "website": "Website",
     "messageRequired": "Message*",
+    "submit": "Submit",
     "thankYou": "Thank you for your interest!",
     "willReply": "We'll get back to you shortly."
   },

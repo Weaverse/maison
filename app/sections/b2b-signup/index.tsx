@@ -182,9 +182,10 @@ export default B2BSignup;
 
 export const schema = createSchema({
   type: "b2b-signup",
-  // The type is the key Weaverse stores against, so it stays put; only the
-  // name merchants see changes.
-  title: "Contact us",
+  // Named for the flow it runs, not for the shape it has: this form creates a
+  // Shopify customer and Company, which a general enquiry has no business
+  // doing. The contact section posts to `/api/contact` instead.
+  title: "B2B Signup",
   inspector: [
     {
       group: "Content",
