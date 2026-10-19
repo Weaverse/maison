@@ -226,19 +226,44 @@ export function QuickShopTrigger({
   // comes from the catalogue, like every other translatable string.
   const triggerLabel = buttonText || t("product.selectOptions");
   const [open, setOpen] = useState(false);
+  // Keyed by handle, so the answer for one product is never served for
+  // another. Weaverse keys a section by its item id, which does not change
+  // when the merchant picks a different product in the Studio, so this
+  // trigger is not remounted and an unkeyed fetcher would keep the product it
+  // loaded first — the dialog then offers a product the section is no longer
+  // showing, and adds it to the cart. Keying it also means going back to a
+  // product already loaded costs no request.
   const { load, data, state } = useFetcher<{
     product: ProductQuery["product"];
-  }>();
+  }>({ key: `quick-shop:${productHandle}` });
 
   const [isFetching, setIsFetching] = useState(false);
   const isLoading = state === "loading" || isFetching;
 
+  // A fetcher key is the dedupe boundary, not a guarantee: react-router hands
+  // back whatever that key last held, so the handle is checked against the
+  // answer before it is shown or opened.
+  const cachedProduct =
+    data?.product?.handle === productHandle ? data.product : undefined;
+
   useEffect(() => {
-    if (isFetching && data?.product) {
+    if (isFetching && cachedProduct) {
       setIsFetching(false);
       setOpen(true);
     }
-  }, [data, isFetching]);
+  }, [cachedProduct, isFetching]);
+
+  // The fetcher moves to the new product's key on its own; these two flags are
+  // this component's and would survive the switch. Left alone, a dialog open
+  // on product A stays open against a key with nothing in it yet, showing an
+  // empty panel. Reset while rendering rather than in an effect, so the
+  // closed dialog is what gets painted instead of flashing the empty one.
+  const [lastHandle, setLastHandle] = useState(productHandle);
+  if (lastHandle !== productHandle) {
+    setLastHandle(productHandle);
+    setOpen(false);
+    setIsFetching(false);
+  }
 
   // Fetch through the locale-prefixed path: the product API prices the
   // variants in the market the request resolves to, so an unprefixed
@@ -249,7 +274,7 @@ export function QuickShopTrigger({
   );
 
   const handleOpen = () => {
-    if (data?.product) {
+    if (cachedProduct) {
       setOpen(true);
     } else {
       setIsFetching(true);
@@ -339,7 +364,11 @@ export function QuickShopTrigger({
               <VisuallyHidden.Root asChild>
                 <Dialog.Title>{t("product.quickShopModal")}</Dialog.Title>
               </VisuallyHidden.Root>
-              {data?.product && <QuickShop data={data as QuickViewData} />}
+              {cachedProduct && (
+                <QuickShop
+                  data={{ ...data, product: cachedProduct } as QuickViewData}
+                />
+              )}
             </div>
           </div>
         </Dialog.Content>
