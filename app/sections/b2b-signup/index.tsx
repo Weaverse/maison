@@ -4,7 +4,7 @@ import {
   useTranslation,
 } from "@weaverse/hydrogen";
 import { forwardRef, useState } from "react";
-import { Form, useFetcher } from "react-router";
+import { useFetcher } from "react-router";
 import { Button } from "~/components/button";
 import { cn } from "~/utils/cn";
 
@@ -23,7 +23,6 @@ const FIELD_CLASS =
 
 const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
   const { t } = useTranslation();
-  const formKey = "b2b-form";
   const {
     heading,
     description,
@@ -33,7 +32,13 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
     textColor,
     ...rest
   } = props;
-  const fetcher = useFetcher({ key: formKey });
+  // No key: a fetcher key is shared by every component that names it, and
+  // nothing stops a page holding two of these. One shared key meant submitting
+  // either form answered both, replacing the other with the success panel
+  // while its entries were never sent. `fetcher.Form` is bound to this fetcher
+  // alone, and a fetcher submission never navigates, so it needs no
+  // `navigate={false}` either.
+  const fetcher = useFetcher();
   const [formState, setFormState] = useState({
     name: "",
     company: "",
@@ -78,11 +83,9 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
             <p className="mt-2">{t("form.willReply")}</p>
           </div>
         ) : (
-          <Form
+          <fetcher.Form
             method="post"
             action="/api/b2b-signup"
-            navigate={false}
-            fetcherKey={formKey}
             className="flex w-full flex-col gap-4"
           >
             {error && (
@@ -171,7 +174,7 @@ const B2BSignup = forwardRef<HTMLElement, B2BSignupProps>((props, ref) => {
                 {termsText}
               </p>
             )}
-          </Form>
+          </fetcher.Form>
         )}
       </div>
     </section>

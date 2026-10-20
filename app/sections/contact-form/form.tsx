@@ -5,7 +5,7 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { Form, useFetcher } from "react-router";
+import { useFetcher } from "react-router";
 import { Button } from "~/components/button";
 
 const inputVariants = cva(
@@ -35,14 +35,6 @@ const inputVariants = cva(
 /** What `/api/contact` answers with. */
 type ContactResponse = { ok?: boolean; error?: string };
 
-/**
- * One key for the form element and the fetcher that reads its state.
- *
- * `navigate={false}` keeps the submission out of the router's navigation, so
- * the result is only reachable through a fetcher holding the same key.
- */
-const FORM_KEY = "contact-form";
-
 interface ContactFormProps
   extends VariantProps<typeof inputVariants>,
     HydrogenComponentProps {
@@ -69,7 +61,13 @@ const ContactForm = (props: ContactFormProps) => {
     ...rest
   } = props;
 
-  const fetcher = useFetcher<ContactResponse>({ key: FORM_KEY });
+  // No key: a fetcher key is shared by every component that names it, and a
+  // page may hold more than one contact section. One shared key meant
+  // submitting either form answered both — the other was replaced by the
+  // success panel with its message never sent and its fields gone.
+  // `fetcher.Form` is bound to this fetcher and nothing else, which is also
+  // why it needs no `navigate={false}`: a fetcher submission never navigates.
+  const fetcher = useFetcher<ContactResponse>();
   const isSubmitting = fetcher.state === "submitting";
   const { ok, error } = fetcher.data ?? {};
 
@@ -105,13 +103,11 @@ const ContactForm = (props: ContactFormProps) => {
   }
 
   return (
-    <Form
+    <fetcher.Form
       ref={ref}
       {...rest}
       method="post"
       action="/api/contact"
-      navigate={false}
-      fetcherKey={FORM_KEY}
       className="flex flex-col items-center max-w-[640px] w-full"
       style={
         {
@@ -198,7 +194,7 @@ const ContactForm = (props: ContactFormProps) => {
       <Button type="submit" variant="primary" loading={isSubmitting}>
         {buttonText || t("form.submit")}
       </Button>
-    </Form>
+    </fetcher.Form>
   );
 };
 
