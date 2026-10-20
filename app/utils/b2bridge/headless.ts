@@ -498,3 +498,137 @@ export function adjustmentForPaidLines(
 
   return { updates, removals };
 }
+
+/**
+ * A quantity that breaks the increment its rule sets.
+ *
+ * B2Bridge reports `increment` on every priced line and then accepts any
+ * quantity regardless of it — measured against rule 8985 with
+ * `increment_quantity = 5`, where quantities of 7 and 12 both came back
+ * `canCheckout: true` with an empty `errors`, while a quantity below the
+ * minimum on the same line is correctly refused. So the increment is the one
+ * order limit this storefront has to hold on its own.
+ */
+export interface IncrementBreach {
+  variantId: string;
+  quantity: number;
+  increment: number;
+  /** The nearest allowed quantity, for the message and the input to snap to. */
+  allowed: number;
+}
+
+/**
+ * The nearest quantity the rule permits, at or below what was asked for.
+ *
+ * Rounds down rather than up: rounding up bills the buyer for units they did
+ * not ask for, and the only case where down is not an option is a quantity
+ * under the minimum, which this raises instead.
+ *
+ * Allowed quantities are the multiples of `increment` at or above `minimum`,
+ * which is the model Shopify's own quantity rules use. A minimum that is not
+ * itself a multiple rounds up to the first one that is, so a rule asking for
+ * at least 7 in steps of 5 starts at 10.
+ */
+export function allowedQuantity(
+  quantity: number,
+  increment: number,
+  minimum: number | null,
+): number {
+  const step = Math.max(1, Math.floor(increment) || 1);
+  const floor = Math.max(
+    step,
+    Math.ceil(Math.max(1, minimum ?? 0) / step) * step,
+  );
+  if (quantity <= floor) {
+    return floor;
+  }
+  return Math.max(floor, Math.floor(quantity / step) * step);
+}
+
+/**
+ * Every priced line whose quantity is off its increment.
+ *
+ * Lines already under their minimum are left out: B2Bridge reports those as
+ * `BELOW_MINIMUM` itself, and raising the quantity to the minimum is the fix
+ * for both, so listing them twice would put two messages on one line.
+ */
+export function incrementBreaches(
+  lines: {
+    variantId: string;
+    quantity: number;
+    increment: number;
+    minimum: number | null;
+    hasRule: boolean;
+  }[],
+): IncrementBreach[] {
+  const breaches: IncrementBreach[] = [];
+  for (const line of lines) {
+    const step = Math.max(1, Math.floor(line.increment) || 1);
+    if (step <= 1 || !line.hasRule) {
+      continue;
+    }
+    if (line.minimum != null && line.quantity < line.minimum) {
+      continue;
+    }
+    if (line.quantity % step === 0) {
+      continue;
+    }
+    breaches.push({
+      variantId: normId(line.variantId),
+      quantity: line.quantity,
+      increment: step,
+      allowed: allowedQuantity(line.quantity, step, line.minimum),
+    });
+  }
+  return breaches;
+}
+
+export interface QuantityRule {
+  minimum: number;
+  maximum: number | null;
+  increment: number;
+}
+
+/**
+ * The two quantity rules on a cart line, combined into the one that binds.
+ *
+ * A line can be under both at once. Shopify's own B2B quantity rules arrive on
+ * `merchandise.quantityRule` whenever the cart carries a `companyLocationId`
+ * and a catalog sets them, and Shopify enforces those at checkout; B2Bridge's
+ * arrive from `cart-pricing` and nothing enforces them. Preferring one source
+ * discards a real constraint either way — a maximum set in Shopify admin would
+ * go unmentioned by a stepper reading only B2Bridge, and the quantity would
+ * then fail at a checkout the cart said was fine.
+ *
+ * Both have to hold, so each field takes the stricter side: the higher
+ * minimum, the lower maximum, and for the increment the lowest common multiple,
+ * since a quantity off either step breaks that rule. Two coprime increments
+ * multiply out — 2 and 5 allow only multiples of 10 — which is a sign of a
+ * misconfiguration rather than something to soften, and softening it would
+ * mean quietly allowing quantities one of the two rules forbids.
+ */
+export function strictestRule(
+  a: Partial<QuantityRule> | null | undefined,
+  b: Partial<QuantityRule> | null | undefined,
+): QuantityRule {
+  const step = (value: number | null | undefined) =>
+    Math.max(1, Math.floor(value || 0) || 1);
+  const incA = step(a?.increment);
+  const incB = step(b?.increment);
+
+  let x = incA;
+  let y = incB;
+  while (y) {
+    [x, y] = [y, x % y];
+  }
+  const increment = (incA / x) * incB;
+
+  const maxA = a?.maximum && a.maximum > 0 ? a.maximum : null;
+  const maxB = b?.maximum && b.maximum > 0 ? b.maximum : null;
+
+  return {
+    minimum: Math.max(1, a?.minimum || 1, b?.minimum || 1),
+    maximum: maxA && maxB ? Math.min(maxA, maxB) : (maxA ?? maxB),
+    increment,
+  };
+}

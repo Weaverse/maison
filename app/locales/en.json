@@ -38,6 +38,7 @@
     "b2bLimitMaxQuantity": "{{name}} is limited to {{limit}} items",
     "b2bLimitMinAmount": "{{name}} must total at least {{limit}}",
     "b2bLimitMaxAmount": "{{name}} is limited to {{limit}}",
+    "b2bLimitIncrement": "{{name}} must be ordered in multiples of {{increment}} — change {{quantity}} to {{allowed}}",
     "b2bLimitOrder": "Your order",
     "b2bFixQuantities": "Adjust the quantities below to continue.",
     "b2bUnavailable": "Wholesale pricing is unavailable right now. Please try again in a moment.",

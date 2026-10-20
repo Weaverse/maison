@@ -963,6 +963,129 @@ if (!LIVE) {
     });
     assert.deepEqual(failure.details, { variantIds: ["47591719436510"] });
   });
+
+  test("an increment B2Bridge will not hold to is held to here", () => {
+    // Captured from rule 8985 on 2026-10-20 with increment_quantity = 5 on
+    // variant 47591719436510: quantities of 7 and 12 both came back
+    // canCheckout: true with an empty errors, so B2Bridge reports the
+    // increment and then ignores it. These are those replies.
+    const line = (quantity, over = {}) => ({
+      variantId: "47591719436510",
+      quantity,
+      increment: 5,
+      minimum: 5,
+      hasRule: true,
+      ...over,
+    });
+
+    assert.deepEqual(b2b.incrementBreaches([line(10)]), []);
+    assert.deepEqual(b2b.incrementBreaches([line(20)]), []);
+
+    assert.deepEqual(b2b.incrementBreaches([line(12)]), [
+      { variantId: "47591719436510", quantity: 12, increment: 5, allowed: 10 },
+    ]);
+    assert.deepEqual(b2b.incrementBreaches([line(7)]), [
+      { variantId: "47591719436510", quantity: 7, increment: 5, allowed: 5 },
+    ]);
+
+    // Below the minimum is B2Bridge's own BELOW_MINIMUM, and raising the
+    // quantity fixes both. Reported once, not twice.
+    assert.deepEqual(b2b.incrementBreaches([line(3)]), []);
+
+    // No rule, or a step of one, means there is no increment to break. Every
+    // variant on this store read increment: 1 before the rule was changed, so
+    // this is the common case rather than an edge.
+    assert.deepEqual(b2b.incrementBreaches([line(12, { increment: 1 })]), []);
+    assert.deepEqual(b2b.incrementBreaches([line(12, { hasRule: false })]), []);
+
+    // A GID in, a bare id out — the cart looks lines up by the bare one.
+    assert.deepEqual(
+      b2b.incrementBreaches([
+        line(12, { variantId: "gid://shopify/ProductVariant/47591719436510" }),
+      ])[0].variantId,
+      "47591719436510",
+    );
+  });
+
+  test("a typed quantity snaps down, never up past what was asked for", () => {
+    // Rounding up would bill for units the buyer never asked for.
+    assert.equal(b2b.allowedQuantity(12, 5, 5), 10);
+    assert.equal(b2b.allowedQuantity(14, 5, 5), 10);
+    assert.equal(b2b.allowedQuantity(15, 5, 5), 15);
+
+    // Under the minimum there is nothing below to round to, so it goes up.
+    assert.equal(b2b.allowedQuantity(3, 5, 5), 5);
+    assert.equal(b2b.allowedQuantity(1, 5, 5), 5);
+
+    // A minimum that is not a multiple starts at the first one that is.
+    assert.equal(b2b.allowedQuantity(8, 5, 7), 10);
+    assert.equal(b2b.allowedQuantity(20, 5, 7), 20);
+
+    // No minimum set: the first allowed quantity is one full increment.
+    assert.equal(b2b.allowedQuantity(3, 5, null), 5);
+    assert.equal(b2b.allowedQuantity(3, 5, 0), 5);
+
+    // A step of one allows anything at or above the minimum.
+    assert.equal(b2b.allowedQuantity(7, 1, 1), 7);
+    assert.equal(b2b.allowedQuantity(7, 0, 1), 7);
+  });
+
+  test("both quantity rules bind, so the stricter side of each wins", () => {
+    // Shopify's shape on the left, B2Bridge's on the right. Measured defaults:
+    // contextualPricing for both of the test company's locations returns
+    // { minimum: 1, maximum: null, increment: 1 } with originType RELATIVE,
+    // meaning nothing is configured there, while B2Bridge's rule 8985 sets
+    // minimum 5 and increment 5 on the same variant.
+    assert.deepEqual(
+      b2b.strictestRule(
+        { minimum: 1, maximum: null, increment: 1 },
+        { minimum: 5, maximum: null, increment: 5 },
+      ),
+      { minimum: 5, maximum: null, increment: 5 },
+    );
+
+    // A maximum set in Shopify admin is not dropped just because B2Bridge
+    // priced the line — B2Bridge reports no maximum for this variant, and
+    // Shopify enforces its own at checkout either way.
+    assert.deepEqual(
+      b2b.strictestRule(
+        { minimum: 1, maximum: 50, increment: 1 },
+        { minimum: 5, maximum: null, increment: 5 },
+      ),
+      { minimum: 5, maximum: 50, increment: 5 },
+    );
+
+    // Both set: the lower maximum and the higher minimum.
+    assert.deepEqual(
+      b2b.strictestRule(
+        { minimum: 2, maximum: 40, increment: 1 },
+        { minimum: 5, maximum: 100, increment: 1 },
+      ),
+      { minimum: 5, maximum: 40, increment: 1 },
+    );
+
+    // Two increments: a quantity has to sit on both steps, so multiples of 10.
+    assert.deepEqual(
+      b2b.strictestRule({ increment: 2 }, { increment: 5 }).increment,
+      10,
+    );
+    // One a multiple of the other collapses to the larger.
+    assert.deepEqual(
+      b2b.strictestRule({ increment: 5 }, { increment: 10 }).increment,
+      10,
+    );
+
+    // Missing, null and zero all mean "no rule", not "a rule of zero".
+    assert.deepEqual(b2b.strictestRule(null, null), {
+      minimum: 1,
+      maximum: null,
+      increment: 1,
+    });
+    assert.deepEqual(
+      b2b.strictestRule({ minimum: 0, maximum: 0, increment: 0 }, undefined),
+      { minimum: 1, maximum: null, increment: 1 },
+    );
+  });
 }
 
 // --- Live probe ---------------------------------------------------------------

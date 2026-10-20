@@ -5,6 +5,7 @@ import { customerIdFromGid, devCustomerIdOverride } from "./client.server";
 import {
   CHECKOUT_REUSE_MS,
   fingerprint,
+  incrementBreaches,
   mergeLines,
   normId,
   pricingKey,
@@ -294,6 +295,35 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
       subtotal: prior.subtotal,
       currency: prior.currency,
     };
+  }
+
+  // Priced once before the draft order is asked for, only to hold the cart to
+  // the increments its rule sets. B2Bridge reports an increment on every line
+  // and then accepts any quantity regardless of it, so checking out a cart of
+  // 12 where the rule says steps of 5 would have B2Bridge create a draft order
+  // the merchant's own rule forbids — and there is no endpoint to delete a
+  // draft order once it exists. One extra request, on a click that happens
+  // once per order, is the cheap half of that trade.
+  //
+  // `canCheckout` is checked here too. `fetchCheckout` reports the same limits
+  // and nothing is created when it refuses, but finding out before asking
+  // keeps the two paths from disagreeing about which rules stop a checkout.
+  const priced = await fetchCartPricing(context.env, prepared.request);
+  if (priced.kind === "failed") {
+    const { action } = priced.failure;
+    if (action === "SHOW_ERRORS") {
+      return { status: "limits" };
+    }
+    return {
+      status: "unavailable",
+      retryable: action === "RETRY_BACKOFF" || action === "RETRY_LATER",
+    };
+  }
+  if (!priced.data.canCheckout) {
+    return { status: "limits" };
+  }
+  if (incrementBreaches(priced.data.lines).length > 0) {
+    return { status: "limits" };
   }
 
   const result = await fetchCheckout(context.env, prepared.request);

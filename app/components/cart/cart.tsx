@@ -39,6 +39,7 @@ import { ScrollArea } from "~/components/scroll-area";
 import { Section } from "~/components/section";
 import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
+import { allowedQuantity, strictestRule } from "~/utils/b2bridge/headless";
 import type { CheckoutState } from "~/utils/b2bridge/types";
 import { calculateAspectRatio } from "~/utils/image";
 import { toggleCartDrawer } from "../layout/cart-drawer";
@@ -498,6 +499,9 @@ function CartLineQuantityAdjust({
   // Keyed to the line, like `UpdateCartButton`'s own form, so a typed quantity
   // and a tapped one are the same kind of event to everything downstream.
   const quantityFetcher = useFetcher({ key: optimisticId });
+  // Called here rather than after the guard below, because a hook cannot sit
+  // behind an early return.
+  const b2bLine = useB2BLinePrice(optimisticId);
   const [inputValue, setInputValue] = useState("");
 
   const optimisticQuantity = optimisticData?.quantity || line?.quantity;
@@ -515,17 +519,29 @@ function CartLineQuantityAdjust({
 
   const { id: lineId, isOptimistic, merchandise } = line;
 
-  // Get quantity rules from merchandise (B2B feature)
-  const quantityRule = merchandise?.quantityRule;
-  const increment = quantityRule?.increment || 1;
-  const minimum = quantityRule?.minimum || 1;
-  const maximum = quantityRule?.maximum || null;
-
-  // Calculate previous and next quantities based on increment
-  const prevQuantity = Number(
-    Math.max(minimum, optimisticQuantity - increment).toFixed(0),
+  // Two rules can bind this line at once, so the stepper obeys both. Reading
+  // only `merchandise.quantityRule` is what left the cart stepping in ones
+  // while the product page, which reads B2Bridge, stepped correctly; reading
+  // only B2Bridge would drop a limit set in Shopify admin, which Shopify then
+  // enforces at a checkout this cart had called fine.
+  const { increment, minimum, maximum } = strictestRule(
+    merchandise?.quantityRule,
+    b2bLine,
   );
-  const nextQuantity = Number((optimisticQuantity + increment).toFixed(0));
+
+  // Stepping lands on quantities the rule actually allows, rather than adding
+  // and subtracting the increment from wherever the line happens to sit. A
+  // line of 12 under a rule of 5 is already off the grid — it can arrive that
+  // way from a quantity typed before the rule changed — and `12 - 5` would
+  // only move it to another quantity that cannot be checked out.
+  const prevQuantity = allowedQuantity(
+    Math.max(1, optimisticQuantity - 1),
+    increment,
+    minimum,
+  );
+  const stepDown = allowedQuantity(optimisticQuantity, increment, minimum);
+  const nextQuantity =
+    stepDown > optimisticQuantity ? stepDown : stepDown + increment;
 
   // Check if we've reached the maximum
   const isAtMaximum = maximum !== null && nextQuantity > maximum;
@@ -536,10 +552,16 @@ function CartLineQuantityAdjust({
 
   function handleQuantityInputBlur() {
     let newQuantity = Number.parseInt(inputValue, 10) || optimisticQuantity;
-    newQuantity = Math.max(minimum, newQuantity);
+    // Clamped before it is snapped, not after: snapping a number that was
+    // already pulled down to the maximum can push it back over.
     if (maximum) {
       newQuantity = Math.min(maximum, newQuantity);
     }
+    // B2Bridge reports the increment and then accepts any quantity against it,
+    // so a typed 12 under a rule of 5 would price, show and check out as 12.
+    // Snapping here is what makes the typed input obey the same rule the
+    // stepper does.
+    newQuantity = allowedQuantity(newQuantity, increment, minimum);
     setInputValue(String(newQuantity));
 
     if (newQuantity !== optimisticQuantity) {

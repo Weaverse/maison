@@ -10,6 +10,7 @@ import {
   changedProducts,
   changedVariants,
   fetchDecision,
+  incrementBreaches,
   isAnswerCurrent,
   normId,
   productDiscountRate,
@@ -441,6 +442,15 @@ export function useCheckoutGate(): CheckoutGate {
   if (state?.status === "priced" && !state.canCheckout) {
     return { blocked: true, reason: "limits" };
   }
+  // `canCheckout` does not cover the increment — B2Bridge reports one per line
+  // and then accepts any quantity against it, so the only thing standing
+  // between a cart of 12 and a draft order the merchant's rule forbids is this
+  // check and the matching one in `createCheckout`. Both are needed: this one
+  // so the button is disabled rather than failing on click, that one because a
+  // disabled button is not a rule.
+  if (state?.status === "priced" && incrementBreaches(state.lines).length > 0) {
+    return { blocked: true, reason: "limits" };
+  }
   return { blocked: false, reason: null };
 }
 
@@ -462,7 +472,7 @@ export function useLimitMessages(): string[] {
     return [];
   }
 
-  return state.errors.map((error) => {
+  const messages = state.errors.map((error) => {
     const id = error.variantId ?? error.productId;
     const name =
       (id ? names[normId(id)] : null) ||
@@ -492,6 +502,27 @@ export function useLimitMessages(): string[] {
       { name, limit },
     );
   });
+
+  // Appended rather than merged into `errors`: these are this storefront's
+  // own finding, not something B2Bridge reported, and naming the quantity to
+  // change to is the whole point — the buyer cannot act on "multiples of 5"
+  // without being told which of their lines is wrong.
+  for (const breach of incrementBreaches(state.lines)) {
+    const name = names[breach.variantId];
+    if (!name) {
+      continue;
+    }
+    messages.push(
+      t("cart.b2bLimitIncrement", {
+        name,
+        increment: String(breach.increment),
+        quantity: String(breach.quantity),
+        allowed: String(breach.allowed),
+      }),
+    );
+  }
+
+  return messages;
 }
 
 /**
