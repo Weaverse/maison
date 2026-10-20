@@ -186,7 +186,7 @@ export const schema = createSchema({
   // Shopify customer and Company, which a general enquiry has no business
   // doing. The contact section posts to `/api/contact` instead.
   title: "B2B Signup",
-  inspector: [
+  settings: [
     {
       group: "Content",
       inputs: [
