@@ -209,7 +209,13 @@ function PredictiveSearchResults() {
 
   const products = results?.find(({ type }) => type === "products");
   const collections = results?.find(({ type }) => type === "collections");
-  const pages = results?.find(({ type }) => type === "articles");
+  // The API answers with `pages` and `articles` as separate groups. The Pages
+  // tab used to read the articles group, so a shop's actual pages were never
+  // shown anywhere: a search matching only a page counted towards
+  // `totalResults` — enough to get past the empty state above — and then found
+  // no tab to live in, leaving the panel blank.
+  const pages = results?.find(({ type }) => type === "pages");
+  const articles = results?.find(({ type }) => type === "articles");
 
   const tabs = [
     {
@@ -223,6 +229,11 @@ function PredictiveSearchResults() {
       items: collections?.items,
     },
     { value: "pages", label: t("search.tabPages"), items: pages?.items },
+    {
+      value: "articles",
+      label: t("search.tabArticles"),
+      items: articles?.items,
+    },
   ].filter((tab) => tab.items?.length > 0);
 
   const currentTab =
@@ -298,7 +309,15 @@ function PredictiveSearchResults() {
               titles, now that the rows have padding for the hover highlight. */}
           <div className="space-y-1">
             {pages?.items?.map((item) => (
-              <PageResultItem key={item.id} item={item} />
+              <TitleResultItem key={item.id} item={item} />
+            ))}
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="articles" className="p-5">
+          <div className="space-y-1">
+            {articles?.items?.map((item) => (
+              <TitleResultItem key={item.id} item={item} />
             ))}
           </div>
         </Tabs.Content>
@@ -381,12 +400,19 @@ function CollectionResultItem({
   );
 }
 
-function PageResultItem({
+/**
+ * A title that links somewhere — the row both the Pages and Articles tabs use.
+ *
+ * The two were never different to look at, and the tabs already say which kind
+ * of result this is, so one component serves both. It accepts either type
+ * rather than only `Article`, which is what kept pages from rendering.
+ */
+function TitleResultItem({
   item,
 }: {
   item: NormalizedPredictiveSearchResultItem;
 }) {
-  if (item.__typename !== "Article") {
+  if (item.__typename !== "Article" && item.__typename !== "Page") {
     return null;
   }
 
