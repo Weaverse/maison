@@ -5,6 +5,8 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
+import { useFetcher } from "react-router";
+import { Button } from "~/components/button";
 
 const inputVariants = cva(
   "px-3 py-3.5 w-full focus:outline-none focus:ring-0",
@@ -30,6 +32,9 @@ const inputVariants = cva(
   },
 );
 
+/** What `/api/contact` answers with. */
+type ContactResponse = { ok?: boolean; error?: string };
+
 interface ContactFormProps
   extends VariantProps<typeof inputVariants>,
     HydrogenComponentProps {
@@ -38,7 +43,8 @@ interface ContactFormProps
   inputBackgroundColor?: string;
   inputTextColor?: string;
   placeholderColor?: string;
-  ref?: React.Ref<HTMLDivElement>;
+  buttonText?: string;
+  ref?: React.Ref<HTMLFormElement>;
 }
 
 const ContactForm = (props: ContactFormProps) => {
@@ -51,13 +57,57 @@ const ContactForm = (props: ContactFormProps) => {
     inputTextColor,
     placeholderColor,
     borderRadius,
+    buttonText,
     ...rest
   } = props;
 
+  // No key: a fetcher key is shared by every component that names it, and a
+  // page may hold more than one contact section. One shared key meant
+  // submitting either form answered both — the other was replaced by the
+  // success panel with its message never sent and its fields gone.
+  // `fetcher.Form` is bound to this fetcher and nothing else, which is also
+  // why it needs no `navigate={false}`: a fetcher submission never navigates.
+  const fetcher = useFetcher<ContactResponse>();
+  const isSubmitting = fetcher.state === "submitting";
+  const { ok, error } = fetcher.data ?? {};
+
+  const fieldStyle = {
+    border: `1px solid ${inputBorderColor}`,
+    backgroundColor: inputBackgroundColor,
+    color: inputTextColor,
+  };
+  const fieldClass = inputVariants({ borderRadius });
+  const rowStyle = { gap: `${gap}px` };
+
+  // The caps match `/api/contact`, which rejects anything longer. Enforcing
+  // them here as well means the buyer is stopped by the field rather than by
+  // an error message after a round trip.
+  const maxLengths = {
+    name: 200,
+    company: 200,
+    email: 254,
+    website: 500,
+    message: 5000,
+  };
+
+  if (ok) {
+    return (
+      <div
+        {...rest}
+        className="flex max-w-[640px] w-full flex-col items-center rounded-lg border border-green-600 bg-green-50 p-6 text-center text-green-800"
+      >
+        <p className="font-semibold text-lg">{t("form.thankYou")}</p>
+        <p className="mt-2">{t("form.willReply")}</p>
+      </div>
+    );
+  }
+
   return (
-    <div
+    <fetcher.Form
       ref={ref}
       {...rest}
+      method="post"
+      action="/api/contact"
       className="flex flex-col items-center max-w-[640px] w-full"
       style={
         {
@@ -76,73 +126,75 @@ const ContactForm = (props: ContactFormProps) => {
           `,
         }}
       />
-      <div
-        className="flex flex-col sm:flex-row w-full"
-        style={{ gap: `${gap}px` }}
-      >
+
+      {error && (
+        <div className="w-full rounded-xl border border-red-600 bg-red-50 p-4 text-red-800">
+          {error}
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row w-full" style={rowStyle}>
         <input
           type="text"
+          name="name"
+          autoComplete="name"
+          required
+          maxLength={maxLengths.name}
           placeholder={t("form.nameRequired")}
-          className={inputVariants({ borderRadius })}
-          style={{
-            border: `1px solid ${inputBorderColor}`,
-            backgroundColor: inputBackgroundColor,
-            color: inputTextColor,
-          }}
+          className={fieldClass}
+          style={fieldStyle}
         />
         <input
           type="text"
+          name="company"
+          autoComplete="organization"
+          maxLength={maxLengths.company}
           placeholder={t("form.company")}
-          className={inputVariants({ borderRadius })}
-          style={{
-            border: `1px solid ${inputBorderColor}`,
-            backgroundColor: inputBackgroundColor,
-            color: inputTextColor,
-          }}
+          className={fieldClass}
+          style={fieldStyle}
         />
       </div>
 
-      <div
-        className="flex flex-col sm:flex-row w-full"
-        style={{ gap: `${gap}px` }}
-      >
+      <div className="flex flex-col sm:flex-row w-full" style={rowStyle}>
         <input
           type="email"
+          name="email"
+          autoComplete="email"
+          required
+          maxLength={maxLengths.email}
           placeholder={t("form.email")}
-          className={inputVariants({ borderRadius })}
-          style={{
-            border: `1px solid ${inputBorderColor}`,
-            backgroundColor: inputBackgroundColor,
-            color: inputTextColor,
-          }}
+          className={fieldClass}
+          style={fieldStyle}
         />
         <input
           type="url"
+          name="website"
+          autoComplete="url"
+          maxLength={maxLengths.website}
           placeholder={t("form.website")}
-          className={inputVariants({ borderRadius })}
-          style={{
-            border: `1px solid ${inputBorderColor}`,
-            backgroundColor: inputBackgroundColor,
-            color: inputTextColor,
-          }}
+          className={fieldClass}
+          style={fieldStyle}
         />
       </div>
 
       <textarea
-        name=""
-        id=""
-        placeholder={t("form.message")}
-        className={`${inputVariants({ borderRadius })} h-[116px] resize-none`}
-        style={
-          {
-            border: `1px solid ${inputBorderColor}`,
-            backgroundColor: inputBackgroundColor,
-            color: inputTextColor,
-            "--placeholder-color": placeholderColor,
-          } as React.CSSProperties
-        }
+        name="message"
+        required
+        maxLength={maxLengths.message}
+        placeholder={t("form.messageRequired")}
+        className={`${fieldClass} h-[116px] resize-none`}
+        style={fieldStyle}
       />
-    </div>
+
+      {/* The submit button belongs to this component, not to the section: the
+          section's `button` child is the theme's `button` type, which renders a
+          `Link` — an `<a>`, and an anchor can never submit a form. A page saved
+          with that child keeps rendering it as the link it always was; this is
+          the control that actually sends the submission. */}
+      <Button type="submit" variant="primary" loading={isSubmitting}>
+        {buttonText || t("form.submit")}
+      </Button>
+    </fetcher.Form>
   );
 };
 
@@ -153,6 +205,18 @@ export const schema = createSchema({
   title: "Contact form fields",
   childTypes: [],
   settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "buttonText",
+          label: "Button text",
+          defaultValue: "Submit",
+          placeholder: "Submit",
+        },
+      ],
+    },
     {
       group: "Layout",
       inputs: [

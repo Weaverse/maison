@@ -49,13 +49,9 @@ export const schema: HydrogenComponentSchema = {
   type: "accordion",
   title: "Accordion",
   settings: [
-    {
-      group: "Accordion settings",
-      inputs: [
-        ...layoutInputs.filter((input) => input.name !== "borderRadius"),
-        ...backgroundInputs.filter((input) => input.name !== "backgroundImage"),
-      ],
-    },
+    // Column count leads: it is the one choice that changes the shape of the
+    // section, and the shared layout and background inputs below it are the
+    // same ones every other section carries.
     {
       group: "Accordion layout",
       inputs: [
@@ -71,6 +67,13 @@ export const schema: HydrogenComponentSchema = {
             ],
           },
         },
+      ],
+    },
+    {
+      group: "Accordion settings",
+      inputs: [
+        ...layoutInputs.filter((input) => input.name !== "borderRadius"),
+        ...backgroundInputs.filter((input) => input.name !== "backgroundImage"),
       ],
     },
   ],

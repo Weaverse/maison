@@ -8,11 +8,14 @@ interface HeaderContainerProps extends HydrogenComponentProps {
 const HeaderContainer = (props: HeaderContainerProps) => {
   const { ref, children, gap, ...rest } = props;
 
+  // `mb-10` holds 40px below the heading at every width. It used to drop to
+  // zero from `md` up, which left the section's own `space-y` as the only gap
+  // and put the heading almost on top of the first card.
   return (
     <div
       ref={ref}
       {...rest}
-      className="mb-10 flex flex-row items-center justify-between md:mb-0"
+      className="mb-10 flex flex-row items-center justify-between"
       style={{ gap: `${gap}px` }}
     >
       {children}

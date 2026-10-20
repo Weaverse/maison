@@ -26,33 +26,43 @@ export function MobileMenu() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
+        {/* Full width on a phone, where the design's 360px frame is the whole
+            screen anyway; capped at 360px from `sm` up, so the tablet keeps
+            the overlay the design shows beside the panel. `inset-0` used to
+            cover everything and left no overlay to see at any size. */}
         <Dialog.Content
-          className="fixed inset-0 left-0 z-10 flex h-(--screen-height) flex-col bg-(--color-header-bg) pb-3 pt-3 uppercase focus-visible:outline-hidden data-[state=open]:animate-enter-from-left data-[state=closed]:animate-exit-to-left"
+          className="fixed inset-y-0 left-0 z-10 flex h-(--screen-height) w-full flex-col sm:max-w-[360px] bg-(--color-header-bg) py-3 uppercase focus-visible:outline-hidden data-[state=open]:animate-enter-from-left data-[state=closed]:animate-exit-to-left"
           aria-describedby={undefined}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <Dialog.Title asChild>
-            <div className="px-4 py-4 font-semibold text-sm">
-              {t("navigation.menu")}
-            </div>
-          </Dialog.Title>
-          <Dialog.Close asChild>
-            <XIcon className="fixed top-[26px] right-4 h-5 w-5" />
-          </Dialog.Close>
-
-          <div className="py-2">
-            <ScrollArea className="h-[calc(var(--screen-height)-5rem)]">
-              <div className="space-y-1 px-4">
-                {headerMenu.items.map((item) => (
-                  <CollapsibleMenuItem
-                    key={item.id}
-                    item={item as unknown as SingleMenuItem}
-                    level={0}
-                  />
-                ))}
-              </div>
-            </ScrollArea>
+          <div className="flex shrink-0 items-center gap-4 px-5">
+            <Dialog.Title asChild>
+              <span className="flex-1 py-4 font-semibold text-sm tracking-[0.28px]">
+                {t("navigation.menu")}
+              </span>
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="flex items-center"
+                aria-label={t("navigation.closeMenu")}
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </Dialog.Close>
           </div>
+
+          <ScrollArea rootClassName="min-h-0 flex-1" size="sm">
+            <div className="flex flex-col gap-2 px-5 pt-2">
+              {headerMenu.items.map((item) => (
+                <CollapsibleMenuItem
+                  key={item.id}
+                  item={item as unknown as SingleMenuItem}
+                  level={0}
+                />
+              ))}
+            </div>
+          </ScrollArea>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
@@ -75,7 +85,7 @@ function CollapsibleMenuItem({
         <Link
           to={to}
           className={cn(
-            "block py-3 text-sm",
+            "block py-3 text-sm tracking-[0.28px]",
             isTopLevel ? "font-semibold" : "font-medium",
           )}
         >
@@ -94,13 +104,13 @@ function CollapsibleMenuItem({
         >
           <span
             className={cn(
-              "uppercase text-sm text-left",
+              "uppercase text-sm text-left tracking-[0.28px]",
               isTopLevel ? "font-semibold" : "font-medium",
             )}
           >
             {title}
           </span>
-          <CaretRightIcon className="h-4 w-4" />
+          <CaretRightIcon className="h-3.5 w-3.5" />
         </button>
       </Collapsible.Trigger>
       <Collapsible.Content className="flex flex-col border-line-subtle border-l pl-4">

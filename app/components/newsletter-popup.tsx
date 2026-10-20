@@ -114,7 +114,7 @@ export function NewsletterPopup() {
         >
           <div
             className={cn(
-              "relative w-full max-w-md overflow-hidden bg-white shadow-xl rounded",
+              "relative w-full max-w-md overflow-hidden bg-white shadow-xl rounded-2xl",
               "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
               newsletterPopupImage && "lg:max-w-2xl",
             )}
@@ -193,7 +193,7 @@ export function NewsletterPopup() {
                     type="email"
                     required
                     placeholder={t("newsletter.emailPlaceholder")}
-                    className="w-full border border-gray-300 px-4 py-2.5 focus:border-gray-500 focus:outline-hidden rounded"
+                    className="w-full rounded-(--btn-border-radius) border border-gray-300 px-4 py-2.5 focus:border-gray-500 focus:outline-hidden"
                   />
                   <Button
                     type="submit"

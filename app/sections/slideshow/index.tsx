@@ -9,6 +9,7 @@ import { cva } from "class-variance-authority";
 import clsx from "clsx";
 import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { useWeaverseStudioCheck } from "~/hooks/use-weaverse-studio-check";
 import type { SlideshowArrowsProps } from "./arrows";
 import { Arrows } from "./arrows";
 import type { SlideshowDotsProps } from "./dots";
@@ -83,10 +84,21 @@ export default function Slideshow(
   } = props;
 
   const { enableTransparentHeader } = useThemeSettings();
+  // The setting's own help text promises auto-rotate is off inside the Studio,
+  // and it has to be: a slide that moves on its own fights the merchant every
+  // time they try to step back to the one they were editing.
+  const isDesignMode = useWeaverseStudioCheck();
+  const shouldAutoRotate = autoRotate && !isDesignMode;
 
   return (
     <section
-      key={Object.values(rest)
+      // Keyed on every scalar setting, as Pilot and Aspen are. Swiper takes
+      // `loop`, `effect`, `autoplay` and `modules` at init and ignores them
+      // afterwards, so the only way a setting change reaches it is a remount.
+      // Keying on `rest` — the props left after the settings are destructured
+      // out — left a constant key, and nothing the merchant changed in the
+      // Studio took effect.
+      key={Object.values(props)
         .filter((v) => typeof v !== "object")
         .join("-")}
       ref={ref}
@@ -95,8 +107,14 @@ export default function Slideshow(
     >
       <Swiper
         effect={effect}
+        // Without `crossFade` the outgoing slide holds full opacity until the
+        // transition ends, so it sits solid beneath the incoming one instead
+        // of giving way to it. Only read when `effect` is "fade".
+        fadeEffect={{ crossFade: true }}
         loop={loop}
-        autoplay={autoRotate ? { delay: changeSlidesEvery * 1000 } : false}
+        autoplay={
+          shouldAutoRotate ? { delay: changeSlidesEvery * 1000 } : false
+        }
         navigation={
           showArrows && {
             nextEl: ".slideshow-arrow-next",
@@ -118,7 +136,7 @@ export default function Slideshow(
         }
         modules={[
           EffectFade,
-          autoRotate ? Autoplay : null,
+          shouldAutoRotate ? Autoplay : null,
           showArrows ? Navigation : null,
           showDots ? Pagination : null,
         ].filter(Boolean)}

@@ -38,7 +38,10 @@ const CompanyStoryContact = (props: CompanyStoryContactProps) => {
         </div>
 
         {/* map */}
-        <div className="overflow-hidden rounded-sm w-full md:w-1/3 ">
+        {/* 16px, the radius the section's own media wrapper uses in
+            index.tsx. `rounded-sm` is 4px in Tailwind v4 and read as a
+            square corner next to it. */}
+        <div className="w-full overflow-hidden rounded-2xl md:w-1/3">
           <iframe
             className="size-full"
             title={t("map.embeddedFrame")}

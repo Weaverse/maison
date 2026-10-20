@@ -532,11 +532,12 @@ export const themeSchema: HydrogenThemeSchema = {
           name: "badgeBorderRadius",
           configs: {
             min: 0,
-            max: 10,
+            max: 20,
             step: 2,
             unit: "px",
           },
-          defaultValue: 0,
+          // Design system's Border/radius-sm
+          defaultValue: 12,
         },
         {
           type: "select",

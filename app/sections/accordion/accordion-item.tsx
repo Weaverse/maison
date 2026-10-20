@@ -57,7 +57,11 @@ const AccordionItem = (props: AccordionItemProps) => {
           className="group flex w-full items-center gap-3 rounded-xl p-4 text-left group-data-[state=open]:mb-0.5 group-data-[state=open]:rounded-b-none"
         >
           {renderIcon()}
-          <span className="text-[16px] leading-[1.4] tracking-[0.02em]">
+          {/* Radix renders `Accordion.Header` as a bare <h3>, which the
+              global heading rule in app.css styles with the serif face. That
+              <h3> is here for screen readers, not as a visual heading, so the
+              body font is restored explicitly. */}
+          <span className="font-sans text-[16px] leading-[1.4] tracking-[0.02em]">
             {title}
           </span>
           <div className="relative ml-auto flex size-6 items-center justify-center rounded-full border-[2.5px] border-line">
