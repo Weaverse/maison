@@ -98,11 +98,21 @@ export function CartSummary({
           currencyCode: b2bState.currency as CurrencyCode,
         }
       : null;
-  const subtotalMoney = b2bMoney ?? shopifySubtotal;
-  const totalMoney = b2bMoney ?? cost?.totalAmount ?? null;
+  // `unavailable` is the other half of that problem: B2Bridge is still the
+  // authority but could not answer, so every line price renders an em dash
+  // instead of Shopify's. Falling back here would leave the retail subtotal as
+  // the only number on screen, directly under a notice saying wholesale
+  // pricing is unavailable. Both have to stay silent, and with the same mark
+  // the lines use.
+  const b2bSilent = b2bState?.status === "unavailable";
+  const noMoneyLabel = b2bSilent ? "\u2014" : "-";
+  const subtotalMoney = b2bMoney ?? (b2bSilent ? null : shopifySubtotal);
+  const totalMoney =
+    b2bMoney ?? (b2bSilent ? null : (cost?.totalAmount ?? null));
   // Comparing a B2B subtotal against a Shopify total would strike through a
   // price that was never offered.
-  const hasDiscount = !b2bMoney && subtotalValue > totalValue && totalValue > 0;
+  const hasDiscount =
+    !(b2bMoney || b2bSilent) && subtotalValue > totalValue && totalValue > 0;
 
   // show loading state for optimistic line item changes or pending cart actions
   const isCartUpdating =
@@ -132,11 +142,11 @@ export function CartSummary({
               ) : subtotalMoney ? (
                 <Money data={subtotalMoney} />
               ) : (
-                "-"
+                noMoneyLabel
               )}
             </dd>
           </dl>
-          {discountTotal > 0 && cost?.subtotalAmount && (
+          {discountTotal > 0 && cost?.subtotalAmount && !b2bSilent && (
             <dl className="flex items-start gap-2.5 text-base leading-none">
               <dt className="min-w-0 grow">{t("cart.discount")}</dt>
               <dd className="shrink-0 whitespace-nowrap">
@@ -170,7 +180,7 @@ export function CartSummary({
               ) : totalMoney?.amount ? (
                 <Money data={totalMoney} />
               ) : (
-                "-"
+                noMoneyLabel
               )}
             </dd>
           </dl>
@@ -194,7 +204,11 @@ export function CartSummary({
                       </span>
                     )}
                     <span className="font-semibold">
-                      {totalMoney?.amount ? <Money data={totalMoney} /> : "-"}
+                      {totalMoney?.amount ? (
+                        <Money data={totalMoney} />
+                      ) : (
+                        noMoneyLabel
+                      )}
                     </span>
                   </dd>
                 )}
