@@ -90,9 +90,16 @@ interface B2BPricingValue {
    * buyer is reading.
    */
   names: Record<string, string>;
+  /**
+   * Cart line id → bare variant id, for the hooks that price one line.
+   *
+   * Comes from the cart, never from `state`. See `cartLineVariants`.
+   */
+  lineVariants: Map<string, string>;
 }
 
 const EMPTY_SET: Set<string> = new Set();
+const EMPTY_LINE_VARIANTS = new Map<string, string>();
 
 const B2BPricingContext = createContext<B2BPricingValue>({
   state: null,
@@ -100,6 +107,7 @@ const B2BPricingContext = createContext<B2BPricingValue>({
   stale: false,
   recalculating: EMPTY_SET,
   names: {},
+  lineVariants: EMPTY_LINE_VARIANTS,
 });
 
 /** The cart as the server knows it, reduced to what changes a price. */
@@ -124,6 +132,34 @@ function cartNames(cart: CartApiQueryFragment | null): Record<string, string> {
 }
 
 /** Bare variant id → the bare product id it belongs to. */
+/**
+ * Cart line id → bare variant id, taken from the cart rather than from the
+ * pricing answer.
+ *
+ * `CartPricingState` carries a map of its own, built server-side from the cart
+ * it priced. Reading that one put stale line ids in front of the buyer: the
+ * cache is keyed by variant and quantity only, so an answer computed for one
+ * cart is reused for any later cart holding the same quantities — and if those
+ * quantities now sit on different line ids, every per-line lookup misses. The
+ * line then falls back to Shopify's retail price while the summary keeps
+ * showing B2Bridge's subtotal, which is two prices for one cart.
+ *
+ * Which line holds which variant is a fact about the cart on screen, not about
+ * the answer, so it is read from the cart every render and cannot go stale.
+ */
+function cartLineVariants(
+  cart: CartApiQueryFragment | null,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const node of cart?.lines?.nodes ?? []) {
+    const variantId = node.merchandise?.id;
+    if (node.id && variantId) {
+      map.set(node.id, normId(variantId));
+    }
+  }
+  return map;
+}
+
 function cartVariantProducts(
   cart: CartApiQueryFragment | null,
 ): Map<string, string> {
@@ -358,6 +394,13 @@ function B2BPricingRoot({
           stale: outOfDate,
           recalculating: pendingProducts,
           names: cartNames(cart),
+          // Both carts, optimistic last: the lines on screen come from the
+          // optimistic cart, so its ids are the ones looked up, while the
+          // server's keep a line that is mid-removal resolvable.
+          lineVariants: new Map([
+            ...cartLineVariants(cart),
+            ...cartLineVariants(optimisticCart),
+          ]),
         }}
       >
         {children}
@@ -383,11 +426,11 @@ export function useB2BPricing(): B2BPricingValue {
  * such as deciding whether a strikethrough means anything.
  */
 export function useB2BLinePrice(lineId: string): PricedCartLine | null {
-  const { state } = useB2BPricing();
+  const { state, lineVariants } = useB2BPricing();
   if (state?.status !== "priced" || !lineId) {
     return null;
   }
-  const variantId = state.lineVariants[lineId];
+  const variantId = lineVariants.get(lineId);
   if (!variantId) {
     return null;
   }
@@ -405,13 +448,13 @@ export function useB2BLinePrice(lineId: string): PricedCartLine | null {
 export function useB2BLinesTotal(
   lines: { id: string; quantity: number }[],
 ): { amount: number; currency: string } | null {
-  const { state } = useB2BPricing();
+  const { state, lineVariants } = useB2BPricing();
   if (state?.status !== "priced") {
     return null;
   }
   let amount = 0;
   for (const line of lines) {
-    const variantId = state.lineVariants[line.id];
+    const variantId = lineVariants.get(line.id);
     const priced = variantId
       ? state.lines.find((entry) => entry.variantId === variantId)
       : null;

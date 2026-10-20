@@ -308,6 +308,15 @@ export type CartPricingState = (
       lines: PricedCartLine[];
       errors: LimitError[];
       /** Cart line id → bare variant id, to map merged lines back to the UI. */
+      /**
+       * Cart line id → bare variant id, for the cart this answer priced.
+       *
+       * Do not read this to price a line on screen. Answers are cached by
+       * variant and quantity alone, so one computed for an earlier cart is
+       * reused for any later cart with the same quantities, and these ids go
+       * with the earlier one. `cartLineVariants` in `b2b-cart-pricing.tsx`
+       * derives the same map from the cart being rendered, which cannot.
+       */
       lineVariants: Record<string, string>;
     }
 ) & {
