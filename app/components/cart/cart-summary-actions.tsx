@@ -66,19 +66,20 @@ export function NoteDialog({
         )}
         aria-describedby={undefined}
       >
-        <Dialog.Close asChild>
-          <button
-            type="button"
-            className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center"
-            aria-label={t("cart.closeDialog")}
-          >
-            <XIcon size={16} />
-          </button>
-        </Dialog.Close>
-
-        <Dialog.Title className="mb-4 font-medium text-sm">
-          {t("cart.orderNote")}
-        </Dialog.Title>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <Dialog.Title asChild className="text-base">
+            <div className="font-medium">{t("cart.orderNote")}</div>
+          </Dialog.Title>
+          <Dialog.Close asChild>
+            <button
+              type="button"
+              className="-m-2 shrink-0 p-2"
+              aria-label={t("cart.closeDialog")}
+            >
+              <XIcon size={16} />
+            </button>
+          </Dialog.Close>
+        </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <textarea
@@ -168,19 +169,20 @@ export function DiscountDialog({
         )}
         aria-describedby={undefined}
       >
-        <Dialog.Close asChild>
-          <button
-            type="button"
-            className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center"
-            aria-label={t("cart.closeDialog")}
-          >
-            <XIcon size={16} />
-          </button>
-        </Dialog.Close>
-
-        <Dialog.Title className="mb-4 font-medium text-sm">
-          {t("cart.discountCode")}
-        </Dialog.Title>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <Dialog.Title asChild className="text-base">
+            <div className="font-medium">{t("cart.discountCode")}</div>
+          </Dialog.Title>
+          <Dialog.Close asChild>
+            <button
+              type="button"
+              className="-m-2 shrink-0 p-2"
+              aria-label={t("cart.closeDialog")}
+            >
+              <XIcon size={16} />
+            </button>
+          </Dialog.Close>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -283,19 +285,20 @@ export function GiftCardDialog({
         )}
         aria-describedby={undefined}
       >
-        <Dialog.Close asChild>
-          <button
-            type="button"
-            className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center"
-            aria-label={t("cart.closeDialog")}
-          >
-            <XIcon size={16} />
-          </button>
-        </Dialog.Close>
-
-        <Dialog.Title className="mb-4 font-medium text-sm">
-          {t("cart.giftCard")}
-        </Dialog.Title>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <Dialog.Title asChild className="text-base">
+            <div className="font-medium">{t("cart.giftCard")}</div>
+          </Dialog.Title>
+          <Dialog.Close asChild>
+            <button
+              type="button"
+              className="-m-2 shrink-0 p-2"
+              aria-label={t("cart.closeDialog")}
+            >
+              <XIcon size={16} />
+            </button>
+          </Dialog.Close>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

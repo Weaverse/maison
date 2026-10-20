@@ -49,28 +49,36 @@ export function ProductsPagination({
   return (
     <div className="grow space-y-6">
       {appliedFilters.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-2">
-            {appliedFilters.map((filter: AppliedFilter) => {
-              const { label } = filter;
-              return (
-                <Link
-                  key={label}
-                  to={getAppliedFilterLink(filter, params, location)}
-                  className="items-center gap-2 border border-line-subtle px-2 py-1 hover:border-line"
-                  variant="custom"
-                  preventScrollReset
-                >
-                  <span>{label}</span>
-                  <XIcon className="h-4 w-4" />
-                </Link>
-              );
-            })}
-          </div>
+        // One flat row: the design spaces the label, the chips and the clear
+        // link by the same 10px, so the chips no longer sit in a group of
+        // their own.
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="px-2 py-1 font-semibold text-body-subtle text-base tracking-[0.28px]">
+            {t("collection.filteredBy")}
+          </span>
+          {appliedFilters.map((filter: AppliedFilter) => {
+            const { label } = filter;
+            return (
+              <Link
+                key={label}
+                to={getAppliedFilterLink(filter, params, location)}
+                className="items-center gap-2 rounded-xl border border-line-subtle px-2 py-1.5 text-body-subtle text-base leading-none tracking-[0.28px] hover:border-line"
+                variant="custom"
+                preventScrollReset
+              >
+                <span>{label}</span>
+                <XIcon className="h-3.5 w-3.5" />
+              </Link>
+            );
+          })}
           {appliedFilters.length > 1 ? (
             <Link
               to={pathname}
               variant="underline"
+              // The rule under the link takes the chips' border colour rather than
+              // the body colour the `underline` variant defaults to, so the row
+              // reads as one set of controls.
+              className="text-body-subtle text-base tracking-[0.28px] after:bg-line-subtle"
               aria-label={t("collection.clearAllLabel")}
               preventScrollReset
             >

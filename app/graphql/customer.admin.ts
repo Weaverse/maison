@@ -1,3 +1,16 @@
+/**
+ * Creates a company together with its first contact.
+ *
+ * `companyCreate` takes a `companyContact` and creates the customer, the
+ * contact and the company in one operation, which is the only way to run this
+ * signup without a half-finished state to recover from: creating the customer
+ * separately writes the email before the company can be refused, and the
+ * retry then dies on the duplicate email instead of reaching the step that
+ * failed.
+ *
+ * `code` is selected alongside the message so a caller can tell a duplicate
+ * apart from a validation error without matching on English text.
+ */
 export const companyCreateMutation = `#graphql
   mutation CompanyCreate($input: CompanyCreateInput!) {
     companyCreate(input: $input) {
@@ -5,39 +18,16 @@ export const companyCreateMutation = `#graphql
         id
         name
         note
+        mainContact {
+          id
+          customer {
+            id
+            email
+          }
+        }
       }
       userErrors {
-        field
-        message
-      }
-    }
-  }
-` as const;
-
-export const customerCreateMutation = `#graphql
-  mutation CustomerCreate($input: CustomerInput!) {
-    customerCreate(input: $input) {
-      customer {
-        id
-        email
-        firstName
-        lastName
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-` as const;
-
-export const assignCustomerToCompanyMutation = `#graphql
-  mutation CompanyAssignCustomer($companyId: ID!, $customerId: ID!) {
-    companyAssignCustomerAsContact(companyId: $companyId, customerId: $customerId) {
-      companyContact {
-        id
-      }
-      userErrors {
+        code
         field
         message
       }
