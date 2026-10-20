@@ -1,4 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
+import { draftOrderQuery } from "~/graphql/draft-order.admin";
 
 /**
  * Reading the state of a draft order B2Bridge created.
@@ -6,31 +7,11 @@ import type { LoaderFunctionArgs } from "react-router";
  * B2Bridge offers no way to ask whether an invoice has been paid, and the
  * payment happens on Shopify's own domain where this storefront sees nothing.
  * Shopify itself knows, so Shopify is who gets asked — through the same admin
- * proxy `($locale).api.b2b-signup.tsx` already uses.
- *
- * Deliberately does not ask for the `order` the draft became: that field needs
- * the `read_orders` scope, while `status` and `lineItems` need only
- * `read_draft_orders`, and `COMPLETED` already answers the question.
+ * proxy `($locale).api.b2b-signup.tsx` already uses, with the query kept in
+ * `~/graphql/draft-order.admin` for the reason given there.
  */
 
 type Context = LoaderFunctionArgs["context"];
-
-const DRAFT_ORDER_QUERY = `#graphql
-  query B2BridgeDraftOrder($id: ID!) {
-    draftOrder(id: $id) {
-      id
-      status
-      lineItems(first: 250) {
-        nodes {
-          quantity
-          variant {
-            id
-          }
-        }
-      }
-    }
-  }
-`;
 
 /**
  * Three answers, not two.
@@ -71,7 +52,7 @@ export async function readDraftOrder(
         Authorization: `Bearer ${WEAVERSE_API_KEY}`,
       },
       body: JSON.stringify({
-        query: DRAFT_ORDER_QUERY,
+        query: draftOrderQuery,
         variables: { id: draftOrderId },
       }),
       signal: AbortSignal.timeout(5000),
