@@ -40,27 +40,56 @@ type Context = LoaderFunctionArgs["context"];
  * Mirrors what `($locale).products.$productHandle.tsx` does for the product
  * page; worth collapsing into one helper once both paths have settled.
  */
-async function resolveBuyerId(context: Context): Promise<string | null> {
+/**
+ * Three answers, because "nobody to price for" and "could not find out who
+ * this is" must not share one.
+ *
+ * `guest` is a settled fact: there is no signed-in buyer, so B2Bridge has
+ * nothing to price and the ordinary storefront is correct. `unknown` is this
+ * storefront failing to ask — a Customer Account query that threw, or one that
+ * answered without an id. Returning `guest` for that put a signed-in wholesale
+ * buyer through Shopify checkout at retail prices, which is the outcome this
+ * integration exists to prevent.
+ */
+type BuyerLookup =
+  | { kind: "buyer"; customerId: string }
+  | { kind: "guest" }
+  | { kind: "unknown" };
+
+async function resolveBuyerId(context: Context): Promise<BuyerLookup> {
   const override = devCustomerIdOverride(context.env);
   if (override) {
-    return override;
+    return { kind: "buyer", customerId: override };
   }
   // Asked for only when it is needed. The override answers without it, and a
   // session check is a round trip like any other.
-  if (!(await context.customerAccount.isLoggedIn())) {
-    return null;
+  let loggedIn = false;
+  try {
+    loggedIn = await context.customerAccount.isLoggedIn();
+  } catch (error) {
+    // Even the session check can fail, and a failure here says nothing about
+    // whether there is a buyer behind it.
+    console.warn("[B2Bridge] session check failed:", (error as Error)?.message);
+    return { kind: "unknown" };
   }
+  if (!loggedIn) {
+    return { kind: "guest" };
+  }
+
   try {
     const result = await context.customerAccount.query(
       CUSTOMER_LOCATIONS_QUERY,
     );
-    return customerIdFromGid(result.data?.customer?.id);
+    const customerId = customerIdFromGid(result.data?.customer?.id);
+    // Signed in, asked, and still no id: an answer this storefront cannot act
+    // on is not the same as there being nobody to act for.
+    return customerId ? { kind: "buyer", customerId } : { kind: "unknown" };
   } catch (error) {
     console.warn(
       "[B2Bridge] customer lookup failed:",
       (error as Error)?.message,
     );
-    return null;
+    return { kind: "unknown" };
   }
 }
 
@@ -113,15 +142,21 @@ async function prepare(context: Context): Promise<Prepared> {
 
   // Three independent lookups. Run in series they were three round trips the
   // buyer waited through before B2Bridge was even asked.
-  const [customerId, cart, market] = await Promise.all([
+  const [buyer, cart, market] = await Promise.all([
     resolveBuyerId(context),
     context.cart.get(),
     loadMarket(context),
   ]);
 
-  if (!customerId) {
+  // Fail closed on `unknown`: the cart must not offer Shopify checkout to a
+  // buyer this storefront merely failed to identify.
+  if (buyer.kind === "unknown") {
+    return { kind: "stop", reason: "unavailable" };
+  }
+  if (buyer.kind === "guest") {
     return { kind: "stop", reason: "not-applicable" };
   }
+  const { customerId } = buyer;
 
   const cartLines: CartLineForPricing[] = (cart?.lines?.nodes ?? [])
     .map((node) => ({
