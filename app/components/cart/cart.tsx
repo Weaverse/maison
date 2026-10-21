@@ -240,7 +240,17 @@ function CartCheckoutActions({
         <div className="flex flex-col gap-2">
           <div className="text-sm text-(--color-text-subtle)">
             {gate.reason === "unavailable" ? (
-              <p>{t("cart.b2bUnavailable")}</p>
+              // `retryable: false` here means asking again changes nothing —
+              // the cart holds something B2Bridge's request cannot express,
+              // and only the buyer can take it out. Telling them to wait a
+              // moment would leave them waiting for good.
+              <p>
+                {t(
+                  state?.status === "unavailable" && !state.retryable
+                    ? "cart.b2bCartUnsupported"
+                    : "cart.b2bUnavailable",
+                )}
+              </p>
             ) : (
               <>
                 <p>{t("cart.b2bFixQuantities")}</p>

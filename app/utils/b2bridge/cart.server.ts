@@ -125,7 +125,7 @@ type Prepared =
       /** Bare variant id → the cart line ids merged into it. */
       sources: Map<string, string[]>;
     }
-  | { kind: "stop"; reason: "not-applicable" | "unavailable" };
+  | { kind: "stop"; reason: "not-applicable" | "unavailable" | "unsupported" };
 
 /**
  * Everything both endpoints need before they can ask B2Bridge anything.
@@ -157,6 +157,20 @@ async function prepare(context: Context): Promise<Prepared> {
     return { kind: "stop", reason: "not-applicable" };
   }
   const { customerId } = buyer;
+
+  // A subscription carries more than a variant and a quantity, and B2Bridge's
+  // request has nowhere to put the rest: the mapping below keeps only
+  // `{variantId, quantity}`, and `mergeLines` would fold a subscription and a
+  // one-time line for the same variant into one. Left alone, a draft order
+  // would be created for an ordinary purchase of goods the buyer asked to
+  // subscribe to. Nothing here can price that, so the cart says so rather
+  // than quietly selling something else.
+  const hasSellingPlan = (cart?.lines?.nodes ?? []).some(
+    (node) => node.sellingPlanAllocation?.sellingPlan?.id,
+  );
+  if (hasSellingPlan) {
+    return { kind: "stop", reason: "unsupported" };
+  }
 
   const cartLines: CartLineForPricing[] = (cart?.lines?.nodes ?? [])
     .map((node) => ({
@@ -209,9 +223,16 @@ export async function loadCartPricing(
 
   const prepared = await prepare(context);
   if (prepared.kind === "stop") {
-    return prepared.reason === "unavailable"
-      ? { status: "unavailable", retryable: true, pendingDraft }
-      : { status: "not-applicable", pendingDraft };
+    if (prepared.reason === "not-applicable") {
+      return { status: "not-applicable", pendingDraft };
+    }
+    // `unsupported` is not retryable: asking again changes nothing, only the
+    // buyer can, by taking the subscription out.
+    return {
+      status: "unavailable",
+      retryable: prepared.reason === "unavailable",
+      pendingDraft,
+    };
   }
   const { sources } = prepared;
 
@@ -360,9 +381,13 @@ export const CHECKOUT_PENDING_MS = 24 * 60 * 60 * 1000;
 export async function createCheckout(context: Context): Promise<CheckoutState> {
   const prepared = await prepare(context);
   if (prepared.kind === "stop") {
-    return prepared.reason === "unavailable"
-      ? { status: "unavailable", retryable: true }
-      : { status: "not-applicable" };
+    if (prepared.reason === "not-applicable") {
+      return { status: "not-applicable" };
+    }
+    return {
+      status: "unavailable",
+      retryable: prepared.reason === "unavailable",
+    };
   }
 
   // Sequential duplicates — a second tab, a back button, a click after the
