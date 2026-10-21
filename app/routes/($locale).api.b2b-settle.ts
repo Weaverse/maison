@@ -3,14 +3,16 @@ import { data } from "react-router";
 import {
   CHECKOUT_PENDING_MS,
   clearCheckoutMark,
+  clearSettlementPlan,
+  planFromCart,
   readCheckoutMarks,
-  recordSettlementProgress,
+  saveSettlementPlan,
 } from "~/utils/b2bridge/cart.server";
 import { readDraftOrder } from "~/utils/b2bridge/draft-order.server";
 import {
-  adjustmentForPaidLines,
-  type LineAdjustment,
-  remainingPaidLines,
+  planForPaidLines,
+  planSteps,
+  planStillApplies,
 } from "~/utils/b2bridge/headless";
 
 /**
@@ -75,29 +77,37 @@ export async function action({ request, context }: ActionFunctionArgs) {
       continue;
     }
 
-    // Only what this order still owes. A previous attempt may have applied
-    // half of it before failing, and charging the whole invoice against the
-    // cart again would take goods that were never paid for.
-    const applied = { ...(invoice.applied ?? {}) };
-    const owed = remainingPaidLines(draft.lines, applied);
-    if (owed.length === 0) {
-      await clearCheckoutMark(context, invoice.draftOrderId);
-      settled = true;
-      continue;
-    }
-
     const cart = await context.cart.get();
     const cartLines = (cart?.lines?.nodes ?? []).map((node) => ({
       id: node.id,
       variantId: node.merchandise?.id ?? "",
       quantity: node.quantity,
     }));
-    const { updates, removals } = adjustmentForPaidLines(cartLines, owed);
-    const note = (lines: LineAdjustment[]) => {
-      for (const line of lines) {
-        applied[line.variantId] = (applied[line.variantId] ?? 0) + line.taken;
-      }
-    };
+
+    // The plan is written down before any of it is done, and says where each
+    // line ends up rather than how much to take off it. Applying it twice
+    // leaves the same cart as applying it once, so a reply that was lost and
+    // two requests racing each other both stop being dangerous.
+    let plan = planFromCart(cart, invoice.draftOrderId);
+    if (plan && !planStillApplies(plan, cartLines)) {
+      // The buyer has changed one of these lines since. Their edit wins;
+      // what is still owed is worked out again from the cart as it stands.
+      plan = null;
+    }
+    if (!plan) {
+      plan = planForPaidLines(invoice.draftOrderId, cartLines, draft.lines);
+      await saveSettlementPlan(context, plan);
+    }
+
+    const { updates, removals } = planSteps(plan, cartLines);
+    if (updates.length === 0 && removals.length === 0) {
+      // Every line is already where the plan puts it, however it got there.
+      await clearSettlementPlan(context, invoice.draftOrderId);
+      await clearCheckoutMark(context, invoice.draftOrderId);
+      settled = true;
+      continue;
+    }
+
     // A cart mutation reports a refusal in `userErrors` and `errors` and does
     // not always throw, so reading `cart` alone let a rejected mutation pass
     // for a settled one — the note was cleared, the goods stayed, and nothing
@@ -119,22 +129,17 @@ export async function action({ request, context }: ActionFunctionArgs) {
     let failed = false;
     try {
       if (updates.length > 0) {
-        const result = await context.cart.updateLines(
-          updates.map(({ id, quantity }) => ({ id, quantity })),
-        );
+        const result = await context.cart.updateLines(updates);
         const problem = refusal(result);
         if (problem) {
           console.warn("[B2Bridge] cart not settled, update refused:", problem);
           failed = true;
         } else {
           latest = result.cart;
-          note(updates);
         }
       }
       if (!failed && removals.length > 0) {
-        const result = await context.cart.removeLines(
-          removals.map(({ id }) => id),
-        );
+        const result = await context.cart.removeLines(removals);
         const problem = refusal(result);
         if (problem) {
           console.warn(
@@ -144,7 +149,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
           failed = true;
         } else {
           latest = result.cart;
-          note(removals);
         }
       }
     } catch (error) {
@@ -159,12 +163,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     if (failed) {
-      await recordSettlementProgress(context, invoice.draftOrderId, applied);
-      // Stop here rather than move on: the next invoice is measured against
-      // a cart this one has left half-adjusted.
+      // The plan stays on the cart, so the next attempt picks up exactly
+      // where this one stopped. Stop here rather than move on: the next
+      // invoice is measured against a cart this one has left half-adjusted.
       break;
     }
 
+    await clearSettlementPlan(context, invoice.draftOrderId);
     await clearCheckoutMark(context, invoice.draftOrderId);
     settled = true;
   }

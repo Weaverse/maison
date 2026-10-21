@@ -1005,59 +1005,59 @@ if (!LIVE) {
     );
   });
 
-  test("a settling that failed half-way does not subtract twice on retry", () => {
-    // The case raised in review of #77: an invoice for A x10 and B x5 against
-    // a cart of A x14 and B x5. Updating A to 4 lands, removing B throws, and
-    // the retry used to recompute the whole invoice against the reduced cart
-    // and take another 10 from the 4 that were never paid for.
+  test("an absolute plan is safe to apply again, however it failed", () => {
+    // The two cases review of #77 left open: a mutation that landed but whose
+    // response was lost, and two requests racing with the same state. Both
+    // stop mattering once the plan says where lines end up rather than how
+    // much to take off them.
+    const line = (id, variantId, quantity) => ({ id, variantId, quantity });
+    const cart = [line("l1", "A", 14), line("l2", "B", 5)];
     const paid = [
       { variantId: "A", quantity: 10 },
       { variantId: "B", quantity: 5 },
     ];
-    const line = (id, variantId, quantity) => ({ id, variantId, quantity });
 
-    const first = b2b.adjustmentForPaidLines(
-      [line("l1", "A", 14), line("l2", "B", 5)],
-      b2b.remainingPaidLines(paid, {}),
-    );
-    assert.deepEqual(first.updates, [
-      { id: "l1", variantId: "A", taken: 10, quantity: 4 },
-    ]);
-    assert.deepEqual(first.removals, [
-      { id: "l2", variantId: "B", taken: 5, quantity: 0 },
+    const plan = b2b.planForPaidLines("D50", cart, paid);
+    assert.deepEqual(plan.lines, [
+      { id: "l1", variantId: "A", from: 14, to: 4 },
+      { id: "l2", variantId: "B", from: 5, to: 0 },
     ]);
 
-    // The update landed, the removal did not, so only A is recorded.
-    const applied = {};
-    for (const entry of first.updates) {
-      applied[entry.variantId] = (applied[entry.variantId] ?? 0) + entry.taken;
-    }
-    assert.deepEqual(applied, { A: 10 });
+    // Nothing applied yet: both steps are owed.
+    assert.deepEqual(b2b.planSteps(plan, cart), {
+      updates: [{ id: "l1", quantity: 4 }],
+      removals: ["l2"],
+    });
 
-    // Retry against the cart as it now stands. A is settled and must be left
-    // alone; only B is still owed.
-    const owed = b2b.remainingPaidLines(paid, applied);
-    assert.deepEqual(owed, [{ variantId: "B", quantity: 5 }]);
+    // The update landed and the reply was lost. The retry sees l1 already at
+    // its target and asks only for what is left — the four unpaid A units are
+    // not touched a second time.
+    const midway = [line("l1", "A", 4), line("l2", "B", 5)];
+    assert.ok(b2b.planStillApplies(plan, midway));
+    assert.deepEqual(b2b.planSteps(plan, midway), {
+      updates: [],
+      removals: ["l2"],
+    });
 
-    const second = b2b.adjustmentForPaidLines(
-      [line("l1", "A", 4), line("l2", "B", 5)],
-      owed,
-    );
-    assert.deepEqual(second.updates, []);
-    assert.deepEqual(second.removals, [
-      { id: "l2", variantId: "B", taken: 5, quantity: 0 },
+    // Both landed. Re-applying is a no-op, so a second request racing the
+    // first finds nothing to do.
+    const done = [line("l1", "A", 4)];
+    assert.ok(b2b.planStillApplies(plan, done));
+    assert.deepEqual(b2b.planSteps(plan, done), { updates: [], removals: [] });
+
+    // The buyer added ten more of A after paying. The plan is void — setting
+    // l1 to 4 would take the ten they never paid for.
+    const changed = [line("l1", "A", 24), line("l2", "B", 5)];
+    assert.equal(b2b.planStillApplies(plan, changed), false);
+
+    // A line removed by the buyer rather than by us voids a plan that meant
+    // to leave something behind.
+    const planKeepingL1 = b2b.planForPaidLines("D51", cart, [
+      { variantId: "A", quantity: 10 },
     ]);
-
-    // Everything applied: nothing is owed, so settling is over.
-    assert.deepEqual(b2b.remainingPaidLines(paid, { A: 10, B: 5 }), []);
-
-    // A GID in the invoice still matches a bare id in the record.
-    assert.deepEqual(
-      b2b.remainingPaidLines(
-        [{ variantId: "gid://shopify/ProductVariant/A", quantity: 10 }],
-        { A: 4 },
-      ),
-      [{ variantId: "A", quantity: 6 }],
+    assert.equal(
+      b2b.planStillApplies(planKeepingL1, [line("l2", "B", 5)]),
+      false,
     );
   });
 

@@ -472,30 +472,6 @@ export interface CartAdjustment {
 }
 
 /**
- * What is still owed against a paid order, given what has already been taken.
- *
- * Settling is two cart mutations and either can fail on its own. Recomputing
- * the whole order against the cart on the next attempt subtracts the part that
- * already succeeded a second time — an invoice for A×10 against a cart of A×14
- * leaves 4, and a retry then takes 10 more from those 4. Carrying what has
- * been applied is what makes a retry safe.
- */
-export function remainingPaidLines(
-  paid: PaidLine[],
-  applied: Record<string, number>,
-): PaidLine[] {
-  const remaining: PaidLine[] = [];
-  for (const line of paid) {
-    const variantId = normId(line.variantId);
-    const left = line.quantity - (applied[variantId] ?? 0);
-    if (left > 0) {
-      remaining.push({ variantId, quantity: left });
-    }
-  }
-  return remaining;
-}
-
-/**
  * What to take out of the cart once an order has been paid for.
  *
  * Subtracts rather than empties. Between creating the draft order and coming
@@ -677,4 +653,89 @@ export function strictestRule(
     maximum: maxA && maxB ? Math.min(maxA, maxB) : (maxA ?? maxB),
     increment,
   };
+}
+
+/**
+ * What settling one paid order will do to the cart, written down before any
+ * of it is done.
+ *
+ * Recomputing "subtract ten of A" on every attempt is what made a retry
+ * dangerous: the second attempt measured against a cart the first had already
+ * reduced. A plan says instead "line L1 ends at 4, line L2 goes" — absolute,
+ * so applying it once and applying it three times leave the same cart. A lost
+ * response and two requests racing each other both stop mattering.
+ *
+ * `from` is what the line held when the plan was made. It is the guard: a line
+ * sitting at neither `from` nor `to` is one the buyer has changed since, and
+ * the plan is void rather than applied over the top of their edit.
+ */
+export interface SettlementPlan {
+  draftOrderId: string;
+  lines: { id: string; variantId: string; from: number; to: number }[];
+}
+
+export function planForPaidLines(
+  draftOrderId: string,
+  cartLines: { id: string; variantId: string; quantity: number }[],
+  paid: PaidLine[],
+): SettlementPlan {
+  const { updates, removals } = adjustmentForPaidLines(cartLines, paid);
+  const byId = new Map(cartLines.map((line) => [line.id, line.quantity]));
+  const lines = [...updates, ...removals].map((entry) => ({
+    id: entry.id,
+    variantId: entry.variantId,
+    from: byId.get(entry.id) ?? entry.taken + entry.quantity,
+    to: entry.quantity,
+  }));
+  return { draftOrderId, lines };
+}
+
+/**
+ * Whether the cart is still the one the plan was made for.
+ *
+ * Each line has to be where the plan left off or where it is going. Anything
+ * else is the buyer's own change — adding ten more of something after paying —
+ * and setting it to an absolute target would throw that away.
+ */
+export function planStillApplies(
+  plan: SettlementPlan,
+  cartLines: { id: string; quantity: number }[],
+): boolean {
+  const byId = new Map(cartLines.map((line) => [line.id, line.quantity]));
+  return plan.lines.every((line) => {
+    const current = byId.get(line.id);
+    if (current === undefined) {
+      // Gone already. Only right if the plan was taking it out.
+      return line.to === 0;
+    }
+    return current === line.from || current === line.to;
+  });
+}
+
+/**
+ * The part of the plan the cart has not reached yet.
+ *
+ * A line already at its target is left out, which is what makes re-applying
+ * free — and what lets a retry tell "this landed" from "this did not" without
+ * needing to have been told.
+ */
+export function planSteps(
+  plan: SettlementPlan,
+  cartLines: { id: string; quantity: number }[],
+): { updates: { id: string; quantity: number }[]; removals: string[] } {
+  const byId = new Map(cartLines.map((line) => [line.id, line.quantity]));
+  const updates: { id: string; quantity: number }[] = [];
+  const removals: string[] = [];
+  for (const line of plan.lines) {
+    const current = byId.get(line.id);
+    if (current === undefined || current === line.to) {
+      continue;
+    }
+    if (line.to > 0) {
+      updates.push({ id: line.id, quantity: line.to });
+    } else {
+      removals.push(line.id);
+    }
+  }
+  return { updates, removals };
 }

@@ -9,6 +9,7 @@ import {
   mergeLines,
   normId,
   pricingKey,
+  type SettlementPlan,
 } from "./headless";
 import {
   fetchCartPricing,
@@ -310,15 +311,6 @@ interface CheckoutMark {
   subtotal: number;
   currency: string;
   at: number;
-  /**
-   * Bare variant id → how many paid units have already come out of the cart.
-   *
-   * Settling is two cart mutations and either can fail on its own. Without a
-   * record of what landed, the next attempt recomputes the whole order against
-   * a cart that is already part-way settled and subtracts the same units
-   * twice, taking goods the buyer never paid for.
-   */
-  applied?: Record<string, number>;
 }
 
 const INVOICES_ATTRIBUTE = "b2b_invoices";
@@ -423,26 +415,6 @@ export async function addCheckoutMark(
   await saveCheckoutMarks(context, [...marks, mark]);
 }
 
-/**
- * Records how much of a paid order has made it out of the cart.
- *
- * Written even when settling failed half-way, so the next attempt starts from
- * here rather than from the whole invoice.
- */
-export async function recordSettlementProgress(
-  context: Context,
-  draftOrderId: string,
-  applied: Record<string, number>,
-): Promise<void> {
-  const marks = await readCheckoutMarks(context);
-  await saveCheckoutMarks(
-    context,
-    marks.map((mark) =>
-      mark.draftOrderId === draftOrderId ? { ...mark, applied } : mark,
-    ),
-  );
-}
-
 /** Drops one invoice from the list — settled, deleted, or long expired. */
 export async function clearCheckoutMark(
   context: Context,
@@ -453,6 +425,45 @@ export async function clearCheckoutMark(
     context,
     marks.filter((mark) => mark.draftOrderId !== draftOrderId),
   );
+}
+
+/**
+ * The settlement plan for one draft order, stored before it is applied.
+ *
+ * Keyed by the draft order's bare id, so two unresolved invoices cannot
+ * overwrite each other's plan.
+ */
+function planAttribute(draftOrderId: string): string {
+  return `b2b_settle_${normId(draftOrderId)}`;
+}
+
+export function planFromCart(
+  cart: CartLike | null,
+  draftOrderId: string,
+): SettlementPlan | null {
+  const plan = parse<SettlementPlan | null>(
+    attributeValue(cart, planAttribute(draftOrderId)),
+    null,
+  );
+  return Array.isArray(plan?.lines) ? plan : null;
+}
+
+export async function saveSettlementPlan(
+  context: Context,
+  plan: SettlementPlan,
+): Promise<void> {
+  await writeCartAttributes(context, {
+    [planAttribute(plan.draftOrderId)]: JSON.stringify(plan),
+  });
+}
+
+export async function clearSettlementPlan(
+  context: Context,
+  draftOrderId: string,
+): Promise<void> {
+  await writeCartAttributes(context, {
+    [planAttribute(draftOrderId)]: null,
+  });
 }
 
 interface CheckoutAttempt {
