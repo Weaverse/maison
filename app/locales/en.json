@@ -46,6 +46,7 @@
     "b2bPriceChanged": "The price changed while you were in the cart. New total: {{total}}.",
     "b2bContinueToPayment": "Continue to payment",
     "b2bCheckoutFailed": "Could not start checkout. Please try again in a moment.",
+    "b2bCheckoutUnconfirmed": "We could not confirm whether your invoice was created. Please check your orders before trying again, so you are not invoiced twice.",
     "b2bCartChanged": "Your cart no longer meets the order rules. Please review it below."
   },
   "navigation": {

@@ -248,8 +248,17 @@ function CartCheckoutActions({
       ) : payThroughB2Bridge ? (
         <div className="flex flex-col gap-2">
           {result?.status === "unavailable" && (
+            // `retryable: false` is the server saying it does not know whether
+            // B2Bridge created the draft order — a lost response, a timeout.
+            // Telling the buyer to try again is the one piece of advice that
+            // must not be given there: a second attempt past the 60s reuse
+            // window creates a second invoice, and no endpoint deletes one.
             <p className="text-sm text-(--color-text-subtle)">
-              {t("cart.b2bCheckoutFailed")}
+              {t(
+                result.retryable
+                  ? "cart.b2bCheckoutFailed"
+                  : "cart.b2bCheckoutUnconfirmed",
+              )}
             </p>
           )}
           {result?.status === "limits" && (
