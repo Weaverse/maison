@@ -216,9 +216,10 @@ export async function loadCartPricing(
   // Read, never acted on here: a loader that changed the cart would do it on
   // a prefetch too. The cart is settled by `api.b2b-settle`, which this only
   // tells the storefront to call.
-  const mark = readCheckoutMark(context);
-  const pendingDraft = Boolean(
-    mark?.draftOrderId && Date.now() - mark.at < CHECKOUT_PENDING_MS,
+  // Any unresolved invoice is worth asking about, not just the newest: the
+  // buyer may well pay an earlier one.
+  const pendingDraft = readCheckoutMarks(context).some(
+    (mark) => mark.draftOrderId && Date.now() - mark.at < CHECKOUT_PENDING_MS,
   );
 
   const prepared = await prepare(context);
@@ -324,11 +325,54 @@ interface CheckoutMark {
   applied?: Record<string, number>;
 }
 
-export function readCheckoutMark(context: Context): CheckoutMark | null {
+/**
+ * At most this many unresolved invoices are carried at once.
+ *
+ * They live in a cookie, so the list cannot grow without bound. Five is well
+ * inside the size limit and far past what a buyer reaches in one session;
+ * beyond it the oldest is dropped, which is the one least likely to be paid.
+ */
+const MAX_PENDING_INVOICES = 5;
+
+/**
+ * Every invoice raised for this buyer that has not been resolved yet, oldest
+ * first.
+ *
+ * A list rather than one record, because a buyer can raise a second invoice
+ * while the first is still payable — changing a quantity gives a new cart
+ * fingerprint, which steps past the reuse window above. Keeping only the
+ * latest meant paying the earlier invoice settled nothing: the cart asked
+ * Shopify about the wrong draft order and left every unit in place.
+ */
+export function readCheckoutMarks(context: Context): CheckoutMark[] {
   const stored = context.session.get(CHECKOUT_SESSION_KEY) as
     | CheckoutMark
+    | CheckoutMark[]
     | undefined;
-  return stored?.mark && stored.invoiceUrl ? stored : null;
+  // A session written before this was a list still holds a bare record.
+  const marks = Array.isArray(stored) ? stored : stored ? [stored] : [];
+  return marks.filter((mark) => mark?.mark && mark.invoiceUrl);
+}
+
+/** The most recent invoice, for the reuse guard and for `pendingDraft`. */
+export function readCheckoutMark(context: Context): CheckoutMark | null {
+  return readCheckoutMarks(context).at(-1) ?? null;
+}
+
+function saveCheckoutMarks(context: Context, marks: CheckoutMark[]): void {
+  if (marks.length === 0) {
+    context.session.unset(CHECKOUT_SESSION_KEY);
+    return;
+  }
+  context.session.set(CHECKOUT_SESSION_KEY, marks.slice(-MAX_PENDING_INVOICES));
+}
+
+/** Adds a newly raised invoice without discarding one still unresolved. */
+export function addCheckoutMark(context: Context, mark: CheckoutMark): void {
+  const marks = readCheckoutMarks(context).filter(
+    (entry) => entry.draftOrderId !== mark.draftOrderId,
+  );
+  saveCheckoutMarks(context, [...marks, mark]);
 }
 
 /**
@@ -340,20 +384,28 @@ export function readCheckoutMark(context: Context): CheckoutMark | null {
  */
 export function recordSettlementProgress(
   context: Context,
+  draftOrderId: string,
   applied: Record<string, number>,
 ): void {
-  const mark = readCheckoutMark(context);
-  if (!mark) {
-    return;
-  }
-  context.session.set(CHECKOUT_SESSION_KEY, {
-    ...mark,
-    applied,
-  } satisfies CheckoutMark);
+  saveCheckoutMarks(
+    context,
+    readCheckoutMarks(context).map((mark) =>
+      mark.draftOrderId === draftOrderId ? { ...mark, applied } : mark,
+    ),
+  );
 }
 
-export function clearCheckoutMark(context: Context): void {
-  context.session.unset(CHECKOUT_SESSION_KEY);
+/** Drops one invoice from the list — settled, deleted, or long expired. */
+export function clearCheckoutMark(
+  context: Context,
+  draftOrderId: string,
+): void {
+  saveCheckoutMarks(
+    context,
+    readCheckoutMarks(context).filter(
+      (mark) => mark.draftOrderId !== draftOrderId,
+    ),
+  );
 }
 
 /**
@@ -483,14 +535,14 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   }
 
   context.session.unset(CHECKOUT_ATTEMPT_KEY);
-  context.session.set(CHECKOUT_SESSION_KEY, {
+  addCheckoutMark(context, {
     mark,
     draftOrderId: result.data.draftOrderId,
     invoiceUrl: result.data.invoiceUrl,
     subtotal: result.data.subtotal,
     currency: result.data.currency,
     at: Date.now(),
-  } satisfies CheckoutMark);
+  });
 
   return {
     status: "ok",
