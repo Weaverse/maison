@@ -224,7 +224,7 @@ export async function loadCartPricing(
   // tells the storefront to call.
   // Any unresolved invoice is worth asking about, not just the newest: the
   // buyer may well pay an earlier one.
-  const pendingDraft = readCheckoutMarks(context).some(
+  const pendingDraft = marksFromCart(await context.cart.get()).some(
     (mark) => mark.draftOrderId && Date.now() - mark.at < CHECKOUT_PENDING_MS,
   );
 
@@ -285,32 +285,22 @@ export async function loadCartPricing(
   };
 }
 
-const CHECKOUT_SESSION_KEY = "b2bridgeCheckout";
-
 /**
- * A checkout that was started and whose outcome is unknown.
+ * Where the checkout's own state lives, and why it is not the session.
  *
- * Written before B2Bridge is asked, not after it answers. A request that dies
- * without a reply may still have created a draft order, and the invoice record
- * below is only written on success — so without this, nothing on the server
- * remembered the attempt and a second click, a reload or another tab asked for
- * a second draft order the merchant cannot delete.
+ * It was a cookie, and a cookie cannot carry this. It travels on the
+ * response — so a reply that is lost takes the record of the attempt with it,
+ * which is precisely the case the record exists for. Two requests holding the
+ * same cookie both read the same stale state and both pass whatever guard it
+ * backs. And it has a hard size limit, which forced unresolved invoices to be
+ * dropped once there were too many of them.
+ *
+ * Cart attributes have none of those properties. They live on the Shopify
+ * cart, every request reads them fresh, and they are written by a mutation
+ * that either lands or does not. Only ids and quantities go in — a buyer or an
+ * app reading the cart learns nothing from them that the cart does not already
+ * say.
  */
-const CHECKOUT_ATTEMPT_KEY = "b2bridgeCheckoutAttempt";
-
-interface CheckoutAttempt {
-  /** Fingerprint of the cart the attempt was made for. */
-  mark: string;
-  at: number;
-}
-
-function readCheckoutAttempt(context: Context): CheckoutAttempt | null {
-  const stored = context.session.get(CHECKOUT_ATTEMPT_KEY) as
-    | CheckoutAttempt
-    | undefined;
-  return stored?.mark ? stored : null;
-}
-
 interface CheckoutMark {
   /** Fingerprint of the cart this invoice was made for. */
   mark: string;
@@ -331,17 +321,57 @@ interface CheckoutMark {
   applied?: Record<string, number>;
 }
 
-/**
- * At most this many unresolved invoices are carried at once.
- *
- * They live in a cookie, so the list cannot grow without bound. Five is well
- * inside the size limit and far past what a buyer reaches in one session;
- * beyond it the oldest is dropped, which is the one least likely to be paid.
- */
-const MAX_PENDING_INVOICES = 5;
+const INVOICES_ATTRIBUTE = "b2b_invoices";
+const ATTEMPT_ATTRIBUTE = "b2b_checkout_attempt";
+
+type CartLike = {
+  attributes?: { key: string; value?: string | null }[] | null;
+};
+
+function attributeValue(cart: CartLike | null, key: string): string | null {
+  return (cart?.attributes ?? []).find((a) => a.key === key)?.value ?? null;
+}
+
+function parse<T>(raw: string | null, fallback: T): T {
+  if (!raw) {
+    return fallback;
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 /**
- * Every invoice raised for this buyer that has not been resolved yet, oldest
+ * `cartAttributesUpdate` replaces the whole set, so everything else on the
+ * cart has to be read and sent back with it. Values set to `null` are dropped.
+ */
+async function writeCartAttributes(
+  context: Context,
+  changes: Record<string, string | null>,
+): Promise<void> {
+  const cart = await context.cart.get();
+  const merged = new Map<string, string>();
+  for (const attribute of cart?.attributes ?? []) {
+    if (attribute.key && attribute.value != null) {
+      merged.set(attribute.key, attribute.value);
+    }
+  }
+  for (const [key, value] of Object.entries(changes)) {
+    if (value === null) {
+      merged.delete(key);
+    } else {
+      merged.set(key, value);
+    }
+  }
+  await context.cart.updateAttributes(
+    [...merged].map(([key, value]) => ({ key, value })),
+  );
+}
+
+/**
+ * Every invoice raised for this cart that has not been resolved yet, oldest
  * first.
  *
  * A list rather than one record, because a buyer can raise a second invoice
@@ -350,68 +380,107 @@ const MAX_PENDING_INVOICES = 5;
  * latest meant paying the earlier invoice settled nothing: the cart asked
  * Shopify about the wrong draft order and left every unit in place.
  */
-export function readCheckoutMarks(context: Context): CheckoutMark[] {
-  const stored = context.session.get(CHECKOUT_SESSION_KEY) as
-    | CheckoutMark
-    | CheckoutMark[]
-    | undefined;
-  // A session written before this was a list still holds a bare record.
-  const marks = Array.isArray(stored) ? stored : stored ? [stored] : [];
-  return marks.filter((mark) => mark?.mark && mark.invoiceUrl);
+export function marksFromCart(cart: CartLike | null): CheckoutMark[] {
+  const marks = parse<CheckoutMark[]>(
+    attributeValue(cart, INVOICES_ATTRIBUTE),
+    [],
+  );
+  return Array.isArray(marks)
+    ? marks.filter((mark) => mark?.mark && mark.invoiceUrl)
+    : [];
 }
 
-/** The most recent invoice, for the reuse guard and for `pendingDraft`. */
-export function readCheckoutMark(context: Context): CheckoutMark | null {
-  return readCheckoutMarks(context).at(-1) ?? null;
+export async function readCheckoutMarks(
+  context: Context,
+): Promise<CheckoutMark[]> {
+  return marksFromCart(await context.cart.get());
 }
 
-function saveCheckoutMarks(context: Context, marks: CheckoutMark[]): void {
-  if (marks.length === 0) {
-    context.session.unset(CHECKOUT_SESSION_KEY);
-    return;
-  }
-  context.session.set(CHECKOUT_SESSION_KEY, marks.slice(-MAX_PENDING_INVOICES));
+/** The most recent invoice, for the reuse guard. */
+export async function readCheckoutMark(
+  context: Context,
+): Promise<CheckoutMark | null> {
+  return (await readCheckoutMarks(context)).at(-1) ?? null;
+}
+
+async function saveCheckoutMarks(
+  context: Context,
+  marks: CheckoutMark[],
+): Promise<void> {
+  await writeCartAttributes(context, {
+    [INVOICES_ATTRIBUTE]: marks.length > 0 ? JSON.stringify(marks) : null,
+  });
 }
 
 /** Adds a newly raised invoice without discarding one still unresolved. */
-export function addCheckoutMark(context: Context, mark: CheckoutMark): void {
-  const marks = readCheckoutMarks(context).filter(
+export async function addCheckoutMark(
+  context: Context,
+  mark: CheckoutMark,
+): Promise<void> {
+  const marks = (await readCheckoutMarks(context)).filter(
     (entry) => entry.draftOrderId !== mark.draftOrderId,
   );
-  saveCheckoutMarks(context, [...marks, mark]);
+  await saveCheckoutMarks(context, [...marks, mark]);
 }
 
 /**
  * Records how much of a paid order has made it out of the cart.
  *
- * Written even when settling failed half-way — the session is committed on
- * every response, so the next attempt starts from here rather than from the
- * whole invoice.
+ * Written even when settling failed half-way, so the next attempt starts from
+ * here rather than from the whole invoice.
  */
-export function recordSettlementProgress(
+export async function recordSettlementProgress(
   context: Context,
   draftOrderId: string,
   applied: Record<string, number>,
-): void {
-  saveCheckoutMarks(
+): Promise<void> {
+  const marks = await readCheckoutMarks(context);
+  await saveCheckoutMarks(
     context,
-    readCheckoutMarks(context).map((mark) =>
+    marks.map((mark) =>
       mark.draftOrderId === draftOrderId ? { ...mark, applied } : mark,
     ),
   );
 }
 
 /** Drops one invoice from the list — settled, deleted, or long expired. */
-export function clearCheckoutMark(
+export async function clearCheckoutMark(
   context: Context,
   draftOrderId: string,
-): void {
-  saveCheckoutMarks(
+): Promise<void> {
+  const marks = await readCheckoutMarks(context);
+  await saveCheckoutMarks(
     context,
-    readCheckoutMarks(context).filter(
-      (mark) => mark.draftOrderId !== draftOrderId,
-    ),
+    marks.filter((mark) => mark.draftOrderId !== draftOrderId),
   );
+}
+
+interface CheckoutAttempt {
+  mark: string;
+  at: number;
+}
+
+/**
+ * A checkout that was started and whose outcome is unknown.
+ *
+ * Written before B2Bridge is asked, and to the cart rather than the session,
+ * so a reply that never arrives still leaves it behind.
+ */
+export function attemptFromCart(cart: CartLike | null): CheckoutAttempt | null {
+  const attempt = parse<CheckoutAttempt | null>(
+    attributeValue(cart, ATTEMPT_ATTRIBUTE),
+    null,
+  );
+  return attempt?.mark ? attempt : null;
+}
+
+async function writeCheckoutAttempt(
+  context: Context,
+  attempt: CheckoutAttempt | null,
+): Promise<void> {
+  await writeCartAttributes(context, {
+    [ATTEMPT_ATTRIBUTE]: attempt ? JSON.stringify(attempt) : null,
+  });
 }
 
 /**
@@ -455,7 +524,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   // because both read the session before either writes it; that case is the
   // disabled button's to catch.
   const mark = fingerprint(pricingKey(prepared.request));
-  const prior = readCheckoutMark(context);
+  const prior = await readCheckoutMark(context);
   if (
     prior &&
     prior.mark === mark &&
@@ -484,7 +553,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   // a draft order, so asking again risks a second invoice for one cart; the
   // buyer is told to check their orders instead. Held for the same window as
   // the reuse guard above, after which a fresh attempt is the lesser risk.
-  const attempt = readCheckoutAttempt(context);
+  const attempt = attemptFromCart(await context.cart.get());
   if (
     attempt &&
     attempt.mark === mark &&
@@ -514,10 +583,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   // Recorded before the call, so a reply that never arrives still leaves a
   // trace. The session is committed on every response, including the failure
   // this exists for.
-  context.session.set(CHECKOUT_ATTEMPT_KEY, {
-    mark,
-    at: Date.now(),
-  } satisfies CheckoutAttempt);
+  await writeCheckoutAttempt(context, { mark, at: Date.now() });
 
   const result = await fetchCheckout(context.env, prepared.request);
   if (result.kind === "failed") {
@@ -527,7 +593,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     // record. Clearing it here is what lets a buyer retry a cart that was
     // merely refused.
     if (action !== "BLOCK") {
-      context.session.unset(CHECKOUT_ATTEMPT_KEY);
+      await writeCheckoutAttempt(context, null);
     }
     // The cart broke an order rule. Nothing was created, and the cart already
     // knows how to say which rule — so this only has to send them back to it.
@@ -540,8 +606,8 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     };
   }
 
-  context.session.unset(CHECKOUT_ATTEMPT_KEY);
-  addCheckoutMark(context, {
+  await writeCheckoutAttempt(context, null);
+  await addCheckoutMark(context, {
     mark,
     draftOrderId: result.data.draftOrderId,
     invoiceUrl: result.data.invoiceUrl,

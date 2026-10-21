@@ -40,7 +40,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
   }
 
-  const pending = readCheckoutMarks(context);
+  const pending = await readCheckoutMarks(context);
   if (pending.length === 0) {
     return data({ settled: false });
   }
@@ -53,7 +53,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   for (const invoice of pending) {
     // Long past the point where the buyer was going to come back for it.
     if (Date.now() - invoice.at > CHECKOUT_PENDING_MS) {
-      clearCheckoutMark(context, invoice.draftOrderId);
+      await clearCheckoutMark(context, invoice.draftOrderId);
       continue;
     }
 
@@ -68,7 +68,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // the cart stands as it is and the note goes — keeping it would mean
     // asking Shopify the same settled question on every cart view for a day.
     if (draft.kind === "missing") {
-      clearCheckoutMark(context, invoice.draftOrderId);
+      await clearCheckoutMark(context, invoice.draftOrderId);
       continue;
     }
     if (draft.status !== "COMPLETED") {
@@ -81,7 +81,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const applied = { ...(invoice.applied ?? {}) };
     const owed = remainingPaidLines(draft.lines, applied);
     if (owed.length === 0) {
-      clearCheckoutMark(context, invoice.draftOrderId);
+      await clearCheckoutMark(context, invoice.draftOrderId);
       settled = true;
       continue;
     }
@@ -159,13 +159,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     if (failed) {
-      recordSettlementProgress(context, invoice.draftOrderId, applied);
+      await recordSettlementProgress(context, invoice.draftOrderId, applied);
       // Stop here rather than move on: the next invoice is measured against
       // a cart this one has left half-adjusted.
       break;
     }
 
-    clearCheckoutMark(context, invoice.draftOrderId);
+    await clearCheckoutMark(context, invoice.draftOrderId);
     settled = true;
   }
 
