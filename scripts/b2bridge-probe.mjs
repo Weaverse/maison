@@ -341,6 +341,17 @@ if (!LIVE) {
     });
     const queen = b2b.overlaysForRule(rule, "USD").get("47591719436510");
     assert.equal(queen.price.amount, "315.25", "325 × 0.97");
+
+    // Shopify's own price is kept beside the replacement. Reported in review
+    // of #77: the product page overwrites `variant.price` with 315.25, and a
+    // sibling priced by applying the product's rate to that number discounts
+    // the base a second time.
+    assert.equal(queen.originalPrice.amount, "325.00", "Shopify's own price");
+    const rate = 1 - 299.49 / 325;
+    const from = (list) =>
+      (Math.round(list * (1 - rate) * 100) / 100).toFixed(2);
+    assert.equal(from(Number(queen.originalPrice.amount)), "299.49");
+    assert.equal(from(Number(queen.price.amount)), "290.51", "the old bug");
     assert.deepEqual(
       queen.quantityPriceBreaks.nodes.map((n) => n.price.amount),
       ["299.49", "283.73"],

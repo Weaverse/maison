@@ -144,6 +144,12 @@ export interface Group {
  */
 export interface VariantOverlay {
   price: { amount: string; currencyCode: string };
+  /**
+   * Shopify's own price for this variant, kept because `price` above replaces
+   * it on the product page. A discount rate measured against the Shopify price
+   * cannot be applied to a price that already carries part of that discount.
+   */
+  originalPrice: { amount: string; currencyCode: string };
   quantityPriceBreaks: {
     nodes: {
       minimumQuantity: number;

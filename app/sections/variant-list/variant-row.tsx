@@ -219,13 +219,22 @@ export function VariantRow({
     // past a tier. Leaving the list price here reads as "this one is
     // excluded" next to a sibling that is plainly discounted, when in fact
     // B2Bridge would price it at the same rate the moment it is added.
-    const list = Number(variant.price.amount);
+    //
+    // Measured against Shopify's price, not against `variant.price`: the PDP
+    // loader has already replaced that with B2Bridge's base price, and a rate
+    // that includes the base discount applied to a number that already
+    // carries it discounts the base twice. On the measured 3% base + 5% tier
+    // rule that showed 290.51 where B2Bridge charges 299.49.
+    const original = (variant as { b2bOriginalPrice?: MoneyData })
+      .b2bOriginalPrice;
+    const listMoney = original ?? variant.price;
+    const list = Number(listMoney.amount);
     const { currencyCode } = variant.price;
     unitPrice = {
       amount: (Math.round(list * (1 - productRate) * 100) / 100).toFixed(2),
       currencyCode,
     };
-    compareUnitPrice = { amount: variant.price.amount, currencyCode };
+    compareUnitPrice = { amount: listMoney.amount, currencyCode };
   }
 
   return (

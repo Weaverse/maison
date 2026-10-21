@@ -193,6 +193,7 @@ export function buildOverlay(
 
   return {
     price: money(base, currencyCode),
+    originalPrice: money(variant.originPrice, currencyCode),
     quantityPriceBreaks: {
       nodes: tiers.map((tier) => ({
         minimumQuantity: tier.fromQuantity,
