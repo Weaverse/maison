@@ -307,7 +307,17 @@ function CartCheckoutActions({
                 // closed through the navigation that follows. The session
                 // guard covers the cases this cannot — a second tab, a back
                 // button — but two genuinely simultaneous clicks are its job.
-                disabled={working || result?.status === "ok"}
+                //
+                // It stays closed on an unconfirmed result too. The message
+                // above that one says an invoice may already exist and asks
+                // the buyer to check their orders; leaving the button live
+                // underneath invited exactly the second draft order the
+                // message is there to prevent.
+                disabled={
+                  working ||
+                  result?.status === "ok" ||
+                  (result?.status === "unavailable" && !result.retryable)
+                }
                 loading={working}
                 variant="primary"
                 className="w-full font-normal"

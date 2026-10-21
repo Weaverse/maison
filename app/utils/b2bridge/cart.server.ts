@@ -259,6 +259,30 @@ export async function loadCartPricing(
 
 const CHECKOUT_SESSION_KEY = "b2bridgeCheckout";
 
+/**
+ * A checkout that was started and whose outcome is unknown.
+ *
+ * Written before B2Bridge is asked, not after it answers. A request that dies
+ * without a reply may still have created a draft order, and the invoice record
+ * below is only written on success — so without this, nothing on the server
+ * remembered the attempt and a second click, a reload or another tab asked for
+ * a second draft order the merchant cannot delete.
+ */
+const CHECKOUT_ATTEMPT_KEY = "b2bridgeCheckoutAttempt";
+
+interface CheckoutAttempt {
+  /** Fingerprint of the cart the attempt was made for. */
+  mark: string;
+  at: number;
+}
+
+function readCheckoutAttempt(context: Context): CheckoutAttempt | null {
+  const stored = context.session.get(CHECKOUT_ATTEMPT_KEY) as
+    | CheckoutAttempt
+    | undefined;
+  return stored?.mark ? stored : null;
+}
+
 interface CheckoutMark {
   /** Fingerprint of the cart this invoice was made for. */
   mark: string;
@@ -373,6 +397,19 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   // `canCheckout` is checked here too. `fetchCheckout` reports the same limits
   // and nothing is created when it refuses, but finding out before asking
   // keeps the two paths from disagreeing about which rules stop a checkout.
+  // An earlier attempt on this exact cart never came back. It may have created
+  // a draft order, so asking again risks a second invoice for one cart; the
+  // buyer is told to check their orders instead. Held for the same window as
+  // the reuse guard above, after which a fresh attempt is the lesser risk.
+  const attempt = readCheckoutAttempt(context);
+  if (
+    attempt &&
+    attempt.mark === mark &&
+    Date.now() - attempt.at < CHECKOUT_REUSE_MS
+  ) {
+    return { status: "unavailable", retryable: false };
+  }
+
   const priced = await fetchCartPricing(context.env, prepared.request);
   if (priced.kind === "failed") {
     const { action } = priced.failure;
@@ -391,9 +428,24 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     return { status: "limits" };
   }
 
+  // Recorded before the call, so a reply that never arrives still leaves a
+  // trace. The session is committed on every response, including the failure
+  // this exists for.
+  context.session.set(CHECKOUT_ATTEMPT_KEY, {
+    mark,
+    at: Date.now(),
+  } satisfies CheckoutAttempt);
+
   const result = await fetchCheckout(context.env, prepared.request);
   if (result.kind === "failed") {
     const { action } = result.failure;
+    // B2Bridge answered, so nothing was created and the attempt is settled —
+    // only a lost reply (`BLOCK`) leaves the question open and keeps the
+    // record. Clearing it here is what lets a buyer retry a cart that was
+    // merely refused.
+    if (action !== "BLOCK") {
+      context.session.unset(CHECKOUT_ATTEMPT_KEY);
+    }
     // The cart broke an order rule. Nothing was created, and the cart already
     // knows how to say which rule — so this only has to send them back to it.
     if (action === "SHOW_ERRORS") {
@@ -405,6 +457,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     };
   }
 
+  context.session.unset(CHECKOUT_ATTEMPT_KEY);
   context.session.set(CHECKOUT_SESSION_KEY, {
     mark,
     draftOrderId: result.data.draftOrderId,
