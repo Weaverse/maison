@@ -296,7 +296,11 @@ export function isAnswerCurrent(
  */
 function linesOfKey(key: string): Map<string, number> {
   const map = new Map<string, number>();
-  for (const entry of key.split(",")) {
+  // A cart key carries who and where before its lines, separated by `#`, so a
+  // change of buyer or market cannot read as the same cart. Only the lines
+  // matter for working out which variants moved.
+  const lines = key.split("#").at(-1) ?? "";
+  for (const entry of lines.split(",")) {
     const at = entry.lastIndexOf(":");
     if (at > 0) {
       map.set(entry.slice(0, at), Number(entry.slice(at + 1)));

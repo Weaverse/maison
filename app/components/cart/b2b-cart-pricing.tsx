@@ -187,12 +187,34 @@ function pricedVariantProducts(
   return map;
 }
 
-function cartKey(cart: CartApiQueryFragment | null): string {
+/**
+ * Who is being priced and where, ahead of what is in their cart.
+ *
+ * The cache, the in-flight key and the last answered key all live in module
+ * scope and are shared by every mounted provider, so a key of lines alone made
+ * two different buyers — or the same buyer in two markets — look like one
+ * request. Changing country through the selector keeps the quantities, which
+ * meant the cache answered with the previous market's prices and currency and
+ * never asked about the new one.
+ *
+ * `path` carries the locale prefix, and the locale is what the server resolves
+ * the market from, so it is the same signal the answer was computed under.
+ */
+function pricingIdentity(
+  cart: CartApiQueryFragment | null,
+  path: string,
+): string {
+  const customerId = cart?.buyerIdentity?.customer?.id;
+  return `${path}|${customerId ? normId(customerId) : "guest"}`;
+}
+
+function cartKey(cart: CartApiQueryFragment | null, identity: string): string {
   const nodes = cart?.lines?.nodes ?? [];
-  return nodes
+  const lines = nodes
     .map((node) => `${normId(node.merchandise?.id ?? "")}:${node.quantity}`)
     .sort()
     .join(",");
+  return lines ? `${identity}#${lines}` : "";
 }
 
 /**
@@ -246,12 +268,27 @@ function B2BPricingRoot({
   const path = usePrefixPathWithLocale("/api/b2b-cart-pricing");
   const [state, setState] = useState<CartPricingState | null>(null);
 
-  const key = cartKey(cart);
+  const identity = pricingIdentity(cart, path);
+  const key = cartKey(cart, identity);
   // The optimistic cart is what the buyer just acted on, so it is what the
   // spinners must answer to. A pending `+` leaves the two disagreeing until
   // Shopify catches up.
-  const optimisticKey = cartKey(optimisticCart);
+  const optimisticKey = cartKey(optimisticCart, identity);
   const settled = key === optimisticKey;
+
+  // A changed identity does not make the answer on screen stale, it makes it
+  // somebody else's. Dropping it puts the gate back to `pending`, so nothing
+  // is shown or checked out at the previous market's prices while the new
+  // ones are being worked out.
+  const seenIdentity = useRef(identity);
+  useEffect(() => {
+    if (seenIdentity.current === identity) {
+      return;
+    }
+    seenIdentity.current = identity;
+    setState(null);
+    setAnsweredKey(null);
+  }, [identity]);
 
   const retries = useRef(0);
   /** The cart key the current `state` was computed for. */

@@ -964,6 +964,36 @@ if (!LIVE) {
     );
   });
 
+  test("a cart key separates buyer and market from the lines", () => {
+    // Reported in review of #77: the cache is shared across providers and was
+    // keyed on lines alone, so changing country with the quantities unchanged
+    // answered from cache with the previous market's prices.
+    const lines = "47591719436510:10";
+    const ca = `/api/b2b-cart-pricing|9196237291742#${lines}`;
+    const vn = `/vi-vn/api/b2b-cart-pricing|9196237291742#${lines}`;
+    const guest = `/api/b2b-cart-pricing|guest#${lines}`;
+
+    assert.notEqual(ca, vn);
+    assert.notEqual(ca, guest);
+
+    // Same lines on both sides, so nothing moved — the identity differing is
+    // what makes them different keys, not a quantity change.
+    assert.equal(b2b.changedVariants(ca, vn).size, 0);
+    assert.equal(b2b.changedVariants(ca, guest).size, 0);
+
+    // And a real quantity change is still seen through the prefix.
+    assert.deepEqual(
+      [...b2b.changedVariants(ca, `${vn.split("#")[0]}#47591719436510:15`)],
+      ["47591719436510"],
+    );
+
+    // Keys with no prefix at all still parse, so nothing else has to change.
+    assert.deepEqual(
+      [...b2b.changedVariants("47591719436510:10", "47591719436510:15")],
+      ["47591719436510"],
+    );
+  });
+
   test("a settling that failed half-way does not subtract twice on retry", () => {
     // The case raised in review of #77: an invoice for A x10 and B x5 against
     // a cart of A x14 and B x5. Updating A to 4 lands, removing B throws, and
