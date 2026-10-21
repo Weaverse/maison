@@ -28,20 +28,18 @@ export const draftOrderQuery = `#graphql
 ` as const;
 
 /**
- * Open draft orders for one customer, newest first.
+ * Draft orders for one customer, newest first.
  *
- * Asked before a new one is created. A checkout whose reply was lost may
- * already have made a draft order, and nothing the storefront stores can say
- * so — the record of the attempt rides on the reply that went missing. Shopify
- * is the one party that knows either way, so it gets asked rather than
- * guessed at.
+ * Asked before retrying a checkout whose reply was lost. The cart stores that
+ * an attempt began, but only Shopify can say whether it became a draft order.
  */
 export const openDraftOrdersQuery = `#graphql
-  query B2BridgeOpenDraftOrders($query: String!) {
-    draftOrders(first: 10, reverse: true, query: $query) {
+  query B2BridgeOpenDraftOrders($query: String!, $after: String) {
+    draftOrders(first: 10, after: $after, reverse: true, query: $query) {
       nodes {
         id
         invoiceUrl
+        status
         createdAt
         subtotalPrice
         currencyCode
@@ -52,7 +50,14 @@ export const openDraftOrdersQuery = `#graphql
               id
             }
           }
+          pageInfo {
+            hasNextPage
+          }
         }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }

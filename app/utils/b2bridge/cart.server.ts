@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query.account";
 import { MARKET_QUERY } from "~/graphql/queries";
+import { withCartMutationLock, writeCartAttributes } from "./cart-state.server";
 import { customerIdFromGid, devCustomerIdOverride } from "./client.server";
 import { findOpenDraftForCart } from "./draft-order.server";
 import {
@@ -297,11 +298,11 @@ export async function loadCartPricing(
  * backs. And it has a hard size limit, which forced unresolved invoices to be
  * dropped once there were too many of them.
  *
- * Cart attributes have none of those properties. They live on the Shopify
- * cart, every request reads them fresh, and they are written by a mutation
- * that either lands or does not. Only ids and quantities go in — a buyer or an
- * app reading the cart learns nothing from them that the cart does not already
- * say.
+ * Cart attributes survive a lost response and are read afresh on each
+ * request. Mutation results are verified and operations within this worker
+ * are serialized per cart; cross-worker atomicity requires a separate shared
+ * coordinator. The cart holds invoice ids, URLs, totals, and fingerprints for
+ * its own checkout; no API credentials are stored there.
  */
 interface CheckoutMark {
   /** Fingerprint of the cart this invoice was made for. */
@@ -337,33 +338,6 @@ function parse<T>(raw: string | null, fallback: T): T {
 }
 
 /**
- * `cartAttributesUpdate` replaces the whole set, so everything else on the
- * cart has to be read and sent back with it. Values set to `null` are dropped.
- */
-async function writeCartAttributes(
-  context: Context,
-  changes: Record<string, string | null>,
-): Promise<void> {
-  const cart = await context.cart.get();
-  const merged = new Map<string, string>();
-  for (const attribute of cart?.attributes ?? []) {
-    if (attribute.key && attribute.value != null) {
-      merged.set(attribute.key, attribute.value);
-    }
-  }
-  for (const [key, value] of Object.entries(changes)) {
-    if (value === null) {
-      merged.delete(key);
-    } else {
-      merged.set(key, value);
-    }
-  }
-  await context.cart.updateAttributes(
-    [...merged].map(([key, value]) => ({ key, value })),
-  );
-}
-
-/**
  * Every invoice raised for this cart that has not been resolved yet, oldest
  * first.
  *
@@ -379,7 +353,7 @@ export function marksFromCart(cart: CartLike | null): CheckoutMark[] {
     [],
   );
   return Array.isArray(marks)
-    ? marks.filter((mark) => mark?.mark && mark.invoiceUrl)
+    ? marks.filter((mark) => mark?.mark && mark.draftOrderId)
     : [];
 }
 
@@ -518,6 +492,20 @@ export const CHECKOUT_PENDING_MS = 24 * 60 * 60 * 1000;
  * a price list in between. It is returned for the cart to compare.
  */
 export async function createCheckout(context: Context): Promise<CheckoutState> {
+  try {
+    async function runCheckout() {
+      return createCheckoutUnlocked(context);
+    }
+    return await withCartMutationLock(context, runCheckout);
+  } catch (error) {
+    console.warn("[B2Bridge] checkout state could not be saved:", error);
+    return { status: "unavailable", retryable: false };
+  }
+}
+
+async function createCheckoutUnlocked(
+  context: Context,
+): Promise<CheckoutState> {
   const prepared = await prepare(context);
   if (prepared.kind === "stop") {
     if (prepared.reason === "not-applicable") {
@@ -530,15 +518,15 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   }
 
   // Sequential duplicates — a second tab, a back button, a click after the
-  // first one has already landed — get the invoice that was already made for
-  // this exact cart rather than a second draft order the merchant has to go
-  // and tidy up. Two genuinely simultaneous clicks still race past this,
-  // because both read the session before either writes it; that case is the
-  // disabled button's to catch.
+  // first one has already landed — get the invoice already made for this cart.
+  // The per-cart lock also serializes simultaneous clicks in this worker.
   const mark = fingerprint(pricingKey(prepared.request));
   const prior = await readCheckoutMark(context);
+  if (prior?.mark === mark && !prior.invoiceUrl) {
+    return { status: "unavailable", retryable: false };
+  }
   if (
-    prior &&
+    prior?.invoiceUrl &&
     prior.mark === mark &&
     Date.now() - prior.at < CHECKOUT_REUSE_MS
   ) {
@@ -563,28 +551,34 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   // keeps the two paths from disagreeing about which rules stop a checkout.
   // An earlier attempt on this exact cart never came back, so it may have
   // created a draft order that nothing here knows about. Shopify does, and
-  // asking it is the only way to tell — the record of an attempt rides on the
-  // reply that went missing, so no local note can answer this. If an invoice
+  // asking it is the only way to tell — the persisted attempt only proves a
+  // request began, not what B2Bridge created. If an invoice
   // for this exact cart is already open, the buyer is sent to pay that one
   // rather than given a second.
   const attempt = attemptFromCart(await context.cart.get());
   if (attempt && attempt.mark === mark) {
-    const existing = await findOpenDraftForCart(
+    const lookup = await findOpenDraftForCart(
       context,
       prepared.request.customerId,
       prepared.request.lines,
-      CHECKOUT_PENDING_MS,
+      attempt.at,
     );
-    if (existing) {
-      await writeCheckoutAttempt(context, null);
+    if (lookup.kind === "found") {
+      const existing = lookup.draft;
       await addCheckoutMark(context, {
         mark,
         draftOrderId: existing.draftOrderId,
-        invoiceUrl: existing.invoiceUrl,
+        invoiceUrl: existing.status === "COMPLETED" ? "" : existing.invoiceUrl,
         subtotal: existing.subtotal,
         currency: existing.currency,
         at: Date.now(),
       });
+      await writeCheckoutAttempt(context, null);
+      if (existing.status === "COMPLETED") {
+        // The reply was lost but the order was paid. The pending mark lets
+        // settlement subtract it; never send the buyer back to pay it again.
+        return { status: "unavailable", retryable: false };
+      }
       return {
         status: "ok",
         invoiceUrl: existing.invoiceUrl,
@@ -592,11 +586,12 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
         currency: existing.currency,
       };
     }
-    // Shopify holds nothing for this cart, or could not be asked. Within the
-    // reuse window the cautious reading is that the question is still open;
-    // past it, a fresh attempt is the lesser risk than a cart that can never
-    // check out.
-    if (Date.now() - attempt.at < CHECKOUT_REUSE_MS) {
+    // A failed or incomplete Shopify lookup cannot prove that no draft was
+    // created. Never turn an unknown outcome into another chargeable draft.
+    if (
+      lookup.kind === "unreadable" ||
+      Date.now() - attempt.at < CHECKOUT_REUSE_MS
+    ) {
       return { status: "unavailable", retryable: false };
     }
   }
@@ -619,9 +614,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     return { status: "limits" };
   }
 
-  // Recorded before the call, so a reply that never arrives still leaves a
-  // trace. The session is committed on every response, including the failure
-  // this exists for.
+  // Persist and verify the attempt before asking B2Bridge to create a draft.
   await writeCheckoutAttempt(context, { mark, at: Date.now() });
 
   const result = await fetchCheckout(context.env, prepared.request);
@@ -645,7 +638,6 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     };
   }
 
-  await writeCheckoutAttempt(context, null);
   await addCheckoutMark(context, {
     mark,
     draftOrderId: result.data.draftOrderId,
@@ -654,6 +646,7 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
     currency: result.data.currency,
     at: Date.now(),
   });
+  await writeCheckoutAttempt(context, null);
 
   return {
     status: "ok",

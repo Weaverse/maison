@@ -8,6 +8,7 @@ import {
   readCheckoutMarks,
   saveSettlementPlan,
 } from "~/utils/b2bridge/cart.server";
+import { withCartMutationLock } from "~/utils/b2bridge/cart-state.server";
 import { readDraftOrder } from "~/utils/b2bridge/draft-order.server";
 import {
   planForPaidLines,
@@ -42,6 +43,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
   }
 
+  try {
+    async function settleCart() {
+      return settleUnlocked(context);
+    }
+    return await withCartMutationLock(context, settleCart);
+  } catch (error) {
+    // A failed attribute write must leave the invoice pending, never be
+    // reported as settled. A later cart visit can retry the recorded plan.
+    console.warn("[B2Bridge] cart settlement state could not be saved:", error);
+    return data({ settled: false }, { status: 503 });
+  }
+}
+
+async function settleUnlocked(context: ActionFunctionArgs["context"]) {
   const pending = await readCheckoutMarks(context);
   if (pending.length === 0) {
     return data({ settled: false });
@@ -102,8 +117,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { updates, removals } = planSteps(plan, cartLines);
     if (updates.length === 0 && removals.length === 0) {
       // Every line is already where the plan puts it, however it got there.
-      await clearSettlementPlan(context, invoice.draftOrderId);
       await clearCheckoutMark(context, invoice.draftOrderId);
+      await clearSettlementPlan(context, invoice.draftOrderId);
       settled = true;
       continue;
     }
@@ -169,8 +184,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       break;
     }
 
-    await clearSettlementPlan(context, invoice.draftOrderId);
     await clearCheckoutMark(context, invoice.draftOrderId);
+    await clearSettlementPlan(context, invoice.draftOrderId);
     settled = true;
   }
 
