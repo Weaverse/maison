@@ -97,7 +97,12 @@ export function CountrySelector({
           </button>
         </Popover.Trigger>
         <Popover.Portal>
-          <Popover.Content>
+          {/* Radix centres the panel on its trigger by default. The panel is
+              320px against a trigger barely a third of that, so centring hung
+              it off the left of the viewport and collision handling then shoved
+              it flush against the edge. Aligning to the start lines its left
+              edge up with the trigger, which is what the design shows. */}
+          <Popover.Content align="start" collisionPadding={16}>
             <div className="my-2 max-h-40 w-80 overflow-auto bg-neutral-800 py-2">
               {localeOptions.map((locale) => {
                 const isSelected =

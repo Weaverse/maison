@@ -32,6 +32,12 @@ export interface SectionProps<T = any>
   ref?: React.Ref<HTMLElement>;
   as?: React.ElementType;
   borderRadius?: number;
+  /**
+   * Draws a rule across the top of the content, above the vertical padding, to
+   * separate this section from the one before it. Opt-in per section: a section
+   * only offers it by adding `borderTop` to its own schema.
+   */
+  borderTop?: boolean;
   containerClassName?: string;
   children?: React.ReactNode;
   customWidth?: number;
@@ -96,6 +102,7 @@ export function Section(props: SectionProps) {
     overflow,
     verticalPadding,
     borderRadius,
+    borderTop,
     backgroundColor,
     backgroundFor,
     backgroundImage,
@@ -151,6 +158,7 @@ export function Section(props: SectionProps) {
       <div
         className={cn(
           variants({ gap, width, verticalPadding, overflow }),
+          borderTop && "border-line-subtle border-t",
           hasBackground &&
             isBgForContent && [
               "rounded-(--section-radius) bg-(--section-bg-color)",

@@ -82,12 +82,6 @@ export const schema = createSchema({
         type: "contact-form-fields",
       },
       {
-        type: "button",
-        text: "Submit",
-        variant: "primary",
-        alignment: "center",
-      },
-      {
         type: "paragraph",
         content:
           "By submitting you have read and agree to the Terms of Use and Privacy Policy.",

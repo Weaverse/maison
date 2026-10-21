@@ -51,7 +51,8 @@
   },
   "navigation": {
     "menu": "MENU",
-    "home": "Home"
+    "home": "Home",
+    "closeMenu": "Close menu"
   },
   "notFound": {
     "featuredProducts": "Featured products",
@@ -75,6 +76,7 @@
     "noProductData": "No product data...",
     "variant": "Variant",
     "quickShopModal": "Quick shop modal",
+    "closeQuickShop": "Close quick shop",
     "selectOptions": "Select options",
     "price": "Price",
     "variantPrice": "Variant Price",
@@ -100,7 +102,8 @@
     "filter": "Filter",
     "applyFilters": "Apply Filters",
     "closeFilters": "Close filters drawer",
-    "clearAll": "Clear all filters",
+    "filteredBy": "Filtered by:",
+    "clearAll": "Clear all",
     "clearAllLabel": "Clear all applied filters",
     "noProductsMatched": "No products matched your filters.",
     "sortBy": "Sort by:",
@@ -124,6 +127,10 @@
     "label": "Search",
     "placeholder": "Search our store...",
     "popular": "Popular searches:",
+    "tabProducts": "Products",
+    "tabCollections": "Collections",
+    "tabPages": "Pages",
+    "tabArticles": "Articles",
     "trending": "Trending Products",
     "noResultsFor": "No results found for",
     "seeAll": "See All Results",
@@ -289,10 +296,12 @@
   },
   "form": {
     "nameRequired": "Your name*",
+    "companyRequired": "Company name*",
     "company": "Company name",
     "email": "Contact email*",
     "website": "Website",
-    "message": "Message",
+    "messageRequired": "Message*",
+    "submit": "Submit",
     "thankYou": "Thank you for your interest!",
     "willReply": "We'll get back to you shortly."
   },

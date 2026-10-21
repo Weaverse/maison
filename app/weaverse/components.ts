@@ -27,7 +27,7 @@ import * as CompanyStoryContent from "~/sections/company-story/content";
 import * as CompanyStoryImage from "~/sections/company-story/image";
 import * as CompanyStorySeparator from "~/sections/company-story/separator";
 import * as ContactForm from "~/sections/contact-form";
-import * as ContactFormForm from "~/sections/contact-form/form";
+import * as ContactFormFields from "~/sections/contact-form/form";
 import * as Countdown from "~/sections/countdown";
 import * as CountDownTimer from "~/sections/countdown/timer";
 import * as FeaturedCollections from "~/sections/featured-collections";
@@ -204,7 +204,7 @@ export const components: HydrogenComponent[] = [
   MulticolumnItems,
   MulticolumnItem,
   ContactForm,
-  ContactFormForm,
+  ContactFormFields,
   LogoList,
   LogoListItems,
   LogoListItem,
