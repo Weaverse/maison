@@ -224,7 +224,19 @@ function CartCheckoutActions({
           {t("cart.viewCart")}
         </Link>
       )}
-      {gate.blocked ? (
+      {gate.reason === "pending" ? (
+        // A spinner rather than a message: nothing has gone wrong, the cart
+        // just does not know yet what this buyer pays. The button is the right
+        // shape and size already, so the wait does not move the layout.
+        <Button
+          disabled
+          loading
+          variant="primary"
+          className="w-full font-normal"
+        >
+          {t("cart.checkout")}
+        </Button>
+      ) : gate.blocked ? (
         <div className="flex flex-col gap-2">
           <div className="text-sm text-(--color-text-subtle)">
             {gate.reason === "unavailable" ? (

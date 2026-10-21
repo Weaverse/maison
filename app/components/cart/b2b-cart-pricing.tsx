@@ -469,16 +469,27 @@ export function useB2BLinesTotal(
 export interface CheckoutGate {
   blocked: boolean;
   /**
+   * `pending` — nothing has come back yet, so it is not yet known whether
+   * this buyer is priced by B2Bridge at all. Nothing is wrong; the cart
+   * simply cannot say that Shopify's price is the right one.
    * `limits` — the cart breaks an order rule and the buyer can fix it.
    * `unavailable` — B2Bridge could not price the cart, so no price is
    * trustworthy and Shopify's own must not be charged instead.
    */
-  reason: "limits" | "unavailable" | null;
+  reason: "pending" | "limits" | "unavailable" | null;
 }
 
 /** Whether the buyer may proceed to checkout, and why not. */
 export function useCheckoutGate(): CheckoutGate {
   const { state } = useB2BPricing();
+  // No answer yet — the first render, the 250ms debounce, the request itself.
+  // A wholesale buyer and a retail one look identical here, and the fallthrough
+  // below treats that as "not a B2B cart", which put Shopify's checkout link on
+  // screen at retail prices before pricing had been asked for. Shut until the
+  // server says positively that B2Bridge does not price this cart.
+  if (!state) {
+    return { blocked: true, reason: "pending" };
+  }
   if (state?.status === "unavailable") {
     return { blocked: true, reason: "unavailable" };
   }
