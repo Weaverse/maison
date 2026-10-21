@@ -1,5 +1,9 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { draftOrderQuery } from "~/graphql/draft-order.admin";
+import {
+  draftOrderQuery,
+  openDraftOrdersQuery,
+} from "~/graphql/draft-order.admin";
+import { normId } from "./headless";
 
 /**
  * Reading the state of a draft order B2Bridge created.
@@ -95,4 +99,104 @@ export async function readDraftOrder(
     );
     return { kind: "unreadable" };
   }
+}
+
+/**
+ * A draft order Shopify already holds for this exact cart, if there is one.
+ *
+ * Matching is the whole invoice: the same variants in the same quantities.
+ * Anything less would adopt an invoice for a different cart and send the
+ * buyer to pay the wrong amount.
+ *
+ * Returns `null` when nothing matches, and also when Shopify cannot be
+ * reached — the caller treats that as "nothing found", which is the cautious
+ * side here only because the alternative is refusing every checkout whenever
+ * the admin API is slow.
+ */
+export async function findOpenDraftForCart(
+  context: Context,
+  customerId: string,
+  lines: { variantId: string; quantity: number }[],
+  maxAgeMs: number,
+): Promise<{
+  draftOrderId: string;
+  invoiceUrl: string;
+  subtotal: number;
+  currency: string;
+} | null> {
+  const { WEAVERSE_HOST, WEAVERSE_API_KEY } = context.env;
+  if (!(WEAVERSE_HOST && WEAVERSE_API_KEY)) {
+    return null;
+  }
+  const wanted = new Map(
+    lines.map((line) => [normId(line.variantId), line.quantity]),
+  );
+
+  try {
+    const response = await fetch(`${WEAVERSE_HOST}/api/admin-graphql`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${WEAVERSE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        query: openDraftOrdersQuery,
+        variables: { query: `customer_id:${normId(customerId)} status:open` },
+      }),
+      signal: AbortSignal.timeout(5000),
+    });
+    const payload = (await response.json()) as {
+      data?: { draftOrders?: { nodes?: RawOpenDraft[] } };
+      draftOrders?: { nodes?: RawOpenDraft[] };
+    };
+    const nodes =
+      payload?.data?.draftOrders?.nodes ?? payload?.draftOrders?.nodes ?? [];
+
+    for (const node of nodes) {
+      if (Date.now() - Date.parse(node.createdAt ?? "") > maxAgeMs) {
+        continue;
+      }
+      const held = new Map<string, number>();
+      for (const item of node.lineItems?.nodes ?? []) {
+        const variantId = normId(item.variant?.id ?? "");
+        if (variantId) {
+          held.set(variantId, (held.get(variantId) ?? 0) + item.quantity);
+        }
+      }
+      if (held.size !== wanted.size) {
+        continue;
+      }
+      let same = true;
+      for (const [variantId, quantity] of wanted) {
+        if (held.get(variantId) !== quantity) {
+          same = false;
+          break;
+        }
+      }
+      if (same && node.id && node.invoiceUrl) {
+        return {
+          draftOrderId: node.id,
+          invoiceUrl: node.invoiceUrl,
+          subtotal: Number(node.subtotalPrice ?? 0),
+          currency: node.currencyCode ?? "",
+        };
+      }
+    }
+    return null;
+  } catch (error) {
+    console.warn(
+      "[B2Bridge] open draft order lookup failed:",
+      (error as Error)?.message,
+    );
+    return null;
+  }
+}
+
+interface RawOpenDraft {
+  id?: string;
+  invoiceUrl?: string;
+  createdAt?: string;
+  subtotalPrice?: string;
+  currencyCode?: string;
+  lineItems?: { nodes?: { quantity: number; variant?: { id?: string } }[] };
 }

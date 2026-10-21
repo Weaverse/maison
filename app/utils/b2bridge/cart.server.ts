@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs } from "react-router";
 import { CUSTOMER_LOCATIONS_QUERY } from "~/graphql/customer-locations-query.account";
 import { MARKET_QUERY } from "~/graphql/queries";
 import { customerIdFromGid, devCustomerIdOverride } from "./client.server";
+import { findOpenDraftForCart } from "./draft-order.server";
 import {
   CHECKOUT_REUSE_MS,
   fingerprint,
@@ -560,17 +561,44 @@ export async function createCheckout(context: Context): Promise<CheckoutState> {
   // `canCheckout` is checked here too. `fetchCheckout` reports the same limits
   // and nothing is created when it refuses, but finding out before asking
   // keeps the two paths from disagreeing about which rules stop a checkout.
-  // An earlier attempt on this exact cart never came back. It may have created
-  // a draft order, so asking again risks a second invoice for one cart; the
-  // buyer is told to check their orders instead. Held for the same window as
-  // the reuse guard above, after which a fresh attempt is the lesser risk.
+  // An earlier attempt on this exact cart never came back, so it may have
+  // created a draft order that nothing here knows about. Shopify does, and
+  // asking it is the only way to tell — the record of an attempt rides on the
+  // reply that went missing, so no local note can answer this. If an invoice
+  // for this exact cart is already open, the buyer is sent to pay that one
+  // rather than given a second.
   const attempt = attemptFromCart(await context.cart.get());
-  if (
-    attempt &&
-    attempt.mark === mark &&
-    Date.now() - attempt.at < CHECKOUT_REUSE_MS
-  ) {
-    return { status: "unavailable", retryable: false };
+  if (attempt && attempt.mark === mark) {
+    const existing = await findOpenDraftForCart(
+      context,
+      prepared.request.customerId,
+      prepared.request.lines,
+      CHECKOUT_PENDING_MS,
+    );
+    if (existing) {
+      await writeCheckoutAttempt(context, null);
+      await addCheckoutMark(context, {
+        mark,
+        draftOrderId: existing.draftOrderId,
+        invoiceUrl: existing.invoiceUrl,
+        subtotal: existing.subtotal,
+        currency: existing.currency,
+        at: Date.now(),
+      });
+      return {
+        status: "ok",
+        invoiceUrl: existing.invoiceUrl,
+        subtotal: existing.subtotal,
+        currency: existing.currency,
+      };
+    }
+    // Shopify holds nothing for this cart, or could not be asked. Within the
+    // reuse window the cautious reading is that the question is still open;
+    // past it, a fresh attempt is the lesser risk than a cart that can never
+    // check out.
+    if (Date.now() - attempt.at < CHECKOUT_REUSE_MS) {
+      return { status: "unavailable", retryable: false };
+    }
   }
 
   const priced = await fetchCartPricing(context.env, prepared.request);
