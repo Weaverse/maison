@@ -158,17 +158,23 @@ async function prepare(context: Context): Promise<Prepared> {
   }
   const { customerId } = buyer;
 
-  // A subscription carries more than a variant and a quantity, and B2Bridge's
-  // request has nowhere to put the rest: the mapping below keeps only
-  // `{variantId, quantity}`, and `mergeLines` would fold a subscription and a
-  // one-time line for the same variant into one. Left alone, a draft order
-  // would be created for an ordinary purchase of goods the buyer asked to
-  // subscribe to. Nothing here can price that, so the cart says so rather
-  // than quietly selling something else.
-  const hasSellingPlan = (cart?.lines?.nodes ?? []).some(
-    (node) => node.sellingPlanAllocation?.sellingPlan?.id,
+  // A line can carry more than a variant and a quantity — a selling plan, or
+  // attributes holding an engraving or a personalisation — and B2Bridge's
+  // request has nowhere to put any of it: the mapping below keeps only
+  // `{variantId, quantity}`, and `mergeLines` would fold two lines of the
+  // same variant into one whatever distinguished them. Left alone, a draft
+  // order would be created for a plain purchase of goods the buyer asked to
+  // have engraved, or to subscribe to. Nothing here can price that, so the
+  // cart says so rather than quietly selling something else.
+  //
+  // Safe to refuse on any line attribute because this theme sets none of its
+  // own; one that is there was put there deliberately.
+  const unsupportedLine = (cart?.lines?.nodes ?? []).some(
+    (node) =>
+      node.sellingPlanAllocation?.sellingPlan?.id ||
+      (node.attributes ?? []).length > 0,
   );
-  if (hasSellingPlan) {
+  if (unsupportedLine) {
     return { kind: "stop", reason: "unsupported" };
   }
 
