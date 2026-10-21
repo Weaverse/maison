@@ -414,6 +414,45 @@ có chức năng xoá. Sau buổi test sẽ còn lại khoảng 5–7 draft; ch�
 mua 20 cái. Đây là cách B2Bridge tính bậc giá, đã được ghi nhận và đang chờ họ
 trả lời. Không liên quan đến phần đang test.
 
+**Dọn giỏ chỉ hoạt động trong cùng một phiên browser.** Đây là giới hạn lớn
+nhất trong danh sách này, nên đọc kỹ.
+
+Ghi chú chờ — thứ cho storefront biết "có một hoá đơn đang đợi trả tiền" — nằm
+trong cookie phiên, và cookie đó không có `maxAge`:
+
+```ts
+// app/.server/context.ts
+createCookieSessionStorage({
+  cookie: { name: "session", httpOnly: true, path: "/", sameSite: "lax", secrets },
+})
+```
+
+Không có `maxAge` nghĩa là cookie chết khi khách đóng browser. Ghi chú chờ mất
+theo, nên storefront không còn biết phải hỏi Shopify về đơn nào. Khách trả tiền
+sau khi đã đóng browser thì **giỏ không bao giờ được dọn**, và họ có thể mua lại
+chính món đã trả.
+
+Khoảng cách này là thật, không phải trường hợp hiếm: link `invoiceUrl` của
+Shopify sống tới một năm (draft order tự xoá sau một năm không chỉnh sửa, và
+mỗi lần sửa thì tính lại), nên khách hoàn toàn có thể nhận hoá đơn hôm nay và
+trả tiền tuần sau, từ một máy khác. Cả 9 ca test ở trên đều làm trong một phiên
+nên không ca nào chạm tới chuyện này.
+
+Hệ quả thứ hai: mốc 24 giờ trong code gần như không bao giờ tới, vì cookie mất
+trước. Nó là lưới an toàn cho ghi chú không bao giờ được giải quyết, không phải
+thời hạn thực tế để khách trả tiền.
+
+Hướng xử lý đã xác định nhưng chưa làm, và là một task riêng: bỏ ghi chú trong
+session, thay bằng hỏi Shopify mỗi phiên một lần xem customer này có draft
+order `COMPLETED` nào mà hàng còn trong giỏ. Query đã kiểm là chạy được:
+
+```
+draftOrders(query: "customer_id:<id> status:completed")
+```
+
+Nó cần thêm một dấu bền vững để biết đơn nào đã dọn rồi, nếu không sẽ dọn lặp
+lại và vi phạm Ca 5; chỗ hợp lý là một tag trên chính draft order.
+
 **Ô xám nhấp nháy khi đổi số lượng.** Đó là lúc đang hỏi lại giá. Mất khoảng
 1–2 giây.
 
@@ -424,7 +463,8 @@ giá của cả nhóm.
 ### Hai ca không test tay được
 
 **Hoá đơn quá 24 giờ.** Phải chờ đúng một ngày. Hành vi đúng là: bỏ ghi chú
-chờ, giỏ giữ nguyên.
+chờ, giỏ giữ nguyên. Trong thực tế cookie phiên thường mất trước khi tới mốc
+này — xem mục về phiên browser ở trên.
 
 **Mạng hỏng đúng lúc hỏi Shopify.** Hành vi đúng là: **không** dọn giỏ, giữ ghi
 chú để thử lại lần sau. Chủ ý: đọc không được không có nghĩa là chưa trả tiền.
