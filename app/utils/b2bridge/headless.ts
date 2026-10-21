@@ -448,11 +448,47 @@ export interface PaidLine {
   quantity: number;
 }
 
+/** One cart line and the share of the paid order that comes off it. */
+export interface LineAdjustment {
+  /** Cart line id. */
+  id: string;
+  /** Bare variant id, so what has been applied can be recorded against it. */
+  variantId: string;
+  /** How many paid units this line gives up. */
+  taken: number;
+  /** What the line's quantity becomes. Zero means the line goes. */
+  quantity: number;
+}
+
 export interface CartAdjustment {
   /** Cart lines to reduce, with the quantity they should be left at. */
-  updates: { id: string; quantity: number }[];
+  updates: LineAdjustment[];
   /** Cart lines to take out entirely. */
-  removals: string[];
+  removals: LineAdjustment[];
+}
+
+/**
+ * What is still owed against a paid order, given what has already been taken.
+ *
+ * Settling is two cart mutations and either can fail on its own. Recomputing
+ * the whole order against the cart on the next attempt subtracts the part that
+ * already succeeded a second time — an invoice for A×10 against a cart of A×14
+ * leaves 4, and a retry then takes 10 more from those 4. Carrying what has
+ * been applied is what makes a retry safe.
+ */
+export function remainingPaidLines(
+  paid: PaidLine[],
+  applied: Record<string, number>,
+): PaidLine[] {
+  const remaining: PaidLine[] = [];
+  for (const line of paid) {
+    const variantId = normId(line.variantId);
+    const left = line.quantity - (applied[variantId] ?? 0);
+    if (left > 0) {
+      remaining.push({ variantId, quantity: left });
+    }
+  }
+  return remaining;
 }
 
 /**
@@ -476,8 +512,8 @@ export function adjustmentForPaidLines(
     owed.set(variantId, (owed.get(variantId) ?? 0) + line.quantity);
   }
 
-  const updates: { id: string; quantity: number }[] = [];
-  const removals: string[] = [];
+  const updates: LineAdjustment[] = [];
+  const removals: LineAdjustment[] = [];
 
   for (const line of cartLines) {
     const variantId = normId(line.variantId);
@@ -489,10 +525,16 @@ export function adjustmentForPaidLines(
     owed.set(variantId, remaining - taken);
 
     const left = line.quantity - taken;
+    const entry: LineAdjustment = {
+      id: line.id,
+      variantId,
+      taken,
+      quantity: left,
+    };
     if (left > 0) {
-      updates.push({ id: line.id, quantity: left });
+      updates.push(entry);
     } else {
-      removals.push(line.id);
+      removals.push(entry);
     }
   }
 

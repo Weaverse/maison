@@ -923,7 +923,10 @@ if (!LIVE) {
         [line("l1", "A", 10), line("l2", "B", 5)],
         [{ variantId: "gid://shopify/ProductVariant/A", quantity: 10 }],
       ),
-      { updates: [], removals: ["l1"] },
+      {
+        updates: [],
+        removals: [{ id: "l1", variantId: "A", taken: 10, quantity: 0 }],
+      },
     );
 
     // Bought 10, then added 4 more of the same. Four are still unpaid.
@@ -932,7 +935,10 @@ if (!LIVE) {
         [line("l1", "A", 14)],
         [{ variantId: "A", quantity: 10 }],
       ),
-      { updates: [{ id: "l1", quantity: 4 }], removals: [] },
+      {
+        updates: [{ id: "l1", variantId: "A", taken: 10, quantity: 4 }],
+        removals: [],
+      },
     );
 
     // One variant across two cart lines — engraving, a selling plan. The paid
@@ -942,7 +948,10 @@ if (!LIVE) {
         [line("l1", "A", 6), line("l2", "A", 6)],
         [{ variantId: "A", quantity: 10 }],
       ),
-      { updates: [{ id: "l2", quantity: 2 }], removals: ["l1"] },
+      {
+        updates: [{ id: "l2", variantId: "A", taken: 4, quantity: 2 }],
+        removals: [{ id: "l1", variantId: "A", taken: 6, quantity: 0 }],
+      },
     );
 
     // Nothing in the order matches what is in the cart now.
@@ -952,6 +961,62 @@ if (!LIVE) {
         [{ variantId: "A", quantity: 1 }],
       ),
       { updates: [], removals: [] },
+    );
+  });
+
+  test("a settling that failed half-way does not subtract twice on retry", () => {
+    // The case raised in review of #77: an invoice for A x10 and B x5 against
+    // a cart of A x14 and B x5. Updating A to 4 lands, removing B throws, and
+    // the retry used to recompute the whole invoice against the reduced cart
+    // and take another 10 from the 4 that were never paid for.
+    const paid = [
+      { variantId: "A", quantity: 10 },
+      { variantId: "B", quantity: 5 },
+    ];
+    const line = (id, variantId, quantity) => ({ id, variantId, quantity });
+
+    const first = b2b.adjustmentForPaidLines(
+      [line("l1", "A", 14), line("l2", "B", 5)],
+      b2b.remainingPaidLines(paid, {}),
+    );
+    assert.deepEqual(first.updates, [
+      { id: "l1", variantId: "A", taken: 10, quantity: 4 },
+    ]);
+    assert.deepEqual(first.removals, [
+      { id: "l2", variantId: "B", taken: 5, quantity: 0 },
+    ]);
+
+    // The update landed, the removal did not, so only A is recorded.
+    const applied = {};
+    for (const entry of first.updates) {
+      applied[entry.variantId] = (applied[entry.variantId] ?? 0) + entry.taken;
+    }
+    assert.deepEqual(applied, { A: 10 });
+
+    // Retry against the cart as it now stands. A is settled and must be left
+    // alone; only B is still owed.
+    const owed = b2b.remainingPaidLines(paid, applied);
+    assert.deepEqual(owed, [{ variantId: "B", quantity: 5 }]);
+
+    const second = b2b.adjustmentForPaidLines(
+      [line("l1", "A", 4), line("l2", "B", 5)],
+      owed,
+    );
+    assert.deepEqual(second.updates, []);
+    assert.deepEqual(second.removals, [
+      { id: "l2", variantId: "B", taken: 5, quantity: 0 },
+    ]);
+
+    // Everything applied: nothing is owed, so settling is over.
+    assert.deepEqual(b2b.remainingPaidLines(paid, { A: 10, B: 5 }), []);
+
+    // A GID in the invoice still matches a bare id in the record.
+    assert.deepEqual(
+      b2b.remainingPaidLines(
+        [{ variantId: "gid://shopify/ProductVariant/A", quantity: 10 }],
+        { A: 4 },
+      ),
+      [{ variantId: "A", quantity: 6 }],
     );
   });
 

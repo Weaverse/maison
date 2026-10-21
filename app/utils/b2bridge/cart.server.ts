@@ -268,6 +268,15 @@ interface CheckoutMark {
   subtotal: number;
   currency: string;
   at: number;
+  /**
+   * Bare variant id → how many paid units have already come out of the cart.
+   *
+   * Settling is two cart mutations and either can fail on its own. Without a
+   * record of what landed, the next attempt recomputes the whole order against
+   * a cart that is already part-way settled and subtracts the same units
+   * twice, taking goods the buyer never paid for.
+   */
+  applied?: Record<string, number>;
 }
 
 export function readCheckoutMark(context: Context): CheckoutMark | null {
@@ -275,6 +284,27 @@ export function readCheckoutMark(context: Context): CheckoutMark | null {
     | CheckoutMark
     | undefined;
   return stored?.mark && stored.invoiceUrl ? stored : null;
+}
+
+/**
+ * Records how much of a paid order has made it out of the cart.
+ *
+ * Written even when settling failed half-way — the session is committed on
+ * every response, so the next attempt starts from here rather than from the
+ * whole invoice.
+ */
+export function recordSettlementProgress(
+  context: Context,
+  applied: Record<string, number>,
+): void {
+  const mark = readCheckoutMark(context);
+  if (!mark) {
+    return;
+  }
+  context.session.set(CHECKOUT_SESSION_KEY, {
+    ...mark,
+    applied,
+  } satisfies CheckoutMark);
 }
 
 export function clearCheckoutMark(context: Context): void {
