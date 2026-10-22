@@ -11,8 +11,9 @@ import { loadCartPricing } from "~/utils/b2bridge/cart.server";
  *
  * Never cached. These prices belong to one buyer.
  */
-export async function loader({ context }: LoaderFunctionArgs) {
-  const pricing = await loadCartPricing(context);
+export async function loader({ context, request }: LoaderFunctionArgs) {
+  const path = new URL(request.url).pathname.replace(/\.data$/, "");
+  const pricing = await loadCartPricing(context, path);
 
   return data(pricing, {
     headers: { "Cache-Control": "no-store" },

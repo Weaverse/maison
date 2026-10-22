@@ -336,6 +336,9 @@ export type CartPricingState = (
   pendingDraft?: boolean;
 };
 
+/** The server cart this particular pricing answer was calculated for. */
+export type CartPricingResponse = CartPricingState & { pricedFor: string };
+
 /**
  * What the cart is told after the buyer clicks checkout.
  *

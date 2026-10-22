@@ -790,17 +790,35 @@ if (!LIVE) {
     assert.equal(b2b.shouldCache(null), false);
   });
 
-  test("every mounted provider learns the answer, in any order", () => {
-    // The drawer and the product page's variant list share one request.
-    // Whichever handles the response first clears the in-flight key; the
-    // others must still be able to tell that their figures are current, or
-    // their spinners never stop.
-    assert.equal(b2b.answeredKeyFor("A", null), "A", "the one that asked");
-    assert.equal(b2b.answeredKeyFor(null, "A"), "A", "the ones that did not");
-    // A provider mounted after the answer landed is current, not stale.
-    assert.equal(b2b.answeredKeyFor(null, "B"), "B");
-    // Nothing has ever been answered, so nothing is current.
-    assert.equal(b2b.answeredKeyFor(null, null), null);
+  test("the pricing response identifies the exact cart it answered", () => {
+    const makeCart = (quantity) => ({
+      buyerIdentity: {
+        customer: { id: "gid://shopify/Customer/9196237291742" },
+      },
+      lines: {
+        nodes: [
+          {
+            merchandise: { id: "gid://shopify/ProductVariant/47591719436510" },
+            quantity,
+          },
+        ],
+      },
+    });
+    const identity = b2b.cartPricingIdentity(
+      makeCart(10),
+      "/api/b2b-cart-pricing",
+    );
+    const original = b2b.cartPricingKey(makeCart(10), identity);
+    const changed = b2b.cartPricingKey(makeCart(15), identity);
+
+    assert.equal(
+      original,
+      "/api/b2b-cart-pricing|9196237291742#47591719436510:10",
+    );
+    assert.notEqual(original, changed);
+    // A response for 15 must never be stored under the 10-key just because
+    // a shared fetcher finishes after the client has returned to 10.
+    assert.equal(b2b.isAnswerCurrent(changed, original), false);
   });
 
   test("an answer overtaken by a newer cart is kept but not shown", () => {
@@ -979,10 +997,30 @@ if (!LIVE) {
     // Reported in review of #77: the cache is shared across providers and was
     // keyed on lines alone, so changing country with the quantities unchanged
     // answered from cache with the previous market's prices.
+    const cart = {
+      buyerIdentity: {
+        customer: { id: "gid://shopify/Customer/9196237291742" },
+      },
+      lines: {
+        nodes: [{ merchandise: { id: "47591719436510" }, quantity: 10 }],
+      },
+    };
     const lines = "47591719436510:10";
-    const ca = `/api/b2b-cart-pricing|9196237291742#${lines}`;
-    const vn = `/vi-vn/api/b2b-cart-pricing|9196237291742#${lines}`;
-    const guest = `/api/b2b-cart-pricing|guest#${lines}`;
+    const ca = b2b.cartPricingKey(
+      cart,
+      b2b.cartPricingIdentity(cart, "/api/b2b-cart-pricing"),
+    );
+    const vn = b2b.cartPricingKey(
+      cart,
+      b2b.cartPricingIdentity(cart, "/vi-vn/api/b2b-cart-pricing"),
+    );
+    const guestCart = { ...cart, buyerIdentity: null };
+    const guest = b2b.cartPricingKey(
+      guestCart,
+      b2b.cartPricingIdentity(guestCart, "/api/b2b-cart-pricing"),
+    );
+
+    assert.equal(ca, `/api/b2b-cart-pricing|9196237291742#${lines}`);
 
     assert.notEqual(ca, vn);
     assert.notEqual(ca, guest);

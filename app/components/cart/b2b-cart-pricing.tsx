@@ -6,7 +6,8 @@ import type { CartApiQueryFragment } from "storefront-api.generated";
 import { useSelectedLocale } from "~/hooks/use-locale";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import {
-  answeredKeyFor,
+  cartPricingIdentity,
+  cartPricingKey,
   changedProducts,
   changedVariants,
   fetchDecision,
@@ -17,7 +18,11 @@ import {
   RETRY_DELAYS_MS,
   shouldCache,
 } from "~/utils/b2bridge/headless";
-import type { CartPricingState, PricedCartLine } from "~/utils/b2bridge/types";
+import type {
+  CartPricingResponse,
+  CartPricingState,
+  PricedCartLine,
+} from "~/utils/b2bridge/types";
 
 /**
  * B2Bridge prices for the cart, fetched once and read by every part of it.
@@ -200,8 +205,8 @@ function pricedVariantProducts(
 /**
  * Who is being priced and where, ahead of what is in their cart.
  *
- * The cache, the in-flight key and the last answered key all live in module
- * scope and are shared by every mounted provider, so a key of lines alone made
+ * The cache and in-flight key live in module scope and are shared by every
+ * mounted provider, so a key of lines alone made
  * two different buyers — or the same buyer in two markets — look like one
  * request. Changing country through the selector keeps the quantities, which
  * meant the cache answered with the previous market's prices and currency and
@@ -210,23 +215,6 @@ function pricedVariantProducts(
  * `path` carries the locale prefix, and the locale is what the server resolves
  * the market from, so it is the same signal the answer was computed under.
  */
-function pricingIdentity(
-  cart: CartApiQueryFragment | null,
-  path: string,
-): string {
-  const customerId = cart?.buyerIdentity?.customer?.id;
-  return `${path}|${customerId ? normId(customerId) : "guest"}`;
-}
-
-function cartKey(cart: CartApiQueryFragment | null, identity: string): string {
-  const nodes = cart?.lines?.nodes ?? [];
-  const lines = nodes
-    .map((node) => `${normId(node.merchandise?.id ?? "")}:${node.quantity}`)
-    .sort()
-    .join(",");
-  return lines ? `${identity}#${lines}` : "";
-}
-
 /**
  * Dedupe state lives in the module, not in a ref.
  *
@@ -237,8 +225,6 @@ function cartKey(cart: CartApiQueryFragment | null, identity: string): string {
  */
 const priceCache = new Map<string, { state: CartPricingState; at: number }>();
 let inFlightKey: string | null = null;
-/** The key the current shared `fetcher.data` answers. Never cleared. */
-let lastAnsweredKey: string | null = null;
 
 const B2BPricingPresent = createContext(false);
 
@@ -274,16 +260,16 @@ function B2BPricingRoot({
   // against pricing a cart Shopify has not accepted and the instant feedback
   // below.
   const optimisticCart = useOptimisticCart<CartApiQueryFragment>(cart);
-  const fetcher = useFetcher<CartPricingState>({ key: "b2b-cart-pricing" });
+  const fetcher = useFetcher<CartPricingResponse>({ key: "b2b-cart-pricing" });
   const path = usePrefixPathWithLocale("/api/b2b-cart-pricing");
   const [state, setState] = useState<CartPricingState | null>(null);
 
-  const identity = pricingIdentity(cart, path);
-  const key = cartKey(cart, identity);
+  const identity = cartPricingIdentity(cart, path);
+  const key = cartPricingKey(cart, identity);
   // The optimistic cart is what the buyer just acted on, so it is what the
   // spinners must answer to. A pending `+` leaves the two disagreeing until
   // Shopify catches up.
-  const optimisticKey = cartKey(optimisticCart, identity);
+  const optimisticKey = cartPricingKey(optimisticCart, identity);
   const settled = key === optimisticKey;
 
   // A changed identity does not make the answer on screen stale, it makes it
@@ -303,6 +289,11 @@ function B2BPricingRoot({
   const retries = useRef(0);
   /** The cart key the current `state` was computed for. */
   const [answeredKey, setAnsweredKey] = useState<string | null>(null);
+  // A cart edit renders before the next pricing response arrives. Keep the
+  // current key available to the response effect without rerunning that effect
+  // against fetcher.data from the previous cart.
+  const currentKey = useRef(key);
+  currentKey.current = key;
   // `fetcher.load` is a fresh function on every render; holding it in a ref
   // keeps it out of the effect's dependencies.
   const load = useRef(fetcher.load);
@@ -344,23 +335,24 @@ function B2BPricingRoot({
     if (!fetcher.data) {
       return;
     }
-    const answered = answeredKeyFor(inFlightKey, lastAnsweredKey);
+    const answered = fetcher.data.pricedFor;
+    // A response may describe a different server cart than the one this
+    // fetch started for. Never leave that request marked in flight forever.
     inFlightKey = null;
     if (!answered) {
       return;
     }
-    lastAnsweredKey = answered;
     // Worth keeping even when it is no longer wanted: the buyer may well come
     // back to that quantity, and then it costs nothing.
     if (shouldCache(fetcher.data)) {
       priceCache.set(answered, { state: fetcher.data, at: Date.now() });
     }
-    if (!isAnswerCurrent(answered, key)) {
+    if (!isAnswerCurrent(answered, currentKey.current)) {
       return;
     }
     setState(fetcher.data);
     setAnsweredKey(answered);
-  }, [fetcher.data, key]);
+  }, [fetcher.data]);
 
   // A failure that said it was worth retrying gets a couple of attempts on a
   // widening delay. Without this a single rate-limited call leaves the cart

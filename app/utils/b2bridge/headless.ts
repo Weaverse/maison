@@ -24,6 +24,37 @@ import type {
 export const MAX_LINES = 250;
 export const MAX_QUANTITY = 1_000_000;
 
+type CartKeySource = {
+  buyerIdentity?: { customer?: { id?: string | null } | null } | null;
+  lines?: {
+    nodes?: ReadonlyArray<{
+      merchandise?: { id?: string | null } | null;
+      quantity: number;
+    }>;
+  } | null;
+};
+
+/** The same buyer/market identity on the client and the pricing route. */
+export function cartPricingIdentity(
+  cart: CartKeySource | null,
+  path: string,
+): string {
+  const customerId = cart?.buyerIdentity?.customer?.id;
+  return `${path}|${customerId ? normId(customerId) : "guest"}`;
+}
+
+/** Include every line quantity so a response cannot price a different cart. */
+export function cartPricingKey(
+  cart: CartKeySource | null,
+  identity: string,
+): string {
+  const lines = (cart?.lines?.nodes ?? [])
+    .map((node) => `${normId(node.merchandise?.id ?? "")}:${node.quantity}`)
+    .sort()
+    .join(",");
+  return lines ? `${identity}#${lines}` : "";
+}
+
 /**
  * `gid://shopify/ProductVariant/47591719436510` → `47591719436510`.
  *
@@ -254,22 +285,6 @@ export function shouldCache(state: { status: string } | null): boolean {
 
 /** Delays between retries of a failure that said it was worth retrying. */
 export const RETRY_DELAYS_MS = [2000, 6000];
-
-/**
- * Which cart key the answer on screen belongs to.
- *
- * More than one provider can be mounted — the drawer and the product page's
- * variant list — and they share one request. Whichever of them handles the
- * response first clears the in-flight key, so the others find nothing there
- * and would never learn that their figures are current again. Falling back to
- * the last key answered lets every provider agree, in any order.
- */
-export function answeredKeyFor(
-  inFlight: string | null,
-  lastAnswered: string | null,
-): string | null {
-  return inFlight ?? lastAnswered;
-}
 
 /**
  * Whether an answer that has just arrived still describes the cart on screen.

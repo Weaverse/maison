@@ -6,6 +6,8 @@ import { customerIdFromGid, devCustomerIdOverride } from "./client.server";
 import { findOpenDraftForCart } from "./draft-order.server";
 import {
   CHECKOUT_REUSE_MS,
+  cartPricingIdentity,
+  cartPricingKey,
   fingerprint,
   incrementBreaches,
   mergeLines,
@@ -20,7 +22,7 @@ import {
 } from "./headless.server";
 import type {
   CartLineForPricing,
-  CartPricingState,
+  CartPricingResponse,
   CheckoutState,
   HeadlessRequest,
 } from "./types";
@@ -137,7 +139,10 @@ type Prepared =
  * buyer, the same market and the same merged lines go to both, which is what
  * makes the price in the cart the price on the invoice.
  */
-async function prepare(context: Context): Promise<Prepared> {
+async function prepare(
+  context: Context,
+  cartSnapshot?: Awaited<ReturnType<Context["cart"]["get"]>>,
+): Promise<Prepared> {
   const { env } = context;
   if (!isHeadlessConfigured(env)) {
     return { kind: "stop", reason: "not-applicable" };
@@ -147,7 +152,9 @@ async function prepare(context: Context): Promise<Prepared> {
   // buyer waited through before B2Bridge was even asked.
   const [buyer, cart, market] = await Promise.all([
     resolveBuyerId(context),
-    context.cart.get(),
+    cartSnapshot === undefined
+      ? context.cart.get()
+      : Promise.resolve(cartSnapshot),
     loadMarket(context),
   ]);
 
@@ -221,25 +228,29 @@ async function prepare(context: Context): Promise<Prepared> {
 /** Prices whatever is in the buyer's cart right now. */
 export async function loadCartPricing(
   context: Context,
-): Promise<CartPricingState> {
+  path: string,
+): Promise<CartPricingResponse> {
   // Read, never acted on here: a loader that changed the cart would do it on
   // a prefetch too. The cart is settled by `api.b2b-settle`, which this only
   // tells the storefront to call.
   // Any unresolved invoice is worth asking about, not just the newest: the
   // buyer may well pay an earlier one.
-  const pendingDraft = marksFromCart(await context.cart.get()).some(
+  const cart = await context.cart.get();
+  const pricedFor = cartPricingKey(cart, cartPricingIdentity(cart, path));
+  const pendingDraft = marksFromCart(cart).some(
     (mark) => mark.draftOrderId && Date.now() - mark.at < CHECKOUT_PENDING_MS,
   );
 
-  const prepared = await prepare(context);
+  const prepared = await prepare(context, cart);
   if (prepared.kind === "stop") {
     if (prepared.reason === "not-applicable") {
-      return { status: "not-applicable", pendingDraft };
+      return { status: "not-applicable", pendingDraft, pricedFor };
     }
     // `unsupported` is not retryable: asking again changes nothing, only the
     // buyer can, by taking the subscription out.
     return {
       status: "unavailable",
+      pricedFor,
       retryable: prepared.reason === "unavailable",
       pendingDraft,
     };
@@ -252,6 +263,7 @@ export async function loadCartPricing(
     const { action } = result.failure;
     return {
       status: "unavailable",
+      pricedFor,
       retryable: action === "RETRY_BACKOFF" || action === "RETRY_LATER",
       pendingDraft,
     };
@@ -267,6 +279,7 @@ export async function loadCartPricing(
   const { data } = result;
   return {
     status: "priced",
+    pricedFor,
     pendingDraft,
     currency: data.currency,
     subtotal: data.subtotal,
