@@ -632,12 +632,24 @@ async function createCheckoutUnlocked(
 
   const result = await fetchCheckout(context.env, prepared.request);
   if (result.kind === "failed") {
-    const { action } = result.failure;
-    // B2Bridge answered, so nothing was created and the attempt is settled —
-    // only a lost reply (`BLOCK`) leaves the question open and keeps the
-    // record. Clearing it here is what lets a buyer retry a cart that was
-    // merely refused.
-    if (action !== "BLOCK") {
+    const { action, status } = result.failure;
+    // Only a reply that proves nothing was created settles the attempt. A
+    // gateway 502, 503 or 504 proves no such thing — the request may well have
+    // reached B2Bridge, created the draft order, and lost its way back — yet
+    // it classifies as `RETRY_LATER` and used to clear the record, so the next
+    // click skipped reconciliation and asked for a second invoice.
+    //
+    // What does prove it is B2Bridge itself refusing the request: a 4xx
+    // carrying a code it validated against. Those, and only those, clear the
+    // attempt, which is what lets a buyer retry a cart that was merely
+    // refused.
+    const refusedOutright =
+      status > 0 &&
+      status < 500 &&
+      (action === "SHOW_ERRORS" ||
+        action === "FIX_REQUEST" ||
+        action === "DROP_LINES");
+    if (refusedOutright) {
       await writeCheckoutAttempt(context, null);
     }
     // The cart broke an order rule. Nothing was created, and the cart already

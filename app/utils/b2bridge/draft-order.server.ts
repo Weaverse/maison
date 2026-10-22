@@ -61,36 +61,89 @@ export async function readDraftOrder(
       }),
       signal: AbortSignal.timeout(5000),
     });
-    const payload = (await response.json()) as {
-      draftOrder?: {
-        status?: string;
-        lineItems?: {
-          nodes?: { quantity: number; variant?: { id?: string } }[];
-        };
+    // `missing` tells settlement to stop tracking a paid invoice for good, so
+    // it has to mean Shopify said the draft is not there — not that we failed
+    // to ask. A throttled admin API answering `503 {errors: […]}` used to land
+    // here as `missing`, and the invoice was forgotten while the goods it paid
+    // for stayed in the cart, with no later lookup able to recover it.
+    if (!response.ok) {
+      console.warn(
+        "[B2Bridge] draft order lookup failed:",
+        `HTTP ${response.status}`,
+      );
+      return { kind: "unreadable" };
+    }
+
+    type DraftOrderNode = {
+      status?: string;
+      lineItems?: {
+        nodes?: { quantity: number; variant?: { id?: string } }[];
+        pageInfo?: { hasNextPage?: boolean };
       };
+    };
+    const payload = (await response.json()) as {
+      data?: { draftOrder?: DraftOrderNode | null };
+      draftOrder?: DraftOrderNode | null;
+      errors?: unknown[];
       error?: string;
     };
 
-    if (payload.error) {
-      console.warn("[B2Bridge] draft order lookup failed:", payload.error);
+    if (payload.error || (payload.errors?.length ?? 0) > 0) {
+      console.warn(
+        "[B2Bridge] draft order lookup failed:",
+        payload.error ?? JSON.stringify(payload.errors),
+      );
+      return { kind: "unreadable" };
+    }
+
+    // The proxy answers either the GraphQL envelope or its `data` directly.
+    const body = payload.data ?? payload;
+    if (!("draftOrder" in body)) {
+      console.warn("[B2Bridge] draft order lookup returned no field");
       return { kind: "unreadable" };
     }
     // Shopify answers `null` for an id it has no draft for. A definite answer,
     // not a failure to get one.
-    if (!payload.draftOrder?.status) {
+    if (body.draftOrder === null) {
       console.warn("[B2Bridge] draft order no longer exists:", draftOrderId);
       return { kind: "missing" };
+    }
+    // Present but without a status is a payload this cannot act on, which is
+    // not the same as Shopify saying the draft is gone.
+    if (!body.draftOrder?.status) {
+      console.warn("[B2Bridge] draft order answered without a status");
+      return { kind: "unreadable" };
+    }
+
+    let lineItems = body.draftOrder.lineItems;
+    if (
+      !Array.isArray(lineItems?.nodes) ||
+      lineItems.pageInfo?.hasNextPage !== false ||
+      lineItems.nodes.some(
+        (node) =>
+          !node ||
+          !Number.isSafeInteger(node.quantity) ||
+          node.quantity <= 0 ||
+          typeof node.variant?.id !== "string" ||
+          !node.variant.id,
+      )
+    ) {
+      // An incomplete paid order must stay pending. Treating absent or
+      // truncated line items as an empty list would clear the invoice mark
+      // without removing any of the goods it paid for.
+      console.warn(
+        "[B2Bridge] draft order answered with incomplete line items",
+      );
+      return { kind: "unreadable" };
     }
 
     return {
       kind: "found",
-      status: payload.draftOrder.status,
-      lines: (payload.draftOrder.lineItems?.nodes ?? [])
-        .filter((node) => node.variant?.id)
-        .map((node) => ({
-          variantId: node.variant?.id ?? "",
-          quantity: node.quantity,
-        })),
+      status: body.draftOrder.status,
+      lines: lineItems.nodes.map((node) => ({
+        variantId: node.variant?.id ?? "",
+        quantity: node.quantity,
+      })),
     };
   } catch (error) {
     console.warn(

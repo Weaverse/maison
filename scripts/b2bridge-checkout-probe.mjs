@@ -349,6 +349,65 @@ test("a second cart fingerprint keeps the first pending invoice", async () => {
   );
 });
 
+test("a gateway 5xx keeps the attempt and reconciles before trying again", async () => {
+  // Reported in review of #77: a 502 classifies as RETRY_LATER, which used to
+  // clear the attempt. A gateway failing on the way back does not prove the
+  // request never reached B2Bridge, so the next click skipped reconciliation
+  // and asked for a second invoice for an order that may already exist.
+  const network = mockNetwork();
+  const context = makeContext();
+  globalThis.testCheckout = async () => ({
+    kind: "failed",
+    failure: { action: "RETRY_LATER", status: 502, code: null },
+  });
+
+  assert.deepEqual(await checkout.createCheckout(context), {
+    status: "unavailable",
+    retryable: true,
+  });
+  assert.ok(
+    checkout.attemptFromCart(context.testCart),
+    "the attempt survives an ambiguous gateway failure",
+  );
+
+  // The second click must ask Shopify rather than create anything.
+  let asked = 0;
+  globalThis.testFindDraft = async () => {
+    asked += 1;
+    return { kind: "unreadable" };
+  };
+  assert.deepEqual(await checkout.createCheckout(context), {
+    status: "unavailable",
+    retryable: false,
+  });
+  assert.equal(asked, 1, "reconciled instead of creating");
+  assert.equal(network.count(), 0);
+});
+
+test("a refusal B2Bridge validated does clear the attempt", async () => {
+  // The other side of it: a 4xx carrying a code is B2Bridge itself saying it
+  // created nothing, so the buyer can fix the cart and try again.
+  mockNetwork();
+  const context = makeContext();
+  globalThis.testCheckout = async () => ({
+    kind: "failed",
+    failure: {
+      action: "SHOW_ERRORS",
+      status: 400,
+      code: "ORDER_LIMIT_VIOLATION",
+    },
+  });
+
+  assert.deepEqual(await checkout.createCheckout(context), {
+    status: "limits",
+  });
+  assert.equal(
+    checkout.attemptFromCart(context.testCart),
+    null,
+    "a validated refusal leaves nothing to reconcile",
+  );
+});
+
 test("an unreadable Shopify lookup never resubmits a lost checkout", async () => {
   const network = mockNetwork();
   const context = makeContext();
@@ -545,6 +604,161 @@ test("the open-draft search checks every page before declaring missing", async (
     assert.equal(result.kind, "found");
     assert.equal(result.draft.draftOrderId, "draft-1");
     assert.deepEqual(calls, [null, "page-1"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("a throttled admin reply is unreadable, never a deleted draft", async () => {
+  // Reported in review of #77, and the worst consequence on that list:
+  // settlement takes `missing` as "this invoice will never be paid" and stops
+  // tracking it. A 503 carrying GraphQL errors used to land there, so one
+  // throttled lookup forgot a paid order for good while its goods stayed in
+  // the cart.
+  const originalFetch = globalThis.fetch;
+  const read = async (response) => {
+    globalThis.fetch = async () => response;
+    return drafts.readDraftOrder(makeContext(), "gid://shopify/DraftOrder/1");
+  };
+  try {
+    assert.equal(
+      (
+        await read({
+          ok: false,
+          status: 503,
+          async json() {
+            return { errors: [{ message: "Throttled" }] };
+          },
+        })
+      ).kind,
+      "unreadable",
+    );
+
+    // Errors with a 200 are just as much a failure to ask.
+    assert.equal(
+      (
+        await read({
+          ok: true,
+          status: 200,
+          async json() {
+            return { errors: [{ message: "Throttled" }] };
+          },
+        })
+      ).kind,
+      "unreadable",
+    );
+
+    // A reply with no `draftOrder` field at all answers nothing.
+    assert.equal(
+      (
+        await read({
+          ok: true,
+          status: 200,
+          async json() {
+            return {};
+          },
+        })
+      ).kind,
+      "unreadable",
+    );
+
+    // Present but without a status is a payload we cannot act on.
+    assert.equal(
+      (
+        await read({
+          ok: true,
+          status: 200,
+          async json() {
+            return { draftOrder: { lineItems: { nodes: [] } } };
+          },
+        })
+      ).kind,
+      "unreadable",
+    );
+
+    // Only Shopify saying `null` is a definite miss.
+    assert.equal(
+      (
+        await read({
+          ok: true,
+          status: 200,
+          async json() {
+            return { draftOrder: null };
+          },
+        })
+      ).kind,
+      "missing",
+    );
+
+    // And the GraphQL envelope is read as readily as the bare body.
+    const found = await read({
+      ok: true,
+      status: 200,
+      async json() {
+        return {
+          data: {
+            draftOrder: {
+              status: "COMPLETED",
+              lineItems: {
+                nodes: [{ quantity: 10, variant: { id: "123" } }],
+                pageInfo: { hasNextPage: false },
+              },
+            },
+          },
+        };
+      },
+    });
+    assert.equal(found.kind, "found");
+    assert.equal(found.status, "COMPLETED");
+    assert.deepEqual(found.lines, [{ variantId: "123", quantity: 10 }]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("incomplete paid draft lines remain unreadable for a later retry", async () => {
+  let originalFetch = globalThis.fetch;
+  let incomplete = [
+    { status: "COMPLETED" },
+    { status: "COMPLETED", lineItems: {} },
+    { status: "COMPLETED", lineItems: { nodes: [] } },
+    {
+      status: "COMPLETED",
+      lineItems: {
+        nodes: [{ quantity: 10, variant: { id: "123" } }],
+        pageInfo: { hasNextPage: true },
+      },
+    },
+    {
+      status: "COMPLETED",
+      lineItems: {
+        nodes: [{ quantity: 10 }],
+        pageInfo: { hasNextPage: false },
+      },
+    },
+    {
+      status: "COMPLETED",
+      lineItems: {
+        nodes: [{ quantity: 0, variant: { id: "123" } }],
+        pageInfo: { hasNextPage: false },
+      },
+    },
+  ];
+  try {
+    for (let draftOrder of incomplete) {
+      globalThis.fetch = async () => ({
+        ok: true,
+        status: 200,
+        async json() {
+          return { draftOrder };
+        },
+      });
+      let result = await drafts.readDraftOrder(
+        makeContext(),
+        "gid://shopify/DraftOrder/1",
+      );
+      assert.equal(result.kind, "unreadable", JSON.stringify(draftOrder));
+    }
   } finally {
     globalThis.fetch = originalFetch;
   }

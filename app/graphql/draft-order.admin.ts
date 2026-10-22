@@ -22,6 +22,9 @@ export const draftOrderQuery = `#graphql
             id
           }
         }
+        pageInfo {
+          hasNextPage
+        }
       }
     }
   }
