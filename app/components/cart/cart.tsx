@@ -173,10 +173,29 @@ function CartCheckoutActions({
   const { t } = useTranslation();
   const gate = useCheckoutGate();
   const limitMessages = useLimitMessages();
-  const { state } = useB2BPricing();
+  const { state, cartKey } = useB2BPricing();
   const checkoutPath = usePrefixPathWithLocale("/api/b2b-checkout");
   const fetcher = useFetcher<CheckoutState>({ key: "b2b-checkout" });
-  const result = fetcher.data;
+
+  // An invoice belongs to the cart it was raised for. `fetcher.data` outlives
+  // that cart — it survives every edit the buyer makes afterwards — so the
+  // result is stamped with the cart it answered and dropped once that cart is
+  // no longer the one on screen.
+  //
+  // Comparing subtotals was not enough and was worse than it looked. Two
+  // different carts can come to the same figure, and when they did the
+  // redirect below took the buyer straight to an invoice for goods they no
+  // longer had. When they did not, the buyer was shown "continue to payment"
+  // pointing at the old invoice with no way left to check out the new cart.
+  //
+  // The key covers buyer, market and every line, and comes from the
+  // optimistic cart so it changes the moment the cart is touched.
+  const answered = useRef<{ data: CheckoutState; key: string } | null>(null);
+  if (fetcher.data && answered.current?.data !== fetcher.data) {
+    answered.current = { data: fetcher.data, key: cartKey };
+  }
+  const result =
+    answered.current?.key === cartKey ? answered.current.data : undefined;
   const working = fetcher.state !== "idle";
   const revalidator = useRevalidator();
 

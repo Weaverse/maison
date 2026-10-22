@@ -96,6 +96,15 @@ interface B2BPricingValue {
    * Comes from the cart, never from `state`. See `cartLineVariants`.
    */
   lineVariants: Map<string, string>;
+  /**
+   * Who is being priced, where, and what they hold — the optimistic cart, so
+   * it changes the moment the buyer touches it.
+   *
+   * An invoice belongs to the cart it was raised for. Anything holding on to
+   * a checkout result compares this against the value it had when the result
+   * arrived, and drops it when they differ.
+   */
+  cartKey: string;
 }
 
 const EMPTY_SET: Set<string> = new Set();
@@ -108,6 +117,7 @@ const B2BPricingContext = createContext<B2BPricingValue>({
   recalculating: EMPTY_SET,
   names: {},
   lineVariants: EMPTY_LINE_VARIANTS,
+  cartKey: "",
 });
 
 /** The cart as the server knows it, reduced to what changes a price. */
@@ -438,6 +448,7 @@ function B2BPricingRoot({
             ...cartLineVariants(cart),
             ...cartLineVariants(optimisticCart),
           ]),
+          cartKey: optimisticKey,
         }}
       >
         {children}

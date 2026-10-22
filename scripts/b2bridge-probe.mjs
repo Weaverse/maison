@@ -1003,6 +1003,19 @@ if (!LIVE) {
       [...b2b.changedVariants("47591719436510:10", "47591719436510:15")],
       ["47591719436510"],
     );
+
+    // Two carts can come to the same money and still be different carts, so
+    // a checkout result cannot be tied to its cart by subtotal. Reported in
+    // review of #77: one invoice was offered for a cart it was not raised
+    // for, and where the figures happened to match, the buyer was redirected
+    // to pay it. Four of A at 25 and ten of B at 10 both total 100.
+    const keyFor = (entries) =>
+      `/api/b2b-cart-pricing|9196237291742#${entries}`;
+    assert.notEqual(keyFor("A:4"), keyFor("B:10"));
+    assert.deepEqual(
+      [...b2b.changedVariants(keyFor("A:4"), keyFor("B:10"))].sort(),
+      ["A", "B"],
+    );
   });
 
   test("an absolute plan is safe to apply again, however it failed", () => {
