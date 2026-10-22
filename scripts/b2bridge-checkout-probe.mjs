@@ -19,6 +19,7 @@ await build({
       `export * as drafts from "${ROOT}/app/utils/b2bridge/draft-order.server.ts";`,
       `export * as checkout from "${ROOT}/app/utils/b2bridge/cart.server.ts";`,
       `export * as checkoutResult from "${ROOT}/app/components/cart/checkout-result.ts";`,
+      `export * as settle from "${ROOT}/app/routes/($locale).api.b2b-settle.ts";`,
     ].join("\n"),
     resolveDir: ROOT,
     loader: "ts",
@@ -32,6 +33,12 @@ await build({
     {
       name: "controlled-network",
       setup(plugin) {
+        plugin.onResolve({ filter: /^react-router$/ }, (args) => {
+          if (args.importer.endsWith(".api.b2b-settle.ts")) {
+            return { path: args.path, namespace: "controlled" };
+          }
+          return null;
+        });
         plugin.onResolve(
           { filter: /^\.\/(client|headless|draft-order)\.server$/ },
           (args) => {
@@ -42,6 +49,12 @@ await build({
           },
         );
         plugin.onLoad({ filter: /.*/, namespace: "controlled" }, (args) => {
+          if (args.path === "react-router") {
+            return {
+              contents: "export const data = (value) => ({ data: value });",
+              loader: "js",
+            };
+          }
           if (args.path === "./client.server") {
             return {
               contents: `export const devCustomerIdOverride = (env) => env.TEST_CUSTOMER_ID;
@@ -67,7 +80,7 @@ await build({
   ],
 });
 
-const { state, drafts, checkout, checkoutResult } = await import(
+const { state, drafts, checkout, checkoutResult, settle } = await import(
   pathToFileURL(OUT).href
 );
 process.on("exit", function removeBundle() {
@@ -111,6 +124,15 @@ function makeContext(options = {}) {
         }
         cart.attributes = attributes;
         return { cart: structuredClone(cart), userErrors: [], errors: [] };
+      },
+      async removeLines(ids) {
+        cart.lines.nodes = cart.lines.nodes.filter(
+          (line) => !ids.includes(line.id),
+        );
+        return { cart: structuredClone(cart), userErrors: [], errors: [] };
+      },
+      setCartId() {
+        return [];
       },
     },
     storefront: {
@@ -382,6 +404,51 @@ test("a gateway 5xx keeps the attempt and reconciles before trying again", async
   });
   assert.equal(asked, 1, "reconciled instead of creating");
   assert.equal(network.count(), 0);
+});
+
+test("a draft created before a 502 is recovered without a second creation", async () => {
+  mockNetwork();
+  let context = makeContext();
+  let created = 0;
+  let lookups = 0;
+  let draft = null;
+  globalThis.testCheckout = async () => {
+    created += 1;
+    draft = {
+      draftOrderId: "gid://shopify/DraftOrder/created-before-502",
+      invoiceUrl: "https://shopify.test/invoice/created-before-502",
+      status: "OPEN",
+      subtotal: 2600,
+      currency: "USD",
+    };
+    return {
+      kind: "failed",
+      failure: { action: "RETRY_LATER", status: 502, code: null },
+    };
+  };
+  globalThis.testFindDraft = async () => {
+    lookups += 1;
+    return draft ? { kind: "found", draft } : { kind: "missing" };
+  };
+
+  assert.deepEqual(await checkout.createCheckout(context), {
+    status: "unavailable",
+    retryable: true,
+  });
+  assert.equal(created, 1);
+  assert.ok(checkout.attemptFromCart(context.testCart));
+
+  let retry = await checkout.createCheckout(context);
+  assert.equal(retry.status, "ok");
+  assert.equal(retry.invoiceUrl, draft.invoiceUrl);
+  assert.equal(lookups, 1);
+  assert.equal(
+    created,
+    1,
+    "the retry adopted the draft instead of creating one",
+  );
+  assert.equal(checkout.marksFromCart(context.testCart).length, 1);
+  assert.equal(checkout.attemptFromCart(context.testCart), null);
 });
 
 test("a refusal B2Bridge validated does clear the attempt", async () => {
@@ -759,6 +826,72 @@ test("incomplete paid draft lines remain unreadable for a later retry", async ()
       );
       assert.equal(result.kind, "unreadable", JSON.stringify(draftOrder));
     }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Admin 503 keeps a paid invoice pending until lookup recovers", async () => {
+  let originalFetch = globalThis.fetch;
+  mockNetwork();
+  let context = makeContext();
+  let initialCheckout = await checkout.createCheckout(context);
+  assert.equal(initialCheckout.status, "ok");
+  assert.equal(checkout.marksFromCart(context.testCart).length, 1);
+
+  let lookups = 0;
+  let request = new Request("https://store.test/api/b2b-settle", {
+    method: "POST",
+  });
+  try {
+    globalThis.fetch = async () => {
+      lookups += 1;
+      if (lookups === 1) {
+        return {
+          ok: false,
+          status: 503,
+          async json() {
+            return { errors: [{ message: "Throttled" }] };
+          },
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return {
+            data: {
+              draftOrder: {
+                status: "COMPLETED",
+                lineItems: {
+                  nodes: [
+                    {
+                      quantity: 10,
+                      variant: { id: "gid://shopify/ProductVariant/123" },
+                    },
+                  ],
+                  pageInfo: { hasNextPage: false },
+                },
+              },
+            },
+          };
+        },
+      };
+    };
+
+    let first = await settle.action({ request, context });
+    assert.equal(first.data.settled, false);
+    assert.equal(context.testCart.lines.nodes[0].quantity, 10);
+    assert.equal(checkout.marksFromCart(context.testCart).length, 1);
+
+    let second = await settle.action({ request, context });
+    assert.equal(second.data.settled, true);
+    assert.deepEqual(context.testCart.lines.nodes, []);
+    assert.equal(checkout.marksFromCart(context.testCart).length, 0);
+
+    let third = await settle.action({ request, context });
+    assert.equal(third.data.settled, false);
+    assert.equal(lookups, 2, "the settled invoice is not queried again");
   } finally {
     globalThis.fetch = originalFetch;
   }
