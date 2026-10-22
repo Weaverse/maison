@@ -46,6 +46,11 @@ import { toggleCartDrawer } from "../layout/cart-drawer";
 import { CartBestSellers } from "./cart-best-sellers";
 import { CartDiscount } from "./cart-discount";
 import { CartSummary } from "./cart-summary";
+import {
+  beginCheckout,
+  type CheckoutResultTracker,
+  checkoutResultForCart,
+} from "./checkout-result";
 
 type CartLine = OptimisticCart<CartApiQueryFragment>["lines"]["nodes"][0];
 type Layouts = "page" | "drawer";
@@ -175,29 +180,31 @@ function CartCheckoutActions({
   const limitMessages = useLimitMessages();
   const { state, cartKey } = useB2BPricing();
   const checkoutPath = usePrefixPathWithLocale("/api/b2b-checkout");
+  // The keyed fetcher shares its pending state across cart views, but its data
+  // can outlive a cart or a component mount. Capture the key at submit time,
+  // not when the reply arrives: the buyer may edit the cart in between. A new
+  // mount has no recorded submission, so it cannot adopt an old response.
   const fetcher = useFetcher<CheckoutState>({ key: "b2b-checkout" });
-
-  // An invoice belongs to the cart it was raised for. `fetcher.data` outlives
-  // that cart — it survives every edit the buyer makes afterwards — so the
-  // result is stamped with the cart it answered and dropped once that cart is
-  // no longer the one on screen.
-  //
-  // Comparing subtotals was not enough and was worse than it looked. Two
-  // different carts can come to the same figure, and when they did the
-  // redirect below took the buyer straight to an invoice for goods they no
-  // longer had. When they did not, the buyer was shown "continue to payment"
-  // pointing at the old invoice with no way left to check out the new cart.
-  //
-  // The key covers buyer, market and every line, and comes from the
-  // optimistic cart so it changes the moment the cart is touched.
-  const answered = useRef<{ data: CheckoutState; key: string } | null>(null);
-  if (fetcher.data && answered.current?.data !== fetcher.data) {
-    answered.current = { data: fetcher.data, key: cartKey };
-  }
-  const result =
-    answered.current?.key === cartKey ? answered.current.data : undefined;
+  const checkoutTracker = useRef<CheckoutResultTracker>({
+    cartKey,
+    submittedKey: null,
+    previousData: undefined,
+    invalidated: false,
+  });
+  const scoped = checkoutResultForCart(
+    checkoutTracker.current,
+    cartKey,
+    fetcher.data,
+  );
+  checkoutTracker.current = scoped.tracker;
+  const result = scoped.result;
   const working = fetcher.state !== "idle";
   const revalidator = useRevalidator();
+
+  function handleCheckoutSubmit() {
+    // Ignore the fetcher's earlier response while a new request is pending.
+    checkoutTracker.current = beginCheckout(cartKey, fetcher.data);
+  }
 
   // B2Bridge owns this cart's prices, so it must also own the order. Shopify's
   // own checkout URL would charge the retail price it computed.
@@ -328,7 +335,11 @@ function CartCheckoutActions({
               </Button>
             </a>
           ) : (
-            <fetcher.Form method="post" action={checkoutPath}>
+            <fetcher.Form
+              method="post"
+              action={checkoutPath}
+              onSubmit={handleCheckoutSubmit}
+            >
               <Button
                 type="submit"
                 // Each submission creates a draft order the merchant cannot

@@ -18,6 +18,7 @@ await build({
       `export * as state from "${ROOT}/app/utils/b2bridge/cart-state.server.ts";`,
       `export * as drafts from "${ROOT}/app/utils/b2bridge/draft-order.server.ts";`,
       `export * as checkout from "${ROOT}/app/utils/b2bridge/cart.server.ts";`,
+      `export * as checkoutResult from "${ROOT}/app/components/cart/checkout-result.ts";`,
     ].join("\n"),
     resolveDir: ROOT,
     loader: "ts",
@@ -66,7 +67,9 @@ await build({
   ],
 });
 
-const { state, drafts, checkout } = await import(pathToFileURL(OUT).href);
+const { state, drafts, checkout, checkoutResult } = await import(
+  pathToFileURL(OUT).href
+);
 process.on("exit", function removeBundle() {
   rmSync(DIR, { recursive: true, force: true });
 });
@@ -157,6 +160,68 @@ function mockNetwork() {
   globalThis.testFindDraft = async () => ({ kind: "missing" });
   return { count: () => checkouts };
 }
+
+test("checkout replies belong to the cart at submit time, not reply time", () => {
+  const cartA = "/api/b2b-cart-pricing|buyer#A:4";
+  const cartB = "/api/b2b-cart-pricing|buyer#B:10";
+  // Both carts total 100; a subtotal comparison would silently redirect B to
+  // A's invoice. The reply arrives only after the buyer has changed carts.
+  const invoiceA = {
+    status: "ok",
+    invoiceUrl: "https://shopify.test/invoice/A",
+    subtotal: 100,
+    currency: "USD",
+  };
+  const invoiceB = {
+    ...invoiceA,
+    invoiceUrl: "https://shopify.test/invoice/B",
+  };
+  let tracker = checkoutResult.beginCheckout(cartA, undefined);
+  function resultFor(key, data) {
+    const checked = checkoutResult.checkoutResultForCart(tracker, key, data);
+    tracker = checked.tracker;
+    return checked.result;
+  }
+
+  assert.equal(resultFor(cartB, undefined), undefined);
+  assert.equal(resultFor(cartB, invoiceA), undefined);
+  assert.equal(
+    resultFor(cartA, invoiceA),
+    undefined,
+    "the old invoice cannot revive",
+  );
+
+  tracker = checkoutResult.beginCheckout(cartB, invoiceA);
+  assert.equal(
+    resultFor(cartB, invoiceA),
+    undefined,
+    "the old fetcher data is ignored",
+  );
+  assert.equal(resultFor(cartB, invoiceB), invoiceB);
+  assert.equal(resultFor(`${cartB}-other-buyer`, invoiceB), undefined);
+  assert.equal(resultFor(cartB, invoiceB), undefined);
+});
+
+test("a prior fetcher response is ignored without this mount submitting", () => {
+  const cartKey = "/api/b2b-cart-pricing|buyer#A:4";
+  const previousInvoice = {
+    status: "ok",
+    invoiceUrl: "https://shopify.test/invoice/old",
+    subtotal: 100,
+    currency: "USD",
+  };
+  const tracker = {
+    cartKey,
+    submittedKey: null,
+    previousData: undefined,
+    invalidated: false,
+  };
+  assert.equal(
+    checkoutResult.checkoutResultForCart(tracker, cartKey, previousInvoice)
+      .result,
+    undefined,
+  );
+});
 
 test("cart attribute writes preserve other keys and verify the returned value", async () => {
   const context = makeContext({
