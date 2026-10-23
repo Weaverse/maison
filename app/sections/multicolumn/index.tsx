@@ -63,11 +63,11 @@ export const schema = createSchema({
         type: "multicolumn--items",
         columns: "4",
         gap: 16,
+        borderRadius: 4,
         children: [
           {
             type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
-            borderRadius: 4,
             children: [
               {
                 type: "heading",
@@ -94,7 +94,6 @@ export const schema = createSchema({
           {
             type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
-            borderRadius: 4,
             children: [
               {
                 type: "heading",
@@ -121,7 +120,6 @@ export const schema = createSchema({
           {
             type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
-            borderRadius: 4,
             children: [
               {
                 type: "heading",
@@ -148,7 +146,6 @@ export const schema = createSchema({
           {
             type: "multicolumn--item",
             backgroundColor: "#DCDCDC",
-            borderRadius: 4,
             children: [
               {
                 type: "heading",

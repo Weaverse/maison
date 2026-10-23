@@ -21,17 +21,28 @@ interface MulticolumnItemsProps
     HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   gap?: number;
+  borderRadius?: number;
 }
 
 const MulticolumnItems = (props: MulticolumnItemsProps) => {
-  const { ref, children, columns, gap, ...rest } = props;
+  // Defaulted here, not only in the schema: a page saved before this setting
+  // existed stores no value, and `undefinedpx` would leave the items square.
+  const { ref, children, columns, gap, borderRadius = 4, ...rest } = props;
 
   return (
     <div
       ref={ref}
       {...rest}
       className={variants({ columns })}
-      style={{ gap: `${gap}px` }}
+      // The radius belongs to the row, not to each item: set per item, a
+      // column could round its corners while its neighbours stayed square.
+      // Each item reads this variable, so one setting styles them all.
+      style={
+        {
+          gap: `${gap}px`,
+          "--item-radius": `${borderRadius}px`,
+        } as React.CSSProperties
+      }
     >
       {children}
     </div>
@@ -73,6 +84,18 @@ export const schema = createSchema({
             unit: "px",
           },
           defaultValue: 16,
+        },
+        {
+          type: "range",
+          name: "borderRadius",
+          label: "Border radius",
+          defaultValue: 4,
+          configs: {
+            min: 0,
+            max: 20,
+            step: 2,
+            unit: "px",
+          },
         },
       ],
     },
