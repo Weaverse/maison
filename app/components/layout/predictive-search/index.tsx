@@ -3,7 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
@@ -451,6 +451,35 @@ function KeywordsDisplay({
           title: keyword,
           styledTitle: keyword,
         }));
+  const railRef = useRef<HTMLDivElement>(null);
+
+  // A mouse wheel reports movement on Y only, and this rail scrolls on X with
+  // its scrollbar hidden — so on a desktop mouse there was no way to reach the
+  // keywords past the edge. Trackpads already send `deltaX` and are left to
+  // scroll it themselves. The listener is registered here rather than through
+  // `onWheel` because React attaches wheel handlers passively, where
+  // `preventDefault` is ignored.
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) {
+      return;
+    }
+    function onWheel(event: WheelEvent) {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+        return;
+      }
+      const max = rail.scrollWidth - rail.clientWidth;
+      const next = Math.min(Math.max(rail.scrollLeft + event.deltaY, 0), max);
+      // Already at that end: leave the event alone so the page still scrolls.
+      if (next === rail.scrollLeft) {
+        return;
+      }
+      event.preventDefault();
+      rail.scrollLeft = next;
+    }
+    rail.addEventListener("wheel", onWheel, { passive: false });
+    return () => rail.removeEventListener("wheel", onWheel);
+  }, []);
 
   if (keywords.length === 0) {
     return null;
@@ -460,7 +489,10 @@ function KeywordsDisplay({
     // One row that scrolls sideways rather than wrapping: the suggestions grow
     // with whatever the shopper has typed, and a second line pushed the results
     // down the panel. `hidden-scroll` keeps the rail itself out of sight.
-    <div className="hidden-scroll mt-3 flex gap-4 overflow-x-auto">
+    <div
+      ref={railRef}
+      className="hidden-scroll mt-3 flex gap-4 overflow-x-auto"
+    >
       {keywords.map((item) => (
         <button
           key={item.title}
