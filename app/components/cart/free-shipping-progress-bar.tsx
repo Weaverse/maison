@@ -1,7 +1,11 @@
 import { Money } from "@shopify/hydrogen";
-import type { CartCost } from "@shopify/hydrogen/storefront-api-types";
+import type {
+  CartCost,
+  CurrencyCode,
+} from "@shopify/hydrogen/storefront-api-types";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
+import { useB2BPricing } from "~/components/cart/b2b-cart-pricing";
 
 interface FreeShippingProgressBarProps {
   cost: CartCost;
@@ -15,13 +19,22 @@ export function FreeShippingProgressBar({
   const { t } = useTranslation();
   const { enableFreeShippingProgressBar, freeShippingThreshold } =
     useThemeSettings();
+  // Free shipping is decided at checkout on what the buyer actually pays, so
+  // measuring progress against Shopify's prices would congratulate a wholesale
+  // buyer on a threshold their order has not reached.
+  const { state: b2bState } = useB2BPricing();
 
   if (!(enableFreeShippingProgressBar && freeShippingThreshold)) {
     return null;
   }
 
-  const subtotalAmount = Number(cost?.subtotalAmount?.amount || 0);
-  const currencyCode = cost?.subtotalAmount?.currencyCode || "USD";
+  const priced = b2bState?.status === "priced" ? b2bState : null;
+  const subtotalAmount = priced
+    ? priced.subtotal
+    : Number(cost?.subtotalAmount?.amount || 0);
+  const currencyCode = (priced?.currency ||
+    cost?.subtotalAmount?.currencyCode ||
+    "USD") as CurrencyCode;
 
   const threshold = Number(freeShippingThreshold);
   const remaining = Math.max(0, threshold - subtotalAmount);
