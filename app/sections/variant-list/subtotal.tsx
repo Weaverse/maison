@@ -8,7 +8,12 @@ import type {
   ProductVariantFragment,
 } from "storefront-api.generated";
 import { Button } from "~/components/button";
+import {
+  useB2BLinesTotal,
+  useProductRecalculating,
+} from "~/components/cart/b2b-cart-pricing";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
+import { Skeleton } from "~/components/skeleton";
 import { useSelectedLocale } from "~/hooks/use-locale";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { desktopVariantGrid } from "~/sections/variant-list/grid";
@@ -17,13 +22,49 @@ import { cn } from "~/utils/cn";
 type SubtotalProps = {
   cart: any;
   variants: ProductVariantFragment[];
+  productId: string;
   /** Mirrors the table header: the purchase method column only exists with selling plans. */
   hasPurchaseMethod?: boolean;
 };
 
+/**
+ * The subtotal, or a spinner laid over it while it is being recalculated.
+ *
+ * The figure stays in flow but invisible rather than being swapped out: an
+ * svg is a different size from the text it replaces, so swapping makes the
+ * row change height on every quantity change.
+ */
+function SubtotalAmount({
+  subtotal,
+  currencyCode,
+  recalculating,
+}: {
+  subtotal: number;
+  currencyCode: CurrencyCode;
+  recalculating: boolean;
+}) {
+  const amount = <Money data={{ amount: String(subtotal), currencyCode }} />;
+  if (!recalculating) {
+    return amount;
+  }
+  return (
+    <span className="relative inline-flex">
+      <span className="invisible" aria-hidden="true">
+        {amount}
+      </span>
+      <Skeleton
+        as="span"
+        className="absolute inset-0 rounded"
+        aria-label="Updating subtotal"
+      />
+    </span>
+  );
+}
+
 export function Subtotal({
   cart: originalCart,
   variants,
+  productId,
   hasPurchaseMethod = false,
 }: SubtotalProps) {
   const { t } = useTranslation();
@@ -35,11 +76,17 @@ export function Subtotal({
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
 
   const currentProductVariantIds = variants.map((v) => v.id);
+  const currentProductLines = (cart?.lines?.nodes ?? []).filter((line) =>
+    currentProductVariantIds.includes(line.merchandise.id),
+  );
+  // This table totals one product, not the whole cart, so the cart-wide B2B
+  // subtotal cannot be used — only the lines on screen.
+  const b2bTotal = useB2BLinesTotal(currentProductLines);
+  // Only when this product is moving. The table totals one product, so a
+  // change elsewhere in the cart leaves this figure alone.
+  const recalculating = useProductRecalculating(productId);
 
   if (cart?.lines?.nodes) {
-    const currentProductLines = cart.lines.nodes.filter((line) =>
-      currentProductVariantIds.includes(line.merchandise.id),
-    );
     existingLineIds = currentProductLines.map((line) => line.id);
 
     totalItems = currentProductLines.reduce(
@@ -53,6 +100,12 @@ export function Subtotal({
     currencyCode =
       currentProductLines[0]?.cost?.totalAmount?.currencyCode ?? currencyCode;
   }
+
+  if (b2bTotal) {
+    subtotal = b2bTotal.amount;
+    currencyCode = b2bTotal.currency as CurrencyCode;
+  }
+
   return (
     <>
       {/* mobile layout */}
@@ -76,7 +129,11 @@ export function Subtotal({
               <div className="">
                 <div className="text-sm">{t("cart.subtotalLabel")}</div>
                 <div className="font-semibold">
-                  <Money data={{ amount: String(subtotal), currencyCode }} />
+                  <SubtotalAmount
+                    subtotal={subtotal}
+                    currencyCode={currencyCode}
+                    recalculating={recalculating}
+                  />
                 </div>
               </div>
               <div className="">
@@ -105,7 +162,11 @@ export function Subtotal({
             <div className="flex flex-1 flex-col items-end gap-1 text-right">
               <div className="text-base">{t("cart.subtotalLabel")}</div>
               <div className="font-semibold text-base">
-                <Money data={{ amount: String(subtotal), currencyCode }} />
+                <SubtotalAmount
+                  subtotal={subtotal}
+                  currencyCode={currencyCode}
+                  recalculating={recalculating}
+                />
               </div>
               <div className="text-[12px] text-body-subtle">
                 {t("cart.checkoutNote")}
@@ -136,7 +197,11 @@ export function Subtotal({
           <div className="col-span-2 flex flex-col items-end gap-1 text-right">
             <div className="text-base">{t("cart.subtotalLabel")}</div>
             <div className="font-semibold text-base">
-              <Money data={{ amount: String(subtotal), currencyCode }} />
+              <SubtotalAmount
+                subtotal={subtotal}
+                currencyCode={currencyCode}
+                recalculating={recalculating}
+              />
             </div>
             <div className="text-[12px] text-body-subtle">
               {t("cart.checkoutNote")}
