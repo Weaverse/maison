@@ -112,7 +112,7 @@ function AnimatedSearchDrawer({ open, children }) {
                   damping: 25,
                   stiffness: 150,
                 }}
-                className="w-screen md:max-w-[384px] bg-background py-4 h-full"
+                className="w-[calc(100vw-24px)] md:max-w-[384px] bg-background py-4 h-full"
               >
                 {children}
               </motion.div>

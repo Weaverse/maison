@@ -322,7 +322,7 @@ export function QuickShopTrigger({
         <Dialog.Content
           className={clsx(
             "quick-shop-dialog-content",
-            "fixed inset-0 z-10 flex items-center overflow-x-hidden px-4",
+            "fixed inset-0 z-10 flex items-center overflow-x-hidden px-6",
             "backdrop-blur-xs data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           )}
           onClick={(e) => {

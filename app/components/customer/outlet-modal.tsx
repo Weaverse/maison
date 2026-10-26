@@ -22,7 +22,7 @@ export function OutletModal({
         />
         <Dialog.Content
           className={clsx([
-            "fixed inset-0 z-10 w-screen p-4",
+            "fixed inset-0 z-10 w-screen p-6",
             "flex items-center justify-center",
             "data-[state=open]:animate-slide-up",
           ])}

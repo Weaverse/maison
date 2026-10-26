@@ -146,7 +146,7 @@ function AnimatedDrawer({ open, children }) {
                 // against it — under the home indicator once one shows up.
                 // Padding-bottom of the safe inset (with a 12px floor) lifts
                 // the buttons clear on every device.
-                className="relative h-full w-screen max-w-[461px] bg-background pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"
+                className="relative h-full w-[calc(100vw-24px)] max-w-[461px] bg-background pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"
               >
                 {children}
               </motion.div>

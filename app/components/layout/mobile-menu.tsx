@@ -31,7 +31,7 @@ export function MobileMenu() {
             the overlay the design shows beside the panel. `inset-0` used to
             cover everything and left no overlay to see at any size. */}
         <Dialog.Content
-          className="fixed inset-y-0 left-0 z-10 flex h-(--screen-height) w-full flex-col sm:max-w-[360px] bg-(--color-header-bg) py-3 uppercase focus-visible:outline-hidden data-[state=open]:animate-enter-from-left data-[state=closed]:animate-exit-to-left"
+          className="fixed inset-y-0 left-0 z-10 flex h-(--screen-height) w-[calc(100%-24px)] flex-col sm:max-w-[360px] bg-(--color-header-bg) py-3 uppercase focus-visible:outline-hidden data-[state=open]:animate-enter-from-left data-[state=closed]:animate-exit-to-left"
           aria-describedby={undefined}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >

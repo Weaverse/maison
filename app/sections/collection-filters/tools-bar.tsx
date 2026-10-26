@@ -77,7 +77,7 @@ function FiltersDrawer({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-10 bg-black/50 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <Dialog.Content
-          className="fixed inset-y-0 right-0 z-10 flex w-full flex-col bg-(--color-background) data-[state=open]:animate-enter-from-right data-[state=closed]:animate-exit-to-right md:w-[360px]"
+          className="fixed inset-y-0 right-0 z-10 flex w-[calc(100%-24px)] flex-col bg-(--color-background) data-[state=open]:animate-enter-from-right data-[state=closed]:animate-exit-to-right md:w-[360px]"
           aria-describedby={undefined}
         >
           <div className="flex items-center justify-between gap-2 px-5 py-3">
