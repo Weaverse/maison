@@ -131,7 +131,6 @@ export function VariantRow({
             )}
             <div className="text-sm">
               <Money data={unitPrice} as="span" withoutTrailingZeros />
-              <span>/unit</span>
             </div>
           </div>
         </div>
@@ -236,7 +235,6 @@ export function VariantRow({
 
         <div className="text-center text-base">
           <Money data={unitPrice} as="span" withoutTrailingZeros />
-          <span>/unit</span>
         </div>
         <div className="text-right font-semibold text-base">
           <Money data={totalPrice} as="span" withoutTrailingZeros />
@@ -306,7 +304,6 @@ export function VariantRow({
         </div>
         <div className="text-center text-base">
           <Money data={unitPrice} as="span" withoutTrailingZeros />
-          <span>/unit</span>
         </div>
         <div className="text-right font-semibold text-base">
           <Money data={totalPrice} as="span" withoutTrailingZeros />
