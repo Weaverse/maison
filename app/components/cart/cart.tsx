@@ -812,9 +812,12 @@ function CartLineSaving({ line }: { line: CartLine }) {
   if (stale) {
     return (
       <div className="flex items-center gap-1 pt-1 text-sm">
+        {/* 112px, not the 160px this once was: the content column of a drawer
+            line is about 224px wide, and the price placeholder takes the right
+            64px of it. At the old width the two bars met in the middle. */}
         <Skeleton
           as="span"
-          className="h-4 w-40 rounded"
+          className="h-4 w-28 rounded"
           aria-label="Updating discount"
         />
       </div>
@@ -882,7 +885,12 @@ function CartLinePrice({
   // separate things loading.
   if (!pricedByB2Bridge && fetcher.state !== "idle") {
     return (
-      <CircleNotchIcon size={18} className={clsx("animate-spin", className)} />
+      <CircleNotchIcon
+        size={18}
+        // The line colour, so the spinner reads as the same quiet furniture as
+        // the rules and field borders around it rather than as body text.
+        className={clsx("animate-spin text-line", className)}
+      />
     );
   }
 
@@ -938,7 +946,15 @@ function CartLinePrice({
     );
 
     // Laid over the figures rather than swapped in, so the line keeps its
-    // height and nothing below it moves while the price is worked out.
+    // height and nothing below it moves while the price is worked out. The
+    // placeholder is one fixed size rather than the shape of what it covers:
+    // sized to the figures it was a different bar on every line — wider for a
+    // larger number, twice as tall where a compare-at price sits above. It is
+    // positioned, so it never widens the cell: the row this sits in cannot
+    // shrink (the saving beside it is a fixed width and this cell is
+    // `shrink-0`), and a cell held open to the placeholder's width pushed the
+    // whole row past the edge of the drawer. `top-1` matches the saving's own
+    // `pt-1`, so on a row that aligns to the top the two bars line up.
     if (recalculating) {
       return (
         <span
@@ -952,7 +968,7 @@ function CartLinePrice({
           </span>
           <Skeleton
             as="span"
-            className="absolute inset-0 rounded"
+            className="absolute top-1 right-0 h-4 w-16 rounded"
             aria-label="Updating price"
           />
         </span>

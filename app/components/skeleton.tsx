@@ -21,7 +21,9 @@ export function Skeleton({
       {...props}
       width={width}
       height={height}
-      className={clsx("animate-pulse bg-gray-300", className)}
+      // `--color-line-subtle`, the theme's own quiet fill, rather than a
+      // Tailwind grey that no style guide names and no setting can reach.
+      className={clsx("animate-pulse bg-line-subtle", className)}
     />
   );
 }

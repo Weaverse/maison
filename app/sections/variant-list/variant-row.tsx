@@ -98,16 +98,30 @@ function PriceWithCompare({
   // in for them: keeping the old content in flow but invisible holds the cell
   // at exactly its own size, so the column does not jump while the price is
   // worked out.
+  //
+  // Its own size is fixed, though, and not the shape of what it covers. Taking
+  // the figures' width made it a different bar in every cell — a row showing
+  // $0 because nothing is ordered yet got a stub barely wider than the two
+  // characters it replaced, beside rows with a full bar.
   return (
-    <span className="relative inline-flex items-baseline gap-1.5">
-      <span className="invisible" aria-hidden="true">
+    <span className="relative block">
+      <span className="invisible block" aria-hidden="true">
         {settled}
       </span>
-      <Skeleton
-        as="span"
-        className="absolute inset-0 rounded"
-        aria-label="Updating price"
-      />
+      {/* A block covering the cell, with the bar as an inline child: it is
+          then placed by the cell's own `text-align`, so it lands exactly where
+          the figure it replaces would — centred under a centred column header,
+          right under a right-aligned one — and every row in a column puts its
+          bar at the same x. Anchoring the bar to the figures instead made a
+          row carrying a struck-through compare-at price sit wider than its
+          neighbours and pushed its bar out of line. */}
+      <span className="absolute inset-0">
+        <Skeleton
+          as="span"
+          className="inline-block h-full w-16 rounded"
+          aria-label="Updating price"
+        />
+      </span>
     </span>
   );
 }
