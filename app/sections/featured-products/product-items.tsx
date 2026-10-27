@@ -159,7 +159,7 @@ function ProductItems(props: ProductItemsProps) {
       </Swimlane>
 
       {/* navi arrows */}
-      <div className="absolute -left-2 -right-2 md:-left-5 md:-right-5 lg:-left-7 lg:-right-7 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[1]">
+      <div className="absolute -left-2 -right-2 md:-left-5 md:-right-5 lg:-left-6 lg:-right-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-[1]">
         <button
           type="button"
           onClick={handlePrev}
