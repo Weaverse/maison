@@ -18,8 +18,15 @@ import type {
   ProductVariantFragment,
   SellingPlanGroupFragment,
 } from "storefront-api.generated";
+import {
+  useB2BLinePrice,
+  useB2BPricing,
+  useB2BProductRate,
+  useProductRecalculating,
+} from "~/components/cart/b2b-cart-pricing";
 import { Image } from "~/components/image";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
+import { Skeleton } from "~/components/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import {
@@ -37,12 +44,78 @@ const CLICK_DEBOUNCE_MS = 300;
 interface VariantRowProps {
   variant: ProductVariantFragment;
   cart: OptimisticCart<CartApiQueryFragment>;
+  /** The product these variants belong to; tiers are reached on its total. */
+  productId: string;
   sellingPlanGroups: { nodes: SellingPlanGroupFragment[] };
+}
+
+type MoneyData = React.ComponentProps<typeof Money>["data"];
+
+/**
+ * A price, with the price it replaced struck through beside it.
+ *
+ * Volume tiers are easy to miss: the number simply changes when the quantity
+ * crosses a threshold, and nothing says it has. Showing what the unit used to
+ * cost makes the saving legible at the moment it is earned, in the same shape
+ * the cart already uses for an applied discount.
+ */
+function PriceWithCompare({
+  price,
+  compareAt,
+  recalculating,
+}: {
+  price: MoneyData;
+  compareAt: MoneyData | null;
+  /** The figures shown belong to the previous quantity. */
+  recalculating?: boolean;
+}) {
+  const { saleBadgeColor } = useThemeSettings();
+
+  const settled = (
+    <>
+      {compareAt && (
+        <span
+          className="font-normal line-through"
+          style={{ color: saleBadgeColor }}
+        >
+          <Money data={compareAt} as="span" withoutTrailingZeros />
+        </span>
+      )}
+      <Money data={price} as="span" withoutTrailingZeros />
+    </>
+  );
+
+  if (!recalculating) {
+    if (!compareAt) {
+      return settled;
+    }
+    return (
+      <span className="inline-flex items-baseline gap-1.5">{settled}</span>
+    );
+  }
+
+  // The placeholder is laid over the figures it replaces rather than swapped
+  // in for them: keeping the old content in flow but invisible holds the cell
+  // at exactly its own size, so the column does not jump while the price is
+  // worked out.
+  return (
+    <span className="relative inline-flex items-baseline gap-1.5">
+      <span className="invisible" aria-hidden="true">
+        {settled}
+      </span>
+      <Skeleton
+        as="span"
+        className="absolute inset-0 rounded"
+        aria-label="Updating price"
+      />
+    </span>
+  );
 }
 
 export function VariantRow({
   variant,
   cart: resolvedCart,
+  productId,
   sellingPlanGroups,
 }: VariantRowProps) {
   const { t } = useTranslation();
@@ -65,6 +138,15 @@ export function VariantRow({
     return isVariantMatch && isPlanMatch;
   });
 
+  const b2bLine = useB2BLinePrice(activeCartLine?.id ?? "");
+  const { state: b2bState } = useB2BPricing();
+  // The whole product: a tier is reached on its combined quantity, so moving
+  // one row reprices every row in the table, including the ones at zero that
+  // would join at the new price.
+  const recalculating = useProductRecalculating(productId);
+  const productRate = useB2BProductRate(productId);
+  const b2bCurrency = b2bState?.status === "priced" ? b2bState.currency : null;
+
   const variantTitle = variant.title === "Default Title" ? "" : variant.title;
 
   const isLowStock =
@@ -86,10 +168,69 @@ export function VariantRow({
     }
   }
 
-  const totalPrice = activeCartLine?.cost?.totalAmount || {
+  let totalPrice = activeCartLine?.cost?.totalAmount || {
     amount: "0",
     currencyCode: variant.price?.currencyCode as any,
   };
+
+  // A variant sitting in the cart is priced by B2Bridge, and its tier depends
+  // on the quantity — so the per-unit figure here moves with the stepper
+  // rather than staying at the list price. A variant at quantity zero is not
+  // in the cart and has no B2B price to show.
+  //
+  // Selling plans are left alone: a subscription price is Shopify's to
+  // compute, and B2Bridge's cart pricing does not model one.
+  let compareUnitPrice: MoneyData | null = null;
+  let compareTotalPrice: MoneyData | null = null;
+
+  if (b2bLine && !selectedPlanId) {
+    const currencyCode = b2bCurrency as typeof variant.price.currencyCode;
+    unitPrice = { amount: String(b2bLine.unitPrice), currencyCode };
+    if (activeCartLine) {
+      totalPrice = {
+        amount: String(b2bLine.unitPrice * activeCartLine.quantity),
+        currencyCode,
+      };
+    }
+
+    // Only once a tier has actually taken effect. Below the first threshold
+    // B2Bridge returns Shopify's own price for both figures, and striking
+    // through a number equal to the one beside it reads as a saving that is
+    // not there.
+    if (b2bLine.unitPrice < b2bLine.originalUnitPrice) {
+      compareUnitPrice = {
+        amount: String(b2bLine.originalUnitPrice),
+        currencyCode,
+      };
+      if (activeCartLine) {
+        compareTotalPrice = {
+          amount: String(b2bLine.originalUnitPrice * activeCartLine.quantity),
+          currencyCode,
+        };
+      }
+    }
+  } else if (productRate && !selectedPlanId && variant.price) {
+    // Not in the cart, but a sibling variant has already taken this product
+    // past a tier. Leaving the list price here reads as "this one is
+    // excluded" next to a sibling that is plainly discounted, when in fact
+    // B2Bridge would price it at the same rate the moment it is added.
+    //
+    // Measured against Shopify's price, not against `variant.price`: the PDP
+    // loader has already replaced that with B2Bridge's base price, and a rate
+    // that includes the base discount applied to a number that already
+    // carries it discounts the base twice. On the measured 3% base + 5% tier
+    // rule that showed 290.51 where B2Bridge charges 299.49.
+    const original = (variant as { b2bOriginalPrice?: MoneyData })
+      .b2bOriginalPrice;
+    const listMoney = original ?? variant.price;
+    const list = Number(listMoney.amount);
+    const { currencyCode } = variant.price;
+    unitPrice = {
+      amount: (Math.round(list * (1 - productRate) * 100) / 100).toFixed(2),
+      currencyCode,
+    };
+    compareUnitPrice = { amount: listMoney.amount, currencyCode };
+  }
 
   return (
     <div className={cn(isOutOfStock && "opacity-50")}>
@@ -130,7 +271,11 @@ export function VariantRow({
               </div>
             )}
             <div className="text-sm">
-              <Money data={unitPrice} as="span" withoutTrailingZeros />
+              <PriceWithCompare
+                price={unitPrice}
+                compareAt={compareUnitPrice}
+                recalculating={recalculating}
+              />
             </div>
           </div>
         </div>
@@ -146,7 +291,11 @@ export function VariantRow({
                 />
               </div>
               <div className="font-bold text-base">
-                <Money data={totalPrice} as="span" withoutTrailingZeros />
+                <PriceWithCompare
+                  price={totalPrice}
+                  compareAt={compareTotalPrice}
+                  recalculating={recalculating}
+                />
               </div>
             </div>
             <div className="flex justify-start items-center">
@@ -167,7 +316,11 @@ export function VariantRow({
               />
             </div>
             <div className="font-bold text-base text-right">
-              <Money data={totalPrice} as="span" withoutTrailingZeros />
+              <PriceWithCompare
+                price={totalPrice}
+                compareAt={compareTotalPrice}
+                recalculating={recalculating}
+              />
             </div>
           </div>
         )}
@@ -234,10 +387,18 @@ export function VariantRow({
         </div>
 
         <div className="text-center text-base">
-          <Money data={unitPrice} as="span" withoutTrailingZeros />
+          <PriceWithCompare
+            price={unitPrice}
+            compareAt={compareUnitPrice}
+            recalculating={recalculating}
+          />
         </div>
         <div className="text-right font-semibold text-base">
-          <Money data={totalPrice} as="span" withoutTrailingZeros />
+          <PriceWithCompare
+            price={totalPrice}
+            compareAt={compareTotalPrice}
+            recalculating={recalculating}
+          />
         </div>
       </div>
 
@@ -303,10 +464,18 @@ export function VariantRow({
           />
         </div>
         <div className="text-center text-base">
-          <Money data={unitPrice} as="span" withoutTrailingZeros />
+          <PriceWithCompare
+            price={unitPrice}
+            compareAt={compareUnitPrice}
+            recalculating={recalculating}
+          />
         </div>
         <div className="text-right font-semibold text-base">
-          <Money data={totalPrice} as="span" withoutTrailingZeros />
+          <PriceWithCompare
+            price={totalPrice}
+            compareAt={compareTotalPrice}
+            recalculating={recalculating}
+          />
         </div>
       </div>
     </div>
@@ -442,7 +611,9 @@ function QuantityUpdateButtons({
     e: React.KeyboardEvent<HTMLInputElement>,
   ) {
     if (e.key === "Enter") {
-      handleQuantityInputBlur();
+      // Blurring runs `handleQuantityInputBlur` on its own; calling it here as
+      // well ran the whole commit twice off one keystroke. The same fix as in
+      // `cart.tsx` — kept identical so the two steppers cannot drift.
       (e.target as HTMLInputElement).blur();
     } else if (e.key === "Escape") {
       setInputValue(String(displayQuantity));

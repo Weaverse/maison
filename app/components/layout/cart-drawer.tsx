@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { Await, useRouteLoaderData } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
+import { B2BPricingProvider } from "~/components/cart/b2b-cart-pricing";
 import { Cart } from "~/components/cart/cart";
 import { FreeShippingProgressBar } from "~/components/cart/free-shipping-progress-bar";
 import Link from "~/components/link";
@@ -99,13 +100,18 @@ function CartDrawerContent({
               </button>
             </Dialog.Close>
           </div>
-          {cart?.totalQuantity > 0 && (
-            <FreeShippingProgressBar
-              cost={cart?.cost as CartCost}
-              className="px-5"
-            />
-          )}
-          <Cart layout="drawer" cart={cart as CartReturn} />
+          {/* The bar and the cart both show money, so both read one set of
+              prices. Wrapping here rather than inside `Cart` is what puts the
+              bar inside it. */}
+          <B2BPricingProvider cart={originalCart}>
+            {cart?.totalQuantity > 0 && (
+              <FreeShippingProgressBar
+                cost={cart?.cost as CartCost}
+                className="px-5"
+              />
+            )}
+            <Cart layout="drawer" cart={cart as CartReturn} />
+          </B2BPricingProvider>
         </div>
       </AnimatedDrawer>
     </Dialog.Root>

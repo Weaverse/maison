@@ -20,6 +20,7 @@ export function variantIdFromGid(gid: string): string | null {
 type MaybeVariant = {
   id?: unknown;
   price?: { amount?: unknown; currencyCode?: unknown };
+  b2bOriginalPrice?: unknown;
   quantityPriceBreaks?: unknown;
   quantityRule?: unknown;
 };
@@ -92,6 +93,13 @@ export function applyOverlays(
         // the overlay cannot disagree with the price it is replacing.
         const currencyCode =
           (value.price?.currencyCode as string) ?? overlay.price.currencyCode;
+        // Kept beside the replacement, not instead of it: a component that
+        // needs the list price — to apply a rate measured against it — has no
+        // other way back to it once `price` is overwritten.
+        node.b2bOriginalPrice = {
+          amount: overlay.originalPrice.amount,
+          currencyCode,
+        };
         node.price = { amount: overlay.price.amount, currencyCode };
         node.quantityPriceBreaks = {
           nodes: overlay.quantityPriceBreaks.nodes.map((tier) => ({

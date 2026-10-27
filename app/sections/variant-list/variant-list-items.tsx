@@ -18,6 +18,7 @@ import type {
   ProductVariantFragment,
 } from "storefront-api.generated";
 import { Button } from "~/components/button";
+import { B2BPricingProvider } from "~/components/cart/b2b-cart-pricing";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import type { RootLoader } from "~/root";
@@ -50,141 +51,151 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
   return (
     <Await resolve={rootData.cart}>
       {(resolvedCart) => (
-        <div>
-          {/* mobile layout */}
-          <div className="space-y-6 md:hidden">
-            <div className="border-b border-line-subtle py-3">
-              <p className="font-semibold text-sm">{t("product.variants")}</p>
+        // The variant list shows per-unit prices, line totals and a subtotal,
+        // so it reads the same prices the cart does rather than Shopify's.
+        <B2BPricingProvider cart={resolvedCart}>
+          <div>
+            {/* mobile layout */}
+            <div className="space-y-6 md:hidden">
+              <div className="border-b border-line-subtle py-3">
+                <p className="font-semibold text-sm">{t("product.variants")}</p>
+              </div>
+              <div className="space-y-6">
+                {variants.map((variant) => (
+                  <VariantRow
+                    key={variant.id}
+                    variant={variant}
+                    cart={resolvedCart}
+                    productId={product.id}
+                    sellingPlanGroups={sellingPlanGroups}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="space-y-6">
-              {variants.map((variant) => (
-                <VariantRow
-                  key={variant.id}
-                  variant={variant}
-                  cart={resolvedCart}
-                  sellingPlanGroups={sellingPlanGroups}
-                />
-              ))}
+
+            <div className="md:hidden mt-6">
+              <Subtotal
+                cart={resolvedCart}
+                variants={variants}
+                productId={product.id}
+                hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+              />
             </div>
-          </div>
 
-          <div className="md:hidden mt-6">
-            <Subtotal
-              cart={resolvedCart}
-              variants={variants}
-              hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
-            />
-          </div>
-
-          {/* tablet layout */}
-          <div className="hidden md:block xl:hidden space-y-6">
-            <div className="space-y-4">
-              {/* Three tracks, matching `VariantRow`'s tablet grid. The design
+            {/* tablet layout */}
+            <div className="hidden md:block xl:hidden space-y-6">
+              <div className="space-y-4">
+                {/* Three tracks, matching `VariantRow`'s tablet grid. The design
                   draws a fourth QUANTITY column with its label at opacity 0 and
                   spans the row's variant cell across it; both shapes place Price
                   and Variant Price identically, so the two grids are kept on one
                   template rather than two. */}
-              <div
-                className={cn(
-                  "grid gap-6 border-b border-line-subtle py-3",
-                  VARIANT_GRID_TABLET,
+                <div
+                  className={cn(
+                    "grid gap-6 border-b border-line-subtle py-3",
+                    VARIANT_GRID_TABLET,
+                  )}
+                >
+                  <div className="font-semibold text-base text-body-subtle uppercase">
+                    {t("product.variant")}
+                  </div>
+                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
+                    {t("product.unitPrice")}
+                  </div>
+                  <div className="font-semibold text-base text-body-subtle uppercase text-right">
+                    {t("product.variantPrice")}
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  {variants.map((variant) => (
+                    <VariantRow
+                      key={variant.id}
+                      variant={variant}
+                      cart={resolvedCart}
+                      productId={product.id}
+                      sellingPlanGroups={sellingPlanGroups}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <Subtotal
+                cart={resolvedCart}
+                variants={variants}
+                productId={product.id}
+                hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+              />
+            </div>
+
+            {/* desktop layout */}
+            <div className="hidden xl:block space-y-6">
+              <div className="space-y-6">
+                {sellingPlanGroups?.nodes?.length > 0 ? (
+                  <div
+                    className={cn(
+                      "grid gap-6 border-b border-line-subtle py-3",
+                      VARIANT_GRID_DESKTOP,
+                    )}
+                  >
+                    <div className="font-semibold text-base text-body-subtle uppercase">
+                      {t("product.variant")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-center">
+                      {t("product.purchaseMethod")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-center">
+                      {t("product.quantity")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-center">
+                      {t("product.unitPrice")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-right">
+                      {t("product.variantPrice")}
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={cn(
+                      "grid gap-6 border-b border-line-subtle py-3",
+                      VARIANT_GRID_DESKTOP_COMPACT,
+                    )}
+                  >
+                    <div className="font-semibold text-base text-body-subtle uppercase">
+                      {t("product.variant")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-center">
+                      {t("product.quantity")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-center">
+                      {t("product.unitPrice")}
+                    </div>
+                    <div className="font-semibold text-base text-body-subtle uppercase text-right">
+                      {t("product.variantPrice")}
+                    </div>
+                  </div>
                 )}
-              >
-                <div className="font-semibold text-base text-body-subtle uppercase">
-                  {t("product.variant")}
-                </div>
-                <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                  {t("product.unitPrice")}
-                </div>
-                <div className="font-semibold text-base text-body-subtle uppercase text-right">
-                  {t("product.variantPrice")}
+                <div className="space-y-6">
+                  {variants.map((variant) => (
+                    <VariantRow
+                      key={variant.id}
+                      variant={variant}
+                      cart={resolvedCart}
+                      productId={product.id}
+                      sellingPlanGroups={sellingPlanGroups}
+                    />
+                  ))}
                 </div>
               </div>
-              <div className="space-y-6">
-                {variants.map((variant) => (
-                  <VariantRow
-                    key={variant.id}
-                    variant={variant}
-                    cart={resolvedCart}
-                    sellingPlanGroups={sellingPlanGroups}
-                  />
-                ))}
-              </div>
+
+              <Subtotal
+                cart={resolvedCart}
+                variants={variants}
+                productId={product.id}
+                hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
+              />
             </div>
-
-            <Subtotal
-              cart={resolvedCart}
-              variants={variants}
-              hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
-            />
           </div>
-
-          {/* desktop layout */}
-          <div className="hidden xl:block space-y-6">
-            <div className="space-y-6">
-              {sellingPlanGroups?.nodes?.length > 0 ? (
-                <div
-                  className={cn(
-                    "grid gap-6 border-b border-line-subtle py-3",
-                    VARIANT_GRID_DESKTOP,
-                  )}
-                >
-                  <div className="font-semibold text-base text-body-subtle uppercase">
-                    {t("product.variant")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    {t("product.purchaseMethod")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    {t("product.quantity")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    {t("product.unitPrice")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-right">
-                    {t("product.variantPrice")}
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "grid gap-6 border-b border-line-subtle py-3",
-                    VARIANT_GRID_DESKTOP_COMPACT,
-                  )}
-                >
-                  <div className="font-semibold text-base text-body-subtle uppercase">
-                    {t("product.variant")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    {t("product.quantity")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    {t("product.unitPrice")}
-                  </div>
-                  <div className="font-semibold text-base text-body-subtle uppercase text-right">
-                    {t("product.variantPrice")}
-                  </div>
-                </div>
-              )}
-              <div className="space-y-6">
-                {variants.map((variant) => (
-                  <VariantRow
-                    key={variant.id}
-                    variant={variant}
-                    cart={resolvedCart}
-                    sellingPlanGroups={sellingPlanGroups}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <Subtotal
-              cart={resolvedCart}
-              variants={variants}
-              hasPurchaseMethod={sellingPlanGroups?.nodes?.length > 0}
-            />
-          </div>
-        </div>
+        </B2BPricingProvider>
       )}
     </Await>
   );

@@ -118,3 +118,25 @@ export const PRODUCT_QUERY = `#graphql
   ${PRODUCT_OPTION_FRAGMENT}
   ${SELLING_PLAN_GROUP_FRAGMENT}
 ` as const;
+
+/**
+ * The market the current locale resolves to.
+ *
+ * B2Bridge needs the market GID to apply a rule's market restrictions, and
+ * rejects `market` without one (`INVALID_REQUEST: market must be { id,
+ * countryCode }`). Nothing else in the storefront needed the id, so it is not
+ * carried on `storefront.i18n` and has to be asked for.
+ */
+export const MARKET_QUERY = `#graphql
+  query Market($country: CountryCode, $language: LanguageCode)
+  @inContext(country: $country, language: $language) {
+    localization {
+      market {
+        id
+      }
+      country {
+        isoCode
+      }
+    }
+  }
+`;
