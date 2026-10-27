@@ -317,6 +317,7 @@ export function VariantRow({
                 cart={resolvedCart}
                 variant={variant}
                 selectedPlanId={selectedPlanId}
+                productId={productId}
               />
             </div>
           </>
@@ -327,6 +328,7 @@ export function VariantRow({
                 cart={resolvedCart}
                 variant={variant}
                 selectedPlanId={selectedPlanId}
+                productId={productId}
               />
             </div>
             <div className="font-bold text-base text-right">
@@ -396,6 +398,7 @@ export function VariantRow({
               cart={resolvedCart}
               variant={variant}
               selectedPlanId={selectedPlanId}
+              productId={productId}
             />
           </div>
         </div>
@@ -475,6 +478,7 @@ export function VariantRow({
             cart={resolvedCart}
             variant={variant}
             selectedPlanId={selectedPlanId}
+            productId={productId}
           />
         </div>
         <div className="text-center text-base">
@@ -500,14 +504,23 @@ interface QuantityUpdateButtonsProps {
   variant: ProductVariantFragment;
   cart: OptimisticCart<CartApiQueryFragment>;
   selectedPlanId: string | null;
+  productId: string;
 }
 
 function QuantityUpdateButtons({
   variant,
   cart: originalCart,
   selectedPlanId,
+  productId,
 }: QuantityUpdateButtonsProps) {
   const { t } = useTranslation();
+  // Called on the click itself, not left to the cart: the stepper debounces
+  // for 300ms before it submits, and the cart says nothing until it does. The
+  // figures go to a placeholder on the press, and stay there until the price
+  // that lands is the final one — the tier a quantity has just crossed
+  // included, so a number on screen is never one the buyer will not be
+  // charged.
+  const { markRecalculating } = useB2BPricing();
   const cartAction = usePrefixPathWithLocale("/cart");
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
@@ -525,6 +538,16 @@ function QuantityUpdateButtons({
 
   const serverQuantity = activeLine?.quantity ?? 0;
   const [pendingDelta, setPendingDelta] = useState(0);
+  /**
+   * A removal is in flight.
+   *
+   * Its own flag rather than the fetcher's state, which this shares with the
+   * stepper: `+` and `-` debounce so that a burst of clicks becomes one
+   * request, and disabling them for the length of each would take that away.
+   * A removal is a single act, and the line it takes out is the one `+` would
+   * otherwise be adding back while it goes.
+   */
+  const [removing, setRemoving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const displayQuantity = Math.max(0, serverQuantity + pendingDelta);
@@ -586,6 +609,12 @@ function QuantityUpdateButtons({
     );
   }
 
+  useEffect(() => {
+    if (fetcher.state === "idle") {
+      setRemoving(false);
+    }
+  }, [fetcher.state]);
+
   // If a flush was deferred because the fetcher was busy, retry once it idles.
   useEffect(() => {
     if (
@@ -615,6 +644,7 @@ function QuantityUpdateButtons({
     newQuantity = Math.max(0, newQuantity);
 
     if (newQuantity !== displayQuantity) {
+      markRecalculating(productId);
       setPendingDelta(newQuantity - serverQuantity);
       scheduleFlush();
     }
@@ -644,11 +674,13 @@ function QuantityUpdateButtons({
   }, []);
 
   function handleIncrement() {
+    markRecalculating(productId);
     setPendingDelta((d) => d + increment);
     scheduleFlush();
   }
 
   function handleDecrement() {
+    markRecalculating(productId);
     setPendingDelta((d) => Math.max(-serverQuantity, d - increment));
     scheduleFlush();
   }
@@ -657,6 +689,8 @@ function QuantityUpdateButtons({
     if (!activeLine || activeLine.isOptimistic) {
       return;
     }
+    markRecalculating(productId);
+    setRemoving(true);
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
       debounceRef.current = null;
@@ -681,7 +715,7 @@ function QuantityUpdateButtons({
           type="button"
           aria-label={t("product.decreaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
-          disabled={displayQuantity <= 0}
+          disabled={displayQuantity <= 0 || removing}
           onClick={handleDecrement}
         >
           <MinusIcon className="size-4" aria-hidden="true" />
@@ -689,8 +723,9 @@ function QuantityUpdateButtons({
 
         <input
           type="number"
-          className="h-full min-w-0 grow basis-16 bg-transparent px-2 text-center text-base focus:outline-none"
+          className="h-full min-w-0 grow basis-16 bg-transparent px-2 text-center text-base focus:outline-none disabled:cursor-not-allowed disabled:text-body-subtle"
           data-test="item-quantity"
+          disabled={removing}
           value={inputValue}
           onChange={handleQuantityInputChange}
           onBlur={handleQuantityInputBlur}
@@ -702,17 +737,24 @@ function QuantityUpdateButtons({
           type="button"
           aria-label={t("product.increaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
-          disabled={isOutOfStock}
+          disabled={isOutOfStock || removing}
           onClick={handleIncrement}
         >
           <PlusIcon className="size-4" aria-hidden="true" />
         </button>
       </div>
       {showTrashButton ? (
+        /* The whole control is disabled while the removal is in flight, this
+           button included. Taking a line out can drop the product under a
+           volume tier, so the figures it leaves behind are not final until the
+           answer comes back; a second press would ask to remove a line that is
+           already going, and a `+` would quietly add back the one the buyer
+           has just asked to be rid of. */
         <button
           type="button"
           aria-label={t("cart.removeFromCart")}
-          className="flex h-4 w-4 items-center justify-center border-none hover:text-red-600 transition"
+          className="flex h-4 w-4 items-center justify-center border-none transition hover:text-red-600 disabled:cursor-not-allowed disabled:text-body-subtle disabled:hover:text-body-subtle"
+          disabled={removing}
           onClick={handleRemove}
         >
           <span className="sr-only">{t("cart.removeItem")}</span>

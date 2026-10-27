@@ -1,6 +1,13 @@
 import { useOptimisticCart } from "@shopify/hydrogen";
 import { useTranslation } from "@weaverse/hydrogen";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { useSelectedLocale } from "~/hooks/use-locale";
@@ -66,6 +73,15 @@ const DEBOUNCE_MS = 250;
  */
 const CACHE_TTL_MS = 30_000;
 
+/**
+ * How long a click may sit marked before the cart has shown any sign of it.
+ *
+ * Longer than the stepper's own 300ms debounce, so an ordinary click keeps
+ * its placeholder the whole way through; short enough that a click which
+ * never reaches the cart does not leave one standing.
+ */
+const MARK_GRACE_MS = 800;
+
 interface B2BPricingValue {
   /** `null` until the first response. */
   state: CartPricingState | null;
@@ -87,6 +103,18 @@ interface B2BPricingValue {
    * moving one variant moves the prices of all of its siblings.
    */
   recalculating: Set<string>;
+  /**
+   * Mark a product as being worked out, from the moment the buyer touches it.
+   *
+   * `recalculating` is derived from the cart, and the cart does not change
+   * until a stepper's debounce elapses and the request is in flight. It also
+   * says nothing at all until a first answer exists to be out of date, so the
+   * very first `+` on a product drew no placeholder while every later one
+   * did. Calling this on the click closes both gaps: the figures go to a
+   * placeholder on the click and stay there until the price that replaces
+   * them is the final one, tier included.
+   */
+  markRecalculating: (productId: string | null) => void;
   /**
    * Variant and product ids → the name to show in a limit message.
    *
@@ -120,6 +148,9 @@ const B2BPricingContext = createContext<B2BPricingValue>({
   loading: false,
   stale: false,
   recalculating: EMPTY_SET,
+  markRecalculating: () => {
+    /* no provider, nothing to mark */
+  },
   names: {},
   lineVariants: EMPTY_LINE_VARIANTS,
   cartKey: "",
@@ -287,6 +318,28 @@ function B2BPricingRoot({
   }, [identity]);
 
   const retries = useRef(0);
+  /**
+   * Products the buyer has just touched, marked on the click itself.
+   *
+   * Held here rather than in the stepper because a tier is reached on a
+   * product's combined quantity: a `+` on one variant moves the price of
+   * every row in its table, including the ones still at zero.
+   */
+  const [marked, setMarked] = useState<Set<string>>(EMPTY_SET);
+  const markRecalculating = useCallback((productId: string | null) => {
+    if (!productId) {
+      return;
+    }
+    const id = normId(productId);
+    setMarked((current) => {
+      if (current.has(id)) {
+        return current;
+      }
+      const next = new Set(current);
+      next.add(id);
+      return next;
+    });
+  }, []);
   /** The cart key the current `state` was computed for. */
   const [answeredKey, setAnsweredKey] = useState<string | null>(null);
   // A cart edit renders before the next pricing response arrives. Keep the
@@ -404,7 +457,7 @@ function B2BPricingRoot({
 
   const outOfDate = Boolean(key) && (!settled || key !== answeredKey);
   const changed = changedVariants(answeredKey, optimisticKey);
-  const pendingProducts = (() => {
+  const derivedProducts = (() => {
     // Nothing priced yet: the buyer is looking at Shopify's prices, not at
     // stale B2B ones, so there is nothing to announce.
     if (!outOfDate || state?.status !== "priced") {
@@ -420,6 +473,38 @@ function B2BPricingRoot({
     }
     return changedProducts(changed, variantProducts);
   })();
+  // What the cart says, plus what the buyer has just done to it.
+  const pendingProducts =
+    marked.size === 0
+      ? derivedProducts
+      : new Set([...derivedProducts, ...marked]);
+
+  // A mark is held until the answer that replaces it arrives, and no longer.
+  //
+  // `outOfDate` is false for the beat between the click and the request going
+  // out, and false again once the answer lands, so the two have to be told
+  // apart: having been out of date and come back means the figures on screen
+  // are the new ones. A click that never reaches the cart — a `+` and a `-`
+  // that cancel out, say — never makes it out of date at all, and the grace
+  // period is what keeps that from leaving a placeholder up for good.
+  const sawOutOfDate = useRef(false);
+  useEffect(() => {
+    if (marked.size === 0) {
+      sawOutOfDate.current = false;
+      return;
+    }
+    if (outOfDate) {
+      sawOutOfDate.current = true;
+      return;
+    }
+    if (sawOutOfDate.current) {
+      sawOutOfDate.current = false;
+      setMarked(EMPTY_SET);
+      return;
+    }
+    const timer = setTimeout(() => setMarked(EMPTY_SET), MARK_GRACE_MS);
+    return () => clearTimeout(timer);
+  }, [marked, outOfDate]);
 
   return (
     <B2BPricingPresent.Provider value={true}>
@@ -432,6 +517,7 @@ function B2BPricingRoot({
           // beat of silence after the click that reads as nothing happening.
           stale: outOfDate,
           recalculating: pendingProducts,
+          markRecalculating,
           names: cartNames(cart),
           // Both carts, optimistic last: the lines on screen come from the
           // optimistic cart, so its ids are the ones looked up, while the
