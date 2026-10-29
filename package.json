@@ -114,5 +114,9 @@
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "overrides": {
+    "motion-dom": "12.23.18",
+    "motion-utils": "12.23.6"
   }
 }
