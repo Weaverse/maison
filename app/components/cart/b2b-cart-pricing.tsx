@@ -1,4 +1,4 @@
-import { useOptimisticCart } from "@shopify/hydrogen";
+import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
 import { useTranslation } from "@weaverse/hydrogen";
 import {
   createContext,
@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useFetcher } from "react-router";
+import { useFetcher, useFetchers } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { useSelectedLocale } from "~/hooks/use-locale";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
@@ -115,6 +115,8 @@ interface B2BPricingValue {
    * them is the final one, tier included.
    */
   markRecalculating: (productId: string | null) => void;
+  /** The stepper has sent its debounced cart mutation. */
+  markSubmitted: (productId: string | null) => void;
   /**
    * Variant and product ids → the name to show in a limit message.
    *
@@ -150,6 +152,9 @@ const B2BPricingContext = createContext<B2BPricingValue>({
   recalculating: EMPTY_SET,
   markRecalculating: () => {
     /* no provider, nothing to mark */
+  },
+  markSubmitted: () => {
+    /* no provider, nothing to submit */
   },
   names: {},
   lineVariants: EMPTY_LINE_VARIANTS,
@@ -326,17 +331,31 @@ function B2BPricingRoot({
    * every row in its table, including the ones still at zero.
    */
   const [marked, setMarked] = useState<Set<string>>(EMPTY_SET);
+  const [localEdits, setLocalEdits] = useState<Set<string>>(EMPTY_SET);
+  const sawWorkAfterMark = useRef(false);
   const markRecalculating = useCallback((productId: string | null) => {
     if (!productId) {
       return;
     }
     const id = normId(productId);
-    setMarked((current) => {
-      if (current.has(id)) {
-        return current;
-      }
+    // An answer for the cart *before* this press is not the answer that may
+    // clear its placeholder, even if its key is still current during debounce.
+    sawWorkAfterMark.current = false;
+    setLocalEdits((current) => new Set(current).add(id));
+    // A new Set even when the id is already in it: the hold below is keyed to
+    // this value, and a second press inside one burst has to restart it rather
+    // than let the first press's clock run out mid-burst.
+    setMarked((current) => new Set(current).add(id));
+  }, []);
+  const markSubmitted = useCallback((productId: string | null) => {
+    if (!productId) {
+      return;
+    }
+    const id = normId(productId);
+    sawWorkAfterMark.current = false;
+    setLocalEdits((current) => {
       const next = new Set(current);
-      next.add(id);
+      next.delete(id);
       return next;
     });
   }, []);
@@ -479,45 +498,58 @@ function B2BPricingRoot({
       ? derivedProducts
       : new Set([...derivedProducts, ...marked]);
 
-  // A mark is held until the answer that replaces it arrives, and no longer.
+  // A mark is held until the figures that replace it are final, and no longer.
   //
-  // `outOfDate` is false for the beat between the click and the request going
-  // out, and false again once the answer lands, so the two have to be told
-  // apart: having been out of date and come back means the figures on screen
-  // are the new ones. A click that never reaches the cart — a `+` and a `-`
-  // that cancel out, say — never makes it out of date at all, and the grace
-  // period is what keeps that from leaving a placeholder up for good.
-  const sawOutOfDate = useRef(false);
+  // `outOfDate` alone cannot say when that is. It is false for the beat between
+  // the click and the request going out, false again once the answer lands,
+  // and false throughout for a cart that started empty — `cartPricingKey`
+  // returns "" for one, so the first `+` on an empty cart would otherwise time
+  // out while its own `LinesAdd` was still in flight. So the hold watches the
+  // work itself: a cart mutation anywhere on the page, or this provider's own
+  // pricing request. Only when both are quiet does the answer decide, and the
+  // timer is the cap for the case where nothing ever confirms the figures — a
+  // `+` and a `-` that cancel out before either reaches the cart, or a pricing
+  // request that will not answer.
+  const cartFetchers = useFetchers();
+  const cartMutating = cartFetchers.some(
+    (f) => f.state !== "idle" && Boolean(f.formData?.get(CartForm.INPUT_NAME)),
+  );
+  const pricingLoading = fetcher.state !== "idle";
+  const answerIsCurrent = Boolean(key) && !outOfDate;
   useEffect(() => {
     if (marked.size === 0) {
-      sawOutOfDate.current = false;
       return;
     }
-    if (outOfDate) {
-      sawOutOfDate.current = true;
+    if (cartMutating || pricingLoading) {
+      sawWorkAfterMark.current = true;
       return;
     }
-    if (sawOutOfDate.current) {
-      sawOutOfDate.current = false;
+    if (localEdits.size === 0 && sawWorkAfterMark.current && answerIsCurrent) {
+      sawWorkAfterMark.current = false;
       setMarked(EMPTY_SET);
       return;
     }
-    const timer = setTimeout(() => setMarked(EMPTY_SET), MARK_GRACE_MS);
+    const timer = setTimeout(() => {
+      sawWorkAfterMark.current = false;
+      setLocalEdits(EMPTY_SET);
+      setMarked(EMPTY_SET);
+    }, MARK_GRACE_MS);
     return () => clearTimeout(timer);
-  }, [marked, outOfDate]);
+  }, [marked, localEdits, answerIsCurrent, cartMutating, pricingLoading]);
 
   return (
     <B2BPricingPresent.Provider value={true}>
       <B2BPricingContext.Provider
         value={{
           state,
-          loading: fetcher.state !== "idle",
+          loading: pricingLoading,
           // `!settled` is what makes this true the moment a stepper is
           // clicked. Waiting for the server cart to come back first leaves a
           // beat of silence after the click that reads as nothing happening.
           stale: outOfDate,
           recalculating: pendingProducts,
           markRecalculating,
+          markSubmitted,
           names: cartNames(cart),
           // Both carts, optimistic last: the lines on screen come from the
           // optimistic cart, so its ids are the ones looked up, while the

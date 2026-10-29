@@ -451,6 +451,7 @@ function KeywordsDisplay({
           title: keyword,
           styledTitle: keyword,
         }));
+  const hasKeywords = keywords.length > 0;
   const railRef = useRef<HTMLDivElement>(null);
 
   // A mouse wheel reports movement on Y only, and this rail scrolls on X with
@@ -461,7 +462,7 @@ function KeywordsDisplay({
   // `preventDefault` is ignored.
   useEffect(() => {
     const rail = railRef.current;
-    if (!rail) {
+    if (!(hasKeywords && rail)) {
       return;
     }
     function onWheel(event: WheelEvent) {
@@ -479,9 +480,13 @@ function KeywordsDisplay({
     }
     rail.addEventListener("wheel", onWheel, { passive: false });
     return () => rail.removeEventListener("wheel", onWheel);
-  }, []);
+    // Keyed to whether the rail is on screen, not to the mount. With no
+    // popular keywords configured there is nothing to render on the first
+    // pass, so a mount-only effect found no rail and never looked again —
+    // the suggestions that arrived a keystroke later scrolled nowhere.
+  }, [hasKeywords]);
 
-  if (keywords.length === 0) {
+  if (!hasKeywords) {
     return null;
   }
 

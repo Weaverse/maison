@@ -47,8 +47,12 @@ function AmountPlaceholder({
   className?: string;
   children: React.ReactNode;
 }) {
+  // The same wrapper in both branches. The drawer's `dd` hands its
+  // `flex items-center gap-2` down here so the copy held in flow keeps the
+  // row's shape; returning the children bare once the figures arrived dropped
+  // it, and the struck-through price lost the 8px it had sat at.
   if (!loading) {
-    return <>{children}</>;
+    return className ? <span className={className}>{children}</span> : children;
   }
   return (
     <span className="relative block">

@@ -520,7 +520,7 @@ function QuantityUpdateButtons({
   // that lands is the final one — the tier a quantity has just crossed
   // included, so a number on screen is never one the buyer will not be
   // charged.
-  const { markRecalculating } = useB2BPricing();
+  const { markRecalculating, markSubmitted } = useB2BPricing();
   const cartAction = usePrefixPathWithLocale("/cart");
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
@@ -555,6 +555,7 @@ function QuantityUpdateButtons({
   function submitCart(action: string, inputs: Record<string, unknown>) {
     const formData = new FormData();
     formData.append(CartForm.INPUT_NAME, JSON.stringify({ action, inputs }));
+    markSubmitted(productId);
     fetcher.submit(formData, { method: "POST", action: cartAction });
   }
 
