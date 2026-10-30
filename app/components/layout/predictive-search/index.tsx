@@ -3,7 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { Image } from "~/components/image";
 import Link from "~/components/link";
@@ -112,7 +112,7 @@ function AnimatedSearchDrawer({ open, children }) {
                   damping: 25,
                   stiffness: 150,
                 }}
-                className="w-screen md:max-w-[384px] bg-background py-4 h-full"
+                className="w-[calc(100vw-24px)] md:max-w-[384px] bg-background py-4 h-full"
               >
                 {children}
               </motion.div>
@@ -451,8 +451,42 @@ function KeywordsDisplay({
           title: keyword,
           styledTitle: keyword,
         }));
+  let hasKeywords = keywords.length > 0;
+  let railRef = useRef<HTMLDivElement>(null);
 
-  if (keywords.length === 0) {
+  // A mouse wheel reports movement on Y only, and this rail scrolls on X with
+  // its scrollbar hidden — so on a desktop mouse there was no way to reach the
+  // keywords past the edge. Trackpads already send `deltaX` and are left to
+  // scroll it themselves. The listener is registered here rather than through
+  // `onWheel` because React attaches wheel handlers passively, where
+  // `preventDefault` is ignored.
+  useEffect(() => {
+    let rail = railRef.current;
+    if (!(hasKeywords && rail)) {
+      return;
+    }
+    function onWheel(event: WheelEvent) {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+        return;
+      }
+      let max = rail.scrollWidth - rail.clientWidth;
+      let next = Math.min(Math.max(rail.scrollLeft + event.deltaY, 0), max);
+      // Already at that end: leave the event alone so the page still scrolls.
+      if (next === rail.scrollLeft) {
+        return;
+      }
+      event.preventDefault();
+      rail.scrollLeft = next;
+    }
+    rail.addEventListener("wheel", onWheel, { passive: false });
+    return () => rail.removeEventListener("wheel", onWheel);
+    // Keyed to whether the rail is on screen, not to the mount. With no
+    // popular keywords configured there is nothing to render on the first
+    // pass, so a mount-only effect found no rail and never looked again —
+    // the suggestions that arrived a keystroke later scrolled nowhere.
+  }, [hasKeywords]);
+
+  if (!hasKeywords) {
     return null;
   }
 
@@ -460,7 +494,10 @@ function KeywordsDisplay({
     // One row that scrolls sideways rather than wrapping: the suggestions grow
     // with whatever the shopper has typed, and a second line pushed the results
     // down the panel. `hidden-scroll` keeps the rail itself out of sight.
-    <div className="hidden-scroll mt-3 flex gap-4 overflow-x-auto">
+    <div
+      ref={railRef}
+      className="hidden-scroll mt-3 flex gap-4 overflow-x-auto"
+    >
       {keywords.map((item) => (
         <button
           key={item.title}

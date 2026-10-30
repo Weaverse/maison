@@ -78,7 +78,12 @@ function NewsLetterForm(props: NewsLetterInputProps) {
             type="email"
             required
             placeholder={placeholder}
-            className="p-3 leading-tight focus:outline-hidden placeholder:text-sm"
+            // Same vertical metrics as `Button` and the other theme form
+            // fields (18px padding + a 16px line box), so the input and the
+            // submit button line up at the same height. `block` is what keeps
+            // them equal: an inline input would add a baseline descender gap
+            // inside the bordered wrapper.
+            className="block max-w-full px-3 py-[18px] text-base leading-none focus:outline-hidden"
             style={{ width }}
           />
         </div>

@@ -58,7 +58,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
             {/* mobile layout */}
             <div className="space-y-6 md:hidden">
               <div className="border-b border-line-subtle py-3">
-                <p className="font-semibold text-sm">{t("product.products")}</p>
+                <p className="font-semibold text-sm">{t("product.variants")}</p>
               </div>
               <div className="space-y-6">
                 {variants.map((variant) => (
@@ -100,7 +100,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                     {t("product.variant")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                    {t("product.price")}
+                    {t("product.unitPrice")}
                   </div>
                   <div className="font-semibold text-base text-body-subtle uppercase text-right">
                     {t("product.variantPrice")}
@@ -147,7 +147,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                       {t("product.quantity")}
                     </div>
                     <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                      {t("product.price")}
+                      {t("product.unitPrice")}
                     </div>
                     <div className="font-semibold text-base text-body-subtle uppercase text-right">
                       {t("product.variantPrice")}
@@ -167,7 +167,7 @@ export function VariantListItems({ variants, product }: VariantListItemsProps) {
                       {t("product.quantity")}
                     </div>
                     <div className="font-semibold text-base text-body-subtle uppercase text-center">
-                      {t("product.price")}
+                      {t("product.unitPrice")}
                     </div>
                     <div className="font-semibold text-base text-body-subtle uppercase text-right">
                       {t("product.variantPrice")}

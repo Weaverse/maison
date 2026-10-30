@@ -111,7 +111,7 @@ export function QuickShop({
           {/* mobile header */}
           <div className="border-b border-line-subtle py-3 md:hidden">
             <div className="text-sm font-semibold uppercase text-body-subtle">
-              {t("product.products")}
+              {t("product.variants")}
             </div>
           </div>
           {/* tablet header — same template as `VariantRow`'s tablet grid. */}
@@ -125,7 +125,7 @@ export function QuickShop({
               {t("product.variant")}
             </div>
             <div className="font-semibold text-base uppercase text-center">
-              {t("product.price")}
+              {t("product.unitPrice")}
             </div>
             <div className="font-semibold text-base uppercase text-right">
               {t("product.variantPrice")}
@@ -150,7 +150,7 @@ export function QuickShop({
                 {t("product.quantity")}
               </div>
               <div className="font-semibold text-base uppercase text-center">
-                {t("product.price")}
+                {t("product.unitPrice")}
               </div>
               <div className="font-semibold text-base uppercase text-right">
                 {t("product.variantPrice")}
@@ -170,7 +170,7 @@ export function QuickShop({
                 {t("product.quantity")}
               </div>
               <div className="font-semibold text-base uppercase text-center">
-                {t("product.price")}
+                {t("product.unitPrice")}
               </div>
               <div className="font-semibold text-base uppercase text-right">
                 {t("product.variantPrice")}
@@ -328,7 +328,7 @@ export function QuickShopTrigger({
         <Dialog.Content
           className={clsx(
             "quick-shop-dialog-content",
-            "fixed inset-0 z-10 flex items-center overflow-x-hidden px-4",
+            "fixed inset-0 z-10 flex items-center overflow-x-hidden px-6",
             "backdrop-blur-xs data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           )}
           onClick={(e) => {

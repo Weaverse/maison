@@ -315,7 +315,10 @@ export function Footer() {
         <FooterMenu />
         {/* Same treatment as the star divider below */}
         <div className="h-px w-full bg-[#A79D95] opacity-35" />
-        <div className="flex flex-col gap-6 py-6 md:flex-row md:flex-wrap md:justify-between lg:flex-nowrap lg:items-center">
+        {/* 12px from each separator to the content — 24px over the whole
+            row. The star divider below pays its half of that through the
+            negative margin on its own box, explained there. */}
+        <div className="flex flex-col gap-6 py-3 md:flex-row md:flex-wrap md:justify-between lg:flex-nowrap lg:items-center">
           {/* Payment Icons - Order 2 on mobile/tablet, Order 3 on desktop */}
           {paymentIconKeys.length > 0 && (
             <div className="order-2 flex items-center gap-3 lg:order-3">
@@ -333,8 +336,13 @@ export function Footer() {
           />
         </div>
 
-        {/* Divider with star */}
-        <div className="flex w-full items-center gap-4">
+        {/* Divider with star. The star sits in a 44px box with the rule
+            drawn through its middle, so the box reaches 22px above the line
+            it reads as. Pulling it back up by that half puts the line on the
+            row's own edge, and the 12px above it is the padding of the row
+            above — the same 12px that row leaves under the hairline. Nothing
+            below moves relative to the star: the whole block shifts together. */}
+        <div className="-mt-[22px] flex w-full items-center gap-4">
           <div className="h-px flex-1 bg-[#A79D95] opacity-35" />
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full text-[#686766]">
             <StarDividerIcon />

@@ -1,7 +1,7 @@
-import { useOptimisticCart } from "@shopify/hydrogen";
+import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
 import { useTranslation } from "@weaverse/hydrogen";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useFetcher } from "react-router";
+import { useFetcher, useFetchers } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { useSelectedLocale } from "~/hooks/use-locale";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
@@ -66,6 +66,15 @@ const DEBOUNCE_MS = 250;
  */
 const CACHE_TTL_MS = 30_000;
 
+/**
+ * How long a click may sit marked before the cart has shown any sign of it.
+ *
+ * Longer than the stepper's own 300ms debounce, so an ordinary click keeps
+ * its placeholder the whole way through; short enough that a click which
+ * never reaches the cart does not leave one standing.
+ */
+const MARK_GRACE_MS = 800;
+
 interface B2BPricingValue {
   /** `null` until the first response. */
   state: CartPricingState | null;
@@ -87,6 +96,20 @@ interface B2BPricingValue {
    * moving one variant moves the prices of all of its siblings.
    */
   recalculating: Set<string>;
+  /**
+   * Mark a product as being worked out, from the moment the buyer touches it.
+   *
+   * `recalculating` is derived from the cart, and the cart does not change
+   * until a stepper's debounce elapses and the request is in flight. It also
+   * says nothing at all until a first answer exists to be out of date, so the
+   * very first `+` on a product drew no placeholder while every later one
+   * did. Calling this on the click closes both gaps: the figures go to a
+   * placeholder on the click and stay there until the price that replaces
+   * them is the final one, tier included.
+   */
+  markRecalculating: (productId: string | null) => void;
+  /** The stepper has sent its debounced cart mutation. */
+  markSubmitted: (productId: string | null) => void;
   /**
    * Variant and product ids → the name to show in a limit message.
    *
@@ -120,6 +143,12 @@ const B2BPricingContext = createContext<B2BPricingValue>({
   loading: false,
   stale: false,
   recalculating: EMPTY_SET,
+  markRecalculating: () => {
+    /* no provider, nothing to mark */
+  },
+  markSubmitted: () => {
+    /* no provider, nothing to submit */
+  },
   names: {},
   lineVariants: EMPTY_LINE_VARIANTS,
   cartKey: "",
@@ -287,6 +316,42 @@ function B2BPricingRoot({
   }, [identity]);
 
   const retries = useRef(0);
+  /**
+   * Products the buyer has just touched, marked on the click itself.
+   *
+   * Held here rather than in the stepper because a tier is reached on a
+   * product's combined quantity: a `+` on one variant moves the price of
+   * every row in its table, including the ones still at zero.
+   */
+  let [marked, setMarked] = useState<Set<string>>(EMPTY_SET);
+  let [localEdits, setLocalEdits] = useState<Set<string>>(EMPTY_SET);
+  let sawWorkAfterMark = useRef(false);
+  function markRecalculating(productId: string | null) {
+    if (!productId) {
+      return;
+    }
+    let id = normId(productId);
+    // An answer for the cart *before* this press is not the answer that may
+    // clear its placeholder, even if its key is still current during debounce.
+    sawWorkAfterMark.current = false;
+    setLocalEdits((current) => new Set(current).add(id));
+    // A new Set even when the id is already in it: the hold below is keyed to
+    // this value, and a second press inside one burst has to restart it rather
+    // than let the first press's clock run out mid-burst.
+    setMarked((current) => new Set(current).add(id));
+  }
+  function markSubmitted(productId: string | null) {
+    if (!productId) {
+      return;
+    }
+    let id = normId(productId);
+    sawWorkAfterMark.current = false;
+    setLocalEdits((current) => {
+      let next = new Set(current);
+      next.delete(id);
+      return next;
+    });
+  }
   /** The cart key the current `state` was computed for. */
   const [answeredKey, setAnsweredKey] = useState<string | null>(null);
   // A cart edit renders before the next pricing response arrives. Keep the
@@ -404,7 +469,7 @@ function B2BPricingRoot({
 
   const outOfDate = Boolean(key) && (!settled || key !== answeredKey);
   const changed = changedVariants(answeredKey, optimisticKey);
-  const pendingProducts = (() => {
+  let derivedProducts = (() => {
     // Nothing priced yet: the buyer is looking at Shopify's prices, not at
     // stale B2B ones, so there is nothing to announce.
     if (!outOfDate || state?.status !== "priced") {
@@ -420,18 +485,64 @@ function B2BPricingRoot({
     }
     return changedProducts(changed, variantProducts);
   })();
+  // What the cart says, plus what the buyer has just done to it.
+  let pendingProducts =
+    marked.size === 0
+      ? derivedProducts
+      : new Set([...derivedProducts, ...marked]);
+
+  // A mark is held until the figures that replace it are final, and no longer.
+  //
+  // `outOfDate` alone cannot say when that is. It is false for the beat between
+  // the click and the request going out, false again once the answer lands,
+  // and false throughout for a cart that started empty — `cartPricingKey`
+  // returns "" for one, so the first `+` on an empty cart would otherwise time
+  // out while its own `LinesAdd` was still in flight. So the hold watches the
+  // work itself: a cart mutation anywhere on the page, or this provider's own
+  // pricing request. Only when both are quiet does the answer decide, and the
+  // timer is the cap for the case where nothing ever confirms the figures — a
+  // `+` and a `-` that cancel out before either reaches the cart, or a pricing
+  // request that will not answer.
+  let cartFetchers = useFetchers();
+  let cartMutating = cartFetchers.some(
+    (f) => f.state !== "idle" && Boolean(f.formData?.get(CartForm.INPUT_NAME)),
+  );
+  let pricingLoading = fetcher.state !== "idle";
+  let answerIsCurrent = Boolean(key) && !outOfDate;
+  useEffect(() => {
+    if (marked.size === 0) {
+      return;
+    }
+    if (cartMutating || pricingLoading) {
+      sawWorkAfterMark.current = true;
+      return;
+    }
+    if (localEdits.size === 0 && sawWorkAfterMark.current && answerIsCurrent) {
+      sawWorkAfterMark.current = false;
+      setMarked(EMPTY_SET);
+      return;
+    }
+    let timer = setTimeout(() => {
+      sawWorkAfterMark.current = false;
+      setLocalEdits(EMPTY_SET);
+      setMarked(EMPTY_SET);
+    }, MARK_GRACE_MS);
+    return () => clearTimeout(timer);
+  }, [marked, localEdits, answerIsCurrent, cartMutating, pricingLoading]);
 
   return (
     <B2BPricingPresent.Provider value={true}>
       <B2BPricingContext.Provider
         value={{
           state,
-          loading: fetcher.state !== "idle",
+          loading: pricingLoading,
           // `!settled` is what makes this true the moment a stepper is
           // clicked. Waiting for the server cart to come back first leaves a
           // beat of silence after the click that reads as nothing happening.
           stale: outOfDate,
           recalculating: pendingProducts,
+          markRecalculating,
+          markSubmitted,
           names: cartNames(cart),
           // Both carts, optimistic last: the lines on screen come from the
           // optimistic cart, so its ids are the ones looked up, while the

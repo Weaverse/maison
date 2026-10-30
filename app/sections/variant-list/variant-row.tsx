@@ -63,15 +63,11 @@ function PriceWithCompare({
   price,
   compareAt,
   recalculating,
-  suffix,
 }: {
   price: MoneyData;
   compareAt: MoneyData | null;
   /** The figures shown belong to the previous quantity. */
   recalculating?: boolean;
-  /** Rendered after the price, e.g. "/unit". Kept inside so the cell keeps
-      its full width while the spinner stands in for it. */
-  suffix?: React.ReactNode;
 }) {
   const { saleBadgeColor } = useThemeSettings();
 
@@ -86,7 +82,6 @@ function PriceWithCompare({
         </span>
       )}
       <Money data={price} as="span" withoutTrailingZeros />
-      {suffix}
     </>
   );
 
@@ -101,18 +96,32 @@ function PriceWithCompare({
 
   // The placeholder is laid over the figures it replaces rather than swapped
   // in for them: keeping the old content in flow but invisible holds the cell
-  // at exactly its own size, so the column does not jump and `/unit` does not
-  // wrap while the price is worked out.
+  // at exactly its own size, so the column does not jump while the price is
+  // worked out.
+  //
+  // Its own size is fixed, though, and not the shape of what it covers. Taking
+  // the figures' width made it a different bar in every cell — a row showing
+  // $0 because nothing is ordered yet got a stub barely wider than the two
+  // characters it replaced, beside rows with a full bar.
   return (
-    <span className="relative inline-flex items-baseline gap-1.5">
-      <span className="invisible" aria-hidden="true">
+    <span className="relative block">
+      <span className="invisible block" aria-hidden="true">
         {settled}
       </span>
-      <Skeleton
-        as="span"
-        className="absolute inset-0 rounded"
-        aria-label="Updating price"
-      />
+      {/* A block covering the cell, with the bar as an inline child: it is
+          then placed by the cell's own `text-align`, so it lands exactly where
+          the figure it replaces would — centred under a centred column header,
+          right under a right-aligned one — and every row in a column puts its
+          bar at the same x. Anchoring the bar to the figures instead made a
+          row carrying a struck-through compare-at price sit wider than its
+          neighbours and pushed its bar out of line. */}
+      <span className="absolute inset-0">
+        <Skeleton
+          as="span"
+          className="inline-block h-full w-16 rounded"
+          aria-label="Updating price"
+        />
+      </span>
     </span>
   );
 }
@@ -280,7 +289,6 @@ export function VariantRow({
                 price={unitPrice}
                 compareAt={compareUnitPrice}
                 recalculating={recalculating}
-                suffix={<span>/unit</span>}
               />
             </div>
           </div>
@@ -309,6 +317,7 @@ export function VariantRow({
                 cart={resolvedCart}
                 variant={variant}
                 selectedPlanId={selectedPlanId}
+                productId={productId}
               />
             </div>
           </>
@@ -319,6 +328,7 @@ export function VariantRow({
                 cart={resolvedCart}
                 variant={variant}
                 selectedPlanId={selectedPlanId}
+                productId={productId}
               />
             </div>
             <div className="font-bold text-base text-right">
@@ -388,6 +398,7 @@ export function VariantRow({
               cart={resolvedCart}
               variant={variant}
               selectedPlanId={selectedPlanId}
+              productId={productId}
             />
           </div>
         </div>
@@ -397,7 +408,6 @@ export function VariantRow({
             price={unitPrice}
             compareAt={compareUnitPrice}
             recalculating={recalculating}
-            suffix={<span>/unit</span>}
           />
         </div>
         <div className="text-right font-semibold text-base">
@@ -468,6 +478,7 @@ export function VariantRow({
             cart={resolvedCart}
             variant={variant}
             selectedPlanId={selectedPlanId}
+            productId={productId}
           />
         </div>
         <div className="text-center text-base">
@@ -475,7 +486,6 @@ export function VariantRow({
             price={unitPrice}
             compareAt={compareUnitPrice}
             recalculating={recalculating}
-            suffix={<span>/unit</span>}
           />
         </div>
         <div className="text-right font-semibold text-base">
@@ -494,14 +504,23 @@ interface QuantityUpdateButtonsProps {
   variant: ProductVariantFragment;
   cart: OptimisticCart<CartApiQueryFragment>;
   selectedPlanId: string | null;
+  productId: string;
 }
 
 function QuantityUpdateButtons({
   variant,
   cart: originalCart,
   selectedPlanId,
+  productId,
 }: QuantityUpdateButtonsProps) {
   const { t } = useTranslation();
+  // Called on the click itself, not left to the cart: the stepper debounces
+  // for 300ms before it submits, and the cart says nothing until it does. The
+  // figures go to a placeholder on the press, and stay there until the price
+  // that lands is the final one — the tier a quantity has just crossed
+  // included, so a number on screen is never one the buyer will not be
+  // charged.
+  let { markRecalculating, markSubmitted } = useB2BPricing();
   const cartAction = usePrefixPathWithLocale("/cart");
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
@@ -519,6 +538,16 @@ function QuantityUpdateButtons({
 
   const serverQuantity = activeLine?.quantity ?? 0;
   const [pendingDelta, setPendingDelta] = useState(0);
+  /**
+   * A removal is in flight.
+   *
+   * Its own flag rather than the fetcher's state, which this shares with the
+   * stepper: `+` and `-` debounce so that a burst of clicks becomes one
+   * request, and disabling them for the length of each would take that away.
+   * A removal is a single act, and the line it takes out is the one `+` would
+   * otherwise be adding back while it goes.
+   */
+  let [removing, setRemoving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const displayQuantity = Math.max(0, serverQuantity + pendingDelta);
@@ -526,6 +555,7 @@ function QuantityUpdateButtons({
   function submitCart(action: string, inputs: Record<string, unknown>) {
     const formData = new FormData();
     formData.append(CartForm.INPUT_NAME, JSON.stringify({ action, inputs }));
+    markSubmitted(productId);
     fetcher.submit(formData, { method: "POST", action: cartAction });
   }
 
@@ -580,6 +610,12 @@ function QuantityUpdateButtons({
     );
   }
 
+  useEffect(() => {
+    if (fetcher.state === "idle") {
+      setRemoving(false);
+    }
+  }, [fetcher.state]);
+
   // If a flush was deferred because the fetcher was busy, retry once it idles.
   useEffect(() => {
     if (
@@ -609,6 +645,7 @@ function QuantityUpdateButtons({
     newQuantity = Math.max(0, newQuantity);
 
     if (newQuantity !== displayQuantity) {
+      markRecalculating(productId);
       setPendingDelta(newQuantity - serverQuantity);
       scheduleFlush();
     }
@@ -638,11 +675,13 @@ function QuantityUpdateButtons({
   }, []);
 
   function handleIncrement() {
+    markRecalculating(productId);
     setPendingDelta((d) => d + increment);
     scheduleFlush();
   }
 
   function handleDecrement() {
+    markRecalculating(productId);
     setPendingDelta((d) => Math.max(-serverQuantity, d - increment));
     scheduleFlush();
   }
@@ -651,6 +690,8 @@ function QuantityUpdateButtons({
     if (!activeLine || activeLine.isOptimistic) {
       return;
     }
+    markRecalculating(productId);
+    setRemoving(true);
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
       debounceRef.current = null;
@@ -675,7 +716,7 @@ function QuantityUpdateButtons({
           type="button"
           aria-label={t("product.decreaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
-          disabled={displayQuantity <= 0}
+          disabled={displayQuantity <= 0 || removing}
           onClick={handleDecrement}
         >
           <MinusIcon className="size-4" aria-hidden="true" />
@@ -683,8 +724,9 @@ function QuantityUpdateButtons({
 
         <input
           type="number"
-          className="h-full min-w-0 grow basis-16 bg-transparent px-2 text-center text-base focus:outline-none"
+          className="h-full min-w-0 grow basis-16 bg-transparent px-2 text-center text-base focus:outline-none disabled:cursor-not-allowed disabled:text-body-subtle"
           data-test="item-quantity"
+          disabled={removing}
           value={inputValue}
           onChange={handleQuantityInputChange}
           onBlur={handleQuantityInputBlur}
@@ -696,17 +738,24 @@ function QuantityUpdateButtons({
           type="button"
           aria-label={t("product.increaseQuantity")}
           className="flex h-full shrink-0 items-center justify-center px-4 transition disabled:cursor-not-allowed disabled:text-body-subtle"
-          disabled={isOutOfStock}
+          disabled={isOutOfStock || removing}
           onClick={handleIncrement}
         >
           <PlusIcon className="size-4" aria-hidden="true" />
         </button>
       </div>
       {showTrashButton ? (
+        /* The whole control is disabled while the removal is in flight, this
+           button included. Taking a line out can drop the product under a
+           volume tier, so the figures it leaves behind are not final until the
+           answer comes back; a second press would ask to remove a line that is
+           already going, and a `+` would quietly add back the one the buyer
+           has just asked to be rid of. */
         <button
           type="button"
           aria-label={t("cart.removeFromCart")}
-          className="flex h-4 w-4 items-center justify-center border-none hover:text-red-600 transition"
+          className="flex h-4 w-4 items-center justify-center border-none transition hover:text-red-600 disabled:cursor-not-allowed disabled:text-body-subtle disabled:hover:text-body-subtle"
+          disabled={removing}
           onClick={handleRemove}
         >
           <span className="sr-only">{t("cart.removeItem")}</span>

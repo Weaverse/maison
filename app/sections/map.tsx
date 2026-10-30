@@ -87,10 +87,9 @@ export default function MapSection(props: MapSectionProps) {
 
   return (
     <Section ref={ref} {...rest} containerClassName="p-0" overflow="unset">
-      {/* Store info card — sits above the map. Figma casts a 25% shadow here;
-          softened to 10% so the map's top edge does not read as dirty. */}
+      {/* Store info card — sits above the map. */}
       <div
-        className="relative z-10 w-full px-6 py-12 shadow-[0_20px_20px_rgb(0_0_0_/_10%)] md:px-12 md:py-20"
+        className="relative z-10 w-full px-6 py-12 md:px-12 md:py-20"
         style={{ backgroundColor: infoBgColor }}
       >
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 md:gap-12 md:px-10">
