@@ -13,7 +13,7 @@ interface ColumnsWithImagesItemsProps extends HydrogenComponentProps {
 }
 
 function ColumnsWithImagesItems(props: ColumnsWithImagesItemsProps) {
-  const {
+  let {
     children,
     gap,
     imageAspectRatio,

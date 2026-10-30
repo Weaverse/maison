@@ -451,8 +451,8 @@ function KeywordsDisplay({
           title: keyword,
           styledTitle: keyword,
         }));
-  const hasKeywords = keywords.length > 0;
-  const railRef = useRef<HTMLDivElement>(null);
+  let hasKeywords = keywords.length > 0;
+  let railRef = useRef<HTMLDivElement>(null);
 
   // A mouse wheel reports movement on Y only, and this rail scrolls on X with
   // its scrollbar hidden — so on a desktop mouse there was no way to reach the
@@ -461,7 +461,7 @@ function KeywordsDisplay({
   // `onWheel` because React attaches wheel handlers passively, where
   // `preventDefault` is ignored.
   useEffect(() => {
-    const rail = railRef.current;
+    let rail = railRef.current;
     if (!(hasKeywords && rail)) {
       return;
     }
@@ -469,8 +469,8 @@ function KeywordsDisplay({
       if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
         return;
       }
-      const max = rail.scrollWidth - rail.clientWidth;
-      const next = Math.min(Math.max(rail.scrollLeft + event.deltaY, 0), max);
+      let max = rail.scrollWidth - rail.clientWidth;
+      let next = Math.min(Math.max(rail.scrollLeft + event.deltaY, 0), max);
       // Already at that end: leave the event alone so the page still scrolls.
       if (next === rail.scrollLeft) {
         return;

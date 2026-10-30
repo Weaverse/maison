@@ -27,7 +27,7 @@ interface MulticolumnItemsProps
 const MulticolumnItems = (props: MulticolumnItemsProps) => {
   // Defaulted here, not only in the schema: a page saved before this setting
   // existed stores no value, and `undefinedpx` would leave the items square.
-  const { ref, children, columns, gap, borderRadius = 4, ...rest } = props;
+  let { ref, children, columns, gap, borderRadius = 4, ...rest } = props;
 
   return (
     <div

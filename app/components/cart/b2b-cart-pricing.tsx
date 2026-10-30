@@ -1,13 +1,6 @@
 import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
 import { useTranslation } from "@weaverse/hydrogen";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useFetcher, useFetchers } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { useSelectedLocale } from "~/hooks/use-locale";
@@ -330,14 +323,14 @@ function B2BPricingRoot({
    * product's combined quantity: a `+` on one variant moves the price of
    * every row in its table, including the ones still at zero.
    */
-  const [marked, setMarked] = useState<Set<string>>(EMPTY_SET);
-  const [localEdits, setLocalEdits] = useState<Set<string>>(EMPTY_SET);
-  const sawWorkAfterMark = useRef(false);
-  const markRecalculating = useCallback((productId: string | null) => {
+  let [marked, setMarked] = useState<Set<string>>(EMPTY_SET);
+  let [localEdits, setLocalEdits] = useState<Set<string>>(EMPTY_SET);
+  let sawWorkAfterMark = useRef(false);
+  function markRecalculating(productId: string | null) {
     if (!productId) {
       return;
     }
-    const id = normId(productId);
+    let id = normId(productId);
     // An answer for the cart *before* this press is not the answer that may
     // clear its placeholder, even if its key is still current during debounce.
     sawWorkAfterMark.current = false;
@@ -346,19 +339,19 @@ function B2BPricingRoot({
     // this value, and a second press inside one burst has to restart it rather
     // than let the first press's clock run out mid-burst.
     setMarked((current) => new Set(current).add(id));
-  }, []);
-  const markSubmitted = useCallback((productId: string | null) => {
+  }
+  function markSubmitted(productId: string | null) {
     if (!productId) {
       return;
     }
-    const id = normId(productId);
+    let id = normId(productId);
     sawWorkAfterMark.current = false;
     setLocalEdits((current) => {
-      const next = new Set(current);
+      let next = new Set(current);
       next.delete(id);
       return next;
     });
-  }, []);
+  }
   /** The cart key the current `state` was computed for. */
   const [answeredKey, setAnsweredKey] = useState<string | null>(null);
   // A cart edit renders before the next pricing response arrives. Keep the
@@ -476,7 +469,7 @@ function B2BPricingRoot({
 
   const outOfDate = Boolean(key) && (!settled || key !== answeredKey);
   const changed = changedVariants(answeredKey, optimisticKey);
-  const derivedProducts = (() => {
+  let derivedProducts = (() => {
     // Nothing priced yet: the buyer is looking at Shopify's prices, not at
     // stale B2B ones, so there is nothing to announce.
     if (!outOfDate || state?.status !== "priced") {
@@ -493,7 +486,7 @@ function B2BPricingRoot({
     return changedProducts(changed, variantProducts);
   })();
   // What the cart says, plus what the buyer has just done to it.
-  const pendingProducts =
+  let pendingProducts =
     marked.size === 0
       ? derivedProducts
       : new Set([...derivedProducts, ...marked]);
@@ -510,12 +503,12 @@ function B2BPricingRoot({
   // timer is the cap for the case where nothing ever confirms the figures — a
   // `+` and a `-` that cancel out before either reaches the cart, or a pricing
   // request that will not answer.
-  const cartFetchers = useFetchers();
-  const cartMutating = cartFetchers.some(
+  let cartFetchers = useFetchers();
+  let cartMutating = cartFetchers.some(
     (f) => f.state !== "idle" && Boolean(f.formData?.get(CartForm.INPUT_NAME)),
   );
-  const pricingLoading = fetcher.state !== "idle";
-  const answerIsCurrent = Boolean(key) && !outOfDate;
+  let pricingLoading = fetcher.state !== "idle";
+  let answerIsCurrent = Boolean(key) && !outOfDate;
   useEffect(() => {
     if (marked.size === 0) {
       return;
@@ -529,7 +522,7 @@ function B2BPricingRoot({
       setMarked(EMPTY_SET);
       return;
     }
-    const timer = setTimeout(() => {
+    let timer = setTimeout(() => {
       sawWorkAfterMark.current = false;
       setLocalEdits(EMPTY_SET);
       setMarked(EMPTY_SET);

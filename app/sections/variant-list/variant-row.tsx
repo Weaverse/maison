@@ -520,7 +520,7 @@ function QuantityUpdateButtons({
   // that lands is the final one — the tier a quantity has just crossed
   // included, so a number on screen is never one the buyer will not be
   // charged.
-  const { markRecalculating, markSubmitted } = useB2BPricing();
+  let { markRecalculating, markSubmitted } = useB2BPricing();
   const cartAction = usePrefixPathWithLocale("/cart");
   const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
   const increment = variant.quantityRule.increment || 1;
@@ -547,7 +547,7 @@ function QuantityUpdateButtons({
    * A removal is a single act, and the line it takes out is the one `+` would
    * otherwise be adding back while it goes.
    */
-  const [removing, setRemoving] = useState(false);
+  let [removing, setRemoving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const displayQuantity = Math.max(0, serverQuantity + pendingDelta);

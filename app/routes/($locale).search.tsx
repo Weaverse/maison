@@ -101,8 +101,8 @@ export async function loader({
     // is what the results page returns. Shopify applies it to the last token,
     // so multi-word terms still work. Only the query sent to Shopify carries
     // it — the term echoed back to the page stays what the shopper typed.
-    const trimmedTerm = searchTerm.trim();
-    const prefixedTerm = trimmedTerm.endsWith("*")
+    let trimmedTerm = searchTerm.trim();
+    let prefixedTerm = trimmedTerm.endsWith("*")
       ? trimmedTerm
       : `${trimmedTerm}*`;
 

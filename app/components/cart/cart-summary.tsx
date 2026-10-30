@@ -8,7 +8,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
 import type { CurrencyCode } from "@shopify/hydrogen/storefront-api-types";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
-import clsx from "clsx";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
@@ -17,6 +16,7 @@ import { useB2BPricing } from "~/components/cart/b2b-cart-pricing";
 import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts } from "~/utils/cart-discounts";
+import { cn } from "~/utils/cn";
 import {
   DiscountDialog,
   GiftCardDialog,
@@ -56,7 +56,7 @@ function AmountPlaceholder({
   }
   return (
     <span className="relative block">
-      <span className={clsx("invisible", className)} aria-hidden="true">
+      <span className={cn("invisible", className)} aria-hidden="true">
         {children}
       </span>
       {/* A block over the whole cell with the bar as an inline child, so the
@@ -278,7 +278,7 @@ export function CartSummary({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
         layout === "page" &&
           "z-[1] grid h-fit w-full gap-5 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav)",
@@ -381,7 +381,7 @@ export function CartSummary({
       {/* action buttons */}
       {actionCount > 0 && (
         <div
-          className={clsx(
+          className={cn(
             "gap-2",
             layout === "drawer" && "flex items-center justify-end",
             layout === "page" && "grid",
@@ -394,7 +394,7 @@ export function CartSummary({
               <Dialog.Trigger asChild>
                 <Button
                   variant="secondary"
-                  className={clsx(
+                  className={cn(
                     "px-3 py-2 text-sm font-normal border-0",
                     layout === "page" && "w-full",
                   )}
@@ -423,7 +423,7 @@ export function CartSummary({
               <Dialog.Trigger asChild>
                 <Button
                   variant="secondary"
-                  className={clsx(
+                  className={cn(
                     "px-3 py-2 text-sm font-normal border-0",
                     layout === "page" && "w-full",
                   )}
