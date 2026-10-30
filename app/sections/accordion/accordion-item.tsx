@@ -28,14 +28,19 @@ const AccordionItem = (props: AccordionItemProps) => {
 
     if (isSvgString(icon)) {
       return (
-        <span className="h-6 w-6" dangerouslySetInnerHTML={{ __html: icon }} />
+        <span
+          // A bare <span> is inline, so `h-6 w-6` would not apply and the SVG
+          // would sit on the text baseline instead of being centered.
+          className="flex size-6 shrink-0 items-center justify-center [&>svg]:size-full"
+          dangerouslySetInnerHTML={{ __html: icon }}
+        />
       );
     }
 
     return (
       <Image
         src={icon}
-        className="h-6 w-6"
+        className="block size-6 shrink-0 object-contain"
         alt={title}
         width={24}
         height={24}

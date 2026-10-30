@@ -98,7 +98,7 @@ export function NewsletterPopup() {
         <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/50 [--fade-in-duration:150ms] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <Dialog.Content
           className={cn(
-            "fixed inset-0 z-50 flex p-4 backdrop-blur-xs",
+            "fixed inset-0 z-50 flex p-6 backdrop-blur-xs",
             newsletterPopupPosition === "center" &&
               "items-center justify-center",
             newsletterPopupPosition === "top-left" &&

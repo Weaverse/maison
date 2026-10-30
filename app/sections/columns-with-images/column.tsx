@@ -6,7 +6,6 @@ import {
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import type { CSSProperties } from "react";
 import { Image } from "~/components/image";
 import Link, { type LinkProps, linkContentInputs } from "~/components/link";
 
@@ -28,7 +27,6 @@ interface ColumnWithImageItemProps
     Pick<LinkProps, "variant" | "text" | "to">,
     HydrogenComponentProps {
   imageSrc: WeaverseImage;
-  imageBorderRadius: number;
   heading: string;
   content: string;
   ref?: React.Ref<HTMLDivElement>;
@@ -37,7 +35,6 @@ interface ColumnWithImageItemProps
 function ColumnWithImageItem(props: ColumnWithImageItemProps) {
   const {
     imageSrc,
-    imageBorderRadius,
     heading,
     content,
     text,
@@ -55,8 +52,9 @@ function ColumnWithImageItem(props: ColumnWithImageItemProps) {
       {...rest}
       data-motion="slide-in"
       className={variants({ size, hideOnMobile })}
-      style={{ "--radius": `${imageBorderRadius}px` } as CSSProperties}
     >
+      {/* `--image-aspect-ratio` and `--radius` are both set once on the
+          parent `Items`, so every column in the row shares them. */}
       <Image
         data={typeof imageSrc === "object" ? imageSrc : { url: imageSrc }}
         sizes="auto"
@@ -117,18 +115,6 @@ export const schema = createSchema({
           type: "image",
           name: "imageSrc",
           label: "Image",
-        },
-        {
-          type: "range",
-          name: "imageBorderRadius",
-          label: "Image border radius",
-          configs: {
-            min: 0,
-            max: 40,
-            step: 2,
-            unit: "px",
-          },
-          defaultValue: 0,
         },
         {
           type: "heading",

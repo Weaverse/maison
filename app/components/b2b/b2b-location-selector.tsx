@@ -60,7 +60,7 @@ export function B2BLocationSelector() {
         />
         <Dialog.Content
           className={clsx([
-            "fixed inset-0 z-50 flex items-center justify-center p-4",
+            "fixed inset-0 z-50 flex items-center justify-center p-6",
             "data-[state=open]:animate-scale-in",
           ])}
           style={

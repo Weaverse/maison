@@ -8,7 +8,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
 import type { CurrencyCode } from "@shopify/hydrogen/storefront-api-types";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
-import clsx from "clsx";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
@@ -17,6 +16,7 @@ import { useB2BPricing } from "~/components/cart/b2b-cart-pricing";
 import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts } from "~/utils/cart-discounts";
+import { cn } from "~/utils/cn";
 import {
   DiscountDialog,
   GiftCardDialog,
@@ -24,6 +24,53 @@ import {
 } from "./cart-summary-actions";
 
 type Layouts = "page" | "drawer";
+
+/**
+ * A figure in the summary, and the placeholder that stands in for it while the
+ * cart is being recalculated.
+ *
+ * The placeholder is laid over the figure rather than swapped in for it. Swapped
+ * in, a 16px box replaced a line of `text-base` type — around 22px, more where a
+ * struck-through price sits beside it — so every row shrank the moment a
+ * quantity changed and grew back when the answer came, taking the tax note and
+ * the buttons under it along. Holding the real figure in flow but invisible
+ * keeps the row exactly its own height, and the bar is one fixed size wherever
+ * it appears.
+ */
+function AmountPlaceholder({
+  loading,
+  className,
+  children,
+}: {
+  loading: boolean;
+  /** The layout the figures need, kept on the copy held in flow. */
+  className?: string;
+  children: React.ReactNode;
+}) {
+  // The same wrapper in both branches. The drawer's `dd` hands its
+  // `flex items-center gap-2` down here so the copy held in flow keeps the
+  // row's shape; returning the children bare once the figures arrived dropped
+  // it, and the struck-through price lost the 8px it had sat at.
+  if (!loading) {
+    return className ? <span className={className}>{children}</span> : children;
+  }
+  return (
+    <span className="relative block">
+      <span className={cn("invisible", className)} aria-hidden="true">
+        {children}
+      </span>
+      {/* A block over the whole cell with the bar as an inline child, so the
+          bar lands where the figure's own alignment puts it. */}
+      <span className="absolute inset-0 text-right">
+        <Skeleton
+          as="span"
+          className="inline-block h-full w-16 rounded"
+          aria-label="Updating amount"
+        />
+      </span>
+    </span>
+  );
+}
 
 export function CartSummary({
   cart,
@@ -231,7 +278,7 @@ export function CartSummary({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
         layout === "page" &&
           "z-[1] grid h-fit w-full gap-5 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav)",
@@ -249,22 +296,16 @@ export function CartSummary({
           <dl className="flex items-start gap-2.5 text-base leading-none">
             <dt className="min-w-0 grow">{t("cart.subtotal")}</dt>
             <dd className="shrink-0 whitespace-nowrap">
-              {isCartUpdating ? (
-                <Skeleton className="h-4 w-20 rounded" />
-              ) : subtotalMoney ? (
-                <Money data={subtotalMoney} />
-              ) : (
-                noMoneyLabel
-              )}
+              <AmountPlaceholder loading={isCartUpdating}>
+                {subtotalMoney ? <Money data={subtotalMoney} /> : noMoneyLabel}
+              </AmountPlaceholder>
             </dd>
           </dl>
           {discountTotal > 0 && cost?.subtotalAmount && !b2bSilent && (
             <dl className="flex items-start gap-2.5 text-base leading-none">
               <dt className="min-w-0 grow">{t("cart.discount")}</dt>
               <dd className="shrink-0 whitespace-nowrap">
-                {isCartUpdating ? (
-                  <Skeleton className="h-4 w-20 rounded" />
-                ) : (
+                <AmountPlaceholder loading={isCartUpdating}>
                   <span className="inline-flex items-center">
                     -
                     <Money
@@ -276,7 +317,7 @@ export function CartSummary({
                       }}
                     />
                   </span>
-                )}
+                </AmountPlaceholder>
               </dd>
             </dl>
           )}
@@ -287,13 +328,13 @@ export function CartSummary({
           <dl className="flex items-start gap-2.5 font-semibold text-base leading-[1.6]">
             <dt className="min-w-0 grow">{t("cart.total")}</dt>
             <dd className="shrink-0 whitespace-nowrap">
-              {isCartUpdating ? (
-                <Skeleton className="h-4 w-20 rounded" />
-              ) : totalMoney?.amount ? (
-                <Money data={totalMoney} />
-              ) : (
-                noMoneyLabel
-              )}
+              <AmountPlaceholder loading={isCartUpdating}>
+                {totalMoney?.amount ? (
+                  <Money data={totalMoney} />
+                ) : (
+                  noMoneyLabel
+                )}
+              </AmountPlaceholder>
             </dd>
           </dl>
         </div>
@@ -306,10 +347,14 @@ export function CartSummary({
                 <dt className="font-semibold text-base uppercase">
                   {t("cart.subtotal")}
                 </dt>
-                {isCartUpdating ? (
-                  <Skeleton className="h-4 w-20 rounded" />
-                ) : (
-                  <dd className="flex items-center gap-2 text-base">
+                {/* The `dd` stays in the document while the figures are
+                    worked out: a `dl` whose `dt` loses its `dd` is read out as
+                    a term with no definition. */}
+                <dd className="text-base">
+                  <AmountPlaceholder
+                    loading={isCartUpdating}
+                    className="flex items-center gap-2"
+                  >
                     {hasDiscount && (
                       <span className="font-medium text-body-subtle/80 text-sm line-through">
                         <Money data={subtotalMoney} />
@@ -322,8 +367,8 @@ export function CartSummary({
                         noMoneyLabel
                       )}
                     </span>
-                  </dd>
-                )}
+                  </AmountPlaceholder>
+                </dd>
               </div>
             </dl>
             <p className="text-body-subtle/80 text-sm">{t("cart.taxNote")}</p>
@@ -336,7 +381,7 @@ export function CartSummary({
       {/* action buttons */}
       {actionCount > 0 && (
         <div
-          className={clsx(
+          className={cn(
             "gap-2",
             layout === "drawer" && "flex items-center justify-end",
             layout === "page" && "grid",
@@ -349,7 +394,7 @@ export function CartSummary({
               <Dialog.Trigger asChild>
                 <Button
                   variant="secondary"
-                  className={clsx(
+                  className={cn(
                     "px-3 py-2 text-sm font-normal border-0",
                     layout === "page" && "w-full",
                   )}
@@ -378,7 +423,7 @@ export function CartSummary({
               <Dialog.Trigger asChild>
                 <Button
                   variant="secondary"
-                  className={clsx(
+                  className={cn(
                     "px-3 py-2 text-sm font-normal border-0",
                     layout === "page" && "w-full",
                   )}

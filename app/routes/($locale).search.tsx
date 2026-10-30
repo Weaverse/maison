@@ -94,9 +94,21 @@ export async function loader({
           }
         : {};
 
+    // `search` is a full-text query, not a prefix one: a single character
+    // matches nothing at all, and "sheet" never reaches "sheets". The trailing
+    // wildcard makes it match by prefix the way the search drawer's
+    // `predictiveSearch` already does, so what the shopper sees while typing
+    // is what the results page returns. Shopify applies it to the last token,
+    // so multi-word terms still work. Only the query sent to Shopify carries
+    // it — the term echoed back to the page stays what the shopper typed.
+    let trimmedTerm = searchTerm.trim();
+    let prefixedTerm = trimmedTerm.endsWith("*")
+      ? trimmedTerm
+      : `${trimmedTerm}*`;
+
     const data = await storefront.query<SearchQuery>(SEARCH_QUERY, {
       variables: {
-        searchTerm,
+        searchTerm: prefixedTerm,
         ...variables,
         ...buyerVariables,
         country: storefront.i18n.country,

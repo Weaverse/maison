@@ -3,8 +3,6 @@ import {
   type HydrogenComponentProps,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
-import type { VariantProps } from "class-variance-authority";
-import { cva } from "class-variance-authority";
 import { type OverlayProps, overlayInputs } from "~/components/overlay";
 import { OverlayAndBackground } from "~/components/overlay-and-background";
 
@@ -18,31 +16,13 @@ import { OverlayAndBackground } from "~/components/overlay-and-background";
 //
 // The flex layout moved to the content wrapper below, which is the layer the
 // children are laid out in.
-const variants = cva("group/overlay relative isolate overflow-hidden p-5", {
-  variants: {
-    borderRadius: {
-      0: "rounded-none",
-      2: "rounded-xs",
-      4: "rounded-sm",
-      6: "rounded-md",
-      8: "rounded-lg",
-      10: "rounded-[10px]",
-      12: "rounded-xl",
-      14: "rounded-[14px]",
-      16: "rounded-2xl",
-      18: "rounded-[18px]",
-      20: "rounded-[20px]",
-    },
-  },
-  defaultVariants: {
-    borderRadius: 4,
-  },
-});
+// The corner radius is set once on `multicolumn--items` and read from there,
+// so every item in the row rounds the same way. The fallback keeps an item
+// rounded if it is ever rendered outside that parent.
+const ITEM_CLASS =
+  "group/overlay relative isolate overflow-hidden rounded-[var(--item-radius,4px)] p-5";
 
-interface MulticolumnItemProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps,
-    OverlayProps {
+interface MulticolumnItemProps extends HydrogenComponentProps, OverlayProps {
   backgroundColor?: string;
   backgroundImage?: WeaverseImage | string;
   ref?: React.Ref<HTMLDivElement>;
@@ -53,7 +33,6 @@ const MulticolumnItem = (props: MulticolumnItemProps) => {
     ref,
     backgroundColor,
     backgroundImage,
-    borderRadius,
     children,
     enableOverlay,
     overlayType,
@@ -69,12 +48,7 @@ const MulticolumnItem = (props: MulticolumnItemProps) => {
   } = props;
 
   return (
-    <div
-      ref={ref}
-      {...rest}
-      className={variants({ borderRadius })}
-      style={{ backgroundColor }}
-    >
+    <div ref={ref} {...rest} className={ITEM_CLASS} style={{ backgroundColor }}>
       <OverlayAndBackground
         backgroundImage={backgroundImage}
         enableOverlay={enableOverlay}
@@ -116,18 +90,6 @@ export const schema = createSchema({
           name: "backgroundColor",
           label: "Background color",
           defaultValue: "#DCDCDC",
-        },
-        {
-          type: "range",
-          name: "borderRadius",
-          label: "Border radius",
-          defaultValue: 4,
-          configs: {
-            min: 0,
-            max: 20,
-            step: 2,
-            unit: "px",
-          },
         },
       ],
     },

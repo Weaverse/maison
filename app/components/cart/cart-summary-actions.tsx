@@ -57,12 +57,12 @@ export function NoteDialog({
           setSubmitted(false);
         }}
         className={cn(
-          "fixed z-50 w-full overflow-hidden",
+          "fixed z-50 overflow-hidden",
           "bg-white p-6 shadow-xl",
           "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           layout === "drawer"
-            ? "max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
-            : "max-w-[400px] md:max-w-[461px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [--slide-up-from:40px] [--slide-down-to:40px]",
+            ? "w-[calc(100%-24px)] max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
+            : "w-[calc(100%-48px)] max-w-[400px] md:max-w-[461px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [--slide-up-from:40px] [--slide-down-to:40px]",
         )}
         aria-describedby={undefined}
       >
@@ -160,12 +160,12 @@ export function DiscountDialog({
           fetcher.data = null;
         }}
         className={cn(
-          "fixed z-50 w-full overflow-hidden",
+          "fixed z-50 overflow-hidden",
           "bg-white p-6 shadow-xl",
           "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           layout === "drawer"
-            ? "max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
-            : "max-w-[400px] md:max-w-[461px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [--slide-up-from:40px] [--slide-down-to:40px]",
+            ? "w-[calc(100%-24px)] max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
+            : "w-[calc(100%-48px)] max-w-[400px] md:max-w-[461px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [--slide-up-from:40px] [--slide-down-to:40px]",
         )}
         aria-describedby={undefined}
       >
@@ -276,12 +276,12 @@ export function GiftCardDialog({
           fetcher.data = null;
         }}
         className={cn(
-          "fixed z-50 w-full overflow-hidden",
+          "fixed z-50 overflow-hidden",
           "bg-white p-6 shadow-xl",
           "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           layout === "drawer"
-            ? "max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
-            : "max-w-[400px] md:max-w-[461px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [--slide-up-from:40px] [--slide-down-to:40px]",
+            ? "w-[calc(100%-24px)] max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
+            : "w-[calc(100%-48px)] max-w-[400px] md:max-w-[461px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 [--slide-up-from:40px] [--slide-down-to:40px]",
         )}
         aria-describedby={undefined}
       >

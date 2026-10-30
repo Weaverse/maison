@@ -257,14 +257,15 @@ export function ProductCard({
             ],
           )}
         /> */}
+        {/* No placeholder when there is no volume pricing: an empty 12px box
+            plus the column's own 12px gap left 24px of dead space between the
+            price and the quick shop button. */}
         {(selectedVariant || firstVariant)?.quantityPriceBreaks?.nodes?.length >
-        0 ? (
+          0 && (
           <div className="text-xs text-body-subtle inline-flex items-center gap-1.5">
             <span className="block size-1.5 bg-line rounded-full" />
             <span>{t("product.volumePricing")}</span>
           </div>
-        ) : (
-          <div className="h-3" />
         )}
       </div>
       {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (

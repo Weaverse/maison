@@ -20,7 +20,18 @@ export default ColumnsWithImages;
 export const schema = createSchema({
   type: "columns-with-images",
   title: "Columns with images",
-  settings: sectionSettings,
+  // The corner radius lives on `Items`, where it rounds every image in the
+  // row. The section's own radius rounds the section box — only visible with
+  // a background on it — and two controls both labelled "Border radius"
+  // a level apart is the confusion this section's review called out.
+  settings: sectionSettings.map((group) =>
+    group.group === "Layout"
+      ? {
+          ...group,
+          inputs: group.inputs.filter((i) => i.name !== "borderRadius"),
+        }
+      : group,
+  ),
   childTypes: [
     "columns-with-images--items",
     "subheading",
