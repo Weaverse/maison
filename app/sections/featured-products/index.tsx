@@ -88,7 +88,7 @@ export const loader = async (
 ) => {
   const { data, weaverse } = args;
   const { language, country } = weaverse.storefront.i18n;
-  const { selectionMethod = "auto", collection, products } = data;
+  const { selectionMethod = "manual", collection, products } = data;
 
   const buyer = await weaverse.customerAccount?.getBuyer();
   const buyerVariables = buyer ? { buyer } : {};
@@ -134,18 +134,23 @@ export const loader = async (
     };
   }
 
-  // Default: auto selection (best selling products)
-  return await weaverse.storefront.query<FeaturedProductsQuery>(
-    FEATURED_PRODUCTS_QUERY,
-    {
-      variables: {
-        country,
-        language,
-        query: maybeFilterOutCombinedListingsQuery,
-        ...buyerVariables,
+  if (selectionMethod === "auto") {
+    return await weaverse.storefront.query<FeaturedProductsQuery>(
+      FEATURED_PRODUCTS_QUERY,
+      {
+        variables: {
+          country,
+          language,
+          query: maybeFilterOutCombinedListingsQuery,
+          ...buyerVariables,
+        },
       },
-    },
-  );
+    );
+  }
+
+  // Nothing picked yet: let the section render its placeholder cards instead
+  // of falling back to real store products.
+  return { products: { nodes: [] } };
 };
 
 export const schema = createSchema({
@@ -173,7 +178,7 @@ export const schema = createSchema({
               { value: "manual", label: "Manual selection" },
             ],
           },
-          defaultValue: "auto",
+          defaultValue: "manual",
         },
         {
           type: "collection",
@@ -198,7 +203,7 @@ export const schema = createSchema({
   ],
   presets: {
     gap: 32,
-    selectionMethod: "auto",
+    selectionMethod: "manual",
     children: [
       {
         type: "featured-products--header",

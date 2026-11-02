@@ -1,5 +1,6 @@
 import {
   createSchema,
+  IMAGES_PLACEHOLDERS,
   useParentInstance,
   useTranslation,
 } from "@weaverse/hydrogen";
@@ -11,6 +12,36 @@ import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { ProductCard } from "~/components/product/product-card";
 import { Swimlane } from "~/components/swimlane";
 import { cn } from "~/utils/cn";
+
+const PRODUCT_CARD_PLACEHOLDER = {
+  id: "gid://shopify/Product/0",
+  title: "Example product",
+  publishedAt: "",
+  handle: "#",
+  vendor: "Vendor",
+  tags: [],
+  images: {
+    nodes: [
+      {
+        id: "0",
+        url: IMAGES_PLACEHOLDERS.product_1,
+        altText: "Example product",
+        width: 1024,
+        height: 1024,
+      },
+    ],
+  },
+  options: [],
+  badges: [],
+  priceRange: {
+    minVariantPrice: { amount: "99.0", currencyCode: "USD" },
+    maxVariantPrice: { amount: "99.0", currencyCode: "USD" },
+  },
+  selectedOrFirstAvailableVariant: {
+    price: { amount: "99.0", currencyCode: "USD" },
+    selectedOptions: [],
+  },
+} as unknown as ProductCardFragment;
 
 const variants = cva("grid", {
   variants: {
@@ -83,9 +114,9 @@ function ProductItems(props: ProductItemsProps) {
   const products = parent.data?.loaderData?.products;
   const swimlaneRef = useState<HTMLDivElement | null>(null);
 
-  if (!products?.nodes?.length) {
-    return null;
-  }
+  const items: ProductCardFragment[] = products?.nodes?.length
+    ? products.nodes
+    : new Array(8).fill(PRODUCT_CARD_PLACEHOLDER);
 
   // grid layout
   if (layout === "grid") {
@@ -96,11 +127,9 @@ function ProductItems(props: ProductItemsProps) {
           className={cn(variants({ mobileGridItems, desktopGridItems }))}
           style={{ gap: `40px ${gap}px` }}
         >
-          {products.nodes
-            .slice(0, itemsToShow)
-            .map((product: ProductCardFragment) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          {items.slice(0, itemsToShow).map((product, index) => (
+            <ProductCard key={`${product.id}-${index}`} product={product} />
+          ))}
         </div>
       </div>
     );
@@ -151,8 +180,8 @@ function ProductItems(props: ProductItemsProps) {
           } as React.CSSProperties
         }
       >
-        {products.nodes.map((product: ProductCardFragment) => (
-          <div key={product.id} className="snap-start">
+        {items.map((product, index) => (
+          <div key={`${product.id}-${index}`} className="snap-start">
             <ProductCard product={product} />
           </div>
         ))}

@@ -180,7 +180,7 @@ export const schema = createSchema({
           type: "text",
           name: "address",
           label: "Map address",
-          defaultValue: "301 Front St W, Toronto, ON M5V 2T6, Canada",
+          defaultValue: "",
           helpText:
             "Used for the map pin and the Get Directions link, not shown as text.",
         },
@@ -225,7 +225,7 @@ export const schema = createSchema({
           name: "addressContent",
           label: "Addresses",
           defaultValue:
-            "<p><strong>Store 1</strong>: 9153 Jerry Dr, Juneau, Alaska 99801, USA</p><p><strong>Store 2</strong>: 4821 Maple Ridge Blvd, Boulder, Colorado 80302, USA</p>",
+            "<p><strong>Store 1</strong>: Add your first store address</p><p><strong>Store 2</strong>: Add your second store address</p>",
         },
         {
           type: "text",
@@ -250,7 +250,7 @@ export const schema = createSchema({
           type: "richtext",
           name: "contactContent",
           label: "Contact",
-          defaultValue: "<p>+1 (907) 555-0123</p><p>visit@maison.com</p>",
+          defaultValue: "<p>Add a phone number</p><p>Add an email address</p>",
         },
         {
           type: "color",

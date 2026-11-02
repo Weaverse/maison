@@ -84,7 +84,7 @@ export const schema = createSchema({
           name: "metaobject",
           label: "Select metaobject definition",
           helpText:
-            'See how to set up a metaobject definition for this section <a href="https://weaverse.io/docs/marketplace/the-pilot-theme#metaobjects" target="_blank">here</a>.',
+            'See how to set up a metaobject definition for this section <a href="https://weaverse.io/docs" target="_blank">here</a>.',
         },
         {
           label: "Members count",
@@ -114,7 +114,7 @@ export const schema = createSchema({
       {
         type: "paragraph",
         content:
-          "This section get data from storefront metaobjects using Shopify Storefront API powered by Weaverse Metaobject Picker.",
+          "Introduce the people behind your store. Pick a metaobject definition to pull in real team members.",
       },
       {
         type: "our-team-members",

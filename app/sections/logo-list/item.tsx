@@ -1,7 +1,7 @@
 import {
   createSchema,
   type HydrogenComponentProps,
-  useTranslation,
+  IMAGES_PLACEHOLDERS,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
@@ -38,28 +38,23 @@ interface LogoListItemProps
 }
 
 const LogoListItem = (props: LogoListItemProps) => {
-  const { t } = useTranslation();
   const { ref, src, altText, borderRadius, children, ...rest } = props;
 
   const imageData =
-    typeof src === "object" ? src : { url: src, altText: altText || "Image" };
+    typeof src === "object"
+      ? src
+      : { url: src || IMAGES_PLACEHOLDERS.image, altText: altText || "" };
 
   return (
     <div ref={ref} {...rest} className={variants({ borderRadius })}>
-      {src ? (
-        <Image
-          data={imageData}
-          className="w-full h-full object-cover"
-          data-motion="slide-in"
-          loading="lazy"
-          width={400}
-          sizes="(min-width: 640px) 16.67vw, 50vw"
-        />
-      ) : (
-        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-          <span className="text-gray-500 text-sm">{t("product.noImage")}</span>
-        </div>
-      )}
+      <Image
+        data={imageData}
+        className="w-full h-full object-cover"
+        data-motion="slide-in"
+        loading="lazy"
+        width={400}
+        sizes="(min-width: 640px) 16.67vw, 50vw"
+      />
       {children}
     </div>
   );

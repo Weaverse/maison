@@ -1,6 +1,7 @@
 import {
   createSchema,
   type HydrogenComponentProps,
+  IMAGES_PLACEHOLDERS,
   isBrowser,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
@@ -9,6 +10,7 @@ import clsx from "clsx";
 import type { CSSProperties } from "react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
+import { Image } from "~/components/image";
 import type { OverlayProps } from "~/components/overlay";
 import { Overlay, overlayInputs } from "~/components/overlay";
 import { useAnimation } from "~/hooks/use-animation";
@@ -164,19 +166,27 @@ export default function HeroVideo(props: HeroVideoProps) {
           "sm:translate-x-[min(0px,calc((var(--desktop-height)/9*16-100vw)/-2))]",
         )}
       >
-        {inView && (
-          <Suspense fallback={null}>
-            <ReactPlayer
-              src={videoURL}
-              playing
-              muted
-              loop={true}
-              width={size.width}
-              height={size.height}
-              controls={false}
-              className="aspect-video"
-            />
-          </Suspense>
+        {videoURL ? (
+          inView && (
+            <Suspense fallback={null}>
+              <ReactPlayer
+                src={videoURL}
+                playing
+                muted
+                loop={true}
+                width={size.width}
+                height={size.height}
+                controls={false}
+                className="aspect-video"
+              />
+            </Suspense>
+          )
+        ) : (
+          <Image
+            data={{ url: IMAGES_PLACEHOLDERS.banner_1 }}
+            className="absolute inset-0 size-full object-cover"
+            sizes="100vw"
+          />
         )}
         <Overlay
           enableOverlay={enableOverlay}
@@ -204,7 +214,7 @@ export const schema = createSchema({
           type: "text",
           name: "videoURL",
           label: "Video URL",
-          defaultValue: "https://www.youtube.com/watch?v=Su-x4Mo5xmU",
+          defaultValue: "",
           placeholder: "https://www.youtube.com/watch?v=Su-x4Mo5xmU",
           helpText: "Support YouTube, Vimeo, MP4, WebM, and HLS streams.",
         },
@@ -276,7 +286,7 @@ export const schema = createSchema({
     enableOverlay: true,
     overlayColor: "#000000",
     overlayOpacity: 40,
-    videoURL: "https://www.youtube.com/watch?v=gbLmku5QACM",
+    videoURL: "",
     height: "large",
     gap: 20,
     children: [

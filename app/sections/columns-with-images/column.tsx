@@ -56,7 +56,11 @@ function ColumnWithImageItem(props: ColumnWithImageItemProps) {
       {/* `--image-aspect-ratio` and `--radius` are both set once on the
           parent `Items`, so every column in the row shares them. */}
       <Image
-        data={typeof imageSrc === "object" ? imageSrc : { url: imageSrc }}
+        data={
+          typeof imageSrc === "object"
+            ? imageSrc
+            : { url: imageSrc || IMAGES_PLACEHOLDERS.product_4 }
+        }
         sizes="auto"
         className="aspect-(--image-aspect-ratio) h-auto rounded-(--radius)"
         aspectRatio={undefined}

@@ -55,22 +55,10 @@ export const schema: HydrogenComponentSchema = {
   childTypes: ["accordion--item"],
   presets: {
     children: [
-      {
-        type: "accordion--item",
-        icon: "truck",
-      },
-      {
-        type: "accordion--item",
-        icon: "paint-brush-household",
-      },
-      {
-        type: "accordion--item",
-        icon: "ruler",
-      },
-      {
-        type: "accordion--item",
-        icon: "package",
-      },
+      { type: "accordion--item" },
+      { type: "accordion--item" },
+      { type: "accordion--item" },
+      { type: "accordion--item" },
     ],
   },
 };
