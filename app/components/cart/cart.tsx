@@ -32,6 +32,10 @@ import {
   useLimitMessages,
   useProductRecalculating,
 } from "~/components/cart/b2b-cart-pricing";
+import {
+  LineRemoveFetchers,
+  lineRemoveFetcherKey,
+} from "~/components/cart/line-remove";
 import { SubscriptionIcon } from "~/components/icons";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
@@ -72,6 +76,11 @@ export function Cart({
     // `originalCart`, not the optimistic one: pricing may only be asked for a
     // cart the server has already accepted.
     <B2BPricingProvider cart={originalCart}>
+      {/* Outside `CartDetails`, which the optimistic cart unmounts the moment
+          the last line goes — taking with it any hold placed inside it. */}
+      <LineRemoveFetchers
+        lineIds={(originalCart?.lines?.nodes ?? []).map((line) => line.id)}
+      />
       {cartHasItems && <CartDetails cart={cart} layout={layout} />}
       <CartEmpty
         hidden={cartHasItems || linesCount}
@@ -543,7 +552,7 @@ function ItemRemoveButton({
       route={cartAction}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds: [lineId] }}
-      fetcherKey="cart-line-remove"
+      fetcherKey={lineRemoveFetcherKey(lineId)}
     >
       <button
         className={clsx(
