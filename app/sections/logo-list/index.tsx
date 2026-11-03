@@ -51,38 +51,32 @@ export const schema = createSchema({
       },
       {
         type: "logo-list--items",
-        columns: "6",
+        desktopGridSize: "6",
         gap: 16,
         children: [
           {
             type: "logo-list--item",
             src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
           },
           {
             type: "logo-list--item",
             src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
           },
           {
             type: "logo-list--item",
             src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
           },
           {
             type: "logo-list--item",
             src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
           },
           {
             type: "logo-list--item",
             src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
           },
           {
             type: "logo-list--item",
             src: IMAGES_PLACEHOLDERS.image,
-            altText: "#",
           },
         ],
       },

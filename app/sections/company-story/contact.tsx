@@ -91,7 +91,7 @@ export const schema = createSchema({
           type: "text",
           name: "address",
           label: "Address",
-          defaultValue: "845 Market Street, San Francisco, CA 94103 US",
+          defaultValue: "",
           helpText: "Address for Google Maps display",
         },
       ],

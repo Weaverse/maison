@@ -1,6 +1,7 @@
 import {
   createSchema,
   type HydrogenComponentProps,
+  IMAGES_PLACEHOLDERS,
   type WeaverseImage,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
@@ -80,8 +81,7 @@ export const schema = createSchema({
           type: "image",
           name: "src",
           label: "Image",
-          defaultValue:
-            "https://cdn.shopify.com/s/files/1/0838/0052/3057/files/h2-placeholder-image.svg",
+          defaultValue: IMAGES_PLACEHOLDERS.image,
         },
         {
           type: "range",

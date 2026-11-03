@@ -151,13 +151,13 @@ export const schema = createSchema({
           type: "text",
           name: "handle",
           label: "Handle",
-          defaultValue: "@maison_ig",
+          defaultValue: "@yourstore",
         },
         {
           type: "url",
           name: "profileUrl",
           label: "Profile link",
-          defaultValue: "https://www.instagram.com/",
+          placeholder: "https://www.instagram.com/your-handle",
         },
         {
           type: "switch",
@@ -171,8 +171,8 @@ export const schema = createSchema({
   presets: {
     backgroundColor: "#F9F7F4",
     heading: "Instagram",
-    handle: "@maison_ig",
-    profileUrl: "https://www.instagram.com/",
+    handle: "@yourstore",
+    profileUrl: "",
     showViewMore: true,
     desktopColumns: 5,
     itemsGap: 24,

@@ -93,7 +93,7 @@ export const schema = createSchema({
       {
         type: "paragraph",
         content:
-          "This section demonstrates how to integrate with third-party apps using their public APIs. Reviews are fetched from Ali Reviews API on the server side.",
+          "Connect your Ali Reviews API key to pull real product reviews into this section.",
       },
       {
         type: "ali-reviews--list",

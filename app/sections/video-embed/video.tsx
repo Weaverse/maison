@@ -1,11 +1,13 @@
 import {
   createSchema,
   type HydrogenComponentProps,
+  IMAGES_PLACEHOLDERS,
   useTranslation,
   type WeaverseVideo,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
+import { Image } from "~/components/image";
 
 const variants = cva("mx-auto aspect-video w-full", {
   variants: {
@@ -137,12 +139,30 @@ function youtubeEmbed(id: string, source: URL): string {
 export default function VideoEmbedItem(props: VideoItemProps) {
   const { t } = useTranslation();
   const { ref, video, videoUrl, size, borderRadius, ...rest } = props;
+  const src = toEmbedUrl(video?.url || videoUrl);
+
+  if (!src) {
+    return (
+      <div
+        ref={ref as unknown as React.Ref<HTMLDivElement>}
+        {...rest}
+        className={variants({ size, borderRadius })}
+      >
+        <Image
+          data={{ url: IMAGES_PLACEHOLDERS.banner_1 }}
+          className="size-full object-cover"
+          sizes="auto"
+        />
+      </div>
+    );
+  }
+
   return (
     <iframe
       ref={ref}
       {...rest}
       className={variants({ size, borderRadius })}
-      src={toEmbedUrl(video?.url || videoUrl)}
+      src={src}
       allowFullScreen
       title={t("video.youtubePlayer")}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -169,7 +189,7 @@ export const schema = createSchema({
           type: "text",
           name: "videoUrl",
           label: "Video URL",
-          defaultValue: "https://www.youtube.com/embed/Su-x4Mo5xmU",
+          defaultValue: "",
           placeholder: "https://youtu.be/Su-x4Mo5xmU",
           helpText:
             "Paste the link from Share on YouTube or Vimeo — watch, youtu.be and Shorts links all work, as does a full embed code. Ignored when a video is selected above.",
