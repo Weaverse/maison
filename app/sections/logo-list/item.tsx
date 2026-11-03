@@ -40,10 +40,15 @@ interface LogoListItemProps
 const LogoListItem = (props: LogoListItemProps) => {
   const { ref, src, altText, borderRadius, children, ...rest } = props;
 
+  // `typeof null === "object"`, so a cleared image would reach `Image` as
+  // `data={null}` unless null is ruled out before the object branch.
   const imageData =
-    typeof src === "object"
+    src && typeof src === "object"
       ? src
-      : { url: src || IMAGES_PLACEHOLDERS.image, altText: altText || "" };
+      : {
+          url: (typeof src === "string" && src) || IMAGES_PLACEHOLDERS.image,
+          altText: altText || "",
+        };
 
   return (
     <div ref={ref} {...rest} className={variants({ borderRadius })}>

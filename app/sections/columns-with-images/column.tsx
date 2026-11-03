@@ -57,9 +57,15 @@ function ColumnWithImageItem(props: ColumnWithImageItemProps) {
           parent `Items`, so every column in the row shares them. */}
       <Image
         data={
-          typeof imageSrc === "object"
+          // `typeof null === "object"`, so a cleared image has to be ruled
+          // out before the object branch or it reaches `Image` as `null`.
+          imageSrc && typeof imageSrc === "object"
             ? imageSrc
-            : { url: imageSrc || IMAGES_PLACEHOLDERS.product_4 }
+            : {
+                url:
+                  (typeof imageSrc === "string" && imageSrc) ||
+                  IMAGES_PLACEHOLDERS.product_4,
+              }
         }
         sizes="auto"
         className="aspect-(--image-aspect-ratio) h-auto rounded-(--radius)"

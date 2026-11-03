@@ -114,7 +114,8 @@ function ProductItems(props: ProductItemsProps) {
   const products = parent.data?.loaderData?.products;
   const swimlaneRef = useState<HTMLDivElement | null>(null);
 
-  const items: ProductCardFragment[] = products?.nodes?.length
+  const hasProducts = Boolean(products?.nodes?.length);
+  const items: ProductCardFragment[] = hasProducts
     ? products.nodes
     : new Array(8).fill(PRODUCT_CARD_PLACEHOLDER);
 
@@ -128,7 +129,11 @@ function ProductItems(props: ProductItemsProps) {
           style={{ gap: `40px ${gap}px` }}
         >
           {items.slice(0, itemsToShow).map((product, index) => (
-            <ProductCard key={`${product.id}-${index}`} product={product} />
+            <ProductCard
+              key={`${product.id}-${index}`}
+              product={product}
+              placeholder={!hasProducts}
+            />
           ))}
         </div>
       </div>
@@ -142,18 +147,18 @@ function ProductItems(props: ProductItemsProps) {
       return;
     }
 
-    const items = Array.from(container.children) as HTMLElement[];
-    if (items.length === 0) {
+    const slides = Array.from(container.children) as HTMLElement[];
+    if (slides.length === 0) {
       return;
     }
 
     const containerScrollLeft = container.scrollLeft;
-    const itemWidth = items[0].offsetWidth + gap;
+    const itemWidth = slides[0].offsetWidth + gap;
 
     const currentIndex = Math.round(containerScrollLeft / itemWidth);
     const targetIndex = Math.max(
       0,
-      Math.min(items.length - 1, currentIndex + direction),
+      Math.min(slides.length - 1, currentIndex + direction),
     );
 
     container.scrollTo({
@@ -182,7 +187,7 @@ function ProductItems(props: ProductItemsProps) {
       >
         {items.map((product, index) => (
           <div key={`${product.id}-${index}`} className="snap-start">
-            <ProductCard product={product} />
+            <ProductCard product={product} placeholder={!hasProducts} />
           </div>
         ))}
       </Swimlane>
