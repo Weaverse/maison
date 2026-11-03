@@ -44,7 +44,10 @@ function Hotspots(props: HotspotsProps) {
   const imageData: Partial<WeaverseImage> =
     typeof image === "string"
       ? { url: image, altText: "Hotspots image" }
-      : image;
+      : (image ?? {
+          url: IMAGES_PLACEHOLDERS.collection_1,
+          altText: "Hotspots image",
+        });
 
   return (
     <Section ref={ref} {...rest} overflow="unset">

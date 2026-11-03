@@ -355,7 +355,7 @@ export const schema = createSchema({
           },
           {
             type: "heading",
-            content: "Spring / Summer 2024 Sale",
+            content: "Spring / Summer Sale",
             color: "#fff",
             size: "scale",
             minSize: 16,
@@ -396,7 +396,7 @@ export const schema = createSchema({
           },
           {
             type: "heading",
-            content: "Autumn / Winter 2024 Sale",
+            content: "Autumn / Winter Sale",
             color: "#fff",
             size: "scale",
             minSize: 16,

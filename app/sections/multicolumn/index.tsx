@@ -54,7 +54,7 @@ export const schema = createSchema({
           {
             type: "view-all-button",
             text: "VIEW ALL",
-            link: "/services",
+            link: "/collections",
             showButton: true,
           },
         ],

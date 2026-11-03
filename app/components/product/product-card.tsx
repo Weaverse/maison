@@ -30,9 +30,16 @@ import { VariantPrices } from "./variant-prices";
 export function ProductCard({
   product,
   className,
+  // Set by sections that fill their grid with placeholder products while the
+  // merchant has not picked any. The card still has to look like a real one,
+  // so only the interactions are dropped: the fake handle would otherwise
+  // link to `/products/#`, load `/api/product/` with no handle from Quick
+  // Shop, and fire a reviews request per card.
+  placeholder = false,
 }: {
   product: ProductCardFragment;
   className?: string;
+  placeholder?: boolean;
 }) {
   const { t } = useTranslation();
   const {
@@ -90,6 +97,46 @@ export function ProductCard({
       secondImage = images.nodes[imageIndex + 1];
     }
   }
+  const imageWrapperClassName =
+    "relative block aspect-(--pcard-image-ratio) overflow-hidden rounded-t-(--pcard-radius) bg-gray-100";
+  const imageContent = image && (
+    <>
+      {/* Loading skeleton overlay */}
+      {isImageLoading && <Spinner />}
+      <Image
+        className={clsx([
+          "absolute inset-0",
+          // The zoom is keyed off the card, not the image, so it also
+          // fires when the cursor is on the quick shop button below.
+          // Tailwind v4 compiles `scale-105` to the `scale` property,
+          // not `transform`, so that is what has to be transitioned.
+          "transition-[opacity,scale] duration-300 group-hover:scale-105",
+          pcardShowImageOnHover && secondImage && "group-hover:opacity-50",
+          isTransitioning && "[&_img]:[view-transition-name:image-expand]",
+        ])}
+        sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
+        data={image}
+        width={700}
+        alt={image.altText || `Picture of ${product.title}`}
+        loading="lazy"
+        onLoad={() => setIsImageLoading(false)}
+      />
+      {pcardShowImageOnHover && secondImage && (
+        <Image
+          className={clsx([
+            "absolute inset-0",
+            "opacity-0 transition-[opacity,scale] duration-300",
+            "group-hover:scale-105 group-hover:opacity-100",
+          ])}
+          sizes="auto"
+          width={700}
+          data={secondImage}
+          alt={secondImage.altText || `Second picture of ${product.title}`}
+          loading="lazy"
+        />
+      )}
+    </>
+  );
 
   return (
     <div
@@ -106,53 +153,18 @@ export function ProductCard({
       }
     >
       <div className="relative">
-        {image && (
-          <Link
-            to={`/products/${product.handle}?${params.toString()}`}
-            prefetch="intent"
-            className="relative block aspect-(--pcard-image-ratio) overflow-hidden rounded-t-(--pcard-radius) bg-gray-100"
-          >
-            {/* Loading skeleton overlay */}
-            {isImageLoading && <Spinner />}
-            <Image
-              className={clsx([
-                "absolute inset-0",
-                // The zoom is keyed off the card, not the image, so it also
-                // fires when the cursor is on the quick shop button below.
-                // Tailwind v4 compiles `scale-105` to the `scale` property,
-                // not `transform`, so that is what has to be transitioned.
-                "transition-[opacity,scale] duration-300 group-hover:scale-105",
-                pcardShowImageOnHover &&
-                  secondImage &&
-                  "group-hover:opacity-50",
-                isTransitioning &&
-                  "[&_img]:[view-transition-name:image-expand]",
-              ])}
-              sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
-              data={image}
-              width={700}
-              alt={image.altText || `Picture of ${product.title}`}
-              loading="lazy"
-              onLoad={() => setIsImageLoading(false)}
-            />
-            {pcardShowImageOnHover && secondImage && (
-              <Image
-                className={clsx([
-                  "absolute inset-0",
-                  "opacity-0 transition-[opacity,scale] duration-300",
-                  "group-hover:scale-105 group-hover:opacity-100",
-                ])}
-                sizes="auto"
-                width={700}
-                data={secondImage}
-                alt={
-                  secondImage.altText || `Second picture of ${product.title}`
-                }
-                loading="lazy"
-              />
-            )}
-          </Link>
-        )}
+        {image &&
+          (placeholder ? (
+            <div className={imageWrapperClassName}>{imageContent}</div>
+          ) : (
+            <Link
+              to={`/products/${product.handle}?${params.toString()}`}
+              prefetch="intent"
+              className={imageWrapperClassName}
+            >
+              {imageContent}
+            </Link>
+          ))}
         <div className="absolute top-2.5 right-2.5 flex gap-1">
           {isBundle && pcardShowBundleBadge && <BundleBadge />}
           {pcardShowSaleBadge && (
@@ -167,14 +179,16 @@ export function ProductCard({
           {pcardShowNewBadge && <NewBadge publishedAt={product.publishedAt} />}
           {pcardShowOutOfStockBadge && <SoldOutBadge />}
         </div>
-        {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "image" && (
-          <QuickShopTrigger
-            productHandle={product.handle}
-            showOnHover={pcardShowQuickShopOnHover}
-            buttonType={pcardQuickShopButtonType}
-            placement="image"
-          />
-        )}
+        {pcardEnableQuickShop &&
+          !placeholder &&
+          pcardQuickShopButtonPlacement === "image" && (
+            <QuickShopTrigger
+              productHandle={product.handle}
+              showOnHover={pcardShowQuickShopOnHover}
+              buttonType={pcardQuickShopButtonType}
+              placement="image"
+            />
+          )}
       </div>
       <div
         className={clsx(
@@ -190,7 +204,7 @@ export function ProductCard({
         {pcardShowVendor && (
           <div className="text-body-subtle">{product.vendor}</div>
         )}
-        {pcardShowReviews && (
+        {pcardShowReviews && !placeholder && (
           <JudgemeStarsRating
             productHandle={product.handle}
             ratingText="{{rating}} ({{total_reviews}} reviews)"
@@ -212,15 +226,21 @@ export function ProductCard({
               : "justify-between gap-4",
           )}
         >
-          <Link
-            to={`/products/${product.handle}?${params.toString()}`}
-            prefetch="intent"
-            className="pb-1 font-semibold line-clamp-2"
-          >
-            <RevealUnderline className="leading-normal group-hover:bg-size-[100%_1px]">
+          {placeholder ? (
+            <span className="pb-1 font-semibold line-clamp-2 leading-normal">
               {product.title}
-            </RevealUnderline>
-          </Link>
+            </span>
+          ) : (
+            <Link
+              to={`/products/${product.handle}?${params.toString()}`}
+              prefetch="intent"
+              className="pb-1 font-semibold line-clamp-2"
+            >
+              <RevealUnderline className="leading-normal group-hover:bg-size-[100%_1px]">
+                {product.title}
+              </RevealUnderline>
+            </Link>
+          )}
           {pcardShowLowestPrice || isCombinedListing(product) ? (
             <div className="flex gap-1">
               <span>{t("product.from")}</span>
@@ -268,16 +288,18 @@ export function ProductCard({
           </div>
         )}
       </div>
-      {pcardEnableQuickShop && pcardQuickShopButtonPlacement === "bottom" && (
-        <div className="mt-auto w-full">
-          <QuickShopTrigger
-            productHandle={product.handle}
-            showOnHover={pcardShowQuickShopOnHover}
-            buttonType={pcardQuickShopButtonType}
-            placement="bottom"
-          />
-        </div>
-      )}
+      {pcardEnableQuickShop &&
+        !placeholder &&
+        pcardQuickShopButtonPlacement === "bottom" && (
+          <div className="mt-auto w-full">
+            <QuickShopTrigger
+              productHandle={product.handle}
+              showOnHover={pcardShowQuickShopOnHover}
+              buttonType={pcardQuickShopButtonType}
+              placement="bottom"
+            />
+          </div>
+        )}
     </div>
   );
 }

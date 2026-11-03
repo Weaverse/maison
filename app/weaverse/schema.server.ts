@@ -161,13 +161,8 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "image",
           name: "transparentLogoData",
           label: "Logo on transparent header",
-          defaultValue: {
-            id: "gid://shopify/MediaImage/34144817938616",
-            altText: "Logo",
-            url: "https://cdn.shopify.com/s/files/1/0838/0052/3057/files/transparent_Pilot_logo.png?v=1718763594",
-            width: 320,
-            height: 116,
-          },
+          // No default: a transparent header sits on top of the hero image, so
+          // the shop-name wordmark is the correct starting point here too.
           condition: (theme) => theme.enableTransparentHeader === true,
         },
         {
@@ -968,7 +963,7 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "textarea",
           name: "popularSearchKeywords",
           label: "Popular search keywords",
-          defaultValue: "Covers, Sheets, Pillowcases, Blankets, Shams",
+          defaultValue: "",
           placeholder: "Covers, Sheets, Pillowcases, Blankets, Shams",
           helpText:
             "Enter popular search keywords separated by commas. E.g. <strong>Covers, Sheets, Pillowcases, Blankets, Shams</strong>",
@@ -1119,25 +1114,25 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "text",
           name: "socialInstagram",
           label: "Instagram",
-          defaultValue: "https://www.instagram.com/",
+          placeholder: "https://www.instagram.com/your-handle",
         },
         {
           type: "text",
           name: "socialX",
           label: "X (formerly Twitter)",
-          defaultValue: "https://x.com/i/communities/1636383560197373952",
+          placeholder: "https://x.com/your-handle",
         },
         {
           type: "text",
           name: "socialLinkedIn",
           label: "LinkedIn",
-          defaultValue: "https://www.linkedin.com/company/weaverseio",
+          placeholder: "https://www.linkedin.com/company/your-company",
         },
         {
           type: "text",
           name: "socialFacebook",
           label: "Facebook",
-          defaultValue: "https://www.facebook.com/weaverse",
+          placeholder: "https://www.facebook.com/your-page",
         },
         {
           type: "heading",
@@ -1177,7 +1172,7 @@ export const themeSchema: HydrogenThemeSchema = {
           type: "richtext",
           name: "copyright",
           label: "Copyright text",
-          defaultValue: "© 2024 Weaverse. All rights reserved.",
+          placeholder: "© 2024 Your store. All rights reserved.",
         },
         {
           type: "heading",

@@ -37,7 +37,5 @@ export const schema = createSchema({
     pages: ["PRODUCT"],
   },
   settings: sectionSettings,
-  presets: {
-    headingText: "Select Variants",
-  },
+  presets: {},
 });
