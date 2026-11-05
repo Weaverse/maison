@@ -3,6 +3,9 @@ import { data } from "react-router";
 import { prefixPathWithLocale } from "~/utils/locale";
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
+  if (context.cartIdentityUnavailable) {
+    throw new Response("Cart identity unavailable", { status: 503 });
+  }
   const { cart, storefront } = context;
 
   try {

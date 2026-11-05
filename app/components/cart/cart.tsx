@@ -82,11 +82,9 @@ export function Cart({
         lineIds={(originalCart?.lines?.nodes ?? []).map((line) => line.id)}
       />
       {cartHasItems && <CartDetails cart={cart} layout={layout} />}
-      <CartEmpty
-        hidden={cartHasItems || linesCount}
-        onClose={onClose}
-        layout={layout}
-      />
+      {!cartHasItems && !linesCount && (
+        <CartEmpty onClose={onClose} layout={layout} />
+      )}
     </B2BPricingProvider>
   );
 }
@@ -1011,11 +1009,9 @@ function CartLinePrice({
 }
 
 function CartEmpty({
-  hidden = false,
   layout = "drawer",
   onClose,
 }: {
-  hidden: boolean;
   layout?: Layouts;
   onClose?: () => void;
 }) {
@@ -1034,7 +1030,6 @@ function CartEmpty({
           "w-full gap-4 pb-12 md:items-start md:gap-8 lg:gap-12",
         ],
       )}
-      hidden={hidden}
     >
       <div className={clsx(layout === "page" && "text-center")}>
         <p className="mb-4">{t("cart.emptyMessage")}</p>
