@@ -230,8 +230,9 @@ export function Footer() {
                 />
               ) : null}
 
-              {/* brand-meta: stacked below lg, inline from lg */}
-              <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center">
+              {/* Keep the location and social links stacked until the brand
+                  column has room for both at xl widths. */}
+              <div className="flex flex-col items-start gap-4 xl:flex-row xl:items-center">
                 {/* Location carries a label above it, so the pair is bottom
                     aligned rather than centred. */}
                 <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
@@ -315,10 +316,13 @@ export function Footer() {
         <FooterMenu />
         {/* Same treatment as the star divider below */}
         <div className="h-px w-full bg-[#A79D95] opacity-35" />
-        {/* 12px from each separator to the content — 24px over the whole
-            row. The star divider below pays its half of that through the
-            negative margin on its own box, explained there. */}
-        <div className="flex flex-col gap-6 py-3 md:flex-row md:flex-wrap md:justify-between lg:flex-nowrap lg:items-center">
+        {/* Figma node 4549-7639 (834) and 1232-25676 (1728). The design gives
+            the row 16px of its own top padding and then sets it off from the
+            rules either side by 20px at tablet and 32px at desktop, so the
+            hairline sits 36px/48px above the figures. Below, the 20px/32px
+            carries to the star divider's box, whose rule is a further 21.5px
+            in — 41.5px/53.5px from the figures to the line the eye reads. */}
+        <div className="flex flex-col gap-6 pt-9 pb-5 md:flex-row md:flex-wrap md:justify-between lg:flex-nowrap lg:items-center lg:pt-12 lg:pb-8">
           {/* Payment Icons - Order 2 on mobile/tablet, Order 3 on desktop */}
           {paymentIconKeys.length > 0 && (
             <div className="order-2 flex items-center gap-3 lg:order-3">
@@ -336,13 +340,11 @@ export function Footer() {
           />
         </div>
 
-        {/* Divider with star. The star sits in a 44px box with the rule
-            drawn through its middle, so the box reaches 22px above the line
-            it reads as. Pulling it back up by that half puts the line on the
-            row's own edge, and the 12px above it is the padding of the row
-            above — the same 12px that row leaves under the hairline. Nothing
-            below moves relative to the star: the whole block shifts together. */}
-        <div className="-mt-[22px] flex w-full items-center gap-4">
+        {/* Divider with star. Its 44px box takes its own space here, as the
+            design has it: the rule runs through the middle, so the gap the row
+            above leaves is what separates the figures from the box, and the
+            box's own half-height is the rest of the way to the line. */}
+        <div className="flex w-full items-center gap-4">
           <div className="h-px flex-1 bg-[#A79D95] opacity-35" />
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full text-[#686766]">
             <StarDividerIcon />
