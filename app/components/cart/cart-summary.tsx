@@ -278,8 +278,7 @@ export function CartSummary({
     <div
       className={cn(
         layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
-        layout === "page" &&
-          "z-[1] grid h-fit w-full gap-5 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav)",
+        layout === "page" && "grid h-fit w-full gap-5 rounded-2xl bg-white p-6",
       )}
     >
       {layout === "drawer" && appliedCodes}

@@ -112,7 +112,9 @@ function CartDetails({
       <div
         className={clsx(
           "space-y-4",
-          layout === "drawer" ? "flex-shrink-0" : "self-start lg:w-[360px]",
+          layout === "drawer"
+            ? "flex-shrink-0"
+            : "self-start lg:sticky lg:top-(--height-nav) lg:w-[360px]",
         )}
       >
         <CartSummary cart={cart} layout={layout}>
@@ -891,13 +893,30 @@ function CartLinePrice({
   // fires first and the saving's placeholder follows it, which reads as two
   // separate things loading.
   if (!pricedByB2Bridge && fetcher.state !== "idle") {
+    const pendingMoney =
+      priceType === "regular"
+        ? line.cost.totalAmount
+        : line.cost.compareAtAmountPerQuantity;
+
     return (
-      <CircleNotchIcon
-        size={18}
-        // The line colour, so the spinner reads as the same quiet furniture as
-        // the rules and field borders around it rather than as body text.
-        className={clsx("animate-spin text-line", className)}
-      />
+      <span className={clsx("relative inline-block", className)}>
+        {pendingMoney && (
+          <Money
+            withoutTrailingZeros
+            {...passthroughProps}
+            data={pendingMoney}
+            className="invisible font-semibold"
+            aria-hidden="true"
+          />
+        )}
+        <CircleNotchIcon
+          size={18}
+          // Keep the price in flow while the spinner is overlaid. Replacing it
+          // with an 18px icon made the price row change height on every update.
+          className="absolute top-1/2 right-0 -translate-y-1/2 animate-spin text-line"
+          aria-label="Updating price"
+        />
+      </span>
     );
   }
 
