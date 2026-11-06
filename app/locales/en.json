@@ -74,6 +74,8 @@
     "zoomMedia": "Zoom product media",
     "zoomDialog": "Product media zoom",
     "zoomImage": "Product image zoom",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
     "noProductData": "No product data...",
     "variant": "Variant",
     "quickShopModal": "Quick shop modal",

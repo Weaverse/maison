@@ -23,6 +23,9 @@ import { Cart } from "~/components/cart/cart";
 import type { RootLoader } from "~/root";
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  if (context.cartIdentityUnavailable) {
+    throw new Response("Cart identity unavailable", { status: 503 });
+  }
   const { cart } = context;
   const formData = await request.formData();
   const { action: cartFormAction, inputs } = CartForm.getFormInput(formData);
@@ -94,7 +97,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (typeof redirectTo === "string" && isLocalPath(redirectTo)) {
     // status = 303;
     // headers.set("Location", redirectTo);
-    return redirect(redirectTo);
+    return redirect(redirectTo, { headers });
   }
 
   const { cart: cartResult, errors, userErrors } = result;
@@ -110,6 +113,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export async function loader({ context }: LoaderFunctionArgs) {
+  if (context.cartIdentityUnavailable) {
+    throw new Response("Cart identity unavailable", { status: 503 });
+  }
   const { cart } = context;
   return await cart.get();
 }
