@@ -1,6 +1,4 @@
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
   MagnifyingGlassPlusIcon,
   VideoCameraIcon,
   XIcon,
@@ -16,7 +14,7 @@ import type {
   Media_Video_Fragment,
   MediaFragment,
 } from "storefront-api.generated";
-import { Button } from "~/components/button";
+import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { Image } from "~/components/image";
 import { ScrollArea } from "~/components/scroll-area";
 import { Spinner } from "~/components/spinner";
@@ -179,26 +177,28 @@ export function ZoomModal({
               <XIcon className="h-6 w-6" />
             </Dialog.Close>
             <div className="absolute right-10 bottom-10 left-10 flex items-center justify-center gap-2 md:left-auto">
-              <Button
-                variant="secondary"
-                className="border-line-subtle"
+              <button
+                type="button"
+                aria-label={t("product.previousImage")}
+                className="rounded-full border border-transparent bg-(--btn-secondary-bg) p-4 transition-all duration-200"
                 onClick={() => {
                   setZoomMediaId(prevMedia.id);
                   scrollToMedia(prevMedia.id);
                 }}
               >
-                <ArrowLeftIcon className="h-4.5 w-4.5" />
-              </Button>
-              <Button
-                variant="secondary"
-                className="border-line-subtle"
+                <ArrowLeft />
+              </button>
+              <button
+                type="button"
+                aria-label={t("product.nextImage")}
+                className="rounded-full border border-transparent bg-(--btn-secondary-bg) p-4 transition-all duration-200"
                 onClick={() => {
                   setZoomMediaId(nextMedia.id);
                   scrollToMedia(nextMedia.id);
                 }}
               >
-                <ArrowRightIcon className="h-4.5 w-4.5" />
-              </Button>
+                <ArrowRight />
+              </button>
             </div>
           </div>
         </Dialog.Content>
