@@ -82,7 +82,7 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
             >
               <div
                 suppressHydrationWarning
-                className="prose dark:prose-invert py-2.5 text-body-subtle"
+                className="prose dark:prose-invert py-2.5 text-base text-body-subtle"
                 dangerouslySetInnerHTML={{ __html: content }}
               />
               {learnMore && (
