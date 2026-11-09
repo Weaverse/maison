@@ -20,10 +20,12 @@ pnpm-lock.yaml
 .github/copilot-instructions.md
 memory/
 scripts/*
-# Checked in: this one runs in CI alongside typecheck and lint.
+# Checked in so they can be run from a clone. Only the last of these is wired
+# into CI; the others are run by hand, and the probes need store credentials.
 !scripts/check-translations.mjs
 !scripts/b2bridge-probe.mjs
 !scripts/b2bridge-checkout-probe.mjs
+!scripts/cart-ownership.test.mjs
 templates/
 specs/
 .wrangler/

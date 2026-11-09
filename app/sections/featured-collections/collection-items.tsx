@@ -2,7 +2,6 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
-  useParentInstance,
 } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
@@ -11,6 +10,7 @@ import { Image } from "~/components/image";
 import Link, { type LinkStyles, linkStylesInputs } from "~/components/link";
 import type { OverlayProps } from "~/components/overlay";
 import { Overlay, overlayInputs } from "~/components/overlay";
+import { useParentData } from "~/hooks/use-parent-data";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { getProductCountLabel } from "~/utils/collection";
@@ -381,11 +381,19 @@ function CollectionItems(props: CollectionItemsData) {
     ...rest
   } = props;
 
-  const parent = useParentInstance();
-  const itemsToShow = Number(parent.data?.data?.collectionsToShow ?? 10);
-  const collections: FeaturedCollectionsLoaderData = parent.data?.loaderData
+  // Settings sit on the section's own state, beside its `loaderData` — not
+  // under a further `data` the way this once looked for them, which read as
+  // undefined and left every list falling back to ten however few the
+  // merchant asked for. Read through `useParentData` so dragging the slider
+  // shows in the Studio rather than waiting for a reload.
+  const parentData = useParentData<{
+    collectionsToShow?: number;
+    loaderData?: FeaturedCollectionsLoaderData;
+  }>();
+  const itemsToShow = Number(parentData?.collectionsToShow ?? 10);
+  const collections: FeaturedCollectionsLoaderData = parentData?.loaderData
     ?.length
-    ? parent.data.loaderData
+    ? parentData.loaderData
     : new Array(itemsToShow).fill(COLLECTION_PLACEHOLDER);
   const items = collections.slice(0, itemsToShow);
 
@@ -552,7 +560,7 @@ export const schema = createSchema({
           type: "color",
           name: "cardBackgroundColor",
           label: "Card background",
-          defaultValue: "#DCDCDC",
+          defaultValue: "#DBD7D1",
           condition: isStandardLayout,
         },
         {

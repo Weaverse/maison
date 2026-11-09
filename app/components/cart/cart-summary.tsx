@@ -13,6 +13,7 @@ import { useFetcher } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import { useB2BPricing } from "~/components/cart/b2b-cart-pricing";
+import { useLineRemovePending } from "~/components/cart/line-remove";
 import { Skeleton } from "~/components/skeleton";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import { getCartDiscounts } from "~/utils/cart-discounts";
@@ -99,12 +100,9 @@ export function CartSummary({
   const dcApplyFetcher = useFetcher({ key: "discount-code-apply" });
   const dcRemoveFetcher = useFetcher({ key: "discount-code-remove" });
   const gcRemoveFetcher = useFetcher({ key: "gift-card-remove" });
-  // Line removal submits with this stable fetcherKey. The CartLineItem that
-  // owns the trash button unmounts the moment the line is optimistically
-  // spliced out, so its own fetcher response would be lost. Reading the keyed
-  // fetcher here (CartSummary stays mounted while the cart has items) keeps
-  // the fetcher alive so revalidation completes and cost stays in sync.
-  const lineRemoveFetcher = useFetcher({ key: "cart-line-remove" });
+  // Each line removes through a fetcher of its own, held open elsewhere; see
+  // `line-remove.tsx`. All this needs to know is whether any of them is busy.
+  const lineRemovePending = useLineRemovePending();
 
   const { cost, discountCodes, isOptimistic, appliedGiftCards, note } = cart;
 
@@ -167,7 +165,7 @@ export function CartSummary({
     dcApplyFetcher.state !== "idle" ||
     dcRemoveFetcher.state !== "idle" ||
     gcRemoveFetcher.state !== "idle" ||
-    lineRemoveFetcher.state !== "idle";
+    lineRemovePending;
 
   // Both chip groups in one place so the drawer can show them above the
   // subtotal, as the design has them, while the cart page keeps them below.
@@ -280,8 +278,7 @@ export function CartSummary({
     <div
       className={cn(
         layout === "drawer" && "grid gap-4 border-line-subtle border-t pt-4",
-        layout === "page" &&
-          "z-[1] grid h-fit w-full gap-5 rounded-2xl bg-white p-6 lg:sticky lg:top-(--height-nav)",
+        layout === "page" && "grid h-fit w-full gap-5 rounded-2xl bg-white p-6",
       )}
     >
       {layout === "drawer" && appliedCodes}

@@ -37,6 +37,13 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # A cart carries its owner, and the rules deciding whether one is kept,
+      # handed over or let go are the kind that fail quietly: the cart simply
+      # belongs to the wrong person, or vanishes after a Shopify hiccup. These
+      # run offline against the pure half of that logic.
+      - name: Cart ownership rules
+        run: npm run cart:ownership-check
+
       # Typecheck does not see bundler-level breakage: a bad dynamic import, a
       # client-only module pulled into the worker bundle, or a Vite plugin
       # misconfiguration all typecheck clean and fail at deploy. The build

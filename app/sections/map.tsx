@@ -92,7 +92,11 @@ export default function MapSection(props: MapSectionProps) {
         className="relative z-10 w-full px-6 py-12 md:px-12 md:py-20"
         style={{ backgroundColor: infoBgColor }}
       >
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 md:gap-12 md:px-10">
+        {/* No horizontal padding of its own: the panel above already insets the
+            content, and carrying `md:px-10` here too stacked the two into 88px
+            a side from `md` up — on a 768px tablet that left the two cards
+            sharing 592px and wrapping mid-address. */}
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 md:gap-12">
           {heading ? (
             <h3 className="text-center font-serif text-[44px] text-body leading-[1.1] tracking-[-1.32px]">
               {heading}

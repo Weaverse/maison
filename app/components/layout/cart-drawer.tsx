@@ -150,9 +150,9 @@ function AnimatedDrawer({ open, children }) {
                 // The bottom keeps its own space: the panel ends flush with the
                 // screen edge, and on a tablet the checkout button sat jammed
                 // against it — under the home indicator once one shows up.
-                // Padding-bottom of the safe inset (with a 12px floor) lifts
-                // the buttons clear on every device.
-                className="relative h-full w-[calc(100vw-24px)] max-w-[461px] bg-background pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"
+                // Match the 20px horizontal inset while keeping extra room
+                // for devices whose safe area is larger.
+                className="relative h-full w-[calc(100vw-24px)] max-w-[461px] bg-background pt-3 pb-[max(env(safe-area-inset-bottom),20px)]"
               >
                 {children}
               </motion.div>

@@ -2,7 +2,6 @@ import {
   createSchema,
   type HydrogenComponentProps,
   IMAGES_PLACEHOLDERS,
-  useParentInstance,
   useTranslation,
 } from "@weaverse/hydrogen";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -12,6 +11,7 @@ import { Link } from "~/components/link";
 import { RevealUnderline } from "~/components/reveal-underline";
 import { useAnimation } from "~/hooks/use-animation";
 import { useSelectedLocale } from "~/hooks/use-locale";
+import { useParentData } from "~/hooks/use-parent-data";
 import type { ImageAspectRatio } from "~/types/image";
 import { cn } from "~/utils/cn";
 import { calculateAspectRatio } from "~/utils/image";
@@ -81,9 +81,13 @@ function ArticlesItems(props: ArticlesItemsProps) {
 
   const [scope] = useAnimation(ref);
 
-  const parent = useParentInstance();
-  const data: ArticlesLoaderData = parent.data?.loaderData;
-  const itemsToShow = Number(parent.data?.data?.articlesToShow ?? 4);
+  // Settings live on the section's own state; see `collection-items.tsx`.
+  const parentData = useParentData<{
+    articlesToShow?: number;
+    loaderData?: ArticlesLoaderData;
+  }>();
+  const data: ArticlesLoaderData = parentData?.loaderData;
+  const itemsToShow = Number(parentData?.articlesToShow ?? 4);
 
   if (!data?.articles?.length) {
     return (

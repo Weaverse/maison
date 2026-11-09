@@ -67,7 +67,7 @@ export const schema = createSchema({
         children: [
           {
             type: "multicolumn--item",
-            backgroundColor: "#DCDCDC",
+            backgroundColor: "#DBD7D1",
             children: [
               {
                 type: "heading",
@@ -93,7 +93,7 @@ export const schema = createSchema({
           },
           {
             type: "multicolumn--item",
-            backgroundColor: "#DCDCDC",
+            backgroundColor: "#DBD7D1",
             children: [
               {
                 type: "heading",
@@ -119,7 +119,7 @@ export const schema = createSchema({
           },
           {
             type: "multicolumn--item",
-            backgroundColor: "#DCDCDC",
+            backgroundColor: "#DBD7D1",
             children: [
               {
                 type: "heading",
@@ -145,7 +145,7 @@ export const schema = createSchema({
           },
           {
             type: "multicolumn--item",
-            backgroundColor: "#DCDCDC",
+            backgroundColor: "#DBD7D1",
             children: [
               {
                 type: "heading",

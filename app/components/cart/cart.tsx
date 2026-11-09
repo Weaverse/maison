@@ -32,6 +32,10 @@ import {
   useLimitMessages,
   useProductRecalculating,
 } from "~/components/cart/b2b-cart-pricing";
+import {
+  LineRemoveFetchers,
+  lineRemoveFetcherKey,
+} from "~/components/cart/line-remove";
 import { SubscriptionIcon } from "~/components/icons";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
@@ -72,12 +76,15 @@ export function Cart({
     // `originalCart`, not the optimistic one: pricing may only be asked for a
     // cart the server has already accepted.
     <B2BPricingProvider cart={originalCart}>
-      {cartHasItems && <CartDetails cart={cart} layout={layout} />}
-      <CartEmpty
-        hidden={cartHasItems || linesCount}
-        onClose={onClose}
-        layout={layout}
+      {/* Outside `CartDetails`, which the optimistic cart unmounts the moment
+          the last line goes — taking with it any hold placed inside it. */}
+      <LineRemoveFetchers
+        lineIds={(originalCart?.lines?.nodes ?? []).map((line) => line.id)}
       />
+      {cartHasItems && <CartDetails cart={cart} layout={layout} />}
+      {!cartHasItems && !linesCount && (
+        <CartEmpty onClose={onClose} layout={layout} />
+      )}
     </B2BPricingProvider>
   );
 }
@@ -105,7 +112,9 @@ function CartDetails({
       <div
         className={clsx(
           "space-y-4",
-          layout === "drawer" ? "flex-shrink-0" : "self-start lg:w-[360px]",
+          layout === "drawer"
+            ? "flex-shrink-0"
+            : "self-start lg:sticky lg:top-(--height-nav) lg:w-[360px]",
         )}
       >
         <CartSummary cart={cart} layout={layout}>
@@ -543,7 +552,7 @@ function ItemRemoveButton({
       route={cartAction}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds: [lineId] }}
-      fetcherKey="cart-line-remove"
+      fetcherKey={lineRemoveFetcherKey(lineId)}
     >
       <button
         className={clsx(
@@ -884,13 +893,30 @@ function CartLinePrice({
   // fires first and the saving's placeholder follows it, which reads as two
   // separate things loading.
   if (!pricedByB2Bridge && fetcher.state !== "idle") {
+    const pendingMoney =
+      priceType === "regular"
+        ? line.cost.totalAmount
+        : line.cost.compareAtAmountPerQuantity;
+
     return (
-      <CircleNotchIcon
-        size={18}
-        // The line colour, so the spinner reads as the same quiet furniture as
-        // the rules and field borders around it rather than as body text.
-        className={clsx("animate-spin text-line", className)}
-      />
+      <span className={clsx("relative inline-block", className)}>
+        {pendingMoney && (
+          <Money
+            withoutTrailingZeros
+            {...passthroughProps}
+            data={pendingMoney}
+            className="invisible font-semibold"
+            aria-hidden="true"
+          />
+        )}
+        <CircleNotchIcon
+          size={18}
+          // Keep the price in flow while the spinner is overlaid. Replacing it
+          // with an 18px icon made the price row change height on every update.
+          className="absolute top-1/2 right-0 -translate-y-1/2 animate-spin text-line"
+          aria-label="Updating price"
+        />
+      </span>
     );
   }
 
@@ -1002,11 +1028,9 @@ function CartLinePrice({
 }
 
 function CartEmpty({
-  hidden = false,
   layout = "drawer",
   onClose,
 }: {
-  hidden: boolean;
   layout?: Layouts;
   onClose?: () => void;
 }) {
@@ -1025,7 +1049,6 @@ function CartEmpty({
           "w-full gap-4 pb-12 md:items-start md:gap-8 lg:gap-12",
         ],
       )}
-      hidden={hidden}
     >
       <div className={clsx(layout === "page" && "text-center")}>
         <p className="mb-4">{t("cart.emptyMessage")}</p>

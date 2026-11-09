@@ -22,7 +22,10 @@ import { clsx } from "clsx";
 import { Suspense, useEffect, useState } from "react";
 import type { LoaderFunctionArgs, MetaArgs } from "react-router";
 import { Await, Form, useLoaderData } from "react-router";
-import type { SearchQuery } from "storefront-api.generated";
+import type {
+  QuerySuggestionQuery,
+  SearchQuery,
+} from "storefront-api.generated";
 import { Button } from "~/components/button";
 import Link, { variants } from "~/components/link";
 import { ProductCard } from "~/components/product/product-card";
@@ -94,30 +97,55 @@ export async function loader({
           }
         : {};
 
-    // `search` is a full-text query, not a prefix one: a single character
-    // matches nothing at all, and "sheet" never reaches "sheets". The trailing
-    // wildcard makes it match by prefix the way the search drawer's
-    // `predictiveSearch` already does, so what the shopper sees while typing
-    // is what the results page returns. Shopify applies it to the last token,
-    // so multi-word terms still work. Only the query sent to Shopify carries
-    // it — the term echoed back to the page stays what the shopper typed.
-    let trimmedTerm = searchTerm.trim();
-    let prefixedTerm = trimmedTerm.endsWith("*")
-      ? trimmedTerm
-      : `${trimmedTerm}*`;
+    let runSearch = (term: string) =>
+      storefront.query<SearchQuery>(SEARCH_QUERY, {
+        variables: {
+          searchTerm: term,
+          ...variables,
+          ...buyerVariables,
+          country: storefront.i18n.country,
+          language: storefront.i18n.language,
+          filters,
+          sortKey,
+          reverse,
+        },
+      });
 
-    const data = await storefront.query<SearchQuery>(SEARCH_QUERY, {
-      variables: {
-        searchTerm: prefixedTerm,
-        ...variables,
-        ...buyerVariables,
-        country: storefront.i18n.country,
-        language: storefront.i18n.language,
-        filters,
-        sortKey,
-        reverse,
-      },
-    });
+    let trimmedTerm = searchTerm.trim();
+    let data = await runSearch(trimmedTerm);
+
+    // `search` is a full-text query, not a prefix one, so the first characters
+    // of a word match nothing: the drawer suggests "sheet" from an "s" and
+    // then the results page it leads to was empty. Ask Shopify what it would
+    // have suggested and search for that instead — the same `predictiveSearch`
+    // the drawer reads, so the page lands where the suggestion promised.
+    //
+    // A wildcard looks like the obvious fix and is not: Shopify reads a bare
+    // `term*` as matching every product in the shop, so "sdgvsd" came back
+    // with the whole catalogue rather than nothing.
+    //
+    // Only on an empty result, and only to a term Shopify itself proposes, so
+    // a search for something this shop does not sell still says so.
+    if (!data.search?.nodes?.length) {
+      let { predictiveSearch } = await storefront.query<QuerySuggestionQuery>(
+        QUERY_SUGGESTION_QUERY,
+        {
+          variables: {
+            searchTerm: trimmedTerm,
+            country: storefront.i18n.country,
+            language: storefront.i18n.language,
+          },
+        },
+      );
+      let suggestion = predictiveSearch?.queries?.[0]?.text?.trim();
+      if (
+        suggestion &&
+        suggestion.toLowerCase() !== trimmedTerm.toLowerCase()
+      ) {
+        data = await runSearch(suggestion);
+      }
+    }
+
     products = data.search;
     lowestPriceProduct = data.lowestPriceProduct;
     highestPriceProduct = data.highestPriceProduct;
@@ -527,6 +555,26 @@ function getRecommendations(
 }
 
 // Aliases for price range query
+/**
+ * What Shopify would have suggested for a term the catalogue does not match.
+ *
+ * The same source the search drawer's suggestions come from, so a term picked
+ * there resolves to the products that suggestion stands for.
+ */
+const QUERY_SUGGESTION_QUERY = `#graphql
+  query querySuggestion(
+    $country: CountryCode
+    $language: LanguageCode
+    $searchTerm: String!
+  ) @inContext(country: $country, language: $language) {
+    predictiveSearch(query: $searchTerm, limit: 1, types: [QUERY]) {
+      queries {
+        text
+      }
+    }
+  }
+` as const;
+
 const SEARCH_QUERY = `#graphql
   query search(
     $buyer: BuyerInput
