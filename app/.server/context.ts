@@ -19,6 +19,9 @@ import {
   currentCartCustomerSubject,
 } from "~/utils/cart-owner.account";
 import {
+  type AdoptionOutcome,
+  adoptionDisposition,
+  adoptionOutcome,
   type CartOwnerMarker,
   cartAccess,
   unavailableCart,
@@ -62,7 +65,7 @@ export async function createHydrogenRouterContext(
   const cartResponseHeaders = new Headers();
 
   function setCartId(cartId: string) {
-    if (customerSubject === undefined) {
+    if (customerSubject === undefined || cartIdentityUnavailable) {
       throw new Response("Cart identity unavailable", { status: 503 });
     }
     allowedCartId = cartId;
@@ -109,6 +112,21 @@ export async function createHydrogenRouterContext(
     session.unset("cartOwner");
   }
 
+  /**
+   * Hold the cart back for this request without giving it up.
+   *
+   * The cookie and the signed marker stay as they are, so the next request
+   * can try again; this one neither reads the cart nor lets anything write to
+   * it. For the times we could not establish who is asking, or could not
+   * reach Shopify to hand a guest cart over — neither of which says the cart
+   * has stopped being the shopper's.
+   */
+  function withholdCart() {
+    allowedCartId = undefined;
+    cartHandlerStale = true;
+    cartIdentityUnavailable = true;
+  }
+
   if (allowedCartId) {
     const marker = session.get("cartOwner") as unknown;
     // Old carts have no signed ownership record. Treat them as unknown rather
@@ -123,13 +141,17 @@ export async function createHydrogenRouterContext(
     } else if (customerSubject === undefined) {
       // Keep the signed marker and cookie for a later retry, but never expose
       // the cart while the account's identity is uncertain.
-      allowedCartId = undefined;
-      cartHandlerStale = true;
+      withholdCart();
     } else {
       const access = cartAccess(allowedCartId, marker, customerSubject);
       if (access === "reset") {
         resetCart();
       } else if (access === "adopt") {
+        // Shopify answering and refusing is a different thing from Shopify
+        // not answering: see `adoptionOutcome`. A refusal gives the cart up;
+        // an unreachable Shopify holds it back for this request and tries
+        // again on the next, so a 503 mid-sign-in costs nobody their cart.
+        let outcome: AdoptionOutcome = "unreachable";
         try {
           const buyer = await hydrogenContext.customerAccount.getBuyer();
           if (!buyer?.customerAccessToken) {
@@ -139,24 +161,26 @@ export async function createHydrogenRouterContext(
             customerAccessToken: buyer.customerAccessToken,
             companyLocationId: buyer.companyLocationId ?? null,
           });
-          if (
-            !result.cart?.id ||
-            result.errors?.length ||
-            result.userErrors?.length
-          ) {
-            throw new Error("Shopify refused the cart buyer identity update");
-          }
-          const cartIdChanged = result.cart.id !== allowedCartId;
-          const headers = hydrogenContext.cart.setCartId(result.cart.id);
-          if (cartIdChanged) {
-            cartHandlerStale = true;
-            for (const cookie of headers.getSetCookie()) {
-              cartResponseHeaders.append("Set-Cookie", cookie);
+          outcome = adoptionOutcome(result);
+          if (outcome === "adopted") {
+            const cartIdChanged = result.cart.id !== allowedCartId;
+            const headers = hydrogenContext.cart.setCartId(result.cart.id);
+            if (cartIdChanged) {
+              cartHandlerStale = true;
+              for (const cookie of headers.getSetCookie()) {
+                cartResponseHeaders.append("Set-Cookie", cookie);
+              }
             }
           }
         } catch (error) {
           console.warn("[cart] guest cart adoption failed:", error);
+          outcome = adoptionOutcome(null, error);
+        }
+        const disposition = adoptionDisposition(outcome);
+        if (disposition === "release") {
           resetCart();
+        } else if (disposition === "withhold") {
+          withholdCart();
         }
       }
     }
@@ -168,8 +192,9 @@ export async function createHydrogenRouterContext(
     hydrogenContext = makeHydrogenContext();
   }
 
-  if (customerSubject === undefined) {
-    cartIdentityUnavailable = true;
+  // Both ways a cart is withheld end here: an account we could not identify,
+  // and a guest cart Shopify would not take while it was being handed over.
+  if (cartIdentityUnavailable) {
     // Reading the cart returns null because this handler has no allowed ID.
     // Block every mutation before it can create or alter a Shopify cart.
     const guardedCart = unavailableCart(hydrogenContext.cart);

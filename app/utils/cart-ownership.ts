@@ -21,6 +21,54 @@ export function unavailableCart<T extends object>(cart: T): T {
   });
 }
 
+/**
+ * How handing a guest cart to a signed-in buyer ended.
+ *
+ * `refused` is Shopify answering about this cart: it cannot be adopted, and
+ * there is nothing to keep. `unreachable` is Shopify not answering at all — a
+ * 503, a dropped connection, a transport-level error — which says nothing
+ * about the cart, so the shopper must not lose it over one.
+ */
+export type AdoptionOutcome = "adopted" | "refused" | "unreachable";
+
+export function adoptionOutcome(
+  result: {
+    cart?: { id?: string } | null;
+    errors?: unknown[] | null;
+    userErrors?: unknown[] | null;
+  } | null,
+  error?: unknown,
+): AdoptionOutcome {
+  if (error || !result) {
+    return "unreachable";
+  }
+  if (result.userErrors?.length) {
+    return "refused";
+  }
+  if (!result.cart?.id || result.errors?.length) {
+    return "unreachable";
+  }
+  return "adopted";
+}
+
+/**
+ * What an adoption outcome does to the cart the shopper is already holding.
+ *
+ * `release` gives it up — the cookie expires and the signed marker goes.
+ * `withhold` keeps both and only takes the cart out of reach for this one
+ * request, so the next can try again. The distinction is the whole point:
+ * Shopify being unreachable must never cost a shopper the cart they filled,
+ * and this mapping is what holds that line.
+ */
+export type CartDisposition = "keep" | "withhold" | "release";
+
+export function adoptionDisposition(outcome: AdoptionOutcome): CartDisposition {
+  if (outcome === "adopted") {
+    return "keep";
+  }
+  return outcome === "refused" ? "release" : "withhold";
+}
+
 /** A missing or malformed signed marker is never evidence of a guest cart. */
 export function cartAccess(
   cartId: string,
