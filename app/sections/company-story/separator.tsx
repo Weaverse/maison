@@ -68,7 +68,7 @@ export const schema = createSchema({
           type: "color",
           name: "separatorColor",
           label: "Separator color",
-          defaultValue: "#DCDCDC",
+          defaultValue: "#DBD7D1",
           condition: (data: CompanyStorySeparatorData) =>
             data.enableSeparator === true,
         },

@@ -216,7 +216,7 @@ export const schema = createSchema({
           type: "color",
           name: "cardBackgroundColor",
           label: "Card background",
-          defaultValue: "#DCDCDC",
+          defaultValue: "#DBD7D1",
         },
         {
           type: "color",

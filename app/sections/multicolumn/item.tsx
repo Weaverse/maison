@@ -89,7 +89,7 @@ export const schema = createSchema({
           type: "color",
           name: "backgroundColor",
           label: "Background color",
-          defaultValue: "#DCDCDC",
+          defaultValue: "#DBD7D1",
         },
       ],
     },

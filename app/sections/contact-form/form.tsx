@@ -241,7 +241,7 @@ export const schema = createSchema({
           type: "color",
           name: "inputBorderColor",
           label: "Border color",
-          defaultValue: "#DCDCDC",
+          defaultValue: "#DBD7D1",
         },
         {
           type: "color",
