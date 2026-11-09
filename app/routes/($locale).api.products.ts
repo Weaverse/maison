@@ -2,7 +2,6 @@ import { flattenConnection } from "@shopify/hydrogen";
 import type { ProductSortKeys } from "@shopify/hydrogen/storefront-api-types";
 import { data, type LoaderFunctionArgs } from "react-router";
 import type { ApiAllProductsQuery } from "storefront-api.generated";
-import invariant from "tiny-invariant";
 import { PRODUCT_CARD_FRAGMENT } from "~/graphql/fragments";
 import { maybeFilterOutCombinedListingsQuery } from "~/utils/combined-listings";
 
@@ -45,37 +44,76 @@ export async function loader({
     // noop
   }
 
-  const buyer = await customerAccount.getBuyer();
+  let buyer: Awaited<ReturnType<typeof customerAccount.getBuyer>>;
+  try {
+    buyer = await customerAccount.getBuyer();
+  } catch (error) {
+    console.error(
+      "[api/products] getBuyer failed:",
+      error instanceof Error ? error.message : "Unknown error",
+    );
+    return data({ products: [] });
+  }
   const buyerVariables =
     buyer?.companyLocationId && buyer?.customerAccessToken
       ? {
           buyer,
         }
       : {};
+  const hasBuyerContext = Boolean(
+    buyer?.companyLocationId && buyer?.customerAccessToken,
+  );
 
   const combinedQuery = [maybeFilterOutCombinedListingsQuery, query]
     .filter(Boolean)
     .join(" ");
 
-  const { products } = await storefront.query<ApiAllProductsQuery>(
-    API_ALL_PRODUCTS_QUERY,
-    {
-      variables: {
-        count,
-        query: combinedQuery,
-        reverse,
-        sortKey,
-        ...buyerVariables,
-        country: storefront.i18n.country,
-        language: storefront.i18n.language,
+  try {
+    const result = await storefront.query<ApiAllProductsQuery>(
+      API_ALL_PRODUCTS_QUERY,
+      {
+        variables: {
+          count,
+          query: combinedQuery,
+          reverse,
+          sortKey,
+          ...buyerVariables,
+          country: storefront.i18n.country,
+          language: storefront.i18n.language,
+        },
+        cache: hasBuyerContext
+          ? storefront.CacheNone()
+          : storefront.CacheLong(),
       },
-      cache: storefront.CacheLong(),
-    },
-  );
+    );
 
-  invariant(products, "No data returned from top products query");
+    if (result.errors?.length) {
+      console.error("[api/products] Shopify GraphQL errors:", {
+        hasBuyerContext,
+        messages: result.errors.map((error) =>
+          buyer?.customerAccessToken
+            ? error.message.replaceAll(buyer.customerAccessToken, "[redacted]")
+            : error.message,
+        ),
+      });
+      return data({ products: [] });
+    }
 
-  return data({ products: flattenConnection(products) });
+    if (!result.products) {
+      console.error("[api/products] Shopify response missing products:", {
+        hasBuyerContext,
+      });
+      return data({ products: [] });
+    }
+
+    return data({ products: flattenConnection(result.products) });
+  } catch (error) {
+    console.error("[api/products] storefront query failed:", {
+      hasBuyerContext,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+    return data({ products: [] });
+  }
 }
 
 const API_ALL_PRODUCTS_QUERY = `#graphql

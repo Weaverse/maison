@@ -47,7 +47,7 @@ export const schema = createSchema({
         imageAspectRatio: "1/1",
         imageBorderRadius: 4,
         showProductCount: true,
-        cardBackgroundColor: "#DCDCDC",
+        cardBackgroundColor: "#DBD7D1",
         cardPadding: 12,
         cardBorderRadius: 4,
       },

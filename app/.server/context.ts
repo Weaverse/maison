@@ -1,5 +1,9 @@
 import type { HydrogenSession } from "@shopify/hydrogen";
-import { createHydrogenContext } from "@shopify/hydrogen";
+import {
+  cartGetIdDefault,
+  cartSetIdDefault,
+  createHydrogenContext,
+} from "@shopify/hydrogen";
 import { WeaverseClient } from "@weaverse/hydrogen";
 import {
   createCookieSessionStorage,
@@ -10,6 +14,18 @@ import {
   CART_MUTATION_FRAGMENT,
   CART_QUERY_FRAGMENT,
 } from "~/graphql/cart-fragments";
+import {
+  type CartCustomerSubject,
+  currentCartCustomerSubject,
+} from "~/utils/cart-owner.account";
+import {
+  type AdoptionOutcome,
+  adoptionDisposition,
+  adoptionOutcome,
+  type CartOwnerMarker,
+  cartGate,
+  withheldCartContext,
+} from "~/utils/cart-ownership";
 import {
   getRequestI18n,
   loadStoreLocalization,
@@ -40,24 +56,144 @@ export async function createHydrogenRouterContext(
     AppSession.init(request, [env.SESSION_SECRET]),
   ]);
 
-  const hydrogenContext = createHydrogenContext(
-    {
-      env,
-      request,
-      cache,
-      waitUntil,
-      session,
-      i18n: getRequestI18n(request),
-      cart: {
-        queryFragment: CART_QUERY_FRAGMENT,
-        mutateFragment: CART_MUTATION_FRAGMENT,
+  let allowedCartId = cartGetIdDefault(request.headers)();
+  let cartWasReset = false;
+  let cartHandlerStale = false;
+  let cartIdentityUnavailable = false;
+  let customerSubject: CartCustomerSubject;
+  const cartCookieWriter = cartSetIdDefault();
+  const cartResponseHeaders = new Headers();
+
+  function setCartId(cartId: string) {
+    if (customerSubject === undefined || cartIdentityUnavailable) {
+      throw new Response("Cart identity unavailable", { status: 503 });
+    }
+    allowedCartId = cartId;
+    session.set("cartOwner", {
+      cartId,
+      customerSubject,
+    } satisfies CartOwnerMarker);
+    return cartCookieWriter(cartId);
+  }
+
+  function makeHydrogenContext() {
+    return createHydrogenContext(
+      {
+        env,
+        request,
+        cache,
+        waitUntil,
+        session,
+        i18n: getRequestI18n(request),
+        cart: {
+          getId: () => allowedCartId,
+          setId: setCartId,
+          queryFragment: CART_QUERY_FRAGMENT,
+          mutateFragment: CART_MUTATION_FRAGMENT,
+        },
+        customerAccount: {
+          useCustomAuthDomain: true,
+        },
       },
-      customerAccount: {
-        useCustomAuthDomain: true,
-      },
-    },
-    additionalContext,
+      additionalContext,
+    );
+  }
+
+  let hydrogenContext = makeHydrogenContext();
+  customerSubject = await currentCartCustomerSubject(
+    hydrogenContext.customerAccount,
+    session,
   );
+
+  function resetCart() {
+    allowedCartId = undefined;
+    cartWasReset = true;
+    cartHandlerStale = true;
+    session.unset("cartOwner");
+  }
+
+  /**
+   * Hold the cart back for this request without giving it up.
+   *
+   * The cookie and the signed marker stay as they are, so the next request
+   * can try again; this one neither reads the cart nor lets anything write to
+   * it. For the times we could not establish who is asking, or could not
+   * reach Shopify to hand a guest cart over — neither of which says the cart
+   * has stopped being the shopper's.
+   */
+  function withholdCart() {
+    // Only worth rebuilding the handler if it had an id to forget.
+    cartHandlerStale = cartHandlerStale || allowedCartId !== undefined;
+    allowedCartId = undefined;
+    cartIdentityUnavailable = true;
+  }
+
+  // Asked before `allowedCartId` is consulted: an account we cannot identify
+  // must not reach Shopify at all, cart cookie or no cart cookie. See
+  // `cartGate` for what the no-cookie case used to cost.
+  const gate = cartGate({
+    customerSubject,
+    cartId: allowedCartId,
+    marker: session.get("cartOwner") as unknown,
+  });
+
+  if (gate === "withhold") {
+    // Keep the signed marker and cookie for a later retry, but never expose
+    // the cart while the account's identity is uncertain.
+    withholdCart();
+  } else if (gate === "reset") {
+    resetCart();
+  } else if (gate === "adopt") {
+    // Shopify answering and refusing is a different thing from Shopify
+    // not answering: see `adoptionOutcome`. A refusal gives the cart up;
+    // an unreachable Shopify holds it back for this request and tries
+    // again on the next, so a 503 mid-sign-in costs nobody their cart.
+    let outcome: AdoptionOutcome = "unreachable";
+    try {
+      const buyer = await hydrogenContext.customerAccount.getBuyer();
+      if (!buyer?.customerAccessToken) {
+        throw new Error("Customer access token unavailable");
+      }
+      const result = await hydrogenContext.cart.updateBuyerIdentity({
+        customerAccessToken: buyer.customerAccessToken,
+        companyLocationId: buyer.companyLocationId ?? null,
+      });
+      outcome = adoptionOutcome(result);
+      if (outcome === "adopted") {
+        const cartIdChanged = result.cart.id !== allowedCartId;
+        const headers = hydrogenContext.cart.setCartId(result.cart.id);
+        if (cartIdChanged) {
+          cartHandlerStale = true;
+          for (const cookie of headers.getSetCookie()) {
+            cartResponseHeaders.append("Set-Cookie", cookie);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("[cart] guest cart adoption failed:", error);
+      outcome = adoptionOutcome(null, error);
+    }
+    const disposition = adoptionDisposition(outcome);
+    if (disposition === "release") {
+      resetCart();
+    } else if (disposition === "withhold") {
+      withholdCart();
+    }
+  }
+
+  // Hydrogen captures the first cart ID inside createCartHandler. Changing the
+  // getId callback's value alone cannot revoke that captured ID.
+  if (cartHandlerStale) {
+    hydrogenContext = makeHydrogenContext();
+  }
+
+  // Both ways a cart is withheld end here: an account we could not identify,
+  // and a guest cart Shopify would not take while it was being handed over.
+  if (cartIdentityUnavailable) {
+    // Reading the cart returns null because this handler has no allowed ID.
+    // Block every mutation before it can create or alter a Shopify cart.
+    hydrogenContext = withheldCartContext(hydrogenContext);
+  }
 
   // Shopify Markets decides what is live; the theme decides what it has a
   // catalog for. This needs the Storefront client, so it runs after the
@@ -78,7 +214,15 @@ export async function createHydrogenRouterContext(
   // `Object.assign` mutates and returns the same instance, so returning it
   // directly keeps the RouterContextProvider intact while letting the added
   // properties reach the context type.
-  return Object.assign(hydrogenContext, { weaverse, localization });
+  return Object.assign(hydrogenContext, {
+    weaverse,
+    localization,
+    get cartWasReset() {
+      return cartWasReset;
+    },
+    cartIdentityUnavailable,
+    cartResponseHeaders,
+  });
 }
 
 class AppSession implements HydrogenSession {
