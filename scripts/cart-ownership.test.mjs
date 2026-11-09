@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createCartHandler } from "@shopify/hydrogen";
 import { currentCartCustomerSubject } from "../app/utils/cart-owner.account.ts";
 import {
   adoptionDisposition,
   adoptionOutcome,
   cartAccess,
+  cartGate,
   unavailableCart,
+  withheldCartContext,
 } from "../app/utils/cart-ownership.ts";
 
 function idToken(subject) {
@@ -171,4 +174,141 @@ test("an unreachable Shopify never costs the shopper their cart", () => {
     ),
     "release",
   );
+});
+
+test("an account we cannot identify is gated with or without a cart cookie", () => {
+  // The case this gate exists for. With no cookie the guard used to be
+  // skipped entirely, so `addLines` reached Shopify, a cart was created
+  // there, and writing its id back failed afterwards — an error for the
+  // shopper and an orphan cart left behind on every retry.
+  assert.equal(
+    cartGate({ customerSubject: undefined, cartId: undefined, marker: null }),
+    "withhold",
+  );
+  assert.equal(
+    cartGate({
+      customerSubject: undefined,
+      cartId: "cart-1",
+      marker: { cartId: "cart-1", customerSubject: "buyer-A" },
+    }),
+    "withhold",
+  );
+
+  // A browser carrying no cart, for someone we can identify, is nothing to act on.
+  assert.equal(
+    cartGate({ customerSubject: "buyer-A", cartId: undefined, marker: null }),
+    "none",
+  );
+  assert.equal(
+    cartGate({ customerSubject: null, cartId: undefined, marker: null }),
+    "none",
+  );
+
+  // With an identity and a cart, the gate is `cartAccess`.
+  const ownedByA = { cartId: "cart-1", customerSubject: "buyer-A" };
+  assert.equal(
+    cartGate({
+      customerSubject: "buyer-A",
+      cartId: "cart-1",
+      marker: ownedByA,
+    }),
+    "keep",
+  );
+  assert.equal(
+    cartGate({
+      customerSubject: "buyer-B",
+      cartId: "cart-1",
+      marker: ownedByA,
+    }),
+    "reset",
+  );
+  assert.equal(
+    cartGate({
+      customerSubject: "buyer-A",
+      cartId: "cart-1",
+      marker: { cartId: "cart-1", customerSubject: null },
+    }),
+    "adopt",
+  );
+  // An old cart with no record at all is let go, not guessed at.
+  assert.equal(
+    cartGate({ customerSubject: "buyer-A", cartId: "cart-1", marker: null }),
+    "reset",
+  );
+});
+
+/**
+ * Hydrogen's own cart handler, over a storefront that answers nothing and
+ * records every request it is asked to make.
+ */
+function recordingCart() {
+  const requests = [];
+  const storefront = {
+    mutate: async (query) => {
+      requests.push(String(query).slice(0, 48));
+      return { cartCreate: { cart: { id: "gid://shopify/Cart/created" } } };
+    },
+    query: async (query) => {
+      requests.push(String(query).slice(0, 48));
+      return { cart: null };
+    },
+    getPublicTokenHeaders: () => ({}),
+    getShopifyDomain: () => "shop.myshopify.com",
+    getApiUrl: () => "https://shop.myshopify.com/api",
+    i18n: { country: "US", language: "EN" },
+  };
+  const cart = createCartHandler({
+    storefront,
+    getCartId: () => undefined,
+    setCartId: () => new Headers(),
+    cartQueryFragment: "fragment CartApiQuery on Cart { id }",
+    cartMutateFragment: "fragment CartApiMutation on Cart { id }",
+  });
+  return { cart, requests };
+}
+
+test("a browser with no cart cookie cannot create one under an unknown identity", async () => {
+  // The whole path, over Hydrogen's real cart handler: no cookie and an
+  // identity we could not establish, through the gate, to a context whose
+  // cart refuses to act.
+  //
+  // Gated behind a cart cookie, as this once was, `addLines` ran: Shopify
+  // created a cart, and only writing its id back failed. The shopper saw an
+  // error with nothing saved, and every retry left another cart behind. What
+  // matters here is not the error but the count underneath it.
+  const { cart, requests } = recordingCart();
+  const gate = cartGate({
+    customerSubject: undefined,
+    cartId: undefined,
+    marker: null,
+  });
+  assert.equal(gate, "withhold");
+
+  const context = withheldCartContext({ cart, storefront: "untouched" });
+  // Thrown, not rejected: the guard stops the call before a promise exists,
+  // which is the point — nothing is in flight to Shopify to be awaited.
+  assert.throws(
+    () =>
+      context.cart.addLines([
+        { merchandiseId: "gid://shopify/ProductVariant/1", quantity: 1 },
+      ]),
+    (error) => error instanceof Response && error.status === 503,
+  );
+  assert.deepEqual(requests, [], "no cart was created in Shopify");
+
+  // Reading is still allowed, and the rest of the context is untouched.
+  assert.equal(await context.cart.get(), null);
+  assert.equal(context.storefront, "untouched");
+  assert.deepEqual(requests, []);
+});
+
+test("a cart that is not withheld is handed over as it is", async () => {
+  const { cart } = recordingCart();
+  const context = { cart };
+  assert.equal(
+    cartGate({ customerSubject: "buyer-A", cartId: undefined, marker: null }),
+    "none",
+  );
+  // Nothing wraps it, so the handler is the one Hydrogen built.
+  assert.equal(context.cart, cart);
 });

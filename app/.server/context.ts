@@ -23,8 +23,8 @@ import {
   adoptionDisposition,
   adoptionOutcome,
   type CartOwnerMarker,
-  cartAccess,
-  unavailableCart,
+  cartGate,
+  withheldCartContext,
 } from "~/utils/cart-ownership";
 import {
   getRequestI18n,
@@ -122,67 +122,62 @@ export async function createHydrogenRouterContext(
    * has stopped being the shopper's.
    */
   function withholdCart() {
+    // Only worth rebuilding the handler if it had an id to forget.
+    cartHandlerStale = cartHandlerStale || allowedCartId !== undefined;
     allowedCartId = undefined;
-    cartHandlerStale = true;
     cartIdentityUnavailable = true;
   }
 
-  if (allowedCartId) {
-    const marker = session.get("cartOwner") as unknown;
-    // Old carts have no signed ownership record. Treat them as unknown rather
-    // than guessing that they belong to the next person using this browser.
-    if (
-      !marker ||
-      typeof marker !== "object" ||
-      !("cartId" in marker) ||
-      marker.cartId !== allowedCartId
-    ) {
-      resetCart();
-    } else if (customerSubject === undefined) {
-      // Keep the signed marker and cookie for a later retry, but never expose
-      // the cart while the account's identity is uncertain.
-      withholdCart();
-    } else {
-      const access = cartAccess(allowedCartId, marker, customerSubject);
-      if (access === "reset") {
-        resetCart();
-      } else if (access === "adopt") {
-        // Shopify answering and refusing is a different thing from Shopify
-        // not answering: see `adoptionOutcome`. A refusal gives the cart up;
-        // an unreachable Shopify holds it back for this request and tries
-        // again on the next, so a 503 mid-sign-in costs nobody their cart.
-        let outcome: AdoptionOutcome = "unreachable";
-        try {
-          const buyer = await hydrogenContext.customerAccount.getBuyer();
-          if (!buyer?.customerAccessToken) {
-            throw new Error("Customer access token unavailable");
+  // Asked before `allowedCartId` is consulted: an account we cannot identify
+  // must not reach Shopify at all, cart cookie or no cart cookie. See
+  // `cartGate` for what the no-cookie case used to cost.
+  const gate = cartGate({
+    customerSubject,
+    cartId: allowedCartId,
+    marker: session.get("cartOwner") as unknown,
+  });
+
+  if (gate === "withhold") {
+    // Keep the signed marker and cookie for a later retry, but never expose
+    // the cart while the account's identity is uncertain.
+    withholdCart();
+  } else if (gate === "reset") {
+    resetCart();
+  } else if (gate === "adopt") {
+    // Shopify answering and refusing is a different thing from Shopify
+    // not answering: see `adoptionOutcome`. A refusal gives the cart up;
+    // an unreachable Shopify holds it back for this request and tries
+    // again on the next, so a 503 mid-sign-in costs nobody their cart.
+    let outcome: AdoptionOutcome = "unreachable";
+    try {
+      const buyer = await hydrogenContext.customerAccount.getBuyer();
+      if (!buyer?.customerAccessToken) {
+        throw new Error("Customer access token unavailable");
+      }
+      const result = await hydrogenContext.cart.updateBuyerIdentity({
+        customerAccessToken: buyer.customerAccessToken,
+        companyLocationId: buyer.companyLocationId ?? null,
+      });
+      outcome = adoptionOutcome(result);
+      if (outcome === "adopted") {
+        const cartIdChanged = result.cart.id !== allowedCartId;
+        const headers = hydrogenContext.cart.setCartId(result.cart.id);
+        if (cartIdChanged) {
+          cartHandlerStale = true;
+          for (const cookie of headers.getSetCookie()) {
+            cartResponseHeaders.append("Set-Cookie", cookie);
           }
-          const result = await hydrogenContext.cart.updateBuyerIdentity({
-            customerAccessToken: buyer.customerAccessToken,
-            companyLocationId: buyer.companyLocationId ?? null,
-          });
-          outcome = adoptionOutcome(result);
-          if (outcome === "adopted") {
-            const cartIdChanged = result.cart.id !== allowedCartId;
-            const headers = hydrogenContext.cart.setCartId(result.cart.id);
-            if (cartIdChanged) {
-              cartHandlerStale = true;
-              for (const cookie of headers.getSetCookie()) {
-                cartResponseHeaders.append("Set-Cookie", cookie);
-              }
-            }
-          }
-        } catch (error) {
-          console.warn("[cart] guest cart adoption failed:", error);
-          outcome = adoptionOutcome(null, error);
-        }
-        const disposition = adoptionDisposition(outcome);
-        if (disposition === "release") {
-          resetCart();
-        } else if (disposition === "withhold") {
-          withholdCart();
         }
       }
+    } catch (error) {
+      console.warn("[cart] guest cart adoption failed:", error);
+      outcome = adoptionOutcome(null, error);
+    }
+    const disposition = adoptionDisposition(outcome);
+    if (disposition === "release") {
+      resetCart();
+    } else if (disposition === "withhold") {
+      withholdCart();
     }
   }
 
@@ -197,14 +192,7 @@ export async function createHydrogenRouterContext(
   if (cartIdentityUnavailable) {
     // Reading the cart returns null because this handler has no allowed ID.
     // Block every mutation before it can create or alter a Shopify cart.
-    const guardedCart = unavailableCart(hydrogenContext.cart);
-    hydrogenContext = new Proxy(hydrogenContext, {
-      get(target, key, receiver) {
-        return key === "cart"
-          ? guardedCart
-          : Reflect.get(target, key, receiver);
-      },
-    });
+    hydrogenContext = withheldCartContext(hydrogenContext);
   }
 
   // Shopify Markets decides what is live; the theme decides what it has a

@@ -7,6 +7,26 @@ export const EXPIRED_CART_COOKIE = "cart=; Path=/; Max-Age=0; SameSite=Lax";
 
 export type CartAccess = "keep" | "adopt" | "reset";
 
+/**
+ * The request's context with its cart put out of reach.
+ *
+ * A proxy rather than an assignment: `createHydrogenContext` returns its own
+ * proxy that reports `cart` as read-only, so writing over it throws.
+ *
+ * Kept here, beside the rules that decide when a cart is withheld and away
+ * from anything that reaches for a section component, so a test can drive it
+ * with Hydrogen's real cart handler and watch a mutation stop before it
+ * becomes a Shopify request.
+ */
+export function withheldCartContext<C extends object>(context: C): C {
+  const guardedCart = unavailableCart((context as { cart: object }).cart);
+  return new Proxy(context, {
+    get(target, key, receiver) {
+      return key === "cart" ? guardedCart : Reflect.get(target, key, receiver);
+    },
+  });
+}
+
 export function unavailableCart<T extends object>(cart: T): T {
   return new Proxy(cart, {
     get(target, key, receiver) {
@@ -67,6 +87,39 @@ export function adoptionDisposition(outcome: AdoptionOutcome): CartDisposition {
     return "keep";
   }
   return outcome === "refused" ? "release" : "withhold";
+}
+
+/**
+ * What a request may do with the cart before anything touches Shopify.
+ *
+ * `none` is the ordinary case of a browser carrying no cart at all. The rest
+ * follow `cartAccess`.
+ *
+ * Deciding this before `cartId` is even looked at is the point: an account we
+ * cannot identify must not be able to create a cart either. Gated behind a
+ * cart cookie, a failed token refresh on a browser holding none left the
+ * guard off entirely — `addLines` reached Shopify, a cart was created there,
+ * and only then did writing its id back fail. The shopper got an error with
+ * nothing saved, and every retry left another cart behind.
+ */
+export type CartGate = "withhold" | "reset" | "adopt" | "keep" | "none";
+
+export function cartGate({
+  customerSubject,
+  cartId,
+  marker,
+}: {
+  customerSubject: string | null | undefined;
+  cartId: string | undefined;
+  marker: unknown;
+}): CartGate {
+  if (customerSubject === undefined) {
+    return "withhold";
+  }
+  if (!cartId) {
+    return "none";
+  }
+  return cartAccess(cartId, marker, customerSubject);
 }
 
 /** A missing or malformed signed marker is never evidence of a guest cart. */
