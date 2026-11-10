@@ -1,5 +1,39 @@
 # @weaverse/maison
 
+## 2026.11.10
+
+First release since `v2026.6.12`. Everything merged to `main` between 2026-08-20 and 2026-11-09.
+
+### Storefront design
+
+- Refreshed the visual system, the home page sections and the page layout, including a reworked footer, announcement bar and product gallery, and new Highlights, Instagram, Image with product and Rich text sections.
+- Rebuilt testimonials as a carousel and gave featured collections an editorial layout with grid and carousel displays.
+
+### Shopping experience
+
+- Reworked the collection, product, cart and search surfaces to the approved designs: cart order summary and pre-discount subtotal, variant table layouts for tablet and desktop, collection card product counts, sort dropdown, related products header and the mobile search bar.
+
+### B2B
+
+- Pricing, checkout and settlement for the B2B cart now run through B2Bridge, with buyer- and market-scoped price caching and draft orders that are never raised twice for the same cart.
+
+### Carts and accounts
+
+- Fixed the case where signing in as a second account on the same browser exposed the previous shopper's cart, checkout attributes and company-location pricing.
+- Removing several cart lines in quick succession no longer brings a deleted line back on screen.
+
+### Content and setup
+
+- Every section preset and default now ships placeholder content only, so a new project starts from clean presets instead of demo data.
+- Localised the storefront: locale-prefixed cart and quick-shop requests, translated newsletter and shipping copy, editable footer and quick-shop labels from theme settings, and corrected sitemap URLs.
+- Judge.me and Klaviyo surfaces are integration-ready: tokens stay server-side and the surfaces stay hidden until a token is present.
+- Added the setup, section and third-party integration guides.
+
+### Maintenance
+
+- Pinned `@shopify/hydrogen` to the 2026.4 line and held `motion-dom` below the release that dropped `activeAnimations`.
+- Automated the `worker-deploy` branch sync.
+
 ## 1.0.0
 
 ### Initial Independent Release
