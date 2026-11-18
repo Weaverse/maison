@@ -19,19 +19,36 @@ interface InstagramProps extends SectionProps, InstagramData {
   ref?: React.Ref<HTMLElement>;
 }
 
+/**
+ * Where the handle shown on screen points to.
+ *
+ * Read from the handle unless a link was typed in, so the two can never
+ * disagree: a merchant who renames the account only has one field to change,
+ * and the tag is a link from the moment the section is added rather than the
+ * plain text a blank "Profile link" used to leave behind.
+ */
+function instagramProfileUrl(handle: string, profileUrl: string) {
+  if (profileUrl) {
+    return profileUrl;
+  }
+  const account = handle?.trim().replace(/^@+/, "").replace(/\/+$/, "");
+  return account ? `https://www.instagram.com/${account}` : "";
+}
+
 export default function Instagram(props: InstagramProps) {
   const { t } = useTranslation();
   const {
     ref,
     heading,
     handle,
-    profileUrl,
+    profileUrl: configuredProfileUrl,
     showViewMore,
     desktopColumns,
     itemsGap,
     children,
     ...rest
   } = props;
+  const profileUrl = instagramProfileUrl(handle, configuredProfileUrl);
 
   const handleLabel = (
     <>
@@ -158,6 +175,7 @@ export const schema = createSchema({
           name: "profileUrl",
           label: "Profile link",
           placeholder: "https://www.instagram.com/your-handle",
+          helpText: "Leave empty to link to the handle above on instagram.com.",
         },
         {
           type: "switch",

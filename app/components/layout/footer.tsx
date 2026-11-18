@@ -1,16 +1,10 @@
-import {
-  FacebookLogoIcon,
-  InstagramLogoIcon,
-  LinkedinLogoIcon,
-  XLogoIcon,
-} from "@phosphor-icons/react";
-
 import * as Accordion from "@radix-ui/react-accordion";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
 import { useFetcher, useRouteLoaderData } from "react-router";
 import { CompanyLocationButton } from "~/components/b2b/company-location-button";
+import { resolveSocialSlots } from "~/components/layout/social-icons";
 import { RevealUnderline } from "~/components/reveal-underline";
 import { useShopMenu } from "~/hooks/use-shop-menu";
 import { useWeaverseStudioCheck } from "~/hooks/use-weaverse-studio-check";
@@ -110,12 +104,9 @@ function StarDividerIcon() {
 export function Footer() {
   const { t } = useTranslation();
   const { shopName } = useShopMenu();
+  const themeSettings = useThemeSettings();
   const {
     footerWidth,
-    socialFacebook,
-    socialInstagram,
-    socialLinkedIn,
-    socialX,
     copyright,
     showNewsletterSignup,
     showFooterWordmark,
@@ -126,7 +117,7 @@ export function Footer() {
     showAmexIcon,
     showPaypalIcon,
     showDinersClubIcon,
-  } = useThemeSettings();
+  } = themeSettings;
 
   // Footer copy lives in the catalogue: translation-key settings write
   // straight into the translation store, so t() is the only reader.
@@ -185,28 +176,7 @@ export function Footer() {
   const wordmarkText = footerWordmark || shopName || "";
   const wordmarkScale = (footerWordmarkScale ?? 100) / 100;
 
-  const SOCIAL_ACCOUNTS = [
-    {
-      name: "Facebook",
-      to: socialFacebook,
-      Icon: FacebookLogoIcon,
-    },
-    {
-      name: "X",
-      to: socialX,
-      Icon: XLogoIcon,
-    },
-    {
-      name: "Instagram",
-      to: socialInstagram,
-      Icon: InstagramLogoIcon,
-    },
-    {
-      name: "LinkedIn",
-      to: socialLinkedIn,
-      Icon: LinkedinLogoIcon,
-    },
-  ].filter((acc) => acc.to && acc.to.trim() !== "");
+  const SOCIAL_ACCOUNTS = resolveSocialSlots(themeSettings, "footerSocial");
 
   return (
     <footer
@@ -242,19 +212,17 @@ export function Footer() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {SOCIAL_ACCOUNTS.filter(({ to }) => Boolean(to)).map(
-                    ({ to, name, Icon }) => (
-                      <Link
-                        key={name}
-                        to={to}
-                        target="_blank"
-                        aria-label={name}
-                        className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#A79D95] transition-opacity hover:opacity-70"
-                      >
-                        <Icon className="size-[18px]" />
-                      </Link>
-                    ),
-                  )}
+                  {SOCIAL_ACCOUNTS.map(({ key, to, name, Icon }) => (
+                    <Link
+                      key={key}
+                      to={to}
+                      target="_blank"
+                      aria-label={name}
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#A79D95] transition-opacity hover:opacity-70"
+                    >
+                      <Icon className="size-[18px]" />
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>

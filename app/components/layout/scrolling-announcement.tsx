@@ -1,11 +1,7 @@
-import {
-  FacebookLogoIcon,
-  InstagramLogoIcon,
-  XLogoIcon,
-} from "@phosphor-icons/react";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { useEffect } from "react";
 import { CompanyLocationButton } from "~/components/b2b/company-location-button";
+import { resolveSocialSlots } from "~/components/layout/social-icons";
 
 const MAX_DURATION = 20;
 
@@ -18,9 +14,6 @@ export function ScrollingAnnouncement() {
     topbarBgColor,
     topbarScrollingGap,
     topbarScrollingSpeed,
-    socialInstagram,
-    socialFacebook,
-    socialX,
   } = themeSettings;
 
   function updateStyles() {
@@ -45,11 +38,7 @@ export function ScrollingAnnouncement() {
     return null;
   }
 
-  const socials = [
-    { name: "Instagram", to: socialInstagram, Icon: InstagramLogoIcon },
-    { name: "Facebook", to: socialFacebook, Icon: FacebookLogoIcon },
-    { name: "X", to: socialX, Icon: XLogoIcon },
-  ].filter(({ to }) => Boolean(to));
+  const socials = resolveSocialSlots(themeSettings, "topbarSocial");
 
   return (
     <div
@@ -66,12 +55,12 @@ export function ScrollingAnnouncement() {
       <div className="mx-auto flex h-full w-full max-w-(--page-width) items-center justify-center px-5 md:px-8 xl:gap-8 xl:px-10">
         {/* Left — socials */}
         <div className="hidden flex-1 items-center gap-3 xl:flex">
-          {socials.map(({ name, to, Icon }) => (
+          {socials.map(({ key, name, to, Icon }) => (
             <a
               aria-label={name}
               className="flex size-8 shrink-0 items-center justify-center rounded-full border border-line transition-opacity hover:opacity-70"
               href={to}
-              key={name}
+              key={key}
               rel="noreferrer"
               target="_blank"
             >
