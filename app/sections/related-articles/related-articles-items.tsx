@@ -85,7 +85,7 @@ function RelatedArticlesItems(props: RelatedArticlesItemsProps) {
       >
         {Array.from({ length: articlesToShow }).map((_, i) => (
           <div key={i} className="flex flex-col gap-5">
-            <div className="w-full overflow-hidden bg-gray-100 rounded-lg">
+            <div className="w-full overflow-hidden bg-line-subtle rounded-lg">
               <Image
                 data={{ url: IMAGES_PLACEHOLDERS.image }}
                 aspectRatio="1/1"

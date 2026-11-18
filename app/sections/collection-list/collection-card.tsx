@@ -95,7 +95,7 @@ export function CollectionCard({
         </div>
       ) : (
         <div
-          className="w-full overflow-hidden bg-gray-100"
+          className="w-full overflow-hidden bg-line-subtle"
           style={{ borderRadius: `${imageBorderRadius}px` }}
         >
           <Image

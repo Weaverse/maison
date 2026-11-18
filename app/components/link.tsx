@@ -14,16 +14,21 @@ import {
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 
+// The button corner radius belongs to the button-shaped variants, not to
+// every link. On the base it also reached plain text links — and a product
+// card title carries `line-clamp-2`, whose `overflow: hidden` then clipped the
+// glyphs at those rounded corners: the first letter of a title lost the left
+// side of its stem. Each variant below that draws a button asks for the radius
+// itself; a bare link and the `underline` variant have no box to round.
+const BUTTON_SHAPE = "rounded-(--btn-border-radius) border px-6 py-[18px]";
+
 export const variants = cva(
-  [
-    "inline-flex items-center justify-center leading-none transition-colors",
-    "rounded-(--btn-border-radius)",
-  ],
+  ["inline-flex items-center justify-center leading-none transition-colors"],
   {
     variants: {
       variant: {
         primary: [
-          "border px-6 py-[18px]",
+          BUTTON_SHAPE,
           "text-(--btn-primary-text)",
           "bg-(--btn-primary-bg)",
           "border-(--btn-primary-bg)",
@@ -32,7 +37,7 @@ export const variants = cva(
           "hover:border-(--btn-primary-bg)",
         ],
         secondary: [
-          "border px-6 py-[18px]",
+          BUTTON_SHAPE,
           "text-(--btn-secondary-text)",
           "bg-(--btn-secondary-bg)",
           "border-(--btn-secondary-bg)",
@@ -41,7 +46,7 @@ export const variants = cva(
           "hover:border-(--btn-secondary-text)",
         ],
         outline: [
-          "border px-6 py-[18px]",
+          BUTTON_SHAPE,
           "text-(--btn-outline-text)",
           "bg-transparent",
           "border-(--btn-outline-text)",
@@ -50,7 +55,7 @@ export const variants = cva(
           "hover:border-(--btn-outline-text)",
         ],
         custom: [
-          "border px-6 py-[18px]",
+          BUTTON_SHAPE,
           "text-(--btn-text)",
           "bg-(--btn-bg)",
           "border-(--btn-border)",
