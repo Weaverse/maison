@@ -1,8 +1,9 @@
-import { CartForm, useOptimisticCart } from "@shopify/hydrogen";
+import { CartForm } from "@shopify/hydrogen";
 import { useTranslation } from "@weaverse/hydrogen";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useFetcher, useFetchers } from "react-router";
 import type { CartApiQueryFragment } from "storefront-api.generated";
+import { useSettledOptimisticCart } from "~/components/cart/use-settled-cart";
 import { useSelectedLocale } from "~/hooks/use-locale";
 import { usePrefixPathWithLocale } from "~/hooks/use-prefix-path-with-locale";
 import {
@@ -288,7 +289,7 @@ function B2BPricingRoot({
   // one that passed the server cart twice would silently lose both the guard
   // against pricing a cart Shopify has not accepted and the instant feedback
   // below.
-  const optimisticCart = useOptimisticCart<CartApiQueryFragment>(cart);
+  const optimisticCart = useSettledOptimisticCart(cart);
   const fetcher = useFetcher<CartPricingResponse>({ key: "b2b-cart-pricing" });
   const path = usePrefixPathWithLocale("/api/b2b-cart-pricing");
   const [state, setState] = useState<CartPricingState | null>(null);
