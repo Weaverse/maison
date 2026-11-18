@@ -505,12 +505,28 @@
    focus. The page is then wider than the window, and a `position: fixed`
    panel sized to `100vw` — the search drawer — hangs off the edge until the
    reader pinches back out. The theme's body size is 14px, so `text-base` is
-   not enough on its own; this floor only applies to touch pointers, and it
-   sits outside every layer so it wins over the utility that set the size. */
-@media (pointer: coarse) {
-  input,
-  textarea,
-  select {
-    font-size: max(16px, 1em);
+   not enough on its own; this floor sits outside every layer so it wins over
+   the utility that set the size.
+
+   WebKit on iOS is the only engine that zooms, so that is all this covers.
+   Applied to touch pointers at large it raised every field on Android and in
+   DevTools' device emulation too, leaving a 16px input beside a 14px label
+   with nothing to show for it. `-webkit-touch-callout` ships on iOS and
+   nowhere else, which also catches Chrome and Firefox on iOS: they are WebKit
+   underneath, so they zoom like Safari does.
+
+   Do not widen this test. Chromium parses several `-webkit-` properties —
+   `-webkit-user-select` among them — so an `or` added to make the detector
+   feel sturdier would match Chrome and undo the whole point of narrowing it.
+   `pointer: coarse` stays as a second guard: it keeps a desktop Safari that
+   ever starts supporting the property from being swept in, and iPadOS still
+   reports coarse with a trackpad attached, so nothing is lost there. */
+@supports (-webkit-touch-callout: none) {
+  @media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
   }
 }
