@@ -44,6 +44,14 @@ jobs:
       - name: Cart ownership rules
         run: npm run cart:ownership-check
 
+      # The optimistic overlay is dropped once the server has applied it, and
+      # getting that wrong is invisible to every other check: the cart simply
+      # counts a pending line twice for a second. These drive the real
+      # Hydrogen hook over scripted fetcher states and assert the raw hook
+      # still doubles, so the guard cannot quietly stop guarding.
+      - name: Cart overlay rules
+        run: npm run cart:overlay-check
+
       # Typecheck does not see bundler-level breakage: a bad dynamic import, a
       # client-only module pulled into the worker bundle, or a Vite plugin
       # misconfiguration all typecheck clean and fail at deploy. The build
