@@ -34,6 +34,7 @@ import { ScrollArea } from "~/components/scroll-area";
 import { Section } from "~/components/section";
 import { Swimlane } from "~/components/swimlane";
 import { PRODUCT_CARD_FRAGMENT } from "~/graphql/fragments";
+import { AppliedFilters } from "~/sections/collection-filters/applied-filters";
 import { FilterItem } from "~/sections/collection-filters/filter-item";
 import { PriceRangeFilter } from "~/sections/collection-filters/price-range-filter";
 import { Sort } from "~/sections/collection-filters/sort";
@@ -232,7 +233,7 @@ export const meta = ({ matches }: MetaArgs<typeof loader>) => {
 
 export default function Search() {
   const { t } = useTranslation();
-  const { searchTerm, products, recommendations } =
+  const { searchTerm, products, recommendations, appliedFilters } =
     useLoaderData<typeof loader>();
   const [searchKey, setSearchKey] = useState(searchTerm);
   const hasResults = products?.nodes?.length > 0;
@@ -273,10 +274,19 @@ export default function Search() {
       <PopularKeywords />
 
       {hasResults && (
-        <div className="mb-8">
+        <div className="mb-6">
           <SearchFilterToolbar />
         </div>
       )}
+      {/* The same row the collection page shows. Without it the only record of
+          an active filter was the checkbox inside the drawer, so the result
+          count looked wrong and nothing could be cleared without opening the
+          drawer again. Outside the `hasResults` branch on purpose: a filter
+          that leaves no results is exactly the one that has to be undoable. */}
+      <AppliedFilters
+        filters={appliedFilters as AppliedFilter[]}
+        className="mb-8"
+      />
 
       {hasResults ? (
         <Pagination connection={products}>
