@@ -59,9 +59,11 @@ export function QuickShop({
     <div className="bg-background p-6 md:p-10">
       <div className="mb-6 flex flex-col gap-8 md:flex-row md:gap-12">
         <div // On a phone the media runs the full width, so it has to start below the
-          // close button rather than beside it — the button spans 24px to 44px
-          // from the top of the panel.
-          className="mt-8 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100"
+          // close button rather than beside it — the button spans 16px to 36px
+          // from the top of the panel. 24px of panel padding plus this margin
+          // clears it by 4px, which is as tight as the band above the image
+          // can go without the two overlapping.
+          className="mt-4 md:mt-0 aspect-square w-full md:w-[200px] flex-shrink-0 overflow-hidden rounded-2xl bg-line-subtle"
         >
           {firstImage && (
             <ProductMedia
@@ -354,7 +356,11 @@ export function QuickShopTrigger({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="absolute top-6 right-6 z-10 flex items-center"
+                // Closer to the corner on a phone. The media below it has to
+                // clear the button, so every pixel the button sits lower is a
+                // pixel of empty band above the image; from md up the media is
+                // beside the text and the offset can stay at 24px.
+                className="absolute top-4 right-4 z-10 flex items-center md:top-6 md:right-6"
                 aria-label={t("product.closeQuickShop")}
               >
                 <XIcon size={20} />

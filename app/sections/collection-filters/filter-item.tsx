@@ -1,6 +1,6 @@
 import * as Checkbox from "@radix-ui/react-checkbox";
 import type { Filter } from "@shopify/hydrogen/storefront-api-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -11,7 +11,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/tooltip";
 import type { RootLoader } from "~/root";
 import { cn } from "~/utils/cn";
 import type { AppliedFilter } from "~/utils/filter";
-import { getAppliedFilterLink, getFilterLink } from "~/utils/filter";
+import {
+  getAppliedFilterLink,
+  getFilterLink,
+  isSameFilter,
+} from "~/utils/filter";
 
 type FilterDisplayAs = "swatch" | "button" | "list-item";
 
@@ -31,11 +35,18 @@ export function FilterItem({
   const location = useLocation();
   const { swatchesConfigs } = useRouteLoaderData<RootLoader>("root");
 
-  const filter = appliedFilters.find(
-    (flt) => JSON.stringify(flt.filter) === option.input,
+  const filter = appliedFilters.find((flt) =>
+    isSameFilter(flt.filter, option.input as string),
   );
 
-  const [checked, setChecked] = useState(Boolean(filter));
+  // Local state so the control answers the click rather than the round trip,
+  // but the URL is what is true: clearing a filter from the "Filtered by" row
+  // has to leave this control unticked as well.
+  const applied = Boolean(filter);
+  const [checked, setChecked] = useState(applied);
+  useEffect(() => {
+    setChecked(applied);
+  }, [applied]);
 
   function handleCheckedChange(newChecked: boolean) {
     setChecked(newChecked);

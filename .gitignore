@@ -20,12 +20,13 @@ pnpm-lock.yaml
 .github/copilot-instructions.md
 memory/
 scripts/*
-# Checked in so they can be run from a clone. Only the last of these is wired
+# Checked in so they can be run from a clone. The two cart suites are wired
 # into CI; the others are run by hand, and the probes need store credentials.
 !scripts/check-translations.mjs
 !scripts/b2bridge-probe.mjs
 !scripts/b2bridge-checkout-probe.mjs
 !scripts/cart-ownership.test.mjs
+!scripts/optimistic-cart.test.mjs
 templates/
 specs/
 .wrangler/

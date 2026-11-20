@@ -11,7 +11,7 @@ import type {
   MediaFragment,
   ProductVariantFragment,
 } from "storefront-api.generated";
-import { FreeMode, Navigation, Pagination, Thumbs } from "swiper/modules";
+import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import { Swiper, type SwiperClass, SwiperSlide } from "swiper/react";
 import { ArrowLeft, ArrowRight } from "~/components/icons";
 import { Image } from "~/components/image";
@@ -255,15 +255,18 @@ export function ProductMedia(props: ProductMediaProps) {
               nextEl: ".media_slider__next",
               prevEl: ".media_slider__prev",
             }}
-            pagination={{ type: "fraction" }}
-            modules={[Pagination, Navigation, Thumbs]}
-            className="overflow-hidden pb-10 md:pb-0 md:[&_.swiper-pagination]:hidden"
+            modules={[Navigation, Thumbs]}
+            // The 40px band below the slides belongs to the progress bar. It
+            // used to hold Swiper's "5 / 5" fraction as well, which only ever
+            // showed on a phone or tablet — the one place the bar and the row
+            // of thumbnails are already saying which slide is up.
+            className="overflow-hidden pb-10 md:pb-0"
           >
             {media.map((med, idx) => {
               return (
                 <SwiperSlide
                   key={med.id}
-                  className="group bg-gray-100 rounded-2xl overflow-hidden"
+                  className="group bg-line-subtle rounded-2xl overflow-hidden"
                   style={imageRadiusStyle}
                 >
                   <div
