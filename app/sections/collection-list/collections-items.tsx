@@ -45,8 +45,7 @@ const gridVariants = cva("grid w-full", {
 });
 
 interface CollectionsItemsProps
-  extends VariantProps<typeof gridVariants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof gridVariants>, HydrogenComponentProps {
   prevButtonText: string;
   nextButtonText: string;
   imageAspectRatio: ImageAspectRatio;

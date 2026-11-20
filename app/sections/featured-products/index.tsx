@@ -21,8 +21,7 @@ interface FeaturedProductsData {
 }
 
 interface FeaturedProductsProps
-  extends SectionProps<FeaturedProductsLoaderData>,
-    FeaturedProductsData {
+  extends SectionProps<FeaturedProductsLoaderData>, FeaturedProductsData {
   ref: React.Ref<HTMLElement>;
 }
 

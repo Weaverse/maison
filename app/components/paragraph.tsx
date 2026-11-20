@@ -4,8 +4,7 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 
 export interface ParagraphProps
-  extends VariantProps<typeof variants>,
-    Partial<HydrogenComponentProps> {
+  extends VariantProps<typeof variants>, Partial<HydrogenComponentProps> {
   ref?: React.Ref<HTMLParagraphElement | HTMLDivElement>;
   as?: "p" | "div";
   content: string;

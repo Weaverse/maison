@@ -330,7 +330,7 @@ changed in Studio.
 Run the complete pre-PR set:
 
 ```bash
-npm run biome
+npm run check
 npm run typecheck
 npm run routes-check
 npm run build
@@ -351,7 +351,7 @@ npm run e2e
 `npm run preview` builds and serves the production bundle locally, which
 catches differences between the dev server and the Oxygen build.
 
-`npm run biome:fix` applies safe lint and format fixes. The repository carries
+`npm run check:fix` applies safe lint and format fixes. The repository carries
 pre-existing warnings; check that your files are clean rather than expecting a
 zero total.
 

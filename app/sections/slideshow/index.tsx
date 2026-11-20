@@ -46,7 +46,8 @@ const variants = cva("group [&_.swiper]:h-full", {
 });
 
 export interface SlideshowData
-  extends VariantProps<typeof variants>,
+  extends
+    VariantProps<typeof variants>,
     SlideshowArrowsProps,
     SlideshowDotsProps {
   ref: React.Ref<HTMLDivElement>;

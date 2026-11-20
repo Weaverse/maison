@@ -119,7 +119,6 @@ export function ProductMedia(props: ProductMediaProps) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: media index only changes with the selected variant
   useEffect(() => {
     if (selectedVariant && swiper) {
       const index = getSelectedVariantMediaIndex(media, selectedVariant);
@@ -127,6 +126,7 @@ export function ProductMedia(props: ProductMediaProps) {
         swiper.slideTo(index);
       }
     }
+    // oxlint-disable-next-line react/exhaustive-deps -- media index only changes with the selected variant
   }, [selectedVariant]);
 
   useEffect(() => {

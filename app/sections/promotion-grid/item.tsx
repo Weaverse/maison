@@ -59,9 +59,7 @@ const variants = cva(
 );
 
 interface PromotionItemProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps,
-    OverlayProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps, OverlayProps {
   backgroundImage: WeaverseImage | string;
   ref?: React.Ref<HTMLDivElement>;
 }

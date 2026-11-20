@@ -27,8 +27,7 @@ const variants = cva("subheading", {
 });
 
 interface SubHeadingProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps {
   ref?: React.Ref<HTMLHeadingElement | HTMLParagraphElement | HTMLDivElement>;
   as?: "h4" | "h5" | "h6" | "div" | "p";
   color?: string;

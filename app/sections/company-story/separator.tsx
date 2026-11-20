@@ -8,8 +8,7 @@ interface CompanyStorySeparatorData {
 }
 
 interface CompanyStorySeparatorProps
-  extends HydrogenComponentProps,
-    CompanyStorySeparatorData {
+  extends HydrogenComponentProps, CompanyStorySeparatorData {
   ref?: React.Ref<HTMLDivElement>;
 }
 

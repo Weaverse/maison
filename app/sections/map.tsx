@@ -22,7 +22,8 @@ const variants = cva("w-full", {
 });
 
 interface MapSectionProps
-  extends Omit<SectionProps, "backgroundColor">,
+  extends
+    Omit<SectionProps, "backgroundColor">,
     VariantProps<typeof variants>,
     LinkStyles {
   ref: React.Ref<HTMLElement>;

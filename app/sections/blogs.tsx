@@ -44,7 +44,8 @@ interface BlogsData {
 }
 
 interface BlogsProps
-  extends Omit<ArticleCardProps, "article" | "blogHandle" | "loading">,
+  extends
+    Omit<ArticleCardProps, "article" | "blogHandle" | "loading">,
     SectionProps,
     VariantProps<typeof variants>,
     BlogsData {

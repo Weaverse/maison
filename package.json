@@ -26,7 +26,7 @@
     "url": "https://github.com/weaverse/maison/issues"
   },
   "scripts": {
-    "build": "shopify hydrogen codegen && react-router build",
+    "build": "shopify hydrogen build --codegen",
     "dev": "react-router typegen && shopify hydrogen dev --codegen --port 3456",
     "dev:ca": "shopify hydrogen dev --codegen --port 3456 --customer-account-push",
     "preview": "shopify hydrogen preview --build",
@@ -36,21 +36,21 @@
     "b2bridge:checkout-check": "node scripts/b2bridge-checkout-probe.mjs",
     "cart:ownership-check": "node --experimental-strip-types --test scripts/cart-ownership.test.mjs",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "lint": "biome check",
+    "lint": "vp check .",
     "codegen": "shopify hydrogen codegen",
     "routes-check": "shopify hydrogen check routes",
     "hydrogen": "shopify hydrogen",
     "clean": "rm -rf dist node_modules package-lock.json pnpm-lock.yaml .shopify .react-router",
     "e2e": "npx playwright test",
     "e2e:ui": "npx playwright test --ui",
-    "biome": "biome check",
-    "biome:fix": "biome check --write",
-    "format": "biome format --write",
-    "format:check": "biome format",
+    "check": "vp check .",
+    "check:fix": "vp check --fix .",
+    "format": "vp fmt --write .",
+    "format:check": "vp fmt --check .",
     "cf-typegen": "wrangler types && react-router typegen",
-    "check": "react-router typegen && tsc --noEmit && react-router build && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
-    "cf-dev": "wrangler dev --port 8787"
+    "cf-dev": "wrangler dev --port 8787",
+    "cf-check": "react-router typegen && tsc --noEmit && react-router build && wrangler deploy --dry-run"
   },
   "dependencies": {
     "@fontsource/belleza": "^5.3.0",
@@ -95,7 +95,6 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.8",
     "@cloudflare/vite-plugin": "^1.54.3",
     "@playwright/test": "1.62.1",
     "@react-router/fs-routes": "7.16.0",
@@ -107,10 +106,10 @@
     "@total-typescript/ts-reset": "0.6.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
-    "@weaverse/biome": "5.8.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite": "^8.2.1",
+    "vite-plus": "1.7.0",
     "wrangler": "^4.128.0"
   },
   "engines": {

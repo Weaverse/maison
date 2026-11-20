@@ -23,8 +23,7 @@ const arrowButtonVariants = cva("p-4 pointer-events-auto", {
 });
 
 interface TestimonialsItemsProps
-  extends VariantProps<typeof arrowButtonVariants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof arrowButtonVariants>, HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   gap?: number;
   mobileCarouselItems?: number;

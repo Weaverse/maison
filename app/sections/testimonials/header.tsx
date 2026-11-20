@@ -23,8 +23,7 @@ const variants = cva("", {
 });
 
 interface TestimonialsHeaderProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
 }
 

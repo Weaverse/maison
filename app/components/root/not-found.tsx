@@ -39,9 +39,9 @@ export function FeaturedProducts() {
   const { load, data } = useFetcher<FeaturedData>();
   const api = usePrefixPathWithLocale("/api/featured-items");
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
   useEffect(() => {
     load(api);
+    // oxlint-disable-next-line react/exhaustive-deps -- Fetch suggestions when the localized endpoint changes.
   }, [api]);
 
   if (!data) {

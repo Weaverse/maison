@@ -6,8 +6,7 @@ interface CompanyStoryContentData {
 }
 
 interface CompanyStoryContentProps
-  extends HydrogenComponentProps,
-    CompanyStoryContentData {
+  extends HydrogenComponentProps, CompanyStoryContentData {
   ref?: React.Ref<HTMLDivElement>;
 }
 

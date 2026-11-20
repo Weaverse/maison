@@ -56,8 +56,7 @@ const variants = cva("grid gap-y-10", {
 });
 
 interface ArticlesItemsProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   imageAspectRatio: ImageAspectRatio;
   showAuthor: boolean;

@@ -8,8 +8,10 @@ import { layoutInputs, Section, type SectionProps } from "~/components/section";
 import type { loader as productRouteLoader } from "~/routes/($locale).products.$productHandle";
 import { isCombinedListing } from "~/utils/combined-listings";
 
-interface ProductInformationData
-  extends Omit<ProductMediaProps, "selectedVariant" | "media"> {
+interface ProductInformationData extends Omit<
+  ProductMediaProps,
+  "selectedVariant" | "media"
+> {
   ref: React.Ref<HTMLDivElement>;
 }
 
