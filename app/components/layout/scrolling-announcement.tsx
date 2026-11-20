@@ -34,11 +34,11 @@ export function ScrollingAnnouncement() {
     }
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
   useEffect(() => {
     updateStyles();
     window.addEventListener("scroll", updateStyles);
     return () => window.removeEventListener("scroll", updateStyles);
+    // oxlint-disable-next-line react/exhaustive-deps -- Rebind the scroll listener when the announcement text changes.
   }, [topbarText]);
 
   if (topbarText?.replace(/<[^>]*>/g, "").trim() === "") {

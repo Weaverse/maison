@@ -88,7 +88,8 @@ interface ProductItemsData {
 }
 
 interface ProductItemsProps
-  extends VariantProps<typeof variants>,
+  extends
+    VariantProps<typeof variants>,
     VariantProps<typeof arrowButtonVariants>,
     ProductItemsData {
   ref?: React.Ref<HTMLDivElement>;

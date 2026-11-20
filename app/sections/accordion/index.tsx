@@ -19,8 +19,7 @@ const variants = cva("grid h-full w-full items-start", {
 });
 
 interface AccordionSectionProps
-  extends SectionProps,
-    VariantProps<typeof variants> {
+  extends SectionProps, VariantProps<typeof variants> {
   accordionLayout?: "column" | "row";
   ref?: React.Ref<HTMLElement>;
 }

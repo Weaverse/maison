@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is **maison**, a Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 22.12+ and uses Biome for linting/formatting. Current version: 5.6.0 with upcoming 5.7.0 release.
+This is **maison**, a Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React, TypeScript, React Router 7, and Tailwind CSS v4. It uses Vite+ for linting and formatting. Current version: 5.6.0 with upcoming 5.7.0 release.
 
 ## Essential Commands
 
@@ -20,9 +20,10 @@ npm run clean      # Clean all build artifacts and dependencies
 
 ### Code Quality (Always run before committing)
 ```bash
-npm run biome      # Check for linting/formatting errors
-npm run biome:fix  # Fix linting/formatting errors
-npm run format     # Format code with Biome
+npm run check      # Check lint and formatting with Vite+
+npm run check:fix  # Format and apply safe lint fixes
+npm run format     # Format code with Oxfmt
+npm run format:check # Check formatting without writing
 npm run typecheck  # Run TypeScript type checking
 ```
 
@@ -75,7 +76,6 @@ All routes follow the pattern `($locale).{route}.tsx` to support internationaliz
    - Tailwind CSS v4 with custom utilities
    - class-variance-authority (cva) for component variants
    - Use the `cn()` utility from `/app/utils/cn.ts` for class merging
-   - Biome's `useSortedClasses` enabled for `clsx`, `cva`, and `cn` functions
 
 5. **Type Safety**:
    - GraphQL types are auto-generated via codegen
@@ -201,14 +201,13 @@ Required environment variables are defined in `env.d.ts`. The project uses `@sho
 - Focus on critical user flows: cart operations, checkout process
 - Run individual tests: `npx playwright test tests/cart.test.ts`
 
-### Biome Configuration
+### Vite+ checks
 
-The project extends from `@weaverse/biome` with these customizations:
+The `fmt` and `lint` blocks in `vite.config.ts` configure Oxfmt and Oxlint:
 - Double quotes for strings
 - Semicolons always
 - Trailing commas
 - Max cognitive complexity: 50
-- Sorted Tailwind classes in `clsx`, `cva`, and `cn` functions
 
 ## Code Conventions
 
@@ -233,13 +232,12 @@ The project extends from `@weaverse/biome` with these customizations:
 ## Development Setup Requirements
 
 ### Node.js and Dependencies
-- **Node.js**: Version 22.12.0 or higher required
+- **Node.js**: Use 22.18+ or 24.11+ on those release lines for Vite+ checks
 - **Package Manager**: npm (configured in package.json, don't use pnpm)
 - **Environment**: Copy `.env.example` to `.env` and configure Shopify store credentials
 
 ### Key Configuration Files
 - **react-router.config.ts**: React Router v7 configuration (SSR enabled, app directory structure)
-- **vite.config.ts**: Includes Hydrogen, Oxygen, Tailwind CSS v4, and development server warmup
-- **biome.json**: Code quality configuration extending from `@weaverse/biome`
+- **vite.config.ts**: Includes Hydrogen, Oxygen, Tailwind CSS v4, development server warmup, and static checks
 - **codegen.ts**: GraphQL code generation for Shopify Storefront and Customer Account APIs
 - **tsconfig.json**: TypeScript config with `~/` path alias, strict mode disabled for compatibility

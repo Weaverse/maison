@@ -42,7 +42,8 @@ function resolveImage(value?: WeaverseImage | string) {
 }
 
 interface ImageWithProductCardProps
-  extends HydrogenComponentProps<Awaited<ReturnType<typeof loader>>>,
+  extends
+    HydrogenComponentProps<Awaited<ReturnType<typeof loader>>>,
     ImageWithProductCardData {
   ref?: React.Ref<HTMLElement>;
 }

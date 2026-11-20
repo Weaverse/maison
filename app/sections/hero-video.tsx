@@ -139,13 +139,13 @@ export default function HeroVideo(props: HeroVideoProps) {
     setSize(getPlayerSize(id));
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
   useEffect(() => {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
+    // oxlint-disable-next-line react/exhaustive-deps -- Rebind the resize listener when visibility or the configured dimensions change.
   }, [inView, height, heightOnDesktop, heightOnMobile]);
 
   const [scope] = useAnimation();

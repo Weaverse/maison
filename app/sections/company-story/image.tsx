@@ -14,8 +14,7 @@ interface CompanyStoryImageData extends OverlayProps {
 }
 
 interface CompanyStoryImageProps
-  extends HydrogenComponentProps,
-    CompanyStoryImageData {
+  extends HydrogenComponentProps, CompanyStoryImageData {
   ref?: React.Ref<HTMLDivElement>;
 }
 

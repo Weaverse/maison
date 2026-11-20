@@ -45,7 +45,8 @@ interface RelatedArticlesItemsData {
 }
 
 interface RelatedArticlesItemsProps
-  extends VariantProps<typeof variants>,
+  extends
+    VariantProps<typeof variants>,
     HydrogenComponentProps,
     RelatedArticlesItemsData {
   ref?: React.Ref<HTMLDivElement>;

@@ -85,7 +85,8 @@ type LayoutStyle = "standard" | "editorial";
 type ContentPosition = "over" | "below";
 
 interface CollectionItemsData
-  extends VariantProps<typeof gridVariants>,
+  extends
+    VariantProps<typeof gridVariants>,
     Partial<OverlayProps>,
     Partial<LinkStyles>,
     HydrogenComponentProps {

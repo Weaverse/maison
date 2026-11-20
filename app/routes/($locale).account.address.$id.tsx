@@ -6,7 +6,6 @@ import type {
 } from "customer-account-api.generated";
 import { type ActionFunction, data, redirect } from "react-router";
 import invariant from "tiny-invariant";
-// biome-ignore lint/style/noExportedImports: <explanation> --- IGNORE ---
 import { AccountEditAddressForm } from "~/components/customer/edit-address-form";
 import { doLogout } from "./($locale).account_.logout";
 

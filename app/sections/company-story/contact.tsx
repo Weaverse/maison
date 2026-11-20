@@ -8,8 +8,7 @@ interface CompanyStoryContactData {
 }
 
 interface CompanyStoryContactProps
-  extends HydrogenComponentProps,
-    CompanyStoryContactData {
+  extends HydrogenComponentProps, CompanyStoryContactData {
   ref?: React.Ref<HTMLDivElement>;
 }
 
