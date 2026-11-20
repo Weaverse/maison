@@ -30,8 +30,7 @@ const variants = cva("relative overflow-hidden aspect-[16/9]", {
 });
 
 interface LogoListItemProps
-  extends HydrogenComponentProps,
-    VariantProps<typeof variants> {
+  extends HydrogenComponentProps, VariantProps<typeof variants> {
   src?: WeaverseImage;
   altText?: string;
   ref?: React.Ref<HTMLDivElement>;

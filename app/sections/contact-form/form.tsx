@@ -36,8 +36,7 @@ const inputVariants = cva(
 type ContactResponse = { ok?: boolean; error?: string };
 
 interface ContactFormProps
-  extends VariantProps<typeof inputVariants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof inputVariants>, HydrogenComponentProps {
   gap?: number;
   inputBorderColor?: string;
   inputBackgroundColor?: string;

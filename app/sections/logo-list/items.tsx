@@ -23,8 +23,7 @@ const variants = cva("grid", {
 });
 
 interface LogoListItemsProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   gap?: number;
 }

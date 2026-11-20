@@ -23,7 +23,8 @@ const variants = cva("", {
 });
 
 interface ColumnWithImageItemProps
-  extends VariantProps<typeof variants>,
+  extends
+    VariantProps<typeof variants>,
     Pick<LinkProps, "variant" | "text" | "to">,
     HydrogenComponentProps {
   imageSrc: WeaverseImage;

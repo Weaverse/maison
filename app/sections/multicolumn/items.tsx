@@ -17,8 +17,7 @@ const variants = cva("grid", {
 });
 
 interface MulticolumnItemsProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps {
   ref?: React.Ref<HTMLDivElement>;
   gap?: number;
   borderRadius?: number;

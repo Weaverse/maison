@@ -49,8 +49,7 @@ const variants = cva("h-auto w-full", {
 });
 
 interface ImageWithTextImageProps
-  extends VariantProps<typeof variants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof variants>, HydrogenComponentProps {
   image: WeaverseImage | string;
   imageAspectRatio: ImageAspectRatio;
   ref?: React.Ref<HTMLDivElement>;

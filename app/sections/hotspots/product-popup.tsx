@@ -8,8 +8,10 @@ import { Image } from "~/components/image";
 import { Link } from "~/components/link";
 import type { HotspotsItemData } from "./item";
 
-interface ProductPopupProps
-  extends Omit<HotspotsItemData, "icon" | "iconSize" | "product"> {
+interface ProductPopupProps extends Omit<
+  HotspotsItemData,
+  "icon" | "iconSize" | "product"
+> {
   product: ProductQuery["product"];
 }
 

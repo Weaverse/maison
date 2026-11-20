@@ -30,13 +30,13 @@ export function B2BLocationProvider({
   const fetcher = useFetcher<B2BLocationContextValue>();
   const [modalOpen, setModalOpen] = useState(fetcher?.data?.modalOpen);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: fetcher.load is stable but fetcher is not
   useEffect(() => {
     if (fetcher.data || fetcher.state === "loading") {
       return;
     }
 
     fetcher.load("/b2blocations");
+    // oxlint-disable-next-line react/exhaustive-deps -- fetcher.load is stable but fetcher is not
   }, [fetcher.data, fetcher.state]);
 
   const value = useMemo<B2BLocationContextValue>(() => {

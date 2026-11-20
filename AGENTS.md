@@ -4,7 +4,7 @@ This file provides guidance to AI agents (Claude, GitHub Copilot, Cursor, etc.) 
 
 ## Project Overview
 
-This is **Maison**, a B2B Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React 19, TypeScript, React Router 7, and Tailwind CSS v4. It runs on Node.js 22.12+ and uses Biome for linting/formatting.
+This is **Maison**, a B2B Shopify Hydrogen theme powered by Weaverse - a visual page builder for Hydrogen storefronts. The project is built with React 19, TypeScript, React Router 7, and Tailwind CSS v4. It uses Vite+ for linting and formatting. Vite+ checks need Node.js 22.18+ or 24.11+ on those release lines.
 
 ## Architecture Overview
 
@@ -48,7 +48,6 @@ Routes are defined in `app/routes.ts` using React Router v7's programmatic routi
    - Tailwind CSS v4 with custom utilities
    - class-variance-authority (cva) for component variants
    - Use the `cn()` utility from `/app/utils/cn.ts` for class merging
-   - Biome's `useSortedClasses` enabled for `clsx`, `cva`, and `cn` functions
 
 5. **Type Safety**:
    - GraphQL types are auto-generated via codegen
@@ -116,14 +115,11 @@ See [`.weaverse/docs/customer-account-local-dev.md`](.weaverse/docs/customer-acc
 
 Required environment variables are defined in `env.d.ts`. The project uses `@shopify/hydrogen` for environment handling.
 
-### Biome Configuration
+### Vite+ checks
 
-The project extends from `@weaverse/biome` with these customizations:
-- Double quotes for strings
-- Semicolons always
-- Trailing commas
-- Max cognitive complexity: 50
-- Sorted Tailwind classes in `clsx`, `cva`, and `cn` functions
+`npm run check` runs Oxfmt and Oxlint using the `fmt` and `lint` blocks in `vite.config.ts`.
+`npm run check:fix` applies formatting and safe lint fixes. Oxfmt uses double quotes,
+semicolons and trailing commas for JavaScript and TypeScript. The cognitive complexity limit is 50.
 
 ## Code Conventions
 

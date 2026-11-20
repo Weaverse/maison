@@ -73,7 +73,6 @@ export default function JudgemeReviewSection(props: JudgemeReviewSectionProps) {
     inViewRef(node);
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation> --- IGNORE ---
   useEffect(() => {
     if (product?.handle) {
       // Check if product handle changed
@@ -117,15 +116,16 @@ export default function JudgemeReviewSection(props: JudgemeReviewSectionProps) {
           });
       }
     }
+    // oxlint-disable-next-line react/exhaustive-deps -- The product handle and page drive review loading, not the response state.
   }, [product?.handle, inView, paging]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset store when component unmounts
   useEffect(() => {
     return () => {
       setStatus("idle");
       setData(null);
       setPaging({ currentPage: 1, perPage: 5 });
     };
+    // oxlint-disable-next-line react/exhaustive-deps -- Reset store when component unmounts
   }, []);
 
   if (!(product && (judgemeConfigured || isDesignMode))) {

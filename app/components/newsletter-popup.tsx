@@ -63,7 +63,7 @@ export function NewsletterPopup() {
     }
   }, [fetcher.data]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: just need to run once
+  // just need to run once.
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     if (!isDesignMode) {
@@ -79,11 +79,11 @@ export function NewsletterPopup() {
   }, []);
 
   // Re-open popup when settings change in design mode
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Need to track all settings changes in design mode
   useEffect(() => {
     if (isDesignMode) {
       setOpen(true);
     }
+    // oxlint-disable-next-line react/exhaustive-deps -- Need to track all settings changes in design mode
   }, [
     newsletterPopupDelay,
     newsletterPopupAllowDismiss,

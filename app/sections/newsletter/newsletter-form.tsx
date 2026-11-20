@@ -28,8 +28,7 @@ const inputVariants = cva("border max-w-full", {
 });
 
 interface NewsLetterInputProps
-  extends VariantProps<typeof inputVariants>,
-    HydrogenComponentProps {
+  extends VariantProps<typeof inputVariants>, HydrogenComponentProps {
   width: number;
   placeholder: string;
   buttonText: string;

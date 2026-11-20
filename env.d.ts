@@ -43,8 +43,9 @@ declare global {
 }
 
 declare module "react-router" {
-  interface AppLoadContext
-    extends Awaited<ReturnType<typeof createHydrogenRouterContext>> {
+  interface AppLoadContext extends Awaited<
+    ReturnType<typeof createHydrogenRouterContext>
+  > {
     // to change context type, change createHydrogenRouterContext() instead
     // Override storefront type to use I18nLocale instead of I18nBase so that
     // pathPrefix / currency / label etc. are visible to consumers of context.

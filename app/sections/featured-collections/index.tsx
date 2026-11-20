@@ -16,8 +16,7 @@ interface FeaturedCollectionsData {
 }
 
 interface FeaturedCollectionsProps
-  extends SectionProps<FeaturedCollectionsLoaderData>,
-    FeaturedCollectionsData {
+  extends SectionProps<FeaturedCollectionsLoaderData>, FeaturedCollectionsData {
   ref: React.Ref<HTMLElement>;
 }
 

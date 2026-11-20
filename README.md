@@ -43,7 +43,7 @@ These **Shopify (Plus)** brands built on top of Weaverse/Maison:
   - [Combined Listings](https://shopify.dev/docs/apps/build/product-merchandising/combined-listings)
   - [Product bundles](https://help.shopify.com/en/manual/products/bundles)
 - [React Router 7](https://reactrouter.com/) for routing/SSR/data loading
-- [Biome](https://biomejs.dev/) code linter/formatter
+- [Vite+ checks](https://viteplus.dev/guide/check) with Oxlint and Oxfmt
 - TypeScript with strict configuration
 - GraphQL code generator
 - Styled with [TailwindCSS](https://tailwindcss.com/) (v4)
@@ -69,7 +69,7 @@ the [Maison setup and usage guide](docs/setup.md).
 
 **Requirements:**
 
-- Node.js version 22.12.0 or higher
+- Node.js 22.18+ or 24.11+ on those release lines for Vite+ checks
 - `npm` package manager
 
 **Follow these steps to get started with Maison and begin crafting your Hydrogen-driven storefront:**
@@ -90,7 +90,7 @@ npm install
 npm run dev
 
 # Run code quality checks before committing
-npm run biome:fix
+npm run check:fix
 npm run typecheck
 
 # Build for production
@@ -369,7 +369,6 @@ app/
 └── weaverse/       # Weaverse configuration
 
 Key configuration files:
-- biome.json                  # Code formatting and linting
 - codegen.ts                  # GraphQL code generation
 - react-router.config.ts      # React Router configuration
 - vite.config.ts              # Vite bundler configuration
@@ -389,7 +388,7 @@ Key configuration files:
 - [React Router](https://reactrouter.com/)
 - [Tailwind CSS v4](https://tailwindcss.com/)
 - [Radix UI](https://www.radix-ui.com/)
-- [Biome](https://biomejs.dev/)
+- [Vite+ checks](https://viteplus.dev/guide/check)
 
 ## License
 
