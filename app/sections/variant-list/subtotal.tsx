@@ -1,17 +1,15 @@
 import { CircleNotchIcon, TrashIcon } from "@phosphor-icons/react";
-import { CartForm, Money, useOptimisticCart } from "@shopify/hydrogen";
+import { CartForm, Money } from "@shopify/hydrogen";
 import type { CurrencyCode } from "@shopify/hydrogen/storefront-api-types";
 import { useTranslation } from "@weaverse/hydrogen";
 import { type FetcherWithComponents, useFetcher } from "react-router";
-import type {
-  CartApiQueryFragment,
-  ProductVariantFragment,
-} from "storefront-api.generated";
+import type { ProductVariantFragment } from "storefront-api.generated";
 import { Button } from "~/components/button";
 import {
   useB2BLinesTotal,
   useProductRecalculating,
 } from "~/components/cart/b2b-cart-pricing";
+import { useSettledOptimisticCart } from "~/components/cart/use-settled-cart";
 import { toggleCartDrawer } from "~/components/layout/cart-drawer";
 import { Skeleton } from "~/components/skeleton";
 import { useSelectedLocale } from "~/hooks/use-locale";
@@ -85,7 +83,7 @@ export function Subtotal({
   let subtotal = 0;
   let currencyCode: CurrencyCode = locale.currency as CurrencyCode;
   let existingLineIds: string[] = [];
-  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
+  const cart = useSettledOptimisticCart(originalCart);
 
   const currentProductVariantIds = variants.map((v) => v.id);
   const currentProductLines = (cart?.lines?.nodes ?? []).filter((line) =>

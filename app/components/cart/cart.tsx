@@ -10,7 +10,6 @@ import {
   Money,
   type OptimisticCart,
   OptimisticInput,
-  useOptimisticCart,
   useOptimisticData,
 } from "@shopify/hydrogen";
 import type {
@@ -36,6 +35,7 @@ import {
   LineRemoveFetchers,
   lineRemoveFetcherKey,
 } from "~/components/cart/line-remove";
+import { useSettledOptimisticCart } from "~/components/cart/use-settled-cart";
 import { SubscriptionIcon } from "~/components/icons";
 import { Image } from "~/components/image";
 import { Link } from "~/components/link";
@@ -68,7 +68,7 @@ export function Cart({
   onClose?: () => void;
   cart: CartApiQueryFragment;
 }) {
-  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
+  const cart = useSettledOptimisticCart(originalCart);
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const cartHasItems = Boolean(cart) && cart.totalQuantity > 0;
 
@@ -454,7 +454,10 @@ function CartLineItem({
             height={250}
             data={image}
             className={clsx(
-              "aspect-square h-auto rounded-xl object-cover",
+              // The tile keeps the subtle background while the file is still
+              // in flight, so a line item reads as a product straight away
+              // instead of a blank white square.
+              "aspect-square h-auto rounded-xl bg-line-subtle object-cover",
               layout === "page" ? "w-[120px] sm:w-[160px]" : "w-[140px]",
             )}
             alt={title}
@@ -882,7 +885,29 @@ function CartLinePrice({
   const pricedByB2Bridge = Boolean(b2bPrice) && b2bState?.status === "priced";
 
   if (!(line?.cost?.amountPerQuantity && line?.cost?.totalAmount)) {
-    return null;
+    // A line Shopify has not priced yet. `useOptimisticCart` builds a newly
+    // added line out of the chosen variant alone — id, merchandise, quantity,
+    // and no `cost` at all — so this ran before there was any figure to show.
+    // Rendering nothing left the cell empty for as long as the reply took,
+    // and the price then appeared out of blank space rather than resolving in
+    // place. A placeholder holds the cell instead, the same one a repricing
+    // line uses.
+    //
+    // Only for the price itself: a compare-at figure may legitimately not
+    // exist, and standing a bar where no saving was about to appear would add
+    // a row and take it away again.
+    if (priceType !== "regular") {
+      return null;
+    }
+    return (
+      <span className={clsx("inline-flex flex-col items-end", className)}>
+        <Skeleton
+          as="span"
+          className="h-4 w-16 rounded"
+          aria-label="Updating price"
+        />
+      </span>
+    );
   }
 
   // The theme's own spinner follows this line's fetcher, so it covers only the

@@ -83,7 +83,7 @@ export default function CollectionFilters(props: CollectionFiltersProps) {
         {showBanner && banner && (
           <div
             className={clsx([
-              "mt-6 overflow-hidden bg-gray-100",
+              "mt-6 overflow-hidden bg-line-subtle",
               "rounded-(--banner-border-radius)",
               "h-(--banner-height-mobile) lg:h-(--banner-height-desktop)",
             ])}
@@ -99,7 +99,10 @@ export default function CollectionFilters(props: CollectionFiltersProps) {
           </div>
         )}
         <ToolsBar {...props} />
-        <div className="flex gap-5 pt-6 pb-8 lg:pt-12 lg:pb-20">
+        {/* The same 24px above the results at every width. `lg:pt-12` left a
+            48px band between the product count and the "Filtered by" row that
+            read as a gap in the page rather than as spacing. */}
+        <div className="flex gap-5 pt-6 pb-8 lg:pb-20">
           {enableFilter && filtersPosition === "sidebar" && (
             <div className="hidden w-72 shrink-0 lg:block">
               <div

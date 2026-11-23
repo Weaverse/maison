@@ -35,6 +35,7 @@
     "b2bridge:check": "node scripts/b2bridge-probe.mjs",
     "b2bridge:checkout-check": "node scripts/b2bridge-checkout-probe.mjs",
     "cart:ownership-check": "node --experimental-strip-types --test scripts/cart-ownership.test.mjs",
+    "cart:overlay-check": "node --experimental-strip-types --test scripts/optimistic-cart.test.mjs",
     "typecheck": "react-router typegen && tsc --noEmit",
     "lint": "vp check .",
     "codegen": "shopify hydrogen codegen",

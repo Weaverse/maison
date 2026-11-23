@@ -4,12 +4,8 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import {
-  CartForm,
-  Money,
-  type OptimisticCart,
-  useOptimisticCart,
-} from "@shopify/hydrogen";
+import * as Popover from "@radix-ui/react-popover";
+import { CartForm, Money, type OptimisticCart } from "@shopify/hydrogen";
 import { useThemeSettings, useTranslation } from "@weaverse/hydrogen";
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
@@ -24,6 +20,7 @@ import {
   useB2BProductRate,
   useProductRecalculating,
 } from "~/components/cart/b2b-cart-pricing";
+import { useSettledOptimisticCart } from "~/components/cart/use-settled-cart";
 import { Image } from "~/components/image";
 import { PurchaseMethodDropdown } from "~/components/product/purchase-method-dropdown";
 import { Skeleton } from "~/components/skeleton";
@@ -63,11 +60,13 @@ function PriceWithCompare({
   price,
   compareAt,
   recalculating,
+  align = "unit",
 }: {
   price: MoneyData;
   compareAt: MoneyData | null;
   /** The figures shown belong to the previous quantity. */
   recalculating?: boolean;
+  align?: "unit" | "total";
 }) {
   const { saleBadgeColor } = useThemeSettings();
 
@@ -99,26 +98,23 @@ function PriceWithCompare({
   // at exactly its own size, so the column does not jump while the price is
   // worked out.
   //
-  // Its own size is fixed, though, and not the shape of what it covers. Taking
-  // the figures' width made it a different bar in every cell — a row showing
-  // $0 because nothing is ordered yet got a stub barely wider than the two
-  // characters it replaced, beside rows with a full bar.
+  // Keep the price's original width in flow. The 64px placeholder is anchored
+  // toward the inside of its column, so a narrow $0 price does not make the
+  // Quick Shop panel horizontally scrollable while prices load.
   return (
     <span className="relative block">
       <span className="invisible block" aria-hidden="true">
         {settled}
       </span>
-      {/* A block covering the cell, with the bar as an inline child: it is
-          then placed by the cell's own `text-align`, so it lands exactly where
-          the figure it replaces would — centred under a centred column header,
-          right under a right-aligned one — and every row in a column puts its
-          bar at the same x. Anchoring the bar to the figures instead made a
-          row carrying a struck-through compare-at price sit wider than its
-          neighbours and pushed its bar out of line. */}
       <span className="absolute inset-0">
         <Skeleton
           as="span"
-          className="inline-block h-full w-16 rounded"
+          className={cn(
+            "absolute top-0 h-full w-16 rounded",
+            align === "total"
+              ? "right-0"
+              : "left-0 md:left-1/2 md:-translate-x-1/2",
+          )}
           aria-label="Updating price"
         />
       </span>
@@ -309,6 +305,7 @@ export function VariantRow({
                   price={totalPrice}
                   compareAt={compareTotalPrice}
                   recalculating={recalculating}
+                  align="total"
                 />
               </div>
             </div>
@@ -336,6 +333,7 @@ export function VariantRow({
                 price={totalPrice}
                 compareAt={compareTotalPrice}
                 recalculating={recalculating}
+                align="total"
               />
             </div>
           </div>
@@ -415,6 +413,7 @@ export function VariantRow({
             price={totalPrice}
             compareAt={compareTotalPrice}
             recalculating={recalculating}
+            align="total"
           />
         </div>
       </div>
@@ -493,6 +492,7 @@ export function VariantRow({
             price={totalPrice}
             compareAt={compareTotalPrice}
             recalculating={recalculating}
+            align="total"
           />
         </div>
       </div>
@@ -522,7 +522,7 @@ function QuantityUpdateButtons({
   // charged.
   let { markRecalculating, markSubmitted } = useB2BPricing();
   const cartAction = usePrefixPathWithLocale("/cart");
-  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
+  const cart = useSettledOptimisticCart(originalCart);
   const increment = variant.quantityRule.increment || 1;
   const isOutOfStock = !variant.availableForSale;
 
@@ -768,7 +768,21 @@ function QuantityUpdateButtons({
   );
 }
 
+const VOLUME_PRICING_PANEL = "bg-white text-body shadow-lg rounded-lg p-0";
+const VOLUME_PRICING_ICON =
+  "cursor-pointer hover:scale-125 duration-300 text-body-subtle";
+
+/**
+ * The quantity rules and the price-break table behind the ⓘ beside a stepper.
+ *
+ * A tooltip opens on hover, and a touch screen has none, so on a phone or a
+ * tablet the table could not be read at all. Rather than bend the tooltip into
+ * opening on tap, each pointer gets the primitive built for it and CSS decides
+ * which one is in the document's flow — no media-query hook, so the server and
+ * the first client render agree.
+ */
 function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
+  const { t } = useTranslation();
   const volumes = [
     {
       minimumQuantity: 1,
@@ -778,38 +792,75 @@ function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
   ];
   const rule = variant.quantityRule;
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <InfoIcon className="cursor-pointer hover:scale-125 duration-300 text-body-subtle" />
-      </TooltipTrigger>
-      <TooltipContent
-        className="bg-white text-body shadow-lg rounded-lg p-0"
-        side="left"
-        sideOffset={5}
-        arrow={false}
-      >
-        <div className="py-3 px-5 space-y-1">
-          <div className="font-semibold">
-            Min {rule.minimum} {rule.maximum ? `- Max ${rule.maximum}` : ""}
-          </div>
-          <div>Increments of {rule.increment}</div>
+  const details = (
+    <>
+      <div className="py-3 px-5 space-y-1">
+        <div className="font-semibold">
+          Min {rule.minimum} {rule.maximum ? `- Max ${rule.maximum}` : ""}
         </div>
-        <ul className="space-y-1">
-          {volumes.map((node, ind) => (
-            <li
-              key={ind}
-              className="flex items-center gap-6 justify-between odd:bg-gray-100 py-2.5 px-5"
+        <div>Increments of {rule.increment}</div>
+      </div>
+      <ul className="space-y-1">
+        {volumes.map((node, ind) => (
+          <li
+            key={ind}
+            className="flex items-center gap-6 justify-between odd:bg-line-subtle py-2.5 px-5"
+          >
+            <span>{node.minimumQuantity}+</span>
+            <div>
+              <Money data={node.price} as="span" withoutTrailingZeros />
+              <span className="ml-1">{node.price.currencyCode}/ea</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+
+  return (
+    <>
+      <span className="inline-flex pointer-coarse:hidden">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {/* A button rather than the bare icon. Radix opens a tooltip on
+                focus as well as on hover, but an <svg> cannot take focus, so
+                the table was unreachable by keyboard on a desktop. */}
+            <button type="button" aria-label={t("product.volumePricing")}>
+              <InfoIcon className={VOLUME_PRICING_ICON} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            className={VOLUME_PRICING_PANEL}
+            side="left"
+            sideOffset={5}
+            arrow={false}
+          >
+            {details}
+          </TooltipContent>
+        </Tooltip>
+      </span>
+      <span className="hidden pointer-coarse:inline-flex">
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            {/* Tapping this is the only way in on a touch screen, which has
+                no hover for the tooltip branch to answer. */}
+            <button type="button" aria-label={t("product.volumePricing")}>
+              <InfoIcon className={VOLUME_PRICING_ICON} />
+            </button>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              className={cn("z-1000 animate-slide-up", VOLUME_PRICING_PANEL)}
+              side="left"
+              align="center"
+              sideOffset={5}
+              collisionPadding={8}
             >
-              <span>{node.minimumQuantity}+</span>
-              <div>
-                <Money data={node.price} as="span" withoutTrailingZeros />
-                <span className="ml-1">{node.price.currencyCode}/ea</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </TooltipContent>
-    </Tooltip>
+              {details}
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      </span>
+    </>
   );
 }

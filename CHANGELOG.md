@@ -1,5 +1,18 @@
 # @weaverse/maison
 
+## Unreleased
+
+### Theme settings
+
+- The announcement bar and the footer each own their social icons now: a row of
+  slots, every slot picking a mark and a link, with a count deciding how many
+  are on screen. The four settings that used to feed both rows —
+  `socialInstagram`, `socialX`, `socialLinkedIn`, `socialFacebook` — no longer
+  appear in Studio. A row whose own slots are all empty still reads them, so a
+  shop that upgrades keeps its icons, but the links are worth re-entering in
+  the new fields: the fallback ends for a row as soon as one of its slots has a
+  link.
+
 ## 2026.11.10
 
 First release since `v2026.6.12`. Everything merged to `main` between 2026-08-20 and 2026-11-09.

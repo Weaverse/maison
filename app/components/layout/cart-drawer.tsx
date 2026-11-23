@@ -1,10 +1,6 @@
 import { ShoppingBagIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  type CartReturn,
-  useAnalytics,
-  useOptimisticCart,
-} from "@shopify/hydrogen";
+import { type CartReturn, useAnalytics } from "@shopify/hydrogen";
 import type { CartCost } from "@shopify/hydrogen/storefront-api-types";
 import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
@@ -15,6 +11,7 @@ import type { CartApiQueryFragment } from "storefront-api.generated";
 import { B2BPricingProvider } from "~/components/cart/b2b-cart-pricing";
 import { Cart } from "~/components/cart/cart";
 import { FreeShippingProgressBar } from "~/components/cart/free-shipping-progress-bar";
+import { useSettledOptimisticCart } from "~/components/cart/use-settled-cart";
 import Link from "~/components/link";
 import type { RootLoader } from "~/root";
 
@@ -62,7 +59,7 @@ function CartDrawerContent({
 }) {
   const { publish } = useAnalytics();
   const { t } = useTranslation();
-  const cart = useOptimisticCart<CartApiQueryFragment>(originalCart);
+  const cart = useSettledOptimisticCart(originalCart);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -110,7 +107,7 @@ function CartDrawerContent({
                 className="px-5"
               />
             )}
-            <Cart layout="drawer" cart={cart as CartReturn} />
+            <Cart layout="drawer" cart={originalCart as CartReturn} />
           </B2BPricingProvider>
         </div>
       </AnimatedDrawer>

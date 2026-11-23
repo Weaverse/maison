@@ -283,16 +283,25 @@ function PredictiveSearchResults() {
             {products?.items?.map((item) => (
               <ProductResultItem key={item.id} item={item} />
             ))}
-            <Link
-              to={`${params.locale ? `/${params.locale}` : ""}/search?q=${encodeURIComponent(searchTerm.current)}`}
-              // Darkens its own background on hover rather than inverting to
-              // the dark button colour: the result rows above it do the same,
-              // and going through opacity keeps it tied to whatever
-              // `--btn-secondary-bg` the theme is set to.
-              className="mt-6 block w-full rounded-(--btn-border-radius) bg-(--btn-secondary-bg) py-3 text-center text-sm font-medium transition-opacity hover:opacity-90"
-            >
-              {t("search.seeAll")}
-            </Link>
+            {/* The design system's secondary button rather than a hand-rolled
+                copy of one, which had drifted on text size, weight and
+                padding. It hugs its label instead of filling the panel. */}
+            <div className="mt-6">
+              <Link
+                to={`${params.locale ? `/${params.locale}` : ""}/search?q=${encodeURIComponent(searchTerm.current)}`}
+                variant="secondary"
+                // Shape and colour come from the variant, the hover does not.
+                // The variant inverts — the fill goes dark and the label light
+                // — and a panel that flips to a dark block under the cursor
+                // reads as a different control. Dimming its own fill keeps it
+                // the same button, and keeps it tied to whatever
+                // `--btn-secondary-bg` the theme is set to; the result rows
+                // above it answer the cursor the same way.
+                className="tracking-[0.28px] transition-opacity hover:border-(--btn-secondary-bg) hover:bg-(--btn-secondary-bg) hover:text-(--btn-secondary-text) hover:opacity-90"
+              >
+                {t("search.seeAll")}
+              </Link>
+            </div>
           </div>
         </Tabs.Content>
 
@@ -342,7 +351,7 @@ function ProductResultItem({
       className="flex gap-4 rounded-lg transition-colors hover:bg-gray-50"
     >
       {item.image && (
-        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-gray-100">
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-line-subtle">
           <Image
             src={item.image.url}
             alt={item.image.altText || item.title}
@@ -385,7 +394,7 @@ function CollectionResultItem({
       className="flex flex-col gap-3 transition-colors hover:bg-gray-50"
     >
       {item.image && (
-        <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-gray-100">
+        <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-line-subtle">
           <Image
             src={item.image.url}
             alt={item.image.altText || item.title}
