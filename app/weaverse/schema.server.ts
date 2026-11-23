@@ -49,6 +49,18 @@ function slotCondition(countKey: string, index: number, iconKey?: string) {
   return condition;
 }
 
+/** A believable address for each mark, shown greyed in its slot's Link field. */
+const SOCIAL_LINK_PLACEHOLDERS: Record<string, string> = {
+  instagram: "https://www.instagram.com/your-handle",
+  facebook: "https://www.facebook.com/your-page",
+  x: "https://x.com/your-handle",
+  linkedin: "https://www.linkedin.com/company/your-company",
+  tiktok: "https://www.tiktok.com/@your-handle",
+  youtube: "https://www.youtube.com/@your-channel",
+  pinterest: "https://www.pinterest.com/your-handle",
+  threads: "https://www.threads.net/@your-handle",
+};
+
 /**
  * One icon slot: what it shows and where it goes.
  *
@@ -77,7 +89,10 @@ function socialSlot(prefix: string, index: number, defaultIcon: string) {
       type: "text" as const,
       name: `${prefix}${index}Link`,
       label: `Link ${index}`,
-      placeholder: "https://www.instagram.com/your-handle",
+      // Keyed to the mark this slot ships with rather than one example for
+      // all of them: a Facebook slot suggesting an Instagram URL reads as a
+      // mistake in the theme.
+      placeholder: SOCIAL_LINK_PLACEHOLDERS[defaultIcon] ?? "https://",
       condition: slotCondition(countKey, index, iconKey),
     },
   ];
@@ -1210,9 +1225,10 @@ export const themeSchema: HydrogenThemeSchema = {
             "We are a team of designers, developers, and creatives...",
         },
         {
-          // The footer's own row, four slots deep. Shaped like the bar's so
-          // the two read the same in Studio, but kept apart: these are the
-          // shop's accounts, the bar's are whatever it wants to point at.
+          // The footer's own row, four marks shown of the six it can hold.
+          // Shaped like the bar's so the two read the same in Studio, but
+          // kept apart: these are the shop's accounts, the bar's are
+          // whatever it wants to point at.
           type: "heading",
           label: "Social links",
         },

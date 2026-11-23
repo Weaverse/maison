@@ -283,17 +283,10 @@ function PredictiveSearchResults() {
             {products?.items?.map((item) => (
               <ProductResultItem key={item.id} item={item} />
             ))}
-            {/* The design system's secondary button, not a shape built to
-                look like one. Every property the Figma node carries — the
-                #F0EFED fill, the 12px radius, 24px by 18px of padding — is
-                already what `variant="secondary"` renders from the merchant's
-                own tokens, so the hand-rolled copy only drifted from it: 12px
-                text where the design has 14, weight 500 where it has 400, and
-                half the vertical padding. The "View all" frame around it is a
-                row that lets the button keep its own width and leaves the rest
-                of the line empty, so it hugs its label and starts where the
-                rows above it do rather than filling the panel. */}
-            <div className="mt-6 flex items-start justify-start">
+            {/* The design system's secondary button rather than a hand-rolled
+                copy of one, which had drifted on text size, weight and
+                padding. It hugs its label instead of filling the panel. */}
+            <div className="mt-6">
               <Link
                 to={`${params.locale ? `/${params.locale}` : ""}/search?q=${encodeURIComponent(searchTerm.current)}`}
                 variant="secondary"
@@ -304,7 +297,7 @@ function PredictiveSearchResults() {
                 // the same button, and keeps it tied to whatever
                 // `--btn-secondary-bg` the theme is set to; the result rows
                 // above it answer the cursor the same way.
-                className="shrink-0 tracking-[0.28px] transition-opacity hover:border-(--btn-secondary-bg) hover:bg-(--btn-secondary-bg) hover:text-(--btn-secondary-text) hover:opacity-90"
+                className="tracking-[0.28px] transition-opacity hover:border-(--btn-secondary-bg) hover:bg-(--btn-secondary-bg) hover:text-(--btn-secondary-text) hover:opacity-90"
               >
                 {t("search.seeAll")}
               </Link>

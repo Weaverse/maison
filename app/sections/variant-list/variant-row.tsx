@@ -822,7 +822,12 @@ function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
       <span className="inline-flex pointer-coarse:hidden">
         <Tooltip>
           <TooltipTrigger asChild>
-            <InfoIcon className={VOLUME_PRICING_ICON} />
+            {/* A button rather than the bare icon. Radix opens a tooltip on
+                focus as well as on hover, but an <svg> cannot take focus, so
+                the table was unreachable by keyboard on a desktop. */}
+            <button type="button" aria-label={t("product.volumePricing")}>
+              <InfoIcon className={VOLUME_PRICING_ICON} />
+            </button>
           </TooltipTrigger>
           <TooltipContent
             className={VOLUME_PRICING_PANEL}
@@ -837,8 +842,8 @@ function VolumePricingInfo({ variant }: { variant: ProductVariantFragment }) {
       <span className="hidden pointer-coarse:inline-flex">
         <Popover.Root>
           <Popover.Trigger asChild>
-            {/* A button rather than the bare icon: tapping it is the only way
-                in here, and it is the only way by keyboard either. */}
+            {/* Tapping this is the only way in on a touch screen, which has
+                no hover for the tooltip branch to answer. */}
             <button type="button" aria-label={t("product.volumePricing")}>
               <InfoIcon className={VOLUME_PRICING_ICON} />
             </button>
