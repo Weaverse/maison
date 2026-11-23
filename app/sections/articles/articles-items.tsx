@@ -100,7 +100,7 @@ function ArticlesItems(props: ArticlesItemsProps) {
             {/* The placeholder follows the same setting as a real card;
                 it used to hardcode 8px and disagree with it. */}
             <div
-              className="w-full overflow-hidden bg-gray-100"
+              className="w-full overflow-hidden bg-line-subtle"
               style={{ borderRadius: `${imageBorderRadius}px` }}
             >
               <Image

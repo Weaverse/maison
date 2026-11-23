@@ -75,8 +75,16 @@ export function PurchaseMethodDropdown({
         />
       </button>
 
+      {/* The panel is wide enough for its own options and never narrower than
+          the control it hangs off. The tablet variant table has no
+          purchase-method column, so there the control is squeezed into the
+          variant cell at around 186px while "Deliver every month, 10% off"
+          needs about 220 — and `overflow-auto` let the list slide sideways
+          inside the panel rather than fit, which cut the first character off
+          every row. The overflow is vertical only now, so a long list still
+          scrolls. */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-(--color-line) rounded-[8px] shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 mt-1 w-max min-w-full max-w-[min(20rem,90vw)] bg-white border border-(--color-line) rounded-[8px] shadow-lg max-h-60 overflow-y-auto overflow-x-hidden">
           <ul className="py-1">
             {/* One-time purchase option */}
             <li>

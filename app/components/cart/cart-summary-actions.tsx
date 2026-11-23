@@ -58,7 +58,7 @@ export function NoteDialog({
         }}
         className={cn(
           "fixed z-50 overflow-hidden",
-          "bg-white p-6 shadow-xl",
+          "rounded-2xl bg-white p-6 shadow-xl",
           "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           layout === "drawer"
             ? "w-[calc(100%-24px)] max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
@@ -161,7 +161,7 @@ export function DiscountDialog({
         }}
         className={cn(
           "fixed z-50 overflow-hidden",
-          "bg-white p-6 shadow-xl",
+          "rounded-2xl bg-white p-6 shadow-xl",
           "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           layout === "drawer"
             ? "w-[calc(100%-24px)] max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"
@@ -277,7 +277,7 @@ export function GiftCardDialog({
         }}
         className={cn(
           "fixed z-50 overflow-hidden",
-          "bg-white p-6 shadow-xl",
+          "rounded-2xl bg-white p-6 shadow-xl",
           "data-[state=open]:animate-slide-up data-[state=closed]:animate-slide-down",
           layout === "drawer"
             ? "w-[calc(100%-24px)] max-w-[461px] bottom-0 right-0 [--slide-up-from:100%] [--slide-down-duration:300ms] [--slide-down-to:100%]"

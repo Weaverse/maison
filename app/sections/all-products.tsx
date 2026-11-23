@@ -45,7 +45,12 @@ export default function AllProducts(props: AllProductsProps) {
               <div
                 className={clsx([
                   "w-full gap-x-4 gap-y-6 lg:gap-y-10",
-                  "grid grid-cols-1 lg:grid-cols-4",
+                  // One column up to `lg` left a single 975px card stretched
+                  // across the width of a tablet, then four cards of 232px a
+                  // pixel later. The count climbs with the theme's own
+                  // breakpoints instead, so a card stays roughly card-sized
+                  // the whole way up.
+                  "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
                 ])}
               >
                 {nodes.map((product) => (

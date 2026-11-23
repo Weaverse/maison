@@ -47,3 +47,13 @@ export const PAGINATION_SIZE = 16;
  * two different numbers.
  */
 export const COLLECTION_PRODUCT_COUNT_LIMIT = 250;
+
+/**
+ * How many icon slots the announcement bar and the footer each offer.
+ *
+ * Theme settings have no repeater input, so "add another" is a fixed run of
+ * slots that reveal one at a time: a merchant only ever sees one empty slot
+ * past the ones they are using. Raising this number is all it takes to offer
+ * more.
+ */
+export const SOCIAL_SLOT_COUNT = 6;

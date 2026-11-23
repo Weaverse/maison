@@ -1,8 +1,118 @@
 import type { HydrogenThemeSchema } from "@weaverse/hydrogen";
 import enUS from "~/locales/en.json";
 import type { StoreLocalization } from "~/types/locale";
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "~/utils/const";
+import {
+  DEFAULT_LOCALE,
+  SOCIAL_SLOT_COUNT,
+  SUPPORTED_LOCALES,
+} from "~/utils/const";
 import { version } from "../../package.json";
+
+/** The marks an icon slot can be set to, shared by the bar and the footer. */
+const SOCIAL_ICON_OPTIONS = [
+  { value: "none", label: "None" },
+  { value: "instagram", label: "Instagram" },
+  { value: "facebook", label: "Facebook" },
+  { value: "x", label: "X (formerly Twitter)" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "youtube", label: "YouTube" },
+  { value: "pinterest", label: "Pinterest" },
+  { value: "threads", label: "Threads" },
+];
+
+/**
+ * A condition for a slot, in the two forms it has to exist in.
+ *
+ * Weaverse hands theme-setting conditions to Studio as source text —
+ * `input.condition.toString()` — so a plain closure is no use there: the slot
+ * number and the prefix it captured are not in scope when Studio evaluates
+ * that text, and the input ends up always visible. Compiling the body with
+ * `new Function` would inline them, but Oxygen runs on workerd, which refuses
+ * to build code from strings at all.
+ *
+ * So the closure runs here and a literal source string goes to Studio, with
+ * `toString` overridden to hand it over. The two spellings of the same test
+ * sit side by side on purpose: they have to be changed together.
+ */
+function slotCondition(countKey: string, index: number, iconKey?: string) {
+  const withinCount = `Number(theme["${countKey}"] ?? 0) >= ${index}`;
+  const source = iconKey
+    ? `(theme) => ${withinCount} && theme["${iconKey}"] !== "none"`
+    : `(theme) => ${withinCount}`;
+
+  const condition = (theme: Record<string, unknown>) =>
+    Number(theme[countKey] ?? 0) >= index &&
+    (!iconKey || theme[iconKey] !== "none");
+  condition.toString = () => source;
+
+  return condition;
+}
+
+/** A believable address for each mark, shown greyed in its slot's Link field. */
+const SOCIAL_LINK_PLACEHOLDERS: Record<string, string> = {
+  instagram: "https://www.instagram.com/your-handle",
+  facebook: "https://www.facebook.com/your-page",
+  x: "https://x.com/your-handle",
+  linkedin: "https://www.linkedin.com/company/your-company",
+  tiktok: "https://www.tiktok.com/@your-handle",
+  youtube: "https://www.youtube.com/@your-channel",
+  pinterest: "https://www.pinterest.com/your-handle",
+  threads: "https://www.threads.net/@your-handle",
+};
+
+/**
+ * One icon slot: what it shows and where it goes.
+ *
+ * `prefix` is what keeps the two rows apart — the bar and the footer each own
+ * their slots, so changing one never moves the other.
+ *
+ * Theme settings have no repeater input, so a row is a fixed run of slots.
+ * Showing all of them at once made for a long scroll of fields nobody was
+ * using, so a count governs how many are on screen — the same "… to show"
+ * range the sections use for their own items.
+ */
+function socialSlot(prefix: string, index: number, defaultIcon: string) {
+  const countKey = `${prefix}sToShow`;
+  const iconKey = `${prefix}${index}Icon`;
+
+  return [
+    {
+      type: "select" as const,
+      name: iconKey,
+      label: `Icon ${index}`,
+      configs: { options: SOCIAL_ICON_OPTIONS },
+      defaultValue: defaultIcon,
+      condition: slotCondition(countKey, index),
+    },
+    {
+      type: "text" as const,
+      name: `${prefix}${index}Link`,
+      label: `Link ${index}`,
+      // Keyed to the mark this slot ships with rather than one example for
+      // all of them: a Facebook slot suggesting an Instagram URL reads as a
+      // mistake in the theme.
+      placeholder: SOCIAL_LINK_PLACEHOLDERS[defaultIcon] ?? "https://",
+      condition: slotCondition(countKey, index, iconKey),
+    },
+  ];
+}
+
+/** The count, then every slot it can reveal. */
+function socialSlots(prefix: string, defaults: string[]) {
+  return [
+    {
+      type: "range" as const,
+      name: `${prefix}sToShow`,
+      label: "Icons to show",
+      defaultValue: defaults.length,
+      configs: { min: 0, max: SOCIAL_SLOT_COUNT, step: 1 },
+    },
+    ...Array.from({ length: SOCIAL_SLOT_COUNT }, (_, i) =>
+      socialSlot(prefix, i + 1, defaults[i] ?? "none"),
+    ).flat(),
+  ];
+}
 
 export const themeSchema: HydrogenThemeSchema = {
   info: {
@@ -125,6 +235,14 @@ export const themeSchema: HydrogenThemeSchema = {
           },
           defaultValue: 1,
         },
+        {
+          // The bar carries its own row of icons, separate from the footer's:
+          // each slot picks what it shows and where it goes. A slot with no
+          // link is left off the bar.
+          type: "heading",
+          label: "Social links",
+        },
+        ...socialSlots("topbarSocial", ["instagram", "facebook", "x"]),
       ],
     },
     {
@@ -1107,33 +1225,19 @@ export const themeSchema: HydrogenThemeSchema = {
             "We are a team of designers, developers, and creatives...",
         },
         {
+          // The footer's own row, four marks shown of the six it can hold.
+          // Shaped like the bar's so the two read the same in Studio, but
+          // kept apart: these are the shop's accounts, the bar's are
+          // whatever it wants to point at.
           type: "heading",
           label: "Social links",
         },
-        {
-          type: "text",
-          name: "socialInstagram",
-          label: "Instagram",
-          placeholder: "https://www.instagram.com/your-handle",
-        },
-        {
-          type: "text",
-          name: "socialX",
-          label: "X (formerly Twitter)",
-          placeholder: "https://x.com/your-handle",
-        },
-        {
-          type: "text",
-          name: "socialLinkedIn",
-          label: "LinkedIn",
-          placeholder: "https://www.linkedin.com/company/your-company",
-        },
-        {
-          type: "text",
-          name: "socialFacebook",
-          label: "Facebook",
-          placeholder: "https://www.facebook.com/your-page",
-        },
+        ...socialSlots("footerSocial", [
+          "facebook",
+          "x",
+          "instagram",
+          "linkedin",
+        ]),
         {
           type: "heading",
           label: "Newsletter",

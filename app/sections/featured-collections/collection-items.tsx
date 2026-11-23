@@ -159,7 +159,7 @@ function StandardCollectionCard({
       <div
         className={cn(
           "w-full overflow-hidden",
-          !collection.image && "bg-gray-100",
+          !collection.image && "bg-line-subtle",
         )}
         style={{ borderRadius: `${imageBorderRadius}px` }}
       >
@@ -340,6 +340,21 @@ function EditorialCollectionCard({
           )}
         </div>
       </div>
+      {/* A coarse pointer has no hover, so the button above never comes out of
+          its collapsed row and the card is left with nothing to click. This
+          covers the whole card there. It is a sibling of that button rather
+          than its ancestor: an <a> nested in an <a> is invalid markup, and
+          the browser recovers from it by closing the outer one early. */}
+      {contentPosition === "over" && (
+        <Link
+          to={collectionPath}
+          className="absolute inset-0 z-2 hidden pointer-coarse:block"
+        >
+          <span className="sr-only">
+            {`View ${collection.title} collection`}
+          </span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -665,9 +680,19 @@ export const schema = createSchema({
           label: "Overlay",
           condition: isEditorialOverlay,
         },
+        // The editorial requirement is added to each input's own condition,
+        // not written over it. `overlayInputs` already hides the solid fields
+        // behind `overlayType === "solid"` and the gradient ones behind
+        // `"gradient"`; replacing those conditions outright left both sets on
+        // screen at once, so half the colour pickers belonged to a mode that
+        // was not selected and did nothing when touched.
         ...overlayInputs.map((input) => ({
           ...input,
-          condition: isEditorialOverlay,
+          condition: (data: CollectionItemsData & OverlayProps) =>
+            isEditorialOverlay(data) &&
+            (typeof input.condition === "function"
+              ? input.condition(data)
+              : true),
         })),
         {
           type: "heading",
@@ -682,6 +707,10 @@ export const schema = createSchema({
           placeholder: "Discover now",
           condition: isEditorialOverlay,
         },
+        // Written over here on purpose, unlike the overlay inputs above: these
+        // ask whether `variant` is "custom", a setting this component does not
+        // have — the card passes that variant to `Link` itself. Composed, the
+        // test would never pass and the button colours would never appear.
         ...linkStylesInputs.map((input) => ({
           ...input,
           condition: isEditorialOverlay,

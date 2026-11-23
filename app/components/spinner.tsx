@@ -4,7 +4,7 @@ export function Spinner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "absolute inset-0 z-10 flex items-center justify-center bg-gray-100",
+        "absolute inset-0 z-10 flex items-center justify-center bg-line-subtle",
         className,
       )}
     >

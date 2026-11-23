@@ -98,7 +98,7 @@ export function ProductCard({
     }
   }
   const imageWrapperClassName =
-    "relative block aspect-(--pcard-image-ratio) overflow-hidden rounded-t-(--pcard-radius) bg-gray-100";
+    "relative block aspect-(--pcard-image-ratio) overflow-hidden rounded-t-(--pcard-radius) bg-line-subtle";
   const imageContent = image && (
     <>
       {/* Loading skeleton overlay */}

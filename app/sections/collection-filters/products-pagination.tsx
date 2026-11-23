@@ -1,27 +1,23 @@
-import { FunnelXIcon, XIcon } from "@phosphor-icons/react";
+import { FunnelXIcon } from "@phosphor-icons/react";
 import { Pagination } from "@shopify/hydrogen";
 import { useTranslation } from "@weaverse/hydrogen";
 import clsx from "clsx";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import {
-  useLoaderData,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import type {
   CollectionQuery,
   ProductCardFragment,
 } from "storefront-api.generated";
-import Link, { variants } from "~/components/link";
+import { variants } from "~/components/link";
 import { ProductCard } from "~/components/product/product-card";
 import { cn } from "~/utils/cn";
 import {
   COMBINED_LISTINGS_CONFIGS,
   isCombinedListing,
 } from "~/utils/combined-listings";
-import { type AppliedFilter, getAppliedFilterLink } from "~/utils/filter";
+import type { AppliedFilter } from "~/utils/filter";
+import { AppliedFilters } from "./applied-filters";
 
 export function ProductsPagination({
   gridSizeDesktop: desktopCols = 3,
@@ -41,52 +37,11 @@ export function ProductsPagination({
       appliedFilters: AppliedFilter[];
     }
   >();
-  const [params] = useSearchParams();
-  const location = useLocation();
-  const { pathname } = location;
   const { ref, inView } = useInView();
 
   return (
     <div className="grow space-y-6">
-      {appliedFilters.length > 0 ? (
-        // One flat row: the design spaces the label, the chips and the clear
-        // link by the same 10px, so the chips no longer sit in a group of
-        // their own.
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="px-2 py-1 font-semibold text-body-subtle text-base tracking-[0.28px]">
-            {t("collection.filteredBy")}
-          </span>
-          {appliedFilters.map((filter: AppliedFilter) => {
-            const { label } = filter;
-            return (
-              <Link
-                key={label}
-                to={getAppliedFilterLink(filter, params, location)}
-                className="items-center gap-2 rounded-xl border border-line-subtle px-2 py-1.5 text-body-subtle text-base leading-none tracking-[0.28px] hover:border-line"
-                variant="custom"
-                preventScrollReset
-              >
-                <span>{label}</span>
-                <XIcon className="h-3.5 w-3.5" />
-              </Link>
-            );
-          })}
-          {appliedFilters.length > 1 ? (
-            <Link
-              to={pathname}
-              variant="underline"
-              // The rule under the link takes the chips' border colour rather than
-              // the body colour the `underline` variant defaults to, so the row
-              // reads as one set of controls.
-              className="text-body-subtle text-base tracking-[0.28px] after:bg-line-subtle"
-              aria-label={t("collection.clearAllLabel")}
-              preventScrollReset
-            >
-              {t("collection.clearAll")}
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
+      <AppliedFilters filters={appliedFilters} />
       {collection.products.nodes.length > 0 ? (
         <Pagination connection={collection.products}>
           {({
@@ -168,7 +123,11 @@ function ProductsLoadedOnScroll(props: ProductsLoadedOnScrollProps) {
     <div
       className={clsx([
         "w-full gap-x-4 gap-y-6 lg:gap-y-10",
-        "grid grid-cols-(--cols-mobile) lg:grid-cols-(--cols-desktop)",
+        // The merchant sets the two ends, phone and desktop. Jumping straight
+        // from one to the other at `lg` left everything from 512px to 1023px
+        // on the phone count — a single card stretched across the width of a
+        // tablet. The count climbs with the theme's own breakpoints instead.
+        "grid grid-cols-(--cols-mobile) sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-(--cols-desktop)",
       ])}
     >
       {nodes
