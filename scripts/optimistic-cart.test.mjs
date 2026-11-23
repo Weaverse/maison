@@ -290,3 +290,67 @@ test("fresh mount mid-loading drops the overlay even when the loader lags", () =
   assert.equal(quantityOf(displayed, VARIANT_A), 0);
   assert.equal(quantityOf(displayed, VARIANT_B), 1);
 });
+
+test("the same key submitted again re-takes its baseline", () => {
+  // A stepper keyed by line id, pressed twice: the second submission goes out
+  // while the first is still `loading`, so the fetcher runs `loading` straight
+  // into `submitting` with no idle render in between. Holding the first
+  // baseline would compare the second submission against a cart the first one
+  // has already changed and drop its overlay for the whole flight — the badge
+  // and the totals would sit still until the server answered.
+  const atOne = cartFixture("2026-11-17T10:00:00Z", [line(VARIANT_A, 1)]);
+  const atTwo = cartFixture("2026-11-17T10:00:05Z", [line(VARIANT_A, 2)]);
+  const atThree = cartFixture("2026-11-17T10:00:09Z", [line(VARIANT_A, 3)]);
+
+  const [s1, s2, s3, s4, s5] = play([
+    {
+      label: "first press submitting, server has A=1",
+      fetchers: [cartFetcher("submitting", updateForm(LINE_A, 2))],
+      serverCart: atOne,
+    },
+    {
+      label: "first press landed, server has A=2",
+      fetchers: [cartFetcher("loading", updateForm(LINE_A, 2))],
+      serverCart: atTwo,
+    },
+    {
+      label: "second press submitting on the same key",
+      fetchers: [cartFetcher("submitting", updateForm(LINE_A, 3))],
+      serverCart: atTwo,
+    },
+    {
+      label: "second press in flight",
+      fetchers: [cartFetcher("loading", updateForm(LINE_A, 3))],
+      serverCart: atTwo,
+    },
+    {
+      label: "second press landed, server has A=3",
+      fetchers: [cartFetcher("loading", updateForm(LINE_A, 3))],
+      serverCart: atThree,
+    },
+  ]);
+
+  assert.equal(s1.drop, false);
+  assert.equal(s1.displayedQuantityA, 2);
+
+  assert.equal(s2.drop, true, `${s2.label}: server caught up`);
+  assert.equal(s2.displayedQuantityA, 2);
+
+  // The baseline is re-taken here, so the second press is measured against
+  // the cart it actually started from.
+  assert.equal(s3.drop, false, `${s3.label}: fresh baseline`);
+  assert.equal(s3.displayedQuantityA, 3, `${s3.label}: the press is answered`);
+
+  assert.equal(
+    s4.drop,
+    false,
+    `${s4.label}: cart unchanged since the baseline`,
+  );
+  assert.equal(s4.displayedQuantityA, 3);
+
+  // Carried through the same sequence rather than replayed on a fresh map, so
+  // the baseline this step is measured against is the one the four steps
+  // before it left behind.
+  assert.equal(s5.drop, true, `${s5.label}: server caught up again`);
+  assert.equal(s5.displayedQuantityA, 3);
+});

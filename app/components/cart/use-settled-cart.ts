@@ -41,8 +41,9 @@ export function useSettledOptimisticCart(
 
 /**
  * One transition of the per-fetcher baselines against the cart now on screen.
- * Pure so scripted event sequences can drive it in tests the way the hook's
- * ref does across renders.
+ *
+ * Takes the baselines as an argument — and writes to them — so scripted event
+ * sequences can drive it in tests the way the hook's ref does across renders.
  */
 export function settlementStale(
   baselines: Map<string, string>,
@@ -63,19 +64,27 @@ export function settlementStale(
     }
     live.add(fetcher.key);
 
+    if (fetcher.state === "submitting") {
+      // React Router revalidates loaders only once the action has returned,
+      // so a cart read during `submitting` cannot contain this submission.
+      // That makes the baseline sound by invariant rather than by whatever
+      // moment this happened to render on.
+      //
+      // Re-taken every time, not only on a key first seen: a keyed fetcher
+      // submitted again before it goes idle — a double-tapped Add to cart, a
+      // stepper keyed by line id — runs `loading` straight into `submitting`.
+      // Keeping the first baseline would compare the second submission
+      // against a cart the first one has already changed, and its overlay
+      // would be dropped for the whole of its flight.
+      baselines.set(fetcher.key, fingerprint);
+      continue;
+    }
+
     if (!baselines.has(fetcher.key)) {
-      if (fetcher.state === "submitting") {
-        // React Router revalidates loaders only once the action has returned,
-        // so a cart read during `submitting` cannot contain this mutation.
-        // That makes the baseline sound by invariant rather than by whatever
-        // moment this happened to render on.
-        baselines.set(fetcher.key, fingerprint);
-      } else {
-        // First seen mid-flight — the drawer mounts when it opens, which may
-        // be after the action already returned. Nothing here establishes that
-        // the cart predates the mutation, so the overlay cannot be trusted.
-        stale = true;
-      }
+      // First seen mid-flight — the drawer mounts when it opens, which may be
+      // after the action already returned. Nothing here establishes that the
+      // cart predates the mutation, so the overlay cannot be trusted.
+      stale = true;
       continue;
     }
 
